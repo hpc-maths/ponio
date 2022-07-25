@@ -1,0 +1,4 @@
+numpy
+sympy
+docopt-ng
+

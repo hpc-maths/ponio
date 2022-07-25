@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" >
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RK-viewer</title>
+  <style>
+    html {
+      --my-color: #00acc1;
+    }
+    body { position: relative; padding-bottom: 150px;}
+    .butcher {
+      border-spacing: 5px;
+      border-collapse: collapse;
+      --bold-border: 3px solid var(--table-border-color);
+      --thin-border: 1px solid var(--table-border-color);
+    }
+    .butcher td {
+      padding: 3px;
+      border-top: var(--thin-border);
+      border-right: var(--thin-border);
+      text-align: center;
+      vertical-align: middle;
+      min-width: 62px;
+      --border-width: 0px;
+    }
+    .butcher tr td:first-child {
+      border-right: var(--bold-border);
+    }
+    .butcher tr:last-child td {
+      border-top: var(--bold-border);
+    }
+    .butcher tr:first-child td { border-top: none !important; }
+    .butcher tr td:last-child { border-right: none !important; }
+
+    #list {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 20px;
+      max-width: 100vw;
+    }
+    
+    .method {
+      display: flex;
+      flex-direction: column;
+      margin: 5px;
+      transition-duration: 1s;
+      padding-bottom: var(--spacing) !important;
+    }
+    .method header {
+      transition-duration: 1s;
+    }
+    .method:hover header {
+      background-color: var(--my-color);
+    }
+    .method:target header {
+      background-color: #fdd835;
+      color: var(--h6-color);
+    }
+    
+    .method h2 {
+      margin-bottom: 0 !important;
+    }
+    
+    .method details {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .scheme li {
+      list-style: none;
+    }
+    .scheme li .katex-display, .scheme li .katex-display > .katex {
+      text-align: left !important;
+    }
+    pre {
+      padding: 5px 15px;
+      tab-size: 4;
+    }
+    
+    #add {
+      width: 64px; height: 64px;
+      border-radius: 100%;
+      margin-left: 20px;
+      border: 2px solid currentColor;
+      color: var(--h1-color);
+      background-color: #c0ca33;
+      transition-duration: 1s;
+      font-family: monospace;
+      transition-duration: 1s;
+    }
+    #add:hover {
+      background-color: var(--my-color);
+    }
+    #add .add {
+      display: inline-block;
+      transform: scale(1.5);
+      transform-origin: center;
+      transition-duration: 1s;
+    }
+    #add:hover .add { 
+      transform: scale(2.5);
+    }
+    .preview {
+      background-color: var(--form-element-disabled-background-color);
+    }
+    .preview::before {
+      content: "Preview:";
+      font-style: italic;
+      color: var(--form-element-placeholder-color);
+    }
+    
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1 !important;
+    }
+    header a {
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .katex {
+      z-index: 0;
+    }
+
+    .drawing {
+      display: flex;
+      gap: 20px;
+    }
+    .drawing canvas {
+      width: 50%;
+      border: 1px solid var(--table-border-color);
+      background-color: var(--my-color);
+    }
+    
+    nav {
+      background: var(--card-background-color);
+      box-shadow: var(--card-box-shadow);
+      position: fixed;
+      z-index: 42;
+      bottom: 0; left: 0;
+      width: 100vw;
+      padding: 0 5vw;
+    }
+    .switcher {
+      background: none !important;
+      border-radius: 100%;
+      border-width: 2px;
+    }
+    
+  </style>
+  <!-- Pico.css (Classless version) -->
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.classless.min.css">
+      
+  <!-- KaTeX -->
+  <script src="https://unpkg.com/asciimath2tex@1.2.1/dist/asciimath2tex.umd.js" type="text/javascript" ></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css" integrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7mLTdk1wblIUnrIq35nqwEvC" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js" integrity="sha384-X/XCfMm41VSsqRNQgDerQczD69XqmjOOOwYQvr/uuC+j4OPoNhVgjdGFwhvN02Ja" crossorigin="anonymous" type="text/javascript" ></script> 
+  
+  <!-- highlight -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js" type="text/javascript" ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/languages/python.min.js" type="text/javascript" ></script>
+  
+  <!-- math.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.js" type="text/javascript" ></script>
+
+  <!-- d3.js -->
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-array@3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-contour@3"></script>
+</head>
+<body style="--font-size: 16px;" >
+  
+  <main id="list"></main>
+  <footer>
+    <nav>
+      <ul>
+        <li><button id="add" ><span class="add">+</span></button></li>
+        <li><button id="switcher" class="switcher" aria-label="Turn off dark mode"><span>🐈‍⬛</span></button></li>
+      </ul>
+      <ul>
+        <li>Une petite liste de méthodes de type Runge-Kutta</li>
+      </ul>
+    </nav>
+  </footer>
+
+  <script>
+// change theme
+
+let switcher = document.getElementById("switcher");
+let light = true;
+switcher.addEventListener('click',(ev)=>{
+  html = document.getElementsByTagName("html")[0];
+  if (light) {
+    html.setAttribute("data-theme","dark")
+    light = false;
+    switcher.children[0].innerHTML = "🐈";
+  } else {
+    html.setAttribute("data-theme","light")
+    light = true;
+    switcher.children[0].innerHTML = "🐈‍⬛";
+  }
+});
+
+let ul = document.getElementById("list");
+
+const parser = new AsciiMathParser(); // to convert python expression (asciimath ich) into LaTeX expression
+function asciimath(expr) {
+  return expr.replaceAll("**","^").replaceAll(/\d\*\d/ig,"x");
+}
+function render(expr,elm) {
+  katex.render(parser.parse(asciimath(expr)),elm,{displayMode:true});
+  return elm;
+}
+
+function label(id,lab) {
+  let header = document.createElement("header");
+  //let h2 = document.createElement("h2");
+  //h2.appendChild(document.createTextNode(lab));
+  //header.appendChild(h2);
+  let a = document.createElement("a");
+  a.href = "#" + id;
+  a.appendChild(document.createTextNode(lab));
+  header.appendChild(a);
+  
+  return header;
+}
+
+function butcher_tableau(A,b,c) {
+  let tab = document.createElement("table");
+  tab.classList.add("butcher");
+  for (i=0;i<A.length;++i) {
+    let tr = document.createElement("tr");
+    let ci = document.createElement("td");
+    render(c[i],ci);
+    tr.appendChild(ci);
+    for (j=0;j<A[i].length;++j) {
+      let aij = document.createElement("td");
+      render(A[i][j],aij);
+      tr.appendChild(aij);
+    }
+    tab.appendChild(tr);
+  }
+
+  let tr = document.createElement("tr");
+  tr.appendChild(document.createElement("td"));
+  for (i=0;i<b.length;++i) {
+    let bi = document.createElement("td");
+    render(b[i],bi);
+    tr.appendChild(bi);
+  }
+  tab.appendChild(tr);
+
+  return tab;
+}
+
+function stability_function(R_expr) {
+  let div = document.createElement("div");
+  div.classList.add("stability_function");
+  render(R_expr,div);
+  
+  return div;
+}
+function resume_tableau(nstages,order,stage_order) {
+  let tab = document.createElement("table");
+  tab.classList.add("resume_tableau");
+  
+  let tr1 = document.createElement("tr");
+  let th1 = document.createElement("th"); th1.setAttribute('scope',"row"); th1.appendChild(document.createTextNode("#stages"));
+  let td1 = document.createElement("td"); td1.appendChild(document.createTextNode(nstages));
+  tr1.appendChild(th1); tr1.appendChild(td1);
+  tab.appendChild(tr1);
+
+  let tr2 = document.createElement("tr");
+  let th2 = document.createElement("th"); th2.setAttribute('scope',"row"); th2.appendChild(document.createTextNode("order"));
+  let td2 = document.createElement("td"); td2.appendChild(document.createTextNode(order));
+  tr2.appendChild(th2); tr2.appendChild(td2);
+  tab.appendChild(tr2);
+
+  let tr3 = document.createElement("tr");
+  let th3 = document.createElement("th"); th3.setAttribute('scope',"row"); th3.appendChild(document.createTextNode("stage order"));
+  let td3 = document.createElement("td"); td3.appendChild(document.createTextNode(stage_order));
+  tr3.appendChild(th3); tr3.appendChild(td3);
+  tab.appendChild(tr3);
+
+  return tab;
+}
+
+function expr_to_canvas(f,[xmin,xmax],[ymin,ymax],thresholds) {
+  let canvas = document.createElement("canvas");
+  canvas.height = 300;
+  canvas.width  = 300;
+  const n = 512, m = 512;
+
+  context = canvas.getContext("2d");
+  projection = d3.geoIdentity().scale(canvas.width / n);
+  path = d3.geoPath(projection,context);
+
+  let values = new Array(n * m);
+  for (let j = 0, k = 0; j < m; ++j) {
+    for (let i = 0; i < n; ++i, ++k) {
+      values[k] = f( i * (xmax-xmin)/ n + xmin, j * (ymax-ymin)/ m + ymin);
+    }
+  }
+
+  const contours = d3.contours()
+    .size([n,m])
+    .thresholds(thresholds)
+    (values);
+  contours.forEach( c => {
+    if (c.coordinates.length == 0) return;
+    context.beginPath();
+    path(c);
+    context.fillStyle = "#fefefe";
+    context.fill();
+    //context.stroke();
+  });
+
+  return canvas;
+}
+function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds) {
+  let canvas = document.createElement("canvas");
+  canvas.height = 300;
+  canvas.width  = 300;
+  const n = data[0].length , m = data.length;
+
+  context = canvas.getContext("2d");
+  projection = d3.geoIdentity().scale(canvas.width / n);
+  path = d3.geoPath(projection,context);
+
+  const contours = d3.contours()
+    .size([n,m])
+    .thresholds(thresholds)
+    ( [].concat(...data) );
+  contours.forEach( c => {
+    if (c.coordinates.length == 0) return;
+    context.beginPath();
+    path(c);
+    context.fillStyle = "#fefefe";
+    context.fill();
+    //context.stroke();
+  });
+
+  return canvas;
+}
+
+function stability_domain( data ) {
+  return data_to_canvas(data.data,[data.xmin,data.xmax],[data.xmin,data.xmax],[1.0]);
+}
+function order_star( data ) {
+  return data_to_canvas(data.data,[data.xmin,data.xmax],[data.xmin,data.xmax],[1.0]);
+}
+
+function prepare_canvas(id) {
+  let div = document.createElement("div");
+  div.classList.add("drawing");
+  div.setAttribute("data-id",id);
+
+  return div;
+}
+
+function scheme(stages) {
+  let ul = document.createElement("ul");
+  ul.classList.add("scheme");
+  stages.map(eq => {
+    let li = document.createElement("li");
+    katex.render(eq,li,{displayMode:true});
+    ul.appendChild(li);
+  });
+  return ul;
+}
+function code(c) {
+  let pre = document.createElement("pre");
+  let code = document.createElement("code");
+  code.classList.add("language-py");
+  code.innerHTML = hljs.highlight(c,{language: 'python'}).value;
+  
+  pre.appendChild(code);
+  
+  return pre;
+}
+function lscheme(stages) {
+  let ul = document.createElement("ul");
+  ul.classList.add("lawson-scheme");
+  stages.map(eq => {
+    let li = document.createElement("li");
+    katex.render(eq,li,{displayMode:true});
+    ul.appendChild(li);
+  });
+  return ul;
+}
+
+function rk_to_elm(rk,elm) {
+  elm.id = rk.id;
+  elm.classList.add('method');
+  elm.appendChild(label(rk.id,rk.label));
+  elm.appendChild(butcher_tableau(rk.A,rk.b,rk.c));
+  
+  if (rk.hasOwnProperty('stability_function')) {
+    let details = document.createElement("details");
+    
+    let summary = document.createElement("summary");
+    summary.appendChild(document.createTextNode("Details"))
+    details.appendChild(summary);
+    
+    let p = document.createElement("p");
+    p.appendChild(stability_function(rk.stability_function));
+    p.appendChild(resume_tableau(rk.nstages,rk.order,rk.stage_order));
+    p.appendChild(prepare_canvas(rk.id));
+    
+    details.addEventListener('click',function (event){
+        let div = event.target.parentElement.children[1].getElementsByClassName("drawing")[0];
+        let id = div.getAttribute("data-id");
+        const rk_url = new URL(window.location.href.split("/").slice(0,-1).join("/") + "/api/" + rk.id + ".json");
+        fetch(rk_url)
+          .then( res => res.json() )
+          .then( out => {
+            div.appendChild(stability_domain(out.stability_domain));
+            div.appendChild(order_star(out.order_star));
+          });
+      },{'once':true});
+
+    let edo = document.createElement("p"); katex.render("\\dot{u}=f(t,u)",edo,{displayMode:true});
+    p.appendChild(edo);
+    p.appendChild(scheme(rk.scheme));
+  
+    if (rk.hasOwnProperty('code')) {
+      p.appendChild(code(rk.code));
+    }
+    
+    let ledo = document.createElement("p"); katex.render("\\dot{u}=Lu + N(t,u)",ledo,{displayMode:true});
+    p.appendChild(ledo);
+    p.appendChild(scheme(rk.lawson_scheme));
+  
+    if (rk.hasOwnProperty('lawson_code')) {
+      p.appendChild(code(rk.lawson_code));
+    }
+
+    details.appendChild(p);
+    elm.appendChild(details);
+  }
+
+  return elm;
+}
+
+const url = new URL(window.location.href.split("/").slice(0,-1).join("/") + "/api/analysis.json");
+
+fetch(url)
+    .then( res => res.json() )
+    .then((out) => {
+      out.forEach((rk) => {
+        //console.log(rk.label);
+        ul.appendChild(rk_to_elm(rk,document.createElement("article")));
+      })
+    });
+  
+document.getElementById("add").addEventListener('click',()=>{
+  let li = document.createElement("article");
+  li.classList.add('method');
+  
+  let h2 = label("New method");
+  h2.setAttribute('contenteditable',true);
+  li.appendChild(h2);
+
+  let input = document.createElement("input");
+  input.type = 'number';
+  input.placeholder = "Number of stages";
+  li.appendChild(input);
+
+  let btn = document.createElement("button");
+  btn.appendChild(document.createTextNode("make table !"));
+  btn.classList.add("maketable-btn");
+  btn.addEventListener('click',(ev)=>{
+    let this_btn = ev.target;
+    let this_parent = this_btn.parentNode;
+    let this_inp = this_parent.children[1];
+    const Nstages = Number( this_inp.value );
+    if ( Nstages > 0 ) {
+      let tab = document.createElement("table");
+      tab.classList.add('butcher');
+      for(i=0;i<=Nstages;++i) {
+        let tr = document.createElement("tr");
+        for(j=0;j<=Nstages;++j) {
+          let td = document.createElement("td");
+          td.setAttribute('contenteditable',true);
+          if (i!=Nstages) {
+            if ( j == 0 ) {
+              td.innerHTML = "c_" + (i+1);
+            } else {
+              td.innerHTML = "a_{" + (i+1) + "," + j + "}";
+            }
+          } else {
+            if ( j == 0 ) {
+              td.innerHTML = "";
+              td.setAttribute('contenteditable',false);
+            } else {
+              td.innerHTML = "b_" + j;
+            }
+          }
+          tr.appendChild(td);
+        }
+        tab.appendChild(tr);
+      }
+      this_parent.appendChild(tab);
+
+      let save = document.createElement("button");
+      save.appendChild(document.createTextNode("save..."));
+      save.classList.add("save-btn");
+      save.addEventListener("click",(ev)=>{
+        let this_btn = ev.target;
+        let this_parent = this_btn.parentNode;
+
+        let label = this_parent.children[0].innerText.trim();
+        let A = Array(Nstages);
+        let b = Array(Nstages);
+        let c = Array(Nstages);
+        
+        let tab = this_parent.children[1];
+        for (i=0;i<tab.childElementCount-1;++i) {
+          c[i] = tab.children[i].children[0].innerText.trim().replaceAll("^","**");
+          A[i] = Array(Nstages);
+          for (j=1;j<tab.childElementCount;++j) {
+            A[i][j-1] = tab.children[i].children[j].innerText.trim().replaceAll("^","**");
+          }
+        }
+        for (i=1;i<tab.childElementCount;++i) {
+          b[i-1] = tab.children[tab.childElementCount-1].children[i].innerText.trim().replaceAll("^","**");
+        }
+
+        let data = {'label':label,'A':A,'b':b,'c':c};
+
+        let isopen = false;
+        // if already a details section, remove it ! (then rebuild it)
+        if ( this_parent.lastChild.localName == "details" ) {
+          isopen = this_parent.lastChild.open;
+          this_parent.removeChild(this_parent.lastChild);
+        }
+        let visu = document.createElement("details");
+        visu.classList.add("visu");
+        visu.open = isopen;
+        let save_zone = document.createElement("textarea");
+        save_zone.value = JSON.stringify(data,null,2);
+        visu.appendChild(save_zone);
+        
+        let preview = document.createElement("div");
+        preview.classList.add("preview");
+        visu.appendChild(rk_to_elm(data,preview));
+
+        this_parent.appendChild(visu);
+      });
+      this_parent.appendChild(save);
+
+      this_parent.removeChild(this_inp);
+      this_parent.removeChild(this_btn);
+    }
+  });
+  li.appendChild(btn);
+  
+  ul.appendChild(li);
+});
+  </script>
+
+</body>
+</html>

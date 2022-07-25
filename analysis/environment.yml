@@ -1,0 +1,8 @@
+name: ponio-analysis-env
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - pip:
+    - -r requirements.txt
+
