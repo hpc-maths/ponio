@@ -3,7 +3,7 @@ image: condaforge/mambaforge
 pages:
   script:
     - conda env create -f analysis/environment.yml
-    - source ponio-analysis-env
+    - source activate ponio-analysis-env
     - mkdir public
     - python analysis/analysis.py -i database/butcher_tableaus.json -o public/api
     - cp html/*.html public
