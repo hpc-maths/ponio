@@ -277,7 +277,7 @@ if __name__ == '__main__':
 
     rk_analysis = []
     for i,drk in enumerate(data):
-        vprint("{}/{} {:25}".format(i+1,len(data),drk['label']), end="\n")
+        vprint("{}/{} {:25}".format(i+1,len(data),drk['label']), end="\r")
 
         rk = rk_butcher(drk['label'],drk['A'],drk['b'],drk['c'])
         drk['id'] = rk.id
