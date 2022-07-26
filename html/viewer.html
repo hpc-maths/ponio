@@ -51,7 +51,12 @@
       margin: 5px;
       transition-duration: 1s;
       padding-bottom: var(--spacing) !important;
-      max-width: calc(50% - 20px);
+      max-width: calc(100% - 20px);
+    }
+    @media (min-width: 992px) {
+      .method {
+        max-width: calc(50% - 20px);
+      }
     }
     .method header {
       transition-duration: 1s;
@@ -63,10 +68,11 @@
       background-color: #fdd835;
       color: var(--h6-color);
     }
-    .method > table, .method .stability_function, .method .scheme  {
+    .method .butcher_container, .method .stability_function, .method .scheme  {
       max-width: 100%;
       overflow-y: scroll;
       display: block;
+      margin-left: auto; margin-right: auto;
     }
     
     .method h2 {
@@ -140,9 +146,9 @@
       gap: 20px;
     }
     .drawing canvas {
-      width: 50%;
-      border: 1px solid var(--table-border-color);
-      background-color: var(--my-color);
+      width: 100%;
+      border: 2px solid var(--table-border-color);
+      background-color: #fefefe11;
     }
     
     nav {
@@ -198,8 +204,10 @@
   </footer>
 
   <script>
-// change theme
+let my_color   = getComputedStyle(document.getElementsByTagName('html')[0]).getPropertyValue('--my-color');
+let axis_color = getComputedStyle(document.getElementsByTagName('html')[0]).getPropertyValue('--color');
 
+// change theme
 let switcher = document.getElementById("switcher");
 let light = true;
 switcher.addEventListener('click',(ev)=>{
@@ -240,6 +248,8 @@ function label(id,lab) {
 }
 
 function butcher_tableau(A,b,c) {
+  let container = document.createElement("div");
+  container.classList.add("butcher_container");
   let tab = document.createElement("table");
   tab.classList.add("butcher");
   for (i=0;i<A.length;++i) {
@@ -264,7 +274,9 @@ function butcher_tableau(A,b,c) {
   }
   tab.appendChild(tr);
 
-  return tab;
+  container.appendChild(tab);
+
+  return container;
 }
 
 function stability_function(R_expr) {
@@ -331,7 +343,7 @@ function expr_to_canvas(f,[xmin,xmax],[ymin,ymax],thresholds) {
 
   return canvas;
 }
-function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds) {
+function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,outside=true) {
   let canvas = document.createElement("canvas");
   canvas.height = 512;
   canvas.width  = 512;
@@ -349,9 +361,11 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds) {
     if (c.coordinates.length == 0) return;
     context.beginPath();
     path(c);
-    context.fillStyle = "#fefefe";
+    if ( outside ) {
+      context.rect(0,0,canvas.width,canvas.height);
+    }
+    context.fillStyle = my_color;
     context.fill();
-    //context.stroke();
   });
 
   // draw axis
@@ -359,7 +373,7 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds) {
   const dy = (ymax-ymin)/canvas.height;
   const i_0 = parseInt((-xmin)/dx), j_0 = parseInt(-ymin/dy);
 
-  context.strokeStyle = "#000000";
+  context.strokeStyle = axis_color;
   context.lineWidth = 1.0;
   // real axis
   context.beginPath();
@@ -396,10 +410,22 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds) {
 }
 
 function stability_domain( data ) {
-  return data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0]);
+  let fig = document.createElement("figure");
+  fig.appendChild(data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0]));
+  let caption = document.createElement("figcaption");
+  let def = document.createElement("span"); katex.render(String.raw`\mathcal{D} = \{ z\in\mathbb{C}\,/\,|R(z)| \leq 1 \}`,def,{displayMode:true});
+  caption.innerHTML = "Stability domain: " + def.outerHTML;
+  fig.appendChild(caption);
+  return fig;
 }
 function order_star( data ) {
-  return data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0]);
+  let fig = document.createElement("figure");
+  fig.appendChild(data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0]));
+  let caption = document.createElement("figcaption");
+  let def = document.createElement("span"); katex.render(String.raw`\mathcal{A}_- = \{ z\in\mathbb{C}\,/\,|e^{-z}R(z)| < 1 \}`,def,{displayMode:true});
+  caption.innerHTML = "Order star: " + def.outerHTML;
+  fig.appendChild(caption);
+  return fig;
 }
 
 function prepare_canvas(id) {
@@ -455,6 +481,10 @@ function rk_to_elm(rk,elm) {
     details.appendChild(summary);
     
     let p = document.createElement("p");
+    let title_R = document.createElement("h6");
+    let R = document.createElement("span"); katex.render("R(z)",R);
+    title_R.innerHTML = "Stability function "+R.outerHTML+":";
+    p.appendChild(title_R);
     p.appendChild(stability_function(rk.stability_function));
     p.appendChild(resume_tableau(rk.nstages,rk.order,rk.stage_order));
     p.appendChild(prepare_canvas(rk.id));
@@ -475,6 +505,9 @@ function rk_to_elm(rk,elm) {
           });
       },{'once':true});
 
+    
+
+    let title_edo = document.createElement("h6"); title_edo.appendChild(document.createTextNode("Runge-Kutta scheme:")); p.appendChild(title_edo);
     let edo = document.createElement("p"); katex.render("\\dot{u}=f(t,u)",edo,{displayMode:true});
     p.appendChild(edo);
     p.appendChild(scheme(rk.scheme));
@@ -483,6 +516,7 @@ function rk_to_elm(rk,elm) {
       p.appendChild(code(rk.code));
     }
     
+    let title_ledo = document.createElement("h6"); title_ledo.appendChild(document.createTextNode("Lawson scheme:")); p.appendChild(title_ledo);
     let ledo = document.createElement("p"); katex.render("\\dot{u}=Lu + N(t,u)",ledo,{displayMode:true});
     p.appendChild(ledo);
     p.appendChild(scheme(rk.lawson_scheme));
