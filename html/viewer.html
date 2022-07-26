@@ -51,6 +51,7 @@
       margin: 5px;
       transition-duration: 1s;
       padding-bottom: var(--spacing) !important;
+      max-width: calc(50% - 20px);
     }
     .method header {
       transition-duration: 1s;
@@ -61,6 +62,11 @@
     .method:target header {
       background-color: #fdd835;
       color: var(--h6-color);
+    }
+    .method > table, .method .stability_function, .method .scheme  {
+      max-width: 100%;
+      overflow-y: scroll;
+      display: block;
     }
     
     .method h2 {
@@ -327,8 +333,8 @@ function expr_to_canvas(f,[xmin,xmax],[ymin,ymax],thresholds) {
 }
 function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds) {
   let canvas = document.createElement("canvas");
-  canvas.height = 300;
-  canvas.width  = 300;
+  canvas.height = 512;
+  canvas.width  = 512;
   const n = data[0].length , m = data.length;
 
   context = canvas.getContext("2d");
@@ -348,14 +354,52 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds) {
     //context.stroke();
   });
 
+  // draw axis
+  const dx = (xmax-xmin)/canvas.width;
+  const dy = (ymax-ymin)/canvas.height;
+  const i_0 = parseInt((-xmin)/dx), j_0 = parseInt(-ymin/dy);
+
+  context.strokeStyle = "#000000";
+  context.lineWidth = 1.0;
+  // real axis
+  context.beginPath();
+  context.moveTo(0,j_0);
+  context.lineTo(n,j_0);
+  context.closePath();
+  context.stroke();
+  // imaginary axis
+  context.beginPath();
+  context.moveTo(i_0,0);
+  context.lineTo(i_0,n);
+  context.closePath();
+  context.stroke();
+
+  // xticks
+  for ( x=parseInt(xmin)-1 ; x<xmax ; ++x ) {
+    context.beginPath();
+    context.moveTo(parseInt((x-xmin)/dx),j_0-5);
+    context.lineTo(parseInt((x-xmin)/dx),j_0+5);
+    context.closePath();
+    context.stroke();
+  }
+  // yticks
+  for ( y=parseInt(ymin)-1 ; y<ymax ; ++y ) {
+    context.beginPath();
+    context.moveTo(i_0-5,parseInt((y-ymin)/dy));
+    context.lineTo(i_0+5,parseInt((y-ymin)/dy));
+    context.closePath();
+    context.stroke();
+  }
+
+  
   return canvas;
 }
 
 function stability_domain( data ) {
-  return data_to_canvas(data.data,[data.xmin,data.xmax],[data.xmin,data.xmax],[1.0]);
+  return data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0]);
 }
 function order_star( data ) {
-  return data_to_canvas(data.data,[data.xmin,data.xmax],[data.xmin,data.xmax],[1.0]);
+  return data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0]);
 }
 
 function prepare_canvas(id) {
@@ -415,7 +459,11 @@ function rk_to_elm(rk,elm) {
     p.appendChild(resume_tableau(rk.nstages,rk.order,rk.stage_order));
     p.appendChild(prepare_canvas(rk.id));
     
-    details.addEventListener('click',function (event){
+    summary.addEventListener('click',function (event){
+
+        let parent = event.target.parentElement;
+        console.log(parent);
+
         let div = event.target.parentElement.children[1].getElementsByClassName("drawing")[0];
         let id = div.getAttribute("data-id");
         const rk_url = new URL(window.location.href.split("/").slice(0,-1).join("/") + "/api/" + rk.id + ".json");
