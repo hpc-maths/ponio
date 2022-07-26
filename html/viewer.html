@@ -165,6 +165,15 @@
       border-radius: 100%;
       border-width: 2px;
     }
+
+    blockquote.warning {
+      --blockquote-border-color: #f4511e;
+    }
+
+    blockquote.warning::before {
+      content: "Warning: ";
+      color: var(--blockquote-border-color);
+    }
     
   </style>
   <!-- Pico.css (Classless version) -->
@@ -523,6 +532,10 @@ function rk_to_elm(rk,elm) {
   
     if (rk.hasOwnProperty('lawson_code')) {
       p.appendChild(code(rk.lawson_code));
+      let warning = document.createElement("blockquote");
+      warning.classList.add("warning");
+      warning.innerHTML = "default NumPy function <a href='https://numpy.org/doc/stable/reference/generated/numpy.exp.html'><samp>np.exp</samp></a> for exponantial take the exponential of each terms of <samp>ndarray</samp>, which is not the exponential of a matrix needed by Lawson method. If this is for matrix computation, prefer <a href='https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.expm.html'><samp>scipy.linalg.expm</samp></a> function.";
+      p.appendChild(warning);
     }
 
     details.appendChild(p);
