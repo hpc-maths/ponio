@@ -151,32 +151,71 @@ class rk_butcher:
         return self._P
     
     def scheme(self,latex=True,lawson=False):
+        # define a zero
+        zero = 0 if not lawson else sp.zeros(3,1)
+
         if latex:
             ks = sp.symbols("k_{{1:{}}}".format(self.nstages+1))
             un,unp1 = sp.symbols(r"u^n u^{n+1}")
             tn,dt = sp.symbols(r"t^n \Delta\ t")
+
+            # to keep exponential in first, use matrix expressions
+            if lawson:
+                ks = [ sp.MatrixSymbol(sp.latex(ki),3,1) for ki in ks ]
+                un,unp1 = ( sp.MatrixSymbol(sp.latex(ui),3,1) for ui in (un,unp1) )
         else:
             ks = sp.symbols("k1:{}".format(self.nstages+1))
             un,unp1 = sp.symbols(r"un unp1")
             tn,dt = sp.symbols(r"tn dt")
+
+            # to keep exponential in first, use matrix expressions
+            if lawson:
+                ks = [ sp.MatrixSymbol(str(ki),3,1) for ki in ks ]
+                un,unp1 = ( sp.MatrixSymbol(str(ui),3,1) for ui in (un,unp1) )
         
         f = sp.Function("f",nargs=2)
         a = 1
         if lawson:
-            L = sp.symbols("L")
-            N = sp.Function("N",nargs=2)
-            f = lambda t,u:sp.exp((tn-t)*L)*N(t,sp.exp((t-tn)*L)*u)
-            a = sp.exp(dt*L) # make the last changement of variable with u_{n+1}
+            def mexp(expr):
+                if type(expr) is sp.ZeroMatrix:
+                    return 1
+                if latex:
+                    expr_str = r"e^{{ {} }}".format(sp.latex(expr.simplify()))
+                else:
+                    expr_str = r"exp({})".format(str(expr.simplify().evalf()).replace("1.0*",""))
+                return sp.MatrixSymbol( expr_str , *expr.shape)
+            
+            L = sp.MatrixSymbol("L",3,3)
+            #N = sp.Function("N",nargs=2)
+            def N(t,u):
+                if latex:
+                    expr_str = r"N\left({}, {}\right)".format(sp.latex(t),sp.latex(u.simplify()))
+                else:
+                    expr_str = r"N({}, {})".format(str(t),str(u.simplify()))
+                return sp.MatrixSymbol( expr_str , *u.shape )
+            f = lambda t,u:mexp((tn-t)*L)*N(t,mexp((t-tn)*L)*u)
+            a = mexp(dt*L) # make the last changement of variable with u_{n+1}
 
         stages = []
         for i in range(0,self.nstages):
+            args = [ self.A[i,j]*ks[j] for j in range(0,self.nstages)]
+            if not lawson:
+                expr = sum(args)
+            else:
+                expr = sp.MatAdd(*args)
             stages.append(sp.Eq(
                 ks[i],
-                f( tn+self.c[i]*dt , un + dt*sum([ self.A[i,j]*ks[j] for j in range(0,self.nstages)]) )
+                f( tn+self.c[i]*dt , un + dt*expr )
             ))
+        
+        args = [ self.b[i]*ks[i] for i in range(0,self.nstages) ]
+        if not lawson:
+            expr = sum(args)
+        else:
+            expr = sp.MatAdd(*args)
         stages.append(sp.Eq(
             unp1,
-            a*( un + dt*sum([ self.b[i]*ks[i] for i in range(0,self.nstages) ]) )
+            a*( un + dt*expr )
         ))
         return stages
 
@@ -220,6 +259,7 @@ def evalf_Cdomain( z , expr , zmin , zmax , N ):
     return np.abs( func(Z) )
 
 from docopt import docopt
+import re
 
 if __name__ == '__main__':
     args = docopt( __doc__ , sys.argv[1:] )
@@ -232,9 +272,12 @@ if __name__ == '__main__':
     output = args['--output']
     os.makedirs(output,exist_ok=True)
 
+    # to remove parenthesis around fractions
+    pattern = re.compile("\\\\left\(\\\\frac\{(?P<numerator>[^{}]+)\}\{(?P<denominator>[^{}]+)\}\\\\right\)")
+
     rk_analysis = []
     for i,drk in enumerate(data):
-        vprint("{}/{} {:25}".format(i+1,len(data),drk['label']), end="\r")
+        vprint("{}/{} {:25}".format(i+1,len(data),drk['label']), end="\n")
 
         rk = rk_butcher(drk['label'],drk['A'],drk['b'],drk['c'])
         drk['id'] = rk.id
@@ -243,7 +286,7 @@ if __name__ == '__main__':
         drk['stage_order']   = rk.stage_order
         drk['stability_function'] = str(rk.stability_function())
         drk['scheme'] = [ "{} = {}".format(sp.latex(eq.lhs),sp.latex(eq.rhs)) for eq in rk.scheme() ]
-        drk['lawson_scheme'] = [ "{} = {}".format(sp.latex(eq.lhs),sp.latex(eq.rhs)) for eq in rk.scheme(lawson=True) ]
+        drk['lawson_scheme'] = [ "{} = {}".format(sp.latex(eq.lhs),pattern.sub( lambda m:m.group(0)[6:-7], sp.latex(eq.rhs))) for eq in rk.scheme(lawson=True) ]
         if rk.is_explicit:
             drk['code'] = rk.code()
             drk['lawson_code'] = rk.code(lawson=True)
