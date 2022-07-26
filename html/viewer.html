@@ -8,6 +8,7 @@
   <style>
     html {
       --my-color: #00acc1;
+      scroll-behavior: smooth;
     }
     body { position: relative; padding-bottom: 150px;}
     .butcher {
@@ -149,6 +150,10 @@
       width: 100%;
       border: 2px solid var(--table-border-color);
       background-color: #fefefe11;
+    }
+    .drawing figcaption {
+      background-color: var(--table-border-color);
+      padding: 10px;
     }
     
     nav {
@@ -659,7 +664,34 @@ document.getElementById("add").addEventListener('click',()=>{
   li.appendChild(btn);
   
   ul.appendChild(li);
+  li.scrollIntoView();
 });
+
+// simple way to copy equation in LaTeX mode
+document.addEventListener('copy', function (event) {
+  const selection = window.getSelection();
+  if (selection.isCollapsed) {
+    return;  // default action OK
+  }
+  const fragment = selection.getRangeAt(0).cloneContents();
+  const katexs = fragment.querySelectorAll('.katex');
+  if (katexs.length === 0) {
+    return;  // default action OK
+  }
+  katexs.forEach (function (element) {
+    const texSource = element.querySelector('annotation');
+    if (texSource) {
+      element.replaceWith(texSource);
+      texSource.innerHTML = '$' + texSource.innerHTML + '$';
+    }
+  });
+  fragment.querySelectorAll('.katex-display annotation').forEach (function (element) {
+    element.innerHTML = '$' + element.innerHTML + '$';
+  })
+  event.clipboardData.setData('text/plain', fragment.textContent);
+  event.clipboardData.setData('text/html', selection.getRangeAt(0).cloneContents());
+  event.preventDefault();
+})
   </script>
 
 </body>
