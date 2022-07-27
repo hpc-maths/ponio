@@ -261,7 +261,7 @@ class rk_butcher:
 \"\"\"""".format(
             meth=self,
             arguments="\n    ".join([ k+"\t"+v for k,v in args.items() ]),
-            warning="WARNING: np.exp is only for 1d case, otherwise need to use scipy.linalg.expm for real matrix exponential" if lawson else ""
+            warning="WARNING: np.exp is only for a scalar linear case, otherwise need to use scipy.linalg.expm for real matrix exponential" if lawson else ""
         )
         r.extend( docstring.split("\n") )
         # stages
