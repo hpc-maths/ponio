@@ -8,7 +8,7 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   
   <!-- Pico.css (Classless version) -->
-  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.classless.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
       
   <!-- KaTeX -->
   <script src="https://unpkg.com/asciimath2tex@1.2.1/dist/asciimath2tex.umd.js" type="text/javascript" ></script>
@@ -30,6 +30,10 @@
 
   <!-- clipboard -->
   <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.10/dist/clipboard.min.js"></script>
+
+  <!-- double slider -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.0/nouislider.min.js" integrity="sha512-1mDhG//LAjM3pLXCJyaA+4c+h5qmMoTc7IuJyuNNPaakrWT9rVTxICK4tIizf7YwJsXgDC2JP74PGCc7qxLAHw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.0/nouislider.css" integrity="sha512-MKxcSu/LDtbIYHBNAWUQwfB3iVoG9xeMCm32QV5hZ/9lFaQZJVaXfz9aFa0IZExWzCpm7OWvp9zq9gVip/nLMg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     html {
       --my-color: #00acc1;
@@ -109,6 +113,10 @@
       display: flex;
       flex-direction: column;
     }
+
+    .unselected {
+      display: none;
+    }
     
     .scheme li {
       list-style: none;
@@ -146,6 +154,8 @@
     }
     .preview {
       background-color: var(--form-element-disabled-background-color);
+      max-width: 100%;
+      width: 100%;
     }
     .preview::before {
       content: "Preview:";
@@ -180,20 +190,30 @@
       background-color: var(--table-border-color);
       padding: 10px;
     }
-    
-    nav {
+    body > footer {
+      position: fixed;
+      bottom: 0; left: 0;
+      transform: translateY( calc(100% - 100px) );
+      z-index: 42;
       background: var(--card-background-color);
       box-shadow: var(--card-box-shadow);
-      position: fixed;
-      z-index: 42;
-      bottom: 0; left: 0;
-      width: 100vw;
+      width: 100vw !important;
+      max-width: 100%;
       padding: 0 5vw;
+      transition-duration: 1s;
     }
-    .switcher {
+    nav {
+      height: 100px;
+    }
+    body > footer:hover {
+      transform: translateY( calc(100% - 110px) );
+    }
+    .switcher, #show_footer {
       background: none !important;
       border-radius: 100%;
       border-width: 2px;
+      transition-duration: 1s;
+      transform: rotate(0);
     }
 
     blockquote.warning {
@@ -207,6 +227,10 @@
 
     #sort_btn {
       --border-color: #c0ca33;
+      --background-color: var(--border-color);
+    }
+    #filter_btn {
+      --border-color: #3949ab;
       --background-color: var(--border-color);
     }
     
@@ -238,9 +262,19 @@
     .clipboard:hover { width: 120px; transition-duration: 0.5s; }
     .clipboard:active { background-color: var(--secondary-hover); color: var(--secondary-inverse); }
 
+
     /* fix hljs colors in dark-theme */
     .hljs-title { color: #d81b60; }
     .hljs-deletion, .hljs-number, .hljs-quote, .hljs-selector-class, .hljs-selector-id, .hljs-string, .hljs-template-tag, .hljs-type { color: #7cb342; }
+
+    /* merge noUIslider with picocss */
+    #slider .noUi-tooltip { display: none; }
+    #slider .noUi-active .noUi-tooltip { display: block; }
+    .noUi-connect { background: var(--range-thumb-color); }
+    .noUi-touch-area { background: var(--range-thumb-color); border: none;  }
+    .noUi-handle::before, .noUi-handle::after { content: none; }
+    .noUi-horizontal .noUi-handle { width: 18px; right: -14px; border: 2px solid var(--range-thumb-border-color); border-radius: 3px; }
+    .noUi-active { box-shadow: none; }
   </style>
 </head>
 <body style="--font-size: 16px;" >
@@ -251,25 +285,50 @@
       <ul>
         <li><button id="add" ><span class="add">+</span></button></li>
         <li><button id="switcher" class="switcher" aria-label="Turn off dark mode"><span>🐈‍⬛</span></button></li>
-      </ul>
-      <ul>
-        <li><label for="sort" >Sorting by:</label></li>
-        <li>
-          <select name="sort" id="sort" >
-            <option value="alpha" >Alphabetical</option>
-            <option value="order" >Order</option>
-            <option value="stages" >Number of stages</option>
-            <option value="stage_order" >Stage order</option>
-            <option value="xmax" disabled >Real stability interval</option>
-            <option value="ymax" disabled >Imaginary stability interval</option>
-          </select>
-        </li>
-        <li><button id="sort_btn" >Sort!</button></li>
+        <li><button id="show_footer" ><span>⬇</span></button></li>
       </ul>
       <ul>
         <li>Une petite liste de méthodes de type Runge-Kutta</li>
       </ul>
     </nav>
+    <fieldset class="form_select" >
+        <label for="sort" >Sorting by:</label>
+        <select name="sort" id="sort" >
+          <option value="alpha" >Alphabetical</option>
+          <option value="order" >Order</option>
+          <option value="stages" >Number of stages</option>
+          <option value="stage_order" >Stage order</option>
+          <option value="xmax" disabled >Real stability interval</option>
+          <option value="ymax" disabled >Imaginary stability interval</option>
+        </select>
+        <button id="sort_btn" >Sort!</button>
+    </fieldset>
+    <fieldset class="form_select" >
+      <label>Order:</label>
+      <div id="slider" class="noUi-active" ></div>
+     
+      <fieldset class="grid" >
+        <legend>Type</legend>
+        <label for="explicit">
+          <input type="radio" id="explicit" value="explicit" name="filter_type">
+          Explicit method
+        </label>
+        <label for="implicit">
+          <input type="radio" id="implicit" value="implicit" name="filter_type">
+          Implicit method
+        </label>
+        <label for="dirk">
+          <input type="radio" id="dirk" value="dirk" name="filter_type">
+          DIRK method
+        </label>
+        <label for="reset">
+          <input type="radio" id="reset" value="reset" name="filter_type">
+          Reset filter
+        </label>
+      </fieldset>
+      
+      <button id="filter_btn" >Filter!</button>
+    </fieldset>
   </footer>
 
   <script>
@@ -561,6 +620,8 @@ function rk_to_elm(rk,elm) {
   elm.setAttribute("data-stage_order",rk.stage_order);
   elm.setAttribute("data-xmax",0.);
   elm.setAttribute("data-ymax",0.);
+  elm.setAttribute("data-explicit",rk.is_explicit);
+  elm.setAttribute("data-dirk",rk.is_dirk);
   
   elm.appendChild(label(rk.id,rk.label));
   elm.appendChild(butcher_tableau(rk.A,rk.b,rk.c));
@@ -742,8 +803,41 @@ document.getElementById("add").addEventListener('click',()=>{
 });
 
 
+// switch footer translate
+let footer = document.getElementsByTagName('footer')[0];
+let footer_down = true;
+let show_footer = document.getElementById("show_footer");
+show_footer.addEventListener('click',(ev)=>{
+  if (footer_down) {
+    footer.style.transform = "translate(0)";
+    show_footer.style.transform = "rotate(0.5turn)";
+    footer_down = false;
+  } else {
+    footer.style.transform = "translate( 0, calc(100% - 100px) )";
+    show_footer.style.transform = "rotate(0turn)";
+    footer_down = true;
+  }
+});
+
+var slider = document.getElementById('slider');
+
+noUiSlider.create(slider, {
+    start: [1, 6],
+    step: 1,
+    connect: true,
+    tooltips: true,
+    format: {
+      to:   (value)=>{ return Math.ceil(Number(value)); },
+      from: (value)=>{ return Math.ceil(Number(value)); }
+    },
+    range: {
+        'min': 1,
+        'max': 10
+    }
+});
+
 // sort methods
-sort_methods = {
+const sort_methods = {
   'alpha': (elm) => { return elm.id; } ,
   'order': (elm) => { return elm.getAttribute("data-order"); } ,
   'stages': (elm) => { return elm.getAttribute("data-nstages"); } ,
@@ -752,8 +846,8 @@ sort_methods = {
   'ymax': (elm) => { return elm.getAttribute("data-ymax"); }
 }
 
-sort_btn = document.getElementById("sort_btn");
-sort_by_elm = document.getElementById("sort");
+let sort_btn = document.getElementById("sort_btn");
+let sort_by_elm = document.getElementById("sort");
 
 sort_btn.addEventListener('click',function (event) {
   let frag = document.createDocumentFragment();
@@ -762,6 +856,46 @@ sort_btn.addEventListener('click',function (event) {
     return  viewer(a) > viewer(b);
   });
   for ( const item of sortedList ) {
+    frag.appendChild(item);
+  }
+  ul.appendChild(frag);
+});
+
+// filter methods
+const filter_methods = {
+  'explicit': (elm) => { return elm.getAttribute("data-explicit") == "true"; } ,
+  'implicit': (elm) => { return elm.getAttribute("data-explicit") == "false"; } ,
+  'dirk':     (elm) => { return elm.getAttribute("data-dirk") == "true"; } ,
+  'reset':    (elm) => { return true; } ,
+  'order':    (elm) => { return elm.getAttribute("data-order"); }
+};
+let order_slider = document.getElementById("slider").noUiSlider;
+
+let filter_btn = document.getElementById("filter_btn");
+filter_btn.addEventListener('click',function (event) {
+  let frag = document.createDocumentFragment();
+
+  let filter_by_elm;
+  let types = document.querySelectorAll("input[name='filter_type']");
+  for ( const radio of types ) {
+    if (radio.checked) {
+      filter_by_elm = radio;
+      break;
+    }
+  }
+
+  const range_order = order_slider.get();
+
+  let viewer = filter_methods[filter_by_elm.value];
+  let filtredList = [...ul.children].map( (elm) => {
+    elm.classList.remove('unselected');
+    let o = filter_methods['order'](elm);
+    if ( !( viewer(elm) && ( range_order[0] <= o && o <= range_order[1] ) ) ) {
+      elm.classList.add('unselected');
+    }
+    return elm;
+  });
+  for ( const item of filtredList ) {
     frag.appendChild(item);
   }
   ul.appendChild(frag);
