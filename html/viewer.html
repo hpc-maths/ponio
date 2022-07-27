@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light" >
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Presentation Overview of Numerical Integrators for ODE</title>
@@ -204,6 +204,11 @@
       content: "Warning: ";
       color: var(--blockquote-border-color);
     }
+
+    #sort_btn {
+      --border-color: #c0ca33;
+      --background-color: var(--border-color);
+    }
     
     .clipboard {
       position: absolute;
@@ -246,6 +251,20 @@
       <ul>
         <li><button id="add" ><span class="add">+</span></button></li>
         <li><button id="switcher" class="switcher" aria-label="Turn off dark mode"><span>🐈‍⬛</span></button></li>
+      </ul>
+      <ul>
+        <li><label for="sort" >Sorting by:</label></li>
+        <li>
+          <select name="sort" id="sort" >
+            <option value="alpha" >Alphabetical</option>
+            <option value="order" >Order</option>
+            <option value="stages" >Number of stages</option>
+            <option value="stage_order" >Stage order</option>
+            <option value="xmax" disabled >Real stability interval</option>
+            <option value="ymax" disabled >Imaginary stability interval</option>
+          </select>
+        </li>
+        <li><button id="sort_btn" >Sort!</button></li>
       </ul>
       <ul>
         <li>Une petite liste de méthodes de type Runge-Kutta</li>
@@ -537,6 +556,12 @@ function lscheme(stages) {
 function rk_to_elm(rk,elm) {
   elm.id = rk.id;
   elm.classList.add('method');
+  elm.setAttribute("data-order",rk.order);
+  elm.setAttribute("data-nstages",rk.nstages);
+  elm.setAttribute("data-stage_order",rk.stage_order);
+  elm.setAttribute("data-xmax",0.);
+  elm.setAttribute("data-ymax",0.);
+  
   elm.appendChild(label(rk.id,rk.label));
   elm.appendChild(butcher_tableau(rk.A,rk.b,rk.c));
   
@@ -714,6 +739,32 @@ document.getElementById("add").addEventListener('click',()=>{
   
   ul.appendChild(li);
   li.scrollIntoView();
+});
+
+
+// sort methods
+sort_methods = {
+  'alpha': (elm) => { return elm.id; } ,
+  'order': (elm) => { return elm.getAttribute("data-order"); } ,
+  'stages': (elm) => { return elm.getAttribute("data-nstages"); } ,
+  'stage_order': (elm) => { return elm.getAttribute("data-stage_order"); } ,
+  'xmax': (elm) => { return elm.getAttribute("data-xmax"); } ,
+  'ymax': (elm) => { return elm.getAttribute("data-ymax"); }
+}
+
+sort_btn = document.getElementById("sort_btn");
+sort_by_elm = document.getElementById("sort");
+
+sort_btn.addEventListener('click',function (event) {
+  let frag = document.createDocumentFragment();
+  let viewer = sort_methods[sort_by_elm.value];
+  let sortedList = [...ul.children].sort((a,b) => {
+    return  viewer(a) > viewer(b);
+  });
+  for ( const item of sortedList ) {
+    frag.appendChild(item);
+  }
+  ul.appendChild(frag);
 });
 
 // simple way to copy equation in LaTeX mode
