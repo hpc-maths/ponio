@@ -239,11 +239,32 @@ class rk_butcher:
         def func_name(rk_id,lawson=False):
             return ("lawson_" if lawson else "")+rk_id
         
-        fun = "f"
+        args = {"f": "function f(t,u)"}
         if lawson:
-            fun = "L, N"
-        args = [fun,"tn","un","dt"] + (["exp=np.exp"] if lawson else [] )
-        r = [ "def {funcname}( {args} ):".format( funcname=func_name(self.id,lawson), args=", ".join(args) ) ]
+            args = {"L": "linar part, a scalar or a matrix", "N": "non-linear part, a function N(t,u)"}
+        args.update(
+            [
+                ("tn","current time"),
+                ("un","current solution at time tn"),
+                ("dt", "time step to the next time")
+            ] + ([("exp=np.exp","exponential function to compute exponential of linear part")] if lawson else [] )
+        )
+
+        # function declaration
+        r = [ "def {funcname}( {args} ):".format( funcname=func_name(self.id,lawson), args=", ".join(args.keys()) ) ]
+        # docstring
+        docstring = """\"\"\"{meth.label}
+    Runge-Kuta method with {meth.nstages} stages, of order {meth.order}
+    {arguments}
+    {warning}
+    source: https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{meth.id}
+\"\"\"""".format(
+            meth=self,
+            arguments="\n    ".join([ k+"\t"+v for k,v in args.items() ]),
+            warning="WARNING: np.exp is only for 1d case, otherwise need to use scipy.linalg.expm for real matrix exponential" if lawson else ""
+        )
+        r.extend( docstring.split("\n") )
+        # stages
         r.extend([ "{} = {}".format(str(eq.lhs),str(eq.rhs)) for eq in self.scheme(latex=False,lawson=lawson) ])
         r[-1] = r[-1].replace("unp1 =","return")
 
