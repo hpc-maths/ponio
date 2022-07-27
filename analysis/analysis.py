@@ -29,6 +29,7 @@ class rk_butcher:
         self._order = None
         self._stage_order = None
         self._is_explicit = None
+        self._is_dirk     = None
         self._is_approched_method = None
         self._R = None
         self._A = None
@@ -95,6 +96,15 @@ class rk_butcher:
                 for i in range(0,self.nstages)
             ]) == 0 )
         return self._is_explicit
+    
+    @property
+    def is_dirk(self):
+        if self._is_dirk is None:
+            self._is_dirk = ( sum([
+                sum([ sp.Abs(self.A[i,j]) for j in range(i+1,self.nstages) ])
+                for i in range(0,self.nstages)
+            ]) == 0 ) and ( sum([ sp.Abs(self.A[i,i]) for i in range(0,self.nstages) ]) != 0 )
+        return self._is_dirk
 
     @property
     def is_approched_method(self):
@@ -308,6 +318,8 @@ if __name__ == '__main__':
         drk['stability_function'] = str(rk.stability_function())
         drk['scheme'] = [ "{} = {}".format(sp.latex(eq.lhs),sp.latex(eq.rhs)) for eq in rk.scheme() ]
         drk['lawson_scheme'] = [ "{} = {}".format(sp.latex(eq.lhs),pattern.sub( lambda m:m.group(0)[6:-7], sp.latex(eq.rhs))) for eq in rk.scheme(lawson=True) ]
+        drk['is_explicit'] = rk.is_explicit
+        drk['is_dirk'] = rk.is_dirk
         if rk.is_explicit:
             drk['code'] = rk.code()
             drk['lawson_code'] = rk.code(lawson=True)
