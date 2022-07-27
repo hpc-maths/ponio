@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Presentation Overview of Numerical Integrators for ODE</title>
   <style>
+    * { transition-duration: 1s; }
     html {
       --my-color: #00acc1;
       scroll-behavior: smooth;
@@ -94,6 +95,7 @@
     pre {
       padding: 5px 15px;
       tab-size: 4;
+      position: relative;
     }
     
     #add {
@@ -180,6 +182,33 @@
       color: var(--blockquote-border-color);
     }
     
+    .clipboard {
+      position: absolute;
+      width: 28px; height: 26px;
+      box-sizing: border-box;
+      top: 3px; left: 3px;
+      padding: 2px;
+      background-color: var(--secondary-inverse);
+      background-position: 2px 2px;
+      border: 1px solid var(--secondary-hover);
+      overflow: hidden;
+      opacity: 0.1;
+      transition-duration: 0.5s;
+      transition-property: all;
+      display: flex; align-items: center;
+      color: var(--secondary-hover);
+    }
+    .clipboard svg { flex-shrink: 0; }
+    .clipboard span {
+      font-size: calc( var(--font-size) * 0.75 );
+      margin-left: 5px;
+    }
+    pre:hover .clipboard {
+      opacity: 1;
+      transition-duration: 0.5s;
+    }
+    .clipboard:hover { width: 120px; transition-duration: 0.5s; }
+    .clipboard:active { background-color: var(--secondary-hover); color: var(--secondary-inverse); }
   </style>
   <!-- Pico.css (Classless version) -->
   <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.classless.min.css">
@@ -201,6 +230,9 @@
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3-array@3"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3-contour@3"></script>
+
+  <!-- clipboard -->
+  <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.10/dist/clipboard.min.js"></script>
 </head>
 <body style="--font-size: 16px;" >
   
@@ -236,6 +268,17 @@ switcher.addEventListener('click',(ev)=>{
     switcher.children[0].innerHTML = "🐈‍⬛";
   }
 });
+
+// set clipboard
+clipboard = new ClipboardJS('.clipboard');
+clipboard.on('success', function(e) {
+    const reset_text = e.trigger.innerText;
+    e.trigger.children[1].innerText = "Copied!";
+    setTimeout( ()=>{ e.trigger.children[1].innerText = reset_text; } , 1000 );
+
+    e.clearSelection();
+});
+
 
 let ul = document.getElementById("list");
 
@@ -460,13 +503,20 @@ function scheme(stages) {
   });
   return ul;
 }
-function code(c) {
+function code(c,id) {
   let pre = document.createElement("pre");
   let code = document.createElement("code");
   code.classList.add("language-py");
   code.innerHTML = hljs.highlight(c,{language: 'python'}).value;
+  code.id = "code-"+id;
   
   pre.appendChild(code);
+
+  let btn = document.createElement('button');
+  btn.classList.add("clipboard");
+  btn.setAttribute("data-clipboard-target","#"+code.id);
+  btn.innerHTML = "<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-paperclip'><path d='M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48'></path></svg><span>Copy code</span>";
+  pre.appendChild(btn);
   
   return pre;
 }
@@ -527,7 +577,7 @@ function rk_to_elm(rk,elm) {
     p.appendChild(scheme(rk.scheme));
   
     if (rk.hasOwnProperty('code')) {
-      p.appendChild(code(rk.code));
+      p.appendChild(code(rk.code,rk.id));
     }
     
     let title_ledo = document.createElement("h6"); title_ledo.appendChild(document.createTextNode("Lawson scheme:")); p.appendChild(title_ledo);
@@ -536,7 +586,7 @@ function rk_to_elm(rk,elm) {
     p.appendChild(scheme(rk.lawson_scheme));
   
     if (rk.hasOwnProperty('lawson_code')) {
-      p.appendChild(code(rk.lawson_code));
+      p.appendChild(code(rk.lawson_code,"l_"+rk.id));
       let warning = document.createElement("blockquote");
       warning.classList.add("warning");
       warning.innerHTML = "default NumPy function <a href='https://numpy.org/doc/stable/reference/generated/numpy.exp.html'><samp>np.exp</samp></a> for exponantial take the exponential of each terms of <samp>ndarray</samp>, which is not the exponential of a matrix needed by Lawson method. If this is for matrix computation, prefer <a href='https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.expm.html'><samp>scipy.linalg.expm</samp></a> function.";
