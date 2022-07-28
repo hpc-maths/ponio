@@ -6,7 +6,7 @@ pages:
     - source activate ponio-analysis-env
     - mkdir public
     - python analysis/analysis.py -i database/butcher_tableaus.json -o public/api
-    - cp html/*.html public
+    - cp html/*.html html/*.js html/*.ico public
   artifacts:
     paths:
       - public
