@@ -1,0 +1,266 @@
+html {
+  --my-color: #00acc1;
+  --primary: var(--my-color);
+  scroll-behavior: smooth;
+}
+body { position: relative; padding-bottom: 150px; }
+
+
+/* Butcher tableau */
+.butcher {
+  border-spacing: 5px;
+  border-collapse: collapse;
+  --bold-border: 3px solid var(--table-border-color);
+  --thin-border: 1px solid var(--table-border-color);
+}
+.butcher td {
+  padding: 3px;
+  border-top: var(--thin-border);
+  border-right: var(--thin-border);
+  text-align: center;
+  vertical-align: middle;
+  min-width: 62px;
+  --border-width: 0px;
+}
+.butcher tr td:first-child {
+  border-right: var(--bold-border); /* separator c and A in butcher tableau */
+}
+.butcher tr:last-child td {
+  border-top: var(--bold-border);
+}
+.butcher tr:first-child td { border-top: none !important; }
+.butcher tr td:last-child { border-right: none !important; }
+
+/* main */
+main {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px;
+  max-width: 100vw;
+}
+
+.method {
+  display: flex;
+  flex-direction: column;
+  margin: 5px;
+  transition-duration: 1s;
+  padding-bottom: var(--spacing) !important;
+  max-width: calc(100% - 20px);
+}
+@media (min-width: 992px) {
+  .method {
+    max-width: calc(50% - 20px);
+  }
+}
+.method header {
+  transition-duration: 1s;
+}
+.method:hover header {
+  background-color: var(--my-color);
+}
+.method:target header {
+  background-color: #fdd835;
+  color: var(--h6-color);
+}
+.method .butcher_container, .method .stability_function, .method .scheme  {
+  max-width: 100%;
+  overflow-y: scroll;
+  display: block;
+  margin-left: auto; margin-right: auto;
+}
+
+.method h2 {
+  margin-bottom: 0 !important;
+}
+
+.method details {
+  display: flex;
+  flex-direction: column;
+}
+
+.unselected {
+  display: none;
+}
+
+.scheme li {
+  list-style: none;
+}
+.scheme li .katex-display, .scheme li .katex-display > .katex {
+  text-align: left !important;
+}
+pre {
+  padding: 5px 15px;
+  tab-size: 4;
+  position: relative;
+}
+
+#add {
+  width: 64px; height: 64px;
+  border-radius: 100%;
+  margin-left: 20px;
+  border: 2px solid currentColor;
+  color: var(--h1-color);
+  background-color: #c0ca33;
+  transition-duration: 1s;
+  font-family: monospace;
+}
+#add:hover {
+  background-color: var(--my-color);
+}
+#add .add {
+  display: inline-block;
+  transform: scale(1.5);
+  transform-origin: center;
+  transition-duration: 1s;
+}
+#add:hover .add { 
+  transform: scale(2.5);
+}
+
+#show_footer {
+  color: var(--primary);
+  stroke-width: 5px;
+}
+
+.preview {
+  background-color: var(--form-element-disabled-background-color);
+  max-width: 100%;
+  width: 100%;
+}
+.preview::before {
+  content: "Preview:";
+  font-style: italic;
+  color: var(--form-element-placeholder-color);
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 1 !important;
+}
+header a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.katex {
+  z-index: 0;
+}
+
+.drawing {
+  display: flex;
+  gap: 20px;
+}
+.drawing canvas {
+  width: 100%;
+  border: 2px solid var(--table-border-color);
+  background-color: #fefefe11;
+}
+.drawing figcaption {
+  background-color: var(--table-border-color);
+  padding: 10px;
+}
+body > footer {
+  position: fixed;
+  bottom: 0; left: 0;
+  transform: translateY( calc(100% - 100px) );
+  z-index: 42;
+  background: var(--card-background-color);
+  box-shadow: var(--card-box-shadow);
+  width: 100vw !important;
+  max-width: 100%;
+  padding: 0 5vw;
+  transition-duration: 1s;
+}
+nav {
+  height: 100px;
+}
+body > footer:hover {
+  transform: translateY( calc(100% - 110px) );
+}
+.switcher, #show_footer {
+  background: none !important;
+  border-radius: 100%;
+  border-width: 2px;
+  transition-duration: 1s;
+  transform: rotate(0);
+}
+
+blockquote.warning {
+  --blockquote-border-color: #f4511e;
+}
+
+blockquote.warning::before {
+  content: "Warning: ";
+  color: var(--blockquote-border-color);
+}
+
+#sort_btn {
+  --border-color: #c0ca33;
+  --background-color: var(--border-color);
+}
+#filter_btn {
+  --border-color: #3949ab;
+  --background-color: var(--border-color);
+}
+
+.clipboard {
+  position: absolute;
+  width: 28px; height: 26px;
+  box-sizing: border-box;
+  top: 3px; left: 3px;
+  padding: 2px;
+  background-color: var(--secondary-inverse);
+  background-position: 2px 2px;
+  border: 1px solid var(--secondary-hover);
+  overflow: hidden;
+  opacity: 0.1;
+  transition-duration: 0.5s;
+  transition-property: all;
+  display: flex; align-items: center;
+  color: var(--secondary-hover);
+}
+.clipboard svg { flex-shrink: 0; }
+.clipboard span {
+  font-size: calc( var(--font-size) * 0.75 );
+  margin-left: 5px;
+}
+pre:hover .clipboard {
+  opacity: 1;
+  transition-duration: 0.5s;
+}
+.clipboard:hover { width: 120px; transition-duration: 0.5s; }
+.clipboard:active { background-color: var(--secondary-hover); color: var(--secondary-inverse); }
+
+.form_sort :where(button, select, textarea):is(:active, :focus) {
+  --primary-focus: #c0ca3320;
+  --border-color: var(--primary-focus);
+  --form-element-focus-color: #c0ca3320;
+}
+
+.form_filter :where(button, select, textarea):is(:active, :focus) ,
+.form_filter, .form_filter [type="radio"], .form_filter input:is(:active, :focus) {
+  --primary-focus: #3949ab20;
+  --border-color: #3949ab;
+  --background-slider-color: #3949ab;
+  --form-element-active-border-color: var(--background-slider-color);
+  --form-element-focus-color: var(--primary-focus);
+}
+
+/* fix hljs colors in dark-theme */
+.hljs-title { color: #d81b60; }
+.hljs-deletion, .hljs-number, .hljs-quote, .hljs-selector-class, .hljs-selector-id, .hljs-string, .hljs-template-tag, .hljs-type { color: #7cb342; }
+
+/* merge noUIslider with picocss */
+/*#slider .noUi-tooltip { display: none; }
+#slider .noUi-active .noUi-tooltip { display: block; }*/
+.noUi-horizontal { margin-top: 50px; }
+.noUi-connect { background: var(--background-slider-color); }
+.noUi-touch-area { background: var(--background-slider-color); border: none;  }
+.noUi-handle::before, .noUi-handle::after { content: none; }
+.noUi-horizontal .noUi-handle { width: 18px; right: -14px; border: 2px solid var(--range-thumb-border-color); border-radius: 3px; }
+.noUi-active { box-shadow: none; }
