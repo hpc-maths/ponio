@@ -31,6 +31,9 @@ body { position: relative; padding-bottom: 150px; }
 .butcher tr:first-child td { border-top: none !important; }
 .butcher tr td:last-child { border-right: none !important; }
 
+.butcher.embedded tr:nth-last-child(-n+2) td { border-top: var(--bold-border); }
+.butcher.embedded tr:last-child td { border-top: var(--thin-border); }
+
 /* main */
 main {
   display: flex;

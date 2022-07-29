@@ -79,6 +79,10 @@
           <input type="radio" id="dirk" value="dirk" name="filter_type">
           DIRK method
         </label>
+        <label for="embedded">
+          <input type="radio" id="embedded" value="embedded" name="filter_type">
+          Embedded method
+        </label>
         <label for="reset">
           <input type="radio" id="reset" value="reset" name="filter_type" checked >
           Reset filter
@@ -117,11 +121,14 @@ function label(id,lab) {
   return header;
 }
 
-function butcher_tableau(A,b,c) {
+function butcher_tableau(A,b,c,b2=undefined) {
+  let is_embedded = ( b2 !== undefined );
+
   let container = document.createElement("div");
   container.classList.add("butcher_container");
   let tab = document.createElement("table");
   tab.classList.add("butcher");
+  if (is_embedded) { tab.classList.add("embedded"); }
   for (i=0;i<A.length;++i) {
     let tr = document.createElement("tr");
     let ci = document.createElement("td");
@@ -143,6 +150,17 @@ function butcher_tableau(A,b,c) {
     tr.appendChild(bi);
   }
   tab.appendChild(tr);
+
+  if ( is_embedded ) {
+    let tr = document.createElement("tr");
+    tr.appendChild(document.createElement("td"));
+    for (i=0;i<b2.length;++i) {
+      let b2i = document.createElement("td");
+      render(b2[i],b2i);
+      tr.appendChild(b2i);
+    }
+    tab.appendChild(tr);
+  }
 
   container.appendChild(tab);
 
@@ -213,7 +231,7 @@ function expr_to_canvas(f,[xmin,xmax],[ymin,ymax],thresholds) {
 
   return canvas;
 }
-function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,outside=true) {
+function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,outside=true,data2=undefined) {
   let canvas = document.createElement("canvas");
   canvas.height = 512;
   canvas.width  = 512;
@@ -237,6 +255,20 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,outside=true) {
     context.fillStyle = my_color;
     context.fill();
   });
+  if ( data2 !== undefined ) {
+    const contours2 = d3.contours()
+      .size([n,m])
+      .thresholds(thresholds)
+      ( [].concat(...data2) );
+    contours2.forEach( c => {
+      if (c.coordinates.length == 0) return;
+      context.beginPath();
+      path(c);
+      context.lineWidth = 3.0;
+      context.strokeStyle = "#000000";
+      context.stroke();
+    });
+  }
 
   // draw axis
   const dx = (xmax-xmin)/canvas.width;
@@ -281,7 +313,7 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,outside=true) {
 
 function stability_domain( data ) {
   let fig = document.createElement("figure");
-  fig.appendChild(data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0]));
+  fig.appendChild( data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0],outside=true,data2=data.data_embedded) );
   let caption = document.createElement("figcaption");
   let def = document.createElement("span"); katex.render(String.raw`\mathcal{D} = \{ z\in\mathbb{C}\,/\,|R(z)| \leq 1 \}`,def,{displayMode:true});
   caption.innerHTML = "Stability domain: " + def.outerHTML;
@@ -354,9 +386,10 @@ function rk_to_elm(rk,elm) {
   elm.setAttribute("data-ymax",0.);
   elm.setAttribute("data-explicit",rk.is_explicit);
   elm.setAttribute("data-dirk",rk.is_dirk);
+  elm.setAttribute("data-embedded",rk.is_embedded);
   
   elm.appendChild(label(rk.id,rk.label));
-  elm.appendChild(butcher_tableau(rk.A,rk.b,rk.c));
+  elm.appendChild(butcher_tableau(rk.A,rk.b,rk.c,rk.b2));
   
   if (rk.hasOwnProperty('stability_function')) {
     let details = document.createElement("details");

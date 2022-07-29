@@ -62,9 +62,10 @@ sort_btn.addEventListener('click',function (event) {
 
 // filter methods
 const filter_methods = {
-  'explicit': (elm) => { return elm.getAttribute("data-explicit") == "true"; } ,
-  'implicit': (elm) => { return elm.getAttribute("data-explicit") == "false"; } ,
-  'dirk':     (elm) => { return elm.getAttribute("data-dirk") == "true"; } ,
+  'explicit': (elm) => { return elm.getAttribute("data-explicit") === "true";  } ,
+  'implicit': (elm) => { return elm.getAttribute("data-explicit") === "false"; } ,
+  'dirk':     (elm) => { return elm.getAttribute("data-dirk")     === "true";  } ,
+  'embedded': (elm) => { return elm.getAttribute("data-embedded") === "true";  } ,
   'reset':    (elm) => { return true; } ,
   'order':    (elm) => { return elm.getAttribute("data-order"); }
 };
