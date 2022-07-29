@@ -20,11 +20,12 @@ import json
 import os, sys
 
 class rk_butcher:
-    def __init__(self,label,A,b,c):
+    def __init__(self,label,A,b,c,b2=None):
         self.label = label
-        self.A = sp.Matrix(A)
-        self.b = sp.Matrix(b)
-        self.c = sp.Matrix(c)
+        self.A  = sp.Matrix(A)
+        self.b  = sp.Matrix(b)
+        self.c  = sp.Matrix(c)
+        self.b2 = None if b2 is None else sp.Matrix(b2)
 
         self._order = None
         self._stage_order = None
@@ -46,6 +47,9 @@ class rk_butcher:
         ]
         yield 'b', [ str(bi) for bi in self.b ]
         yield 'c', [ str(ci) for ci in self.c ]
+        
+        if self.b2 is not None:
+            yield 'b2', [ str(bi) for bi in self.b2 ]
 
     @property
     def nstages(self):
@@ -111,41 +115,27 @@ class rk_butcher:
         if self._is_approched_method is None:
             self._is_approched_method = any([ type(x) is sp.Float for x in self.A ])
         return self._is_approched_method
+    
+    @property
+    def is_embedded(self):
+        return self.b2 is not None
 
-    def stability_function(self):
-        if self._R is None:
+    def stability_function(self,embedded=False):
+        def stab_func(A,b,approched_method=False):
             z = sp.symbols("z")
-            if self.is_approched_method:
-                # solve Dahlquist test equation
-                # because SymPy can't simplify determinant formula
-                """
-                stages = self.scheme(latex=False)
-                dtsubs = (sp.symbols("dt"),z)
-                unsubs = (sp.symbols("un"),1)
-                fsubs  = (sp.Function("f",nargs=2),lambda t,u:u)
-                self._R = stages[-1].rhs
-                
-                if not self.is_explicit:
-                    Ki = []
-                    for eq in stages[:-1]:
-                        tmp = eq.replace(*fsubs).subs(*unsubs).subs(*dtsubs)
-                        Ki.append( (eq.lhs, sp.solve(tmp,eq.lhs)[0].simplify()) )
-                    for ki,sub in reversed(Ki):
-                        self._R = self._R.subs(ki,sub)
-                    self._R = self._R.subs(*unsubs).subs(*dtsubs).expand()
-                else :
-                    for eq in reversed(stages[:-1]):
-                        self._R = self._R.subs(eq.lhs,eq.rhs)
-                    self._R = self._R.replace(*fsubs).subs(*unsubs).subs(*dtsubs).factor().evalf()
-                """
-                self._R = ( 1+z*( self.b.T*( (sp.eye(*self.A.shape) - z*self.A).inv().evalf(chop=True)*sp.ones(*self.b.shape) ) )[0] ).expand().simplify().collect(z)
+            I  = sp.eye(*A.shape)  # identity matrix
+            I1 = sp.ones(*b.shape) # vector of ones
+            if approched_method:
+                return  ( 1+z*( b.T*( (I - z*A).inv().evalf(chop=True)*I1 ) )[0] ).expand().simplify().collect(z)
             else:
-                # standard formula from Butcher's book
-                I  = sp.eye(*self.A.shape)  # identity matrix
-                I1 = sp.ones(*self.b.shape) # vector of ones
-                N = I + z*( I1*self.b.T - self.A )
-                D = I - z*self.A
-                self._R = ( N.det()/D.det() ).expand().simplify().collect(z)
+                N  = I + z*( I1*b.T - A )
+                D  = I - z*A
+                return ( N.det()/D.det() ).expand().simplify().collect(z)
+        if embedded:
+            return stab_func(self.A,self.b2,approched_method=self.is_approched_method)
+
+        if self._R is None:
+            self._R = stab_func(self.A,self.b,approched_method=self.is_approched_method)
         return self._R
     
     def order_star_function(self):
@@ -159,29 +149,26 @@ class rk_butcher:
             z = sp.symbols("z")
             self._P = sp.Abs( (self.stability_function() - sp.exp(z))/sp.exp(z) )
         return self._P
-    
-    def scheme(self,latex=True,lawson=False):
-        # define a zero
-        zero = 0 if not lawson else sp.zeros(3,1)
 
+    def scheme(self,latex=True,lawson=False):
         if latex:
             ks = sp.symbols("k_{{1:{}}}".format(self.nstages+1))
-            un,unp1 = sp.symbols(r"u^n u^{n+1}")
+            un,unp1,ubnp1 = sp.symbols(r"u^n u^{n+1} \tilde{u}^{n+1}")
             tn,dt = sp.symbols(r"t^n \Delta\ t")
 
             # to keep exponential in first, use matrix expressions
             if lawson:
                 ks = [ sp.MatrixSymbol(sp.latex(ki),3,1) for ki in ks ]
-                un,unp1 = ( sp.MatrixSymbol(sp.latex(ui),3,1) for ui in (un,unp1) )
+                un,unp1,ubnp1 = ( sp.MatrixSymbol(sp.latex(ui),3,1) for ui in (un,unp1,ubnp1) )
         else:
             ks = sp.symbols("k1:{}".format(self.nstages+1))
-            un,unp1 = sp.symbols(r"un unp1")
+            un,unp1,ubnp1 = sp.symbols(r"un unp1 ubnp1")
             tn,dt = sp.symbols(r"tn dt")
 
             # to keep exponential in first, use matrix expressions
             if lawson:
                 ks = [ sp.MatrixSymbol(str(ki),3,1) for ki in ks ]
-                un,unp1 = ( sp.MatrixSymbol(str(ui),3,1) for ui in (un,unp1) )
+                un,unp1,ubnp1 = ( sp.MatrixSymbol(str(ui),3,1) for ui in (un,unp1,ubnp1) )
         
         f = sp.Function("f",nargs=2)
         a = 1
@@ -227,6 +214,18 @@ class rk_butcher:
             unp1,
             a*( un + dt*expr )
         ))
+
+        if self.is_embedded:
+            args = [ self.b2[i]*ks[i] for i in range(0,self.nstages) ]
+            if not lawson:
+                expr = sum(args)
+            else:
+                expr = sp.MatAdd(*args)
+            stages.append(sp.Eq(
+                ubnp1,
+                a*( un + dt*expr )
+            ))
+
         return stages
 
     @property
@@ -259,26 +258,53 @@ class rk_butcher:
                 ("dt", "time step to the next time")
             ] + ([("exp=np.exp","exponential function to compute exponential of linear part")] if lawson else [] )
         )
+        if self.is_embedded:
+            args['tol'] = "tolerance of embedded time step method"
+
+        # stages
+        scheme = self.scheme(latex=False,lawson=lawson)
 
         # function declaration
         r = [ "def {funcname}( {args} ):".format( funcname=func_name(self.id,lawson), args=", ".join(args.keys()) ) ]
+
+        args_len = len(max(args.keys(),key=len))
         # docstring
         docstring = """\"\"\"{meth.label}
-    Runge-Kuta method with {meth.nstages} stages, of order {meth.order}
+    {embedded}{lawson}Runge-Kuta method with {meth.nstages} stages, of order {meth.order}
     {arguments}
+    
+    return {output}
+
     {warning}
     source: https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{meth.id}
 \"\"\"""".format(
             meth=self,
-            arguments="\n    ".join([ k+"\t"+v for k,v in args.items() ]),
-            warning="WARNING: np.exp is only for a scalar linear case, otherwise need to use scipy.linalg.expm for real matrix exponential" if lawson else ""
+            embedded = "" if not self.is_embedded else "Embedded ",
+            lawson = "" if not lawson else "Lawson ",
+            arguments="\n    ".join([ f"{{k:{args_len}}}    {{v}}".format(k=k,v=v) for k,v in args.items() ]),
+            #output   ="{} solution at time tn".format(str(scheme[-1].lhs)) if not self.is_embedded else "({unp1}, {ubnp1}) tuple of solutions at time tn of order {order} and {orderbis}".format(unp1=str(scheme[-2].lhs),ubnp1=str(scheme[-1].lhs),order=self.order,orderbis=self.order-1),
+            output   ="{} solution at time tn".format(str(scheme[-1].lhs)) if not self.is_embedded else "(t,u,dt,error) tuple where t is the time of the {unp1}, {ubnp1}) tuple of solutions at time tn of order {order} and {orderbis}".format(unp1=str(scheme[-2].lhs),ubnp1=str(scheme[-1].lhs),order=self.order,orderbis=self.order-1),
+            warning  ="WARNING: np.exp is only for a scalar linear case, otherwise need to use scipy.linalg.expm for real matrix exponential" if lawson else ""
         )
         r.extend( docstring.split("\n") )
-        # stages
-        r.extend([ "{} = {}".format(str(eq.lhs),str(eq.rhs)) for eq in self.scheme(latex=False,lawson=lawson) ])
-        r[-1] = r[-1].replace("unp1 =","return")
 
-        return "\n\t".join(r)
+        r.extend([ "{} = {}".format(str(eq.lhs),str(eq.rhs)) for eq in scheme ])
+
+        if self.is_embedded:
+            error_computation = """
+# computation error
+error = np.linalg.norm( {unp1} - {ubnp1} )
+ndt = dt*(tol/error)**({power})
+if error > tol:
+    return (tn,un,ndt,error)
+else:
+    return (tn+dt,unp1,ndt,error)""".format(unp1=str(scheme[-2].lhs),ubnp1=str(scheme[-1].lhs),power=1./self.order)
+            r.extend(error_computation.split("\n"))
+            #r.append("return ({unp1}, {ubnp1})".format(unp1=str(scheme[-2].lhs),ubnp1=str(scheme[-1].lhs)))
+        else:
+            r[-1] = r[-1].replace("{unp1} =".format(unp1=str(scheme[-1].lhs)),"return")
+
+        return "\n    ".join(r)
 
 def evalf_Cdomain( z , expr , zmin , zmax , N ):
     func = sp.lambdify(z,expr,'numpy')
@@ -303,14 +329,14 @@ if __name__ == '__main__':
     output = args['--output']
     os.makedirs(output,exist_ok=True)
 
-    # to remove parenthesis around fractions
+    # to remove parenthesis around fractions in Lawson scheme expressions
     pattern = re.compile("\\\\left\(\\\\frac\{(?P<numerator>[^{}]+)\}\{(?P<denominator>[^{}]+)\}\\\\right\)")
 
     rk_analysis = []
     for i,drk in enumerate(data):
         vprint("{}/{} {:25}".format(i+1,len(data),drk['label']), end="\r")
 
-        rk = rk_butcher(drk['label'],drk['A'],drk['b'],drk['c'])
+        rk = rk_butcher(label=drk['label'],A=drk['A'],b=drk['b'],c=drk['c'],b2=drk['b2'] if 'b2' in drk else None)
         drk['id'] = rk.id
         drk['nstages'] = rk.nstages
         drk['order']   = rk.order
@@ -320,6 +346,7 @@ if __name__ == '__main__':
         drk['lawson_scheme'] = [ "{} = {}".format(sp.latex(eq.lhs),pattern.sub( lambda m:m.group(0)[6:-7], sp.latex(eq.rhs))) for eq in rk.scheme(lawson=True) ]
         drk['is_explicit'] = rk.is_explicit
         drk['is_dirk'] = rk.is_dirk
+        drk['is_embedded'] = rk.is_embedded
         if rk.is_explicit:
             drk['code'] = rk.code()
             drk['lawson_code'] = rk.code(lawson=True)
@@ -330,6 +357,9 @@ if __name__ == '__main__':
         N = (512,512)
         stability_domain = { 'xmin':np.real(zmin), 'xmax':np.real(zmax), 'ymin':np.imag(zmin), 'ymax':np.imag(zmax) }
         stability_domain['data'] = evalf_Cdomain( sp.symbols("z") , rk.stability_function() , zmin , zmax , N ).tolist()
+
+        if rk.is_embedded:
+            stability_domain['data_embedded'] = evalf_Cdomain( sp.symbols("z") , rk.stability_function(embedded=True) , zmin , zmax , N ).tolist()
 
         zmin = -3.5-3.5j
         zmax =  3.5+3.5j
