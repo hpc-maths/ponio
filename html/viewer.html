@@ -459,6 +459,10 @@ fetch(url)
         //console.log(rk.label);
         ul.appendChild(rk_to_elm(rk,document.createElement("article")));
       })
+      
+      if ( location.hash !== "" ) {
+        location.href = location.href;
+      }
     });
   </script>
 
