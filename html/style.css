@@ -212,10 +212,11 @@ blockquote.warning::before {
 }
 
 .clipboard {
-  position: absolute;
+  position: sticky;
   width: 28px; height: 26px;
+  margin-bottom: -20px; transform: translateX(calc( -15px + 5px )); /* translate remove padding-left from pre and add padding-top of pre */
   box-sizing: border-box;
-  top: 3px; left: 3px;
+  top: 0px; left: 0px;
   padding: 2px;
   background-color: var(--secondary-inverse);
   background-position: 2px 2px;
