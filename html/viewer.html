@@ -231,7 +231,7 @@ function expr_to_canvas(f,[xmin,xmax],[ymin,ymax],thresholds) {
 
   return canvas;
 }
-function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,outside=true,data2=undefined) {
+function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,options={},outside=true,data2=undefined) {
   let canvas = document.createElement("canvas");
   canvas.height = 512;
   canvas.width  = 512;
@@ -252,7 +252,7 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,outside=true,dat
     if ( outside ) {
       context.rect(0,0,canvas.width,canvas.height);
     }
-    context.fillStyle = my_color;
+    context.fillStyle = options.hasOwnProperty('fill_color') ? options.fill_color : "#ff0000";
     context.fill();
   });
   if ( data2 !== undefined ) {
@@ -265,7 +265,7 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,outside=true,dat
       context.beginPath();
       path(c);
       context.lineWidth = 3.0;
-      context.strokeStyle = "#000000";
+      context.strokeStyle = options.hasOwnProperty('stroke_color') ? options.stroke_color : "#000000";
       context.stroke();
     });
   }
@@ -275,7 +275,7 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,outside=true,dat
   const dy = (ymax-ymin)/canvas.height;
   const i_0 = parseInt((-xmin)/dx), j_0 = parseInt(-ymin/dy);
 
-  context.strokeStyle = axis_color;
+  context.strokeStyle = options.hasOwnProperty('axis_color') ? options.axis_color : "#000000";
   context.lineWidth = 1.0;
   // real axis
   context.beginPath();
@@ -311,18 +311,18 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,outside=true,dat
   return canvas;
 }
 
-function stability_domain( data ) {
+function stability_domain( data , options ) {
   let fig = document.createElement("figure");
-  fig.appendChild( data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0],outside=true,data2=data.data_embedded) );
+  fig.appendChild( data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0],options=options,outside=true,data2=data.data_embedded) );
   let caption = document.createElement("figcaption");
   let def = document.createElement("span"); katex.render(String.raw`\mathcal{D} = \{ z\in\mathbb{C}\,/\,|R(z)| \leq 1 \}`,def,{displayMode:true});
   caption.innerHTML = "Stability domain: " + def.outerHTML;
   fig.appendChild(caption);
   return fig;
 }
-function order_star( data ) {
+function order_star( data , options ) {
   let fig = document.createElement("figure");
-  fig.appendChild(data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0]));
+  fig.appendChild( data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0],options=options) );
   let caption = document.createElement("figcaption");
   let def = document.createElement("span"); katex.render(String.raw`\mathcal{A}_- = \{ z\in\mathbb{C}\,/\,|e^{-z}R(z)| < 1 \}`,def,{displayMode:true});
   caption.innerHTML = "Order star: " + def.outerHTML;
@@ -376,7 +376,7 @@ function lscheme(stages) {
   return ul;
 }
 
-function rk_to_elm(rk,elm) {
+function rk_to_elm(rk,elm,options) {
   elm.id = rk.id;
   elm.classList.add('method');
   elm.setAttribute("data-order",rk.order);
@@ -414,8 +414,8 @@ function rk_to_elm(rk,elm) {
         fetch(rk_url)
           .then( res => res.json() )
           .then( out => {
-            div.appendChild(stability_domain(out.stability_domain));
-            div.appendChild(order_star(out.order_star));
+            div.appendChild(stability_domain(out.stability_domain, options));
+            div.appendChild(order_star(out.order_star, options));
           });
       },{'once':true});
 
@@ -443,6 +443,49 @@ function rk_to_elm(rk,elm) {
       p.appendChild(warning);
     }
 
+    if (rk.hasOwnProperty('doi')) {
+      let doi = document.createElement("blockquote");
+      doi.classList.add("doi");
+
+      
+      let url_crossref = "https://api.crossref.org/works/" + rk.doi;
+      fetch(url_crossref)
+      .then( res => res.json() )
+      .then( res => res.message )
+      .then( out => {
+          let link = document.createElement("a");
+          link.href = out.URL;
+          link.innerHTML = "<span>Link to reference</span>";
+          doi.appendChild(link);
+
+          let authors = document.createElement("ul");
+          authors.classList.add("authors");
+          out.author.forEach( (author) => {
+            let auth = document.createElement("li");
+            auth.appendChild(document.createTextNode(author.family + ", " + author.given));
+            authors.appendChild(auth);
+          });
+          doi.appendChild(authors);
+          
+          let title = document.createElement("span");
+          title.classList.add("title");
+          title.appendChild(document.createTextNode(out.title[0]));
+          doi.appendChild(title);
+
+          let pubdate = document.createElement("span");
+          pubdate.classList.add("date");
+          pubdate.appendChild(document.createTextNode(out.published['date-parts'][0][0]));
+          doi.appendChild(pubdate);
+
+          let publisher = document.createElement("span");
+          publisher.classList.add("publisher");
+          publisher.appendChild(document.createTextNode(out['short-container-title'][0]));
+          doi.appendChild(publisher);
+        });
+
+        p.appendChild(doi);
+    }
+
     details.appendChild(p);
     elm.appendChild(details);
   }
@@ -457,7 +500,7 @@ fetch(url)
     .then((out) => {
       out.forEach((rk) => {
         //console.log(rk.label);
-        ul.appendChild(rk_to_elm(rk,document.createElement("article")));
+        ul.appendChild(rk_to_elm(rk,document.createElement("article"),{"fill_color":my_color,"stroke_color":"#000000","axis_color":axis_color}));
       })
       
       if ( location.hash !== "" ) {

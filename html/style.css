@@ -240,6 +240,29 @@ pre:hover .clipboard {
 .clipboard:hover { width: 120px; transition-duration: 0.5s; }
 .clipboard:active { background-color: var(--secondary-hover); color: var(--secondary-inverse); }
 
+.doi {
+  --blockquote-border-color: #039be5;
+}
+.doi a span {
+  display: inline-block; width: 0; height: 0; overflow: hidden; margin-right: 1ex;
+}
+.doi a::before { content: "🌐"; text-decoration: none; color: inherit; }
+.doi ul.authors {
+  display: inline-block;
+  margin: 0; padding: 0;
+}
+.doi ul.authors li {
+  display: inline-block;
+}
+
+.doi ul.authors li::after { content: "&"; margin: 0 0.5ex; }
+.doi ul.authors li:last-child:after { content: ""; margin: 0; }
+.doi .title { font-style: italic; }
+.doi ul.authors::after,
+.doi .title::after,
+.doi .date::after
+{ content: ","; margin-right: 0.5ex; }
+
 .form_sort :where(button, select, textarea):is(:active, :focus) {
   --primary-focus: #c0ca3320;
   --border-color: var(--primary-focus);
