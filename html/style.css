@@ -253,6 +253,7 @@ pre:hover .clipboard {
 }
 .doi ul.authors li {
   display: inline-block;
+  margin: 0;
 }
 
 .doi ul.authors li::after { content: "&"; margin: 0 0.5ex; }
