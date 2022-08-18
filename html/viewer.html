@@ -46,6 +46,13 @@
         </span></button></li>
       </ul>
       <ul>
+        <li><button class="about"
+          data-target="modal-about"
+          onClick="toggleModal(event)">
+          <span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-life-buoy"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line><line x1="14.83" y1="9.17" x2="18.36" y2="5.64"></line><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line></svg>
+          </span>
+        </button></li>
         <li>Une petite liste de méthodes de type Runge-Kutta</li>
       </ul>
     </nav>
@@ -93,6 +100,60 @@
     </fieldset>
   </footer>
 
+  <dialog id="modal-about">
+    <article>
+      <a href="#close"
+        aria-label="Close"
+        class="close"
+        data-target="modal-about"
+        onClick="toggleModal(event)">
+      </a>
+      <h3>About computation</h3>
+      <p>
+        For each Runge-Kutta method presented here, we propose some analysis. Each method is defined by its Butcher tableau:
+        <span id="about-butcher-tableau" ></span>
+      </p>
+      <h4>Stability function</h4>
+      <p>
+        The stability function is the factor between two iterations when solve the Dahlquist equation with a Runge-Kutta method. It is defined as:
+        <span id="about-stability-funciton" ></span>
+      </p>
+      <h4>Stability domain</h4>
+      <p>
+        This is the set of each complex sush that amplification via the stability function is lower than 1 (no amplification):
+        <span id="about-stability-domain" ></span>
+      </p>
+      <h4>Order star</h4>
+      <p>
+        Order star is defined in:
+        <span data-doi="10.1007/978-1-4899-3071-2" id="about-order-star-ref" ></span>
+        as 3 sets:
+        <span id="about-order-star" ></span>
+      </p>
+      <h4>Order</h4>
+      <p>
+        Count number of petals of the order star <span id="about-order" ></span> in a neighborhood of 0.
+      </p>
+      <h4>Stage order</h4>
+      <p>
+        The stage order is the highest integer <span id="about-stage-order-r" ></span> sush:
+        <span id="about-stage-order" ></span>
+      </p>
+      <h4>Runge-Kutta method</h4>
+      <p>
+        To solve ODE <span id="about-scheme-ode" ></span> with a Runge-Kutta method:
+        <span id="about-scheme" ></span>
+      </p>
+      <p>For an explicit method, there is no inversion of function, so we propose a short example of code.</p>
+      <h4>Underlying Lawson method</h4>
+      <p>
+        To solve the ODE <span id="about-lawson-ode" ></span> with the underlying Lawson method and solve exactly the linear part:
+        <span id="about-lawson" ></span>
+      </p>
+      <p>For an explicit method, there is no inversion of function, so we propose a short example of code.</p>
+    </article>
+  </dialog>
+
 <script src="main.js" type="text/javascript" ></script>
 <script>
 const fill_color = "#00acc1"; //getComputedStyle(document.getElementsByTagName('html')[0]).getPropertyValue('--my-color');
@@ -116,6 +177,63 @@ fetch(url)
 </script>
 
 <script src="themeSwitcher.js" type="text/javascript" ></script>
+
+<script src="modal.js" ></script>
+<script>
+  katex.render(
+      String.raw`\begin{array}{c|c}c&A\\ \hline & b^\top \end{array}`,
+      document.getElementById("about-butcher-tableau"),
+      {displayMode:true}
+    );
+  katex.render(
+      String.raw`R(z) = \frac{\det(\mathbb{I}+z(1\!\!1b^\top - A))}{\det(\mathbb{I}-zA)}`,
+      document.getElementById("about-stability-funciton"),
+      {displayMode:true}
+    );
+  katex.render(
+      String.raw`\begin{aligned}\mathcal{A}_+ &= \{ z\in\mathbb{C}\,/\,|e^{-z}R(z)| > 1 \} \\ \mathcal{A}_- &= \{ z\in\mathbb{C}\,/\,|e^{-z}R(z)| < 1 \} \\ \mathcal{A}_0 &= \{ z\in\mathbb{C}\,/\,|e^{-z}R(z)| = 1 \} \end{aligned}`,
+      document.getElementById("about-order-star"),
+      {displayMode:true}
+    );
+  katex.render(
+      String.raw`\mathcal{A}_-`,
+      document.getElementById("about-order"),
+      {displayMode:false}
+    );
+  katex.render(
+      String.raw`r`,
+      document.getElementById("about-stage-order-r"),
+      {displayMode:false}
+    );
+  katex.render(
+      String.raw`\forall i,\ \sum_j a_{ij}c_j^s = \frac{c_i^s}{s},\quad s=1,\dots,r`,
+      document.getElementById("about-stage-order"),
+      {displayMode:true}
+    );
+  katex.render(
+      String.raw`\dot{u} = f(t,u)`,
+      document.getElementById("about-scheme-ode"),
+      {displayMode:false}
+    );
+  katex.render(
+      String.raw`\begin{aligned}k_i &= f(t^n+c_i\Delta t, u^n + \Delta t\sum_{j=1}^s a_{ij}k_j)\\ u^{n+1} &= u^n + \Delta t \sum_{i=1}^s b_ik_i\end{aligned}`,
+      document.getElementById("about-scheme"),
+      {displayMode:true}
+    );
+  katex.render(
+      String.raw`\dot{u} = Lu + N(t,u)`,
+      document.getElementById("about-lawson-ode"),
+      {displayMode:false}
+    );
+  katex.render(
+      String.raw`\begin{aligned}k_i &= e^{-c_i\Delta t L}N(t^n+c_i\Delta t, e^{c_i\Delta t L}(u^n + \Delta t\sum_{j=1}^s a_{ij}k_j))\\ u^{n+1} &= e^{\Delta t L}(u^n + \Delta t \sum_{i=1}^s b_ik_i)\end{aligned}`,
+      document.getElementById("about-lawson"),
+      {displayMode:true}
+    );
+  let bib = document.getElementById("about-order-star-ref");
+  let tmp_bib = doi_bib(bib.getAttribute('data-doi'));
+  bib.appendChild(tmp_bib);
+</script>
 
 <!-- double slider -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.0/nouislider.min.js" integrity="sha512-1mDhG//LAjM3pLXCJyaA+4c+h5qmMoTc7IuJyuNNPaakrWT9rVTxICK4tIizf7YwJsXgDC2JP74PGCc7qxLAHw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

@@ -144,7 +144,7 @@ class rk_butcher:
             self._A = sp.exp(-z)*self.stability_function()
         return self._A
     
-    def precision_function(self):
+    def relative_error_function(self):
         if self._P is None:
             z = sp.symbols("z")
             self._P = sp.Abs( (self.stability_function() - sp.exp(z))/sp.exp(z) )
@@ -259,7 +259,7 @@ class rk_butcher:
             ] + ([("exp=np.exp","exponential function to compute exponential of linear part")] if lawson else [] )
         )
         if self.is_embedded:
-            args['tol'] = "tolerance of embedded time step method"
+            args['tol=1e-4'] = "tolerance of embedded time step method"
 
         # stages
         scheme = self.scheme(latex=False,lawson=lawson)
@@ -360,6 +360,9 @@ if __name__ == '__main__':
 
         if rk.is_embedded:
             stability_domain['data_embedded'] = evalf_Cdomain( sp.symbols("z") , rk.stability_function(embedded=True) , zmin , zmax , N ).tolist()
+        
+        relative_error = { 'xmin':np.real(zmin), 'xmax':np.real(zmax), 'ymin':np.imag(zmin), 'ymax':np.imag(zmax) }
+        relative_error['data'] = evalf_Cdomain( sp.symbols("z") , rk.relative_error_function() , zmin , zmax , N ).tolist()
 
         zmin = -3.5-3.5j
         zmax =  3.5+3.5j
@@ -368,7 +371,7 @@ if __name__ == '__main__':
         order_star['data'] = evalf_Cdomain( sp.symbols("z") , rk.order_star_function() , zmin , zmax , N ).tolist()
 
         rk_domain = os.path.join(output,rk.id+".json")
-        json.dump( {'stability_domain':stability_domain, 'order_star':order_star} , open(rk_domain,'w') )
+        json.dump( {'stability_domain':stability_domain, 'order_star':order_star, 'relative_error':relative_error} , open(rk_domain,'w') )
 
     vprint()
     

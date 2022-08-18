@@ -102,8 +102,6 @@ pre {
 }
 
 #add {
-  width: 64px; height: 64px;
-  border-radius: 100%;
   margin-left: 20px;
   border: 2px solid currentColor;
   color: var(--h1-color);
@@ -127,6 +125,22 @@ pre {
 #show_footer {
   color: var(--primary);
   stroke-width: 5px;
+}
+
+.about {
+  background-color: #ff6b7d;
+}
+
+#about-order-star-ref .doi {
+  display: inline; margin: 0; padding: 0;
+  border: none;
+}
+#about-order-star-ref .doi a { display: none; }
+
+nav button {
+  width: 64px; height: 64px;
+  border-radius: 100%;
+  border-width: 2px;
 }
 
 .preview {
@@ -156,12 +170,23 @@ header a {
 
 .drawing {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 20px;
 }
 .drawing canvas {
   width: 100%;
   border: 2px solid var(--table-border-color);
   background-color: #fefefe11;
+}
+.drawing figure {
+  width: 100%;
+  max-width: 100%;
+}
+@media (min-width: 992px) {
+  .drawing figure {
+    max-width: calc(50% - 10px);
+  }
 }
 .drawing figcaption {
   background-color: var(--table-border-color);

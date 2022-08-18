@@ -130,7 +130,7 @@ function expr_to_canvas(f,[xmin,xmax],[ymin,ymax],thresholds) {
 
   return canvas;
 }
-function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,options={},outside=true,data2=undefined) {
+function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,options={},inside=true,data2=undefined) {
   let canvas = document.createElement("canvas");
   canvas.height = 512;
   canvas.width  = 512;
@@ -148,7 +148,7 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,options={},outsi
     if (c.coordinates.length == 0) return;
     context.beginPath();
     path(c);
-    if ( outside ) {
+    if ( inside ) {
       context.rect(0,0,canvas.width,canvas.height);
     }
     context.fillStyle = options.hasOwnProperty('fill_color') ? options.fill_color : "#ff0000";
@@ -206,13 +206,12 @@ function data_to_canvas(data,[xmin,xmax],[ymin,ymax],thresholds,options={},outsi
     context.stroke();
   }
 
-  
   return canvas;
 }
 
 function stability_domain( data , options ) {
   let fig = document.createElement("figure");
-  fig.appendChild( data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0],options=options,outside=true,data2=data.data_embedded) );
+  fig.appendChild( data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0],options=options,inside=true,data2=data.data_embedded) );
   let caption = document.createElement("figcaption");
   let def = document.createElement("span"); katex.render(String.raw`\mathcal{D} = \{ z\in\mathbb{C}\,/\,|R(z)| \leq 1 \}`,def,{displayMode:true});
   caption.innerHTML = "Stability domain: " + def.outerHTML;
@@ -225,6 +224,47 @@ function order_star( data , options ) {
   let caption = document.createElement("figcaption");
   let def = document.createElement("span"); katex.render(String.raw`\mathcal{A}_- = \{ z\in\mathbb{C}\,/\,|e^{-z}R(z)| < 1 \}`,def,{displayMode:true});
   caption.innerHTML = "Order star: " + def.outerHTML;
+  fig.appendChild(caption);
+  return fig;
+}
+function relative_error( data , stab_data , options ) {
+  let fig = document.createElement("figure");
+  let canvas = data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0],options=options,inside=false);
+  
+  const n = data.data[0].length , m = data.data.length;
+  context = canvas.getContext("2d");
+  projection = d3.geoIdentity().scale(canvas.width / n);
+  path = d3.geoPath(projection,context);
+  const rerrors = d3.contours()
+      .size([n,m])
+      .thresholds([0.05,0.25,0.5,0.75])
+      ( [].concat(...data.data) );
+    rerrors.forEach( c => {
+      if (c.coordinates.length == 0) return;
+      context.beginPath();
+      path(c);
+      context.rect(-1,-1,canvas.width+1,canvas.height+1);
+      context.lineWidth = 3.0;
+      context.strokeStyle = "rgba(16,149,193,0.125)";
+      context.stroke();
+    });
+  const stab = d3.contours()
+    .size([n,m])
+    .thresholds([1.0])
+    ( [].concat(...stab_data.data) );
+  stab.forEach( c => {
+    if (c.coordinates.length == 0) return;
+    context.beginPath();
+    path(c);
+    context.rect(0,0,canvas.width,canvas.height);
+    context.fillStyle = "#ff000088";
+    context.fill();
+  });
+
+  fig.appendChild(canvas);
+  let caption = document.createElement("figcaption");
+  let def = document.createElement("span"); katex.render(String.raw`e = \{ z\in\mathbb{C}\,/\,\left|\frac{R(z)-e^{z}}{e^{z}}\right| > 1 \}`,def,{displayMode:true});
+  caption.innerHTML = "Relative error: " + def.outerHTML + "display also line for isopleths 0.05, 0.25, 0.5 and 0.75 (in red we recall stability domain).";
   fig.appendChild(caption);
   return fig;
 }
@@ -275,6 +315,55 @@ function lscheme(stages) {
   return ul;
 }
 
+function doi_bib(doi) {
+  let url_crossref = "https://api.crossref.org/works/" + doi;
+  
+  let elm = document.createElement("blockquote");
+  elm.classList.add("doi");
+
+  fetch(url_crossref)
+    .then( res => res.json() )
+    .then( res => res.message )
+    .then( out => {
+      let link = document.createElement("a");
+      link.href = out.URL;
+      link.innerHTML = "<span>Link to reference</span>";
+      elm.appendChild(link);
+
+      let authors = document.createElement("ul");
+      authors.classList.add("authors");
+      out.author.forEach( (author) => {
+        let auth = document.createElement("li");
+        auth.appendChild(document.createTextNode(author.family + ", " + author.given));
+        authors.appendChild(auth);
+      });
+      elm.appendChild(authors);
+      
+      let title = document.createElement("span");
+      title.classList.add("title");
+      title.appendChild(document.createTextNode(out.title[0]));
+      elm.appendChild(title);
+
+      let pubdate = document.createElement("span");
+      pubdate.classList.add("date");
+      pubdate.appendChild(document.createTextNode(out.published['date-parts'][0][0]));
+      elm.appendChild(pubdate);
+
+      let publisher = document.createElement("span");
+      publisher.classList.add("publisher");
+      let pub = out['short-container-title'][0];
+      if ( pub !== undefined ) {
+        publisher.appendChild(document.createTextNode(pub));
+      } else {
+        pub = out['publisher'];
+        publisher.appendChild(document.createTextNode(pub));
+      }
+      elm.appendChild(publisher);
+    });
+
+  return elm;
+}
+
 function rk_to_elm(rk,elm,options) {
   elm.id = rk.id;
   elm.classList.add('method');
@@ -315,6 +404,7 @@ function rk_to_elm(rk,elm,options) {
           .then( out => {
             div.appendChild(stability_domain(out.stability_domain, options));
             div.appendChild(order_star(out.order_star, options));
+            div.appendChild(relative_error(out.relative_error,out.stability_domain, options));
           });
       },{'once':true});
 
@@ -343,46 +433,7 @@ function rk_to_elm(rk,elm,options) {
     }
 
     if (rk.hasOwnProperty('doi')) {
-      let doi = document.createElement("blockquote");
-      doi.classList.add("doi");
-
-      
-      let url_crossref = "https://api.crossref.org/works/" + rk.doi;
-      fetch(url_crossref)
-      .then( res => res.json() )
-      .then( res => res.message )
-      .then( out => {
-          let link = document.createElement("a");
-          link.href = out.URL;
-          link.innerHTML = "<span>Link to reference</span>";
-          doi.appendChild(link);
-
-          let authors = document.createElement("ul");
-          authors.classList.add("authors");
-          out.author.forEach( (author) => {
-            let auth = document.createElement("li");
-            auth.appendChild(document.createTextNode(author.family + ", " + author.given));
-            authors.appendChild(auth);
-          });
-          doi.appendChild(authors);
-          
-          let title = document.createElement("span");
-          title.classList.add("title");
-          title.appendChild(document.createTextNode(out.title[0]));
-          doi.appendChild(title);
-
-          let pubdate = document.createElement("span");
-          pubdate.classList.add("date");
-          pubdate.appendChild(document.createTextNode(out.published['date-parts'][0][0]));
-          doi.appendChild(pubdate);
-
-          let publisher = document.createElement("span");
-          publisher.classList.add("publisher");
-          publisher.appendChild(document.createTextNode(out['short-container-title'][0]));
-          doi.appendChild(publisher);
-        });
-
-        p.appendChild(doi);
+      p.appendChild(doi_bib(rk.doi));
     }
 
     details.appendChild(p);
