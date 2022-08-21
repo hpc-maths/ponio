@@ -65,6 +65,7 @@
           <option value="stage_order" >Stage order</option>
           <option value="xmax" disabled >Real stability interval</option>
           <option value="ymax" disabled >Imaginary stability interval</option>
+          <option value="random" >Random</option>
         </select>
         <button id="sort_btn" >Sort!</button>
     </fieldset>
@@ -166,6 +167,7 @@ const url = new URL(window.location.href.split("/").slice(0,-1).join("/") + "/ap
 fetch(url)
     .then( res => res.json() )
     .then((out) => {
+      out.sort(() => Math.random() - 0.5);
       out.forEach((rk) => {
         ul.appendChild(rk_to_elm(rk,document.createElement("article"),{"fill_color":fill_color,"stroke_color":"#000000","axis_color":axis_color}));
       })

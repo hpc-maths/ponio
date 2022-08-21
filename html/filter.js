@@ -42,15 +42,16 @@ const sort_methods = {
   'stages': (elm) => { return elm.getAttribute("data-nstages"); } ,
   'stage_order': (elm) => { return elm.getAttribute("data-stage_order"); } ,
   'xmax': (elm) => { return elm.getAttribute("data-xmax"); } ,
-  'ymax': (elm) => { return elm.getAttribute("data-ymax"); }
+  'ymax': (elm) => { return elm.getAttribute("data-ymax"); } ,
+  'random': (elm) => { return Math.random() - 0.5; }
 }
 
 let sort_btn = document.getElementById("sort_btn");
 let sort_by_elm = document.getElementById("sort");
 
-sort_btn.addEventListener('click',function (event) {
+function sort_rklist( method ) {
   let frag = document.createDocumentFragment();
-  let viewer = sort_methods[sort_by_elm.value];
+  let viewer = sort_methods[method];
   let sortedList = [...ul.children].sort((a,b) => {
     return  viewer(a) > viewer(b);
   });
@@ -58,6 +59,10 @@ sort_btn.addEventListener('click',function (event) {
     frag.appendChild(item);
   }
   ul.appendChild(frag);
+}
+
+sort_btn.addEventListener('click',function (event) {
+  sort_rklist(sort_by_elm.value);
 });
 
 // filter methods
