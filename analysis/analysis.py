@@ -15,6 +15,7 @@ Options:
 
 import sympy as sp
 import numpy as np
+import itertools
 
 import json
 import os, sys
@@ -113,7 +114,7 @@ class rk_butcher:
     @property
     def is_approched_method(self):
         if self._is_approched_method is None:
-            self._is_approched_method = any([ type(x) is sp.Float for x in self.A ])
+            self._is_approched_method = any([ type(x) is sp.Float for x in itertools.chain(self.A,self.b,self.c) ])
         return self._is_approched_method
     
     @property
