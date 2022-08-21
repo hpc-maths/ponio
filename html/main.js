@@ -263,7 +263,7 @@ function relative_error( data , stab_data , options ) {
 
   fig.appendChild(canvas);
   let caption = document.createElement("figcaption");
-  let def = document.createElement("span"); katex.render(String.raw`e = \{ z\in\mathbb{C}\,/\,\left|\frac{R(z)-e^{z}}{e^{z}}\right| > 1 \}`,def,{displayMode:true});
+  let def = document.createElement("span"); katex.render(String.raw`e = \left\{ z\in\mathbb{C}\,/\,\left|\frac{R(z)-e^{z}}{e^{z}}\right| > 1 \right\}`,def,{displayMode:true});
   caption.innerHTML = "Relative error: " + def.outerHTML + "display also line for isopleths 0.05, 0.25, 0.5 and 0.75 (in red we recall stability domain).";
   fig.appendChild(caption);
   return fig;
