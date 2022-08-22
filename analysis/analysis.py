@@ -128,9 +128,12 @@ class rk_butcher:
             I1 = sp.ones(*b.shape) # vector of ones
             if approched_method:
                 return  ( 1+z*( b.T*( (I - z*A).inv().evalf(chop=True)*I1 ) )[0] ).expand().simplify().collect(z)
+            elif A.shape[0] >= 10:
+                return ( 1+z*( b.T*( (I - z*A).inv()*I1 ) )[0] ).expand().simplify().collect(z)
             else:
                 N  = I + z*( I1*b.T - A )
                 D  = I - z*A
+
                 return ( N.det()/D.det() ).expand().simplify().collect(z)
         if embedded:
             return stab_func(self.A,self.b2,approched_method=self.is_approched_method)
@@ -294,12 +297,17 @@ class rk_butcher:
         if self.is_embedded:
             error_computation = """
 # computation error
-error = np.linalg.norm( {unp1} - {ubnp1} )
+
+tmp_unp1,tmp_ubnp1 = (np.atleast_1d({unp1}), np.atleast_1d({ubnp1}))
+error = np.sqrt( 1./len(tmp_unp1)*sum([
+    ( (unp1_i - ubnp1_i)/(1.0 + max(un_i,unp1_i)) )**2
+    for un_i,unp1_i,ubnp1_i in zip(np.atleast_1d(un).flat, tmp_unp1.flat, tmp_ubnp1.flat)
+]) )
 ndt = dt*(tol/error)**({power})
 if error > tol:
     return (tn,un,ndt,error)
 else:
-    return (tn+dt,unp1,ndt,error)""".format(unp1=str(scheme[-2].lhs),ubnp1=str(scheme[-1].lhs),power=1./self.order)
+    return (tn+dt,{unp1},ndt,error)""".format(unp1=str(scheme[-2].lhs),ubnp1=str(scheme[-1].lhs),power=1./self.order)
             r.extend(error_computation.split("\n"))
             #r.append("return ({unp1}, {ubnp1})".format(unp1=str(scheme[-2].lhs),ubnp1=str(scheme[-1].lhs)))
         else:
