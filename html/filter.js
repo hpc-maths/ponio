@@ -38,11 +38,11 @@ noUiSlider.create(slider, {
 // sort methods
 const sort_methods = {
   'alpha': (elm) => { return elm.id; } ,
-  'order': (elm) => { return elm.getAttribute("data-order"); } ,
-  'stages': (elm) => { return elm.getAttribute("data-nstages"); } ,
-  'stage_order': (elm) => { return elm.getAttribute("data-stage_order"); } ,
-  'xmax': (elm) => { return elm.getAttribute("data-xmax"); } ,
-  'ymax': (elm) => { return elm.getAttribute("data-ymax"); } ,
+  'order': (elm) => { return Number(elm.getAttribute("data-order")); } ,
+  'stages': (elm) => { return Number(elm.getAttribute("data-nstages")); } ,
+  'stage_order': (elm) => { return Number(elm.getAttribute("data-stage_order")); } ,
+  'xmax': (elm) => { return Number(elm.getAttribute("data-xmax")); } ,
+  'ymax': (elm) => { return Number(elm.getAttribute("data-ymax")); } ,
   'random': (elm) => { return Math.random() - 0.5; }
 }
 
