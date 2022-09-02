@@ -398,7 +398,7 @@ function rk_to_elm(rk,elm,options) {
     summary.addEventListener('click',function (event){
         let div = event.target.parentElement.children[1].getElementsByClassName("drawing")[0];
         let id = div.getAttribute("data-id");
-        const rk_url = new URL(window.location.href.split("/").slice(0,-1).join("/") + "/api/" + rk.id + ".json");
+        const rk_url = new URL(window.location.href.split("/").slice(0,-1).join("/") + "/api/" + rk.id + "_domains.json");
         fetch(rk_url)
           .then( res => res.json() )
           .then( out => {

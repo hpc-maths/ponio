@@ -3,13 +3,14 @@
 """analysis.py
 
 Usage:
-  analysis.py (--input=<input_json>) (--output=<output_dir>) [--verbose]
+  analysis.py (FILE...) (--output=<output_dir>) [--verbose] [--standalone]
 
 Options:
   -h, --help                                 Show help
-  -i <input_json>, --input=<input_json>      Input file which contains Butcher tableaus
+  FILE                                       File which contain a Butcher tableau
   -o <output_dir>, --output=<output_dir>     Output directory where store Runge-Kutta scheme analysis and static API on stability domain and order stars
   --verbose                                  Verbose mode
+  -s, --standalone                           All analysis in one file (by default each analysis of each method is in its own file)
 
 """
 
@@ -315,6 +316,41 @@ else:
 
         return "\n    ".join(r)
 
+def analysis_butcher(rk):
+    # to remove parenthesis around fractions in Lawson scheme expressions
+    pattern = re.compile("\\\\left\(\\\\frac\{(?P<numerator>[^{}]+)\}\{(?P<denominator>[^{}]+)\}\\\\right\)")
+    
+    analysis = {}
+    # update butcher with new values
+    analysis['id']          = rk.id
+    analysis['nstages']     = rk.nstages
+    analysis['order']       = rk.order
+    analysis['stage_order'] = rk.stage_order
+
+    # flags
+    analysis['is_explicit'] = rk.is_explicit
+    analysis['is_dirk']     = rk.is_dirk
+    analysis['is_embedded'] = rk.is_embedded
+
+    # some LaTeX
+    analysis['stability_function'] = str(rk.stability_function())
+    analysis['scheme'] = [
+        "{} = {}".format(sp.latex(eq.lhs), sp.latex(eq.rhs))
+        for eq in rk.scheme()
+    ]
+    analysis['lawson_scheme'] = [
+        "{} = {}".format(sp.latex(eq.lhs), pattern.sub( lambda m:m.group(0)[6:-7], sp.latex(eq.rhs)))
+        for eq in rk.scheme(lawson=True)
+    ]
+
+    # some code
+    if rk.is_explicit:
+        analysis['code']        = rk.code()
+        analysis['lawson_code'] = rk.code(lawson=True)
+    
+    return analysis
+
+
 def evalf_Cdomain( z , expr , zmin , zmax , N ):
     func = sp.lambdify(z,expr,'numpy')
     X,Y = np.meshgrid(
@@ -332,35 +368,30 @@ if __name__ == '__main__':
     
     vprint = print if args['--verbose'] else lambda *args,**kwargs:None
 
-    with open( args['--input'] ,'r') as f:
-        data = json.load(f)
-
     output = args['--output']
     os.makedirs(output,exist_ok=True)
 
-    # to remove parenthesis around fractions in Lawson scheme expressions
-    pattern = re.compile("\\\\left\(\\\\frac\{(?P<numerator>[^{}]+)\}\{(?P<denominator>[^{}]+)\}\\\\right\)")
-
     rk_analysis = []
-    for i,drk in enumerate(data):
-        vprint("{}/{} {:25}".format(i+1,len(data),drk['label']), end="\r")
+    for i,file in enumerate(args['FILE']):
+        with open(file,'r') as f:
+            butcher = json.load(f)
+        vprint("{}/{} {:25}".format(i+1,len(args['FILE']),butcher['label']), end="\r")
 
-        rk = rk_butcher(label=drk['label'],A=drk['A'],b=drk['b'],c=drk['c'],b2=drk['b2'] if 'b2' in drk else None)
-        drk['id'] = rk.id
-        drk['nstages'] = rk.nstages
-        drk['order']   = rk.order
-        drk['stage_order']   = rk.stage_order
-        drk['stability_function'] = str(rk.stability_function())
-        drk['scheme'] = [ "{} = {}".format(sp.latex(eq.lhs),sp.latex(eq.rhs)) for eq in rk.scheme() ]
-        drk['lawson_scheme'] = [ "{} = {}".format(sp.latex(eq.lhs),pattern.sub( lambda m:m.group(0)[6:-7], sp.latex(eq.rhs))) for eq in rk.scheme(lawson=True) ]
-        drk['is_explicit'] = rk.is_explicit
-        drk['is_dirk'] = rk.is_dirk
-        drk['is_embedded'] = rk.is_embedded
-        if rk.is_explicit:
-            drk['code'] = rk.code()
-            drk['lawson_code'] = rk.code(lawson=True)
-        rk_analysis.append(drk)
+        rk = rk_butcher(
+            label=butcher['label'],
+            A=butcher['A'],b=butcher['b'],c=butcher['c'],
+            b2=butcher['b2'] if 'b2' in butcher else None
+        )
+        butcher.update(analysis_butcher(rk))
 
+        if args['--standalone']:
+            rk_analysis.append(butcher)
+        else:
+            with open(os.path.join(output,rk.id+".json"),'w') as f:
+                json.dump(butcher,f,indent=4)
+
+        # add some data evaluated on complex domain
+        # stability domaine
         zmin = -5-3.5j
         zmax =  2+3.5j
         N = (512,512)
@@ -370,20 +401,30 @@ if __name__ == '__main__':
         if rk.is_embedded:
             stability_domain['data_embedded'] = evalf_Cdomain( sp.symbols("z") , rk.stability_function(embedded=True) , zmin , zmax , N ).tolist()
         
+        # relative error (or precision) thanks to Laurent François
         relative_error = { 'xmin':np.real(zmin), 'xmax':np.real(zmax), 'ymin':np.imag(zmin), 'ymax':np.imag(zmax) }
         relative_error['data'] = evalf_Cdomain( sp.symbols("z") , rk.relative_error_function() , zmin , zmax , N ).tolist()
 
+        # order star
         zmin = -3.5-3.5j
         zmax =  3.5+3.5j
         N = (512,512)
         order_star = { 'xmin':np.real(zmin), 'xmax':np.real(zmax), 'ymin':np.imag(zmin), 'ymax':np.imag(zmax) }
         order_star['data'] = evalf_Cdomain( sp.symbols("z") , rk.order_star_function() , zmin , zmax , N ).tolist()
 
-        rk_domain = os.path.join(output,rk.id+".json")
-        json.dump( {'stability_domain':stability_domain, 'order_star':order_star, 'relative_error':relative_error} , open(rk_domain,'w') )
+        with open(os.path.join(output,rk.id+"_domains.json"),'w') as f:
+            json.dump(
+                {
+                    'stability_domain':stability_domain,
+                    'order_star':order_star,
+                    'relative_error':relative_error
+                },
+                f
+            )
 
     vprint()
     
-    json_analysis = os.path.join(output,"analysis.json")
-    json.dump(rk_analysis, open(json_analysis,'w')  ,indent=4)
+    if args['--standalone']:
+        json_analysis = os.path.join(output,"analysis.json")
+        json.dump(rk_analysis, open(json_analysis,'w')  ,indent=4)
 
