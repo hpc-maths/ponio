@@ -1,0 +1,4 @@
+sympy
+docopt-ng
+jinja2
+
