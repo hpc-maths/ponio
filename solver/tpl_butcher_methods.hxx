@@ -16,7 +16,7 @@ struct butcher_{{ rk.id }} : public {{ "adaptive_" if 'b2' in rk else "" }}butch
 {
   using base_t = {{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }},value_t>;
   static constexpr std::size_t N_stages = base_t::N_stages;
-  static constexpr std::size_t order = 5;
+  static constexpr std::size_t order = {{ rk.order }};
 
   using base_t::A;
   using base_t::b;
@@ -25,9 +25,9 @@ struct butcher_{{ rk.id }} : public {{ "adaptive_" if 'b2' in rk else "" }}butch
   butcher_{{ rk.id }}()
   : base_t(
     {{ '{{' }}
-      {% for ai in rk.A -%}
+    {% for ai in rk.A -%}
       { {{ ai }} }{{ ",\n      " if not loop.last else "" }}
-      {%- endfor %}
+    {%- endfor %}
     {{ '}}' }}, // A
     { {{ rk.b }} }, // b
     {% if 'b2' in rk -%}{ {{ rk.b2 }} }, // b2 {%- endif %}
@@ -38,6 +38,8 @@ struct butcher_{{ rk.id }} : public {{ "adaptive_" if 'b2' in rk else "" }}butch
 /**
  * @brief {{ rk.label }} method
  * @tparam value_t type of coefficient (``double``by default)
+ * 
+ * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
  */
 template <typename value_t=double>
 using {{ rk.id }} = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<value_t>>;

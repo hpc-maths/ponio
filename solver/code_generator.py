@@ -17,75 +17,48 @@ import json
 import os, sys
 import sympy as sp
 
-def code_pow(x,e):
-  """
-    replace some trivial cases by a simpler expression (for code)
-    because all division in sympy are `sp.Pow(expr,-1)` and same
-    for every square, of square root
-  """
-  if e == 1 :
-    return x
-  if sp.S(e).is_number and e < 0 :
-    return 1./(code_pow(x,-e))
-  if e == sp.S.Half :
-    return sp.Function("std::sqrt",nargs=1)(x)
-  return sp.Function("std::pow",nargs=2)(x,e)
-
-def STLizer(expr):
-  math_to_stl = [(f,sp.Function("std::"+str(f),nargs=1)) for f in (sp.sin,sp.cos,sp.exp)]
-  math_to_stl.append( (sp.sqrt,sp.Function("std::sqrt",nargs=1)) )
-
-  #expr = 1.0*expr
-  expr = 1.0*expr
-
-  for old,new in math_to_stl:
-    expr = expr.subs(old,new)
-  
-  expr = expr.replace(sp.Pow,code_pow)
-
-  return str(expr)
+sys.path.append("../analysis")
+from analysis import rk_butcher
 
 def is_explicit(filename):
   with open(filename,'r') as f:
     data = json.load(f)
 
-  mA = sp.Matrix(data['A'])
-
-  nstages = len(data['A'])
-  return ( sum([
-      sum([ sp.Abs(mA[i,j]) for j in range(i,nstages) ])
-      for i in range(0,nstages)
-  ]) == 0 )
+  rk = rk_butcher(
+    label=data['label'],
+    A=data['A'],b=data['b'],c=data['c']
+  )
+  return rk.is_explicit
 
 def extract_meth(filename):
   with open(filename,'r') as f:
     data = json.load(f)
 
-  mA = sp.Matrix(data['A'])
-
-  nstages = len(data['A'])
-  is_explicit = ( sum([
-      sum([ sp.Abs(mA[i,j]) for j in range(i,nstages) ])
-      for i in range(0,nstages)
-  ]) == 0 )
-
   id = os.path.basename(filename).replace(".json","")
   print(id)
-  A = [ [ STLizer(sp.parse_expr(aij)) for aij in ai ] for ai in data['A'] ]
-  b = [ STLizer(sp.parse_expr(bi)) for bi in data['b'] ]
-  c = [ STLizer(sp.parse_expr(ci)) for ci in data['c'] ]
+
+  rk = rk_butcher(
+    label=data['label'],
+    A=data['A'],b=data['b'],c=data['c'],
+    b2=data['b2'] if 'b2' in data else None
+  )
+  
+  A = rk.A.evalf(n=36).tolist()
+  b = rk.b.evalf(n=36).T.tolist()[0]
+  c = rk.c.evalf(n=36).T.tolist()[0]
 
   butcher = {
     'label': data['label'],
     'id': id,
-    'A':[ " , ".join(ai) for ai in A ],
-    'b':" , ".join(b),
-    'c':" , ".join(c)
-    }
+    'A':[ " , ".join(map(str,ai)) for ai in A ],
+    'b':" , ".join(map(str,b)),
+    'c':" , ".join(map(str,c)),
+    'order': rk.order
+  }
 
   if 'b2' in data:
-    b2 = [ STLizer(sp.parse_expr(bi)) for bi in data['b2'] ]
-    butcher['b2'] = " , ".join(b2)
+    b2 = sp.Matrix(data['b2']).evalf(n=36).T.tolist()[0]
+    butcher['b2'] = " , ".join(map(str,b2))
   
   return butcher
 
