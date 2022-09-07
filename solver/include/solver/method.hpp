@@ -16,7 +16,7 @@ namespace ode {
   auto
   error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
   {
-    return std::abs( (unp1-unp1bis)/(1.0 + std::max(un,unp1)) );
+    return std::abs( (unp1-unp1bis)/(1.0 + std::max(std::abs(un),std::abs(unp1))) );
   }
   template <typename state_t>
   requires ::detail::is_const_iterable<state_t>
@@ -27,16 +27,17 @@ namespace ode {
     auto it_unp1bis = std::cbegin(unp1bis);
     auto last = std::cend(un);
 
+    auto n_elm = std::distance(std::cbegin(un),last);
+
     using value_t = std::remove_cvref_t<decltype(*it_unp1)>;
     auto r = static_cast<value_t>(0.);
 
     for ( auto it_un=std::cbegin(un) ; it_un != last ; ++it_un, ++it_unp1, ++it_unp1bis )
     {
-      r += ::detail::power<2>(
-        ( *it_unp1 - *it_unp1bis )/( 1.0 + std::max(*it_un,*it_unp1) )
-      );
+      auto tmp = ( *it_unp1 - *it_unp1bis )/( 1.0 + std::max(std::abs(*it_un),std::abs(*it_unp1)) );
+      r += tmp*tmp;
     }
-    return std::sqrt(r);
+    return std::sqrt((1./static_cast<double>(n_elm))*r);
 
     /*
     return std::sqrt(
@@ -65,17 +66,25 @@ namespace ode {
     step_storage_t kis;
 
     method( Algorithm_t const& alg_ , state_t const& shadow_of_u0 )
-    : alg(alg_) , kis(::detail::init_fill_array<Algorithm_t::N_stages+1>(shadow_of_u0))
+    : alg(alg_) , kis(::detail::init_fill_array<std::tuple_size<step_storage_t>::value>(shadow_of_u0))
     {}
 
-    template < std::size_t I=0 , typename Problem_t , typename value_t >
+    template < std::size_t I=0 , typename Problem_t , typename value_t , typename Algo_t=Algorithm_t >
+    requires std::same_as<Algo_t,Algorithm_t> && Algorithm_t::is_embedded
     typename std::enable_if< (I == Algorithm_t::N_stages+1) , void >::type
     _call_stage ( Problem_t & f , value_t tn , state_t const& un , value_t dt )
     {
-      
+      kis[I] = alg.stage(Stage<I>{}, f, tn, un, kis, dt);
     }
 
-    template < std::size_t I=0 , typename Problem_t , typename value_t >
+    template < std::size_t I=0 , typename Problem_t , typename value_t , typename Algo_t=Algorithm_t >
+    requires std::same_as<Algo_t,Algorithm_t>
+    typename std::enable_if< (I == Algorithm_t::N_stages+1) , void >::type
+    _call_stage ( Problem_t & f , value_t tn , state_t const& un , value_t dt )
+    {}
+
+    template < std::size_t I=0 , typename Problem_t , typename value_t , typename Algo_t=Algorithm_t >
+    requires std::same_as<Algo_t,Algorithm_t>
     typename std::enable_if< (I < Algorithm_t::N_stages+1) , void >::type
     _call_stage ( Problem_t & f , value_t tn , state_t const& un , value_t dt )
     {
@@ -102,17 +111,18 @@ namespace ode {
       auto error = error_estimate(un,kis[Algorithm_t::N_stages],kis[Algorithm_t::N_stages+1]);
 
       value_t new_dt = 0.9*std::pow(alg.tol/error, 1./static_cast<value_t>(Algorithm_t::order))*dt;
-
+      new_dt = std::min(std::max(0.2*dt,new_dt),5.*dt);
+      
       if (error > alg.tol) {
         return std::make_tuple(
-          tn+dt,
-          kis[Algorithm_t::N_stages],
+          tn,
+          un,
           new_dt
         );
       } else {
         return std::make_tuple(
-          tn,
-          un,
+          tn+dt,
+          kis[Algorithm_t::N_stages],
           new_dt
         );
       }

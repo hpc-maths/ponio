@@ -12,16 +12,16 @@ concept is_embedded_tableau = requires (Tableau t){ t.b2; };
 
 namespace runge_kutta {
 
-
   template <typename Tableau>
   struct explicit_rk_butcher
   {
     Tableau butcher;
     static constexpr std::size_t N_stages = Tableau::N_stages;
     static constexpr bool is_embedded = is_embedded_tableau<Tableau>;
+    static constexpr std::size_t order = Tableau::order;
 
-    explicit_rk_butcher()
-    : butcher()
+    explicit_rk_butcher(double tol_=1e-4)
+    : butcher(), tol(tol_)
     {}
 
     template < typename Problem_t , typename state_t , typename value_t , typename ArrayKi_t , std::size_t I >
@@ -44,6 +44,8 @@ namespace runge_kutta {
     {
       return ::detail::tpl_inner_product<N_stages>(butcher.b2, Ki, un, dt);
     }
+
+    double tol;
   };
 
 } // namespace runge_kutta
