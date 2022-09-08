@@ -17,9 +17,8 @@ namespace observer {
 
   /** @class capsule
    *  helper to display a value
-   *  @tparam state_t    type to display
-   *  @tparam IsIterable boolean template parameter to test if `state_t` is iterable or not
-   *  @details This class only store a reference of data
+   *  @tparam state_t    type to display and test \ref detail::is_const_iterable to propose a stream redirection
+   *  @details This class only store a reference of data.
    */
   template < typename state_t >
   struct capsule
@@ -46,9 +45,7 @@ namespace observer {
     return capsule< state_t >(dat);   
   }
 
-  /**
-   * display a \ref capsule which contains a simple data
-   */
+  #ifndef IN_DOXYGEN
   template < typename state_t >
   std::ostream&
   operator << ( std::ostream & os , capsule<state_t> const& data )
@@ -56,14 +53,16 @@ namespace observer {
     os << data.data;
     return os;
   }
+  #endif
+
   /**
-   * display a \ref capsule which contains an iterable data
+   * display a \ref capsule which contains an iterable data or not
    */
-  template < typename state_t > requires ::detail::is_iterable<state_t>
+  template < typename state_t > requires ::detail::is_const_iterable<state_t>
   std::ostream&
   operator << ( std::ostream & os , capsule<state_t> const& data )
   {
-    std::copy( std::begin(data.data) , std::end(data.data) , std::ostream_iterator<decltype(*std::begin(data.data))>(os," ") );
+    std::copy( std::cbegin(data.data) , std::cend(data.data) , std::ostream_iterator<decltype(*std::cbegin(data.data))>(os," ") );
     return os;
   }
 

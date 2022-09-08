@@ -50,8 +50,8 @@ namespace detail {
   /**
    * @brief fill an uninitialize array
    * 
-   * @tparam T type of stored value in array
    * @tparam N size of array to fill
+   * @tparam T type of stored value in array
    * 
    * @param value value to fill in uninitialize array
    * 
@@ -59,6 +59,13 @@ namespace detail {
    *   int i = 42;
    *   const std::array<int,8> arr = detail::init_fill_array<8>( i ); // all values of `arr` are `42`
    * @endcode
+   * 
+   * @details `value` can also be an invokable object that take an unsigned integer and return type stored in array `T`.
+   * 
+   * @code{,cpp}
+   *   const std::array<int,8> arr = detail::init_fill_array<8>([](int i){ return i*i; }); // get {0,1,4,9,16,25,36,49}
+   * @endcode
+   * 
    */
   template <std::size_t N, typename T>
   constexpr std::array<std::remove_cvref_t<T>, N>
@@ -67,6 +74,7 @@ namespace detail {
     return init_fill_array_impl(std::forward<T>(value), std::make_index_sequence<N>());
   }
 
+#ifndef IN_DOXYGEN
   // second version with a invocable parameter (thanks concepts)
   template <typename Function_t, std::size_t ...Is> requires std::invocable<Function_t,std::size_t>
   constexpr std::array<typename decltype(std::function{std::declval<Function_t>()})::result_type, sizeof...(Is)>
@@ -77,8 +85,8 @@ namespace detail {
   /**
    * @brief fill an uninitialize array with a generator
    * 
-   * @tparam Function_t type of invocable object
    * @tparam N size of array to fill
+   * @tparam Function_t type of invocable object
    * 
    * @param f invocable object that need to get a `std::size_t` and return the value type of output array
    * 
@@ -92,6 +100,7 @@ namespace detail {
   {
     return init_fill_array_impl(std::forward<Function_t>(f), std::make_index_sequence<N>());
   }
+#endif
 
   /**
    * @brief concept to check if a template is iterable
@@ -122,16 +131,26 @@ namespace detail {
 
   template <typename Arithmetic, std::size_t ...Is>
   constexpr Arithmetic
-  power_impl(Arithmetic && base, std::index_sequence<Is...>)
+  power_impl(Arithmetic && value, std::index_sequence<Is...>)
   {
-    return ( static_cast<Arithmetic>(1.0) * ... * (static_cast<void>(Is), base) );
+    return ( static_cast<Arithmetic>(1.0) * ... * (static_cast<void>(Is), value) );
   }
 
-  template <std::size_t Iexp, typename Arithmetic>
-  constexpr Arithmetic
-  power(Arithmetic && base)
+  /**
+   * @brief return `Iexp` multiplication of `value` to make an efficient power function for integers
+   * 
+   * @tparam Iexp exponent of expression
+   * @tparam Arithmetic_t arithmetic type (need multiplication and `1` can be converted into this type) 
+   * @param value value to powered
+   * @return constexpr Arithmetic_t \f$\texttt{value}^{\texttt{Iexp}}=1\times\underbrace{\texttt{value}\times\cdots\times \texttt{value}}_{\texttt{Iexp}\ \text{times}}\f$ with \f$\texttt{Iexp}\in\mathbb{N}\f$ (could be equal to zero)
+   * 
+   * @note if we remove condition \p Iexp could be equal to zero, we could remove the requirement `1` can be converted into `Arithmetic_t`.
+   */
+  template <std::size_t Iexp, typename Arithmetic_t>
+  constexpr Arithmetic_t
+  power(Arithmetic_t && value)
   {
-    return power_impl(std::forward<Arithmetic>(base), std::make_index_sequence<Iexp>());
+    return power_impl(std::forward<Arithmetic_t>(value), std::make_index_sequence<Iexp>());
   }
 
 } // namespace detail
