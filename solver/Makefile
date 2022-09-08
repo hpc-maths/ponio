@@ -8,3 +8,6 @@ install: $(Butcher_methods)
 $(Butcher_methods): $(RK_methods)
 	python code_generator.py $^ -o $@
 
+clean:
+	rm -f $(Butcher_methods)
+
