@@ -10,7 +10,7 @@ BUTCHER_METHODS = $(INC_dir)/$(LIB_name)/butcher_methods.hpp
 CXX = g++-12 -std=c++20
 
 $(BUTCHER_METHODS):
-	python ../code_generator.py ../../database/*.json -o $@
+	$(MAKE) -C .. install
 
 % : %.cpp $(HEADER) $(BUTCHER_METHODS)
 	$(CXX) -I $(INC_dir) -I ${CONDA_PREFIX}/include $< -o $@
