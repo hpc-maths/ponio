@@ -1,0 +1,17 @@
+.wy-nav-content-wrap {
+  background: #e3e3e3;
+}
+p {
+    text-align: justify;
+}
+
+.align-center * {
+  text-align: center;
+}
+
+dt:target, span.highlighted {
+  background-color: #fbe54e99 !important;
+}
+dt.sig.sig-object.cpp {
+  width: 100%;
+}

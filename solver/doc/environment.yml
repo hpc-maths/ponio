@@ -1,0 +1,12 @@
+name: ponio-solver-doc
+
+channels:
+  - conda-forge
+
+dependencies:
+  - make
+  - graphviz
+  - doxygen
+  - sphinx
+  - sphinx_rtd_theme
+  - breathe
