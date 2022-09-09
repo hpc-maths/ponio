@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
     import jinja2
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(local_dir))
-    template = env.get_template("tpl_butcher_methods.hxx")
+    template = env.get_template("template/tpl_butcher_methods.hxx")
 
     with open(args['--output'],'w') as f:
       f.write(
