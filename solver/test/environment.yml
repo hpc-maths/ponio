@@ -1,0 +1,10 @@
+name: ponio-solver-test
+
+channels:
+  - conda-forge
+
+dependencies:
+  - make
+  - doctest
+  - eigen
+  - cxx-compiler
