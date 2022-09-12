@@ -19,6 +19,7 @@ namespace runge_kutta {
     static constexpr std::size_t N_stages = Tableau::N_stages;
     static constexpr bool is_embedded = is_embedded_tableau<Tableau>;
     static constexpr std::size_t order = Tableau::order;
+    static constexpr const char* id = Tableau::id;
 
     explicit_rk_butcher(double tol_=1e-4)
     : butcher(), tol(tol_)

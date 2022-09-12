@@ -17,6 +17,7 @@ struct butcher_{{ rk.id }} : public {{ "adaptive_" if 'b2' in rk else "" }}butch
   using base_t = {{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }},value_t>;
   static constexpr std::size_t N_stages = base_t::N_stages;
   static constexpr std::size_t order = {{ rk.order }};
+  static constexpr const char* id = "{{ rk.id }}";
 
   using base_t::A;
   using base_t::b;
