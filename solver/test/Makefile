@@ -32,7 +32,7 @@ main.cpp : $(TESTS)
 test: $(RUN)
 
 clean :
-	rm -f $(EXE)
+	rm -f $(EXE) $(MAIN)
 
 mrproper : clean
 	rm *.dat
