@@ -1,15 +1,17 @@
-Butcher_methods = include/solver/butcher_methods.hpp
-RK_methods = $(wildcard ../database/*.json)
+RK_METHODS = $(wildcard ../database/*.json)
+
+BUTCHER_METHODS = include/solver/butcher_methods.hpp
+TEST_ORDER      = test/test_order.hxx
 
 Ndigit=36
 
 all: install
 
-install: $(Butcher_methods)
+install: $(BUTCHER_METHODS) $(TEST_ORDER)
 
-$(Butcher_methods): $(RK_methods)
-	python code_generator.py $^ -o $@ --Ndigit=$(Ndigit)
+$(BUTCHER_METHODS) $(TEST_ORDER)&: $(RK_METHODS)
+	python code_generator.py $^ -o $(BUTCHER_METHODS) -t $(TEST_ORDER)  --Ndigit=$(Ndigit)
 
 clean:
-	rm -f $(Butcher_methods)
+	rm -f $(BUTCHER_METHODS) $(TEST_ORDER)
 

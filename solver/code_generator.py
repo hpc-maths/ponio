@@ -3,12 +3,13 @@
 """code_generator.py
 
 Usage:
-    code_generator.py FILE... (--output=<header>) [--Ndigit=<N>]
+    code_generator.py FILE... (--output=<header>) (--test=<header>) [--Ndigit=<N>]
 
 Options:
     -h, --help                      show help
     FILE                            json file to split or join and name of output (last)
     -o=<header>, --output=<header>  name of output file header C++
+    -t=<header>, --test=<header>    name of output test file C++
     --Ndigit=<N>                    number of digit in output Butcher tableau [default: 36]
 
 Output is include/butcher_methods.hpp
@@ -80,6 +81,13 @@ if __name__ == '__main__':
     template = env.get_template("template/tpl_butcher_methods.hxx")
 
     with open(args['--output'],'w') as f:
+      f.write(
+        template.render(list_meth=list_meth)
+      )
+
+    template = env.get_template("template/tpl_test_order.hxx")
+
+    with open(args['--test'],'w') as f:
       f.write(
         template.render(list_meth=list_meth)
       )
