@@ -5,6 +5,7 @@
 #include <array>
 #include <type_traits>
 #include <cmath>
+#include <ranges>
 
 #include "detail.hpp"
 #include "stage.hpp"
@@ -19,20 +20,20 @@ namespace ode {
     return std::abs( (unp1-unp1bis)/(1.0 + std::max(std::abs(un),std::abs(unp1))) );
   }
   template <typename state_t>
-  requires ::detail::is_const_iterable<state_t>
+  requires std::ranges::range<state_t>
   auto
   error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
   {
-    auto it_unp1    = std::cbegin(unp1);
-    auto it_unp1bis = std::cbegin(unp1bis);
-    auto last = std::cend(un);
+    auto it_unp1    = std::ranges::cbegin(unp1);
+    auto it_unp1bis = std::ranges::cbegin(unp1bis);
+    auto last = std::ranges::cend(un);
 
-    auto n_elm = std::distance(std::cbegin(un),last);
+    auto n_elm = std::distance(std::ranges::cbegin(un),last);
 
     using value_t = std::remove_cvref_t<decltype(*it_unp1)>;
     auto r = static_cast<value_t>(0.);
 
-    for ( auto it_un=std::cbegin(un) ; it_un != last ; ++it_un, ++it_unp1, ++it_unp1bis )
+    for ( auto it_un=std::ranges::cbegin(un) ; it_un != last ; ++it_un, ++it_unp1, ++it_unp1bis )
     {
       auto tmp = ( *it_unp1 - *it_unp1bis )/( 1.0 + std::max(std::abs(*it_un),std::abs(*it_unp1)) );
       r += tmp*tmp;
@@ -68,7 +69,7 @@ namespace ode {
   struct method
   {
     static constexpr bool is_embedded = Algorithm_t::is_embedded;
-    using step_storage_t = std::conditional< is_embedded,
+    using step_storage_t = typename std::conditional< is_embedded,
                               std::array<state_t,Algorithm_t::N_stages+2>,
                               std::array<state_t,Algorithm_t::N_stages+1>
                             >::type;
