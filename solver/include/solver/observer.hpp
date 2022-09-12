@@ -133,6 +133,7 @@ namespace observer {
     std::ofstream out;
 
     file_observer ( std::string_view filename );
+    file_observer ( std::string const& filename );
 
     file_observer ( std::filesystem::path const& path );
   };
@@ -144,6 +145,15 @@ namespace observer {
    */
   file_observer::file_observer ( std::string_view filename ):
     out(filename.data())
+  {}
+
+  /**
+   * constructor of \ref file_observer
+   * @param filename string of the output file
+   * @warning this class doesn't create any folder
+   */
+  file_observer::file_observer ( std::string const& filename ):
+    out(filename)
   {}
 
   /**
