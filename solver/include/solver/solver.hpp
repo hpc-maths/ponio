@@ -13,7 +13,7 @@ namespace ode {
    * @param pb     problem to solve, it could by any function or functor with a call operator with following parameter `(value_t tn, state_t const& un)`.
    * @param algo   choosen method to solve the problem `pb`
    * @param u0     initial condition \f$u_0 = u(t=0)\f$
-   * @param t_span container \f$[t_\text{start} , t_\text{end})\f$ with possible intermediate time value where solver should go
+   * @param t_span container \f$[t_\text{start} , t_\text{end}]\f$ with possible intermediate time value where solver should go
    * @param dt     time step value \f$\Delta t\f$
    * @param obs    observer that do something with current time, solution and time step at each iteration
    * @return returns the last value of solution \f$u^n\f$
@@ -33,11 +33,13 @@ namespace ode {
     state_t un  = u0;
     state_t un1 = u0;
 
+    value_t last_time = t_span.back();
+
     auto meth = make_method(algo ,un);
 
     obs( current_time , un , dt );
 
-    while ( it_next_time != it_end_time ) {
+    while ( current_time < last_time ) {
 
       std::tie( current_time , un1 , current_dt ) = meth( pb , current_time , un , current_dt );
       std::swap(un,un1);
