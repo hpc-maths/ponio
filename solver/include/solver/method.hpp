@@ -10,6 +10,7 @@
 #include "detail.hpp"
 #include "stage.hpp"
 #include "generic_butcher_rk.hpp"
+#include "splitting.hpp"
 
 namespace ode {
 

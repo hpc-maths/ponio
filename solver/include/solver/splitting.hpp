@@ -6,6 +6,23 @@
 namespace ode {
 namespace splitting {
 
+  namespace detail {
+    template <std::size_t I, typename Problem_t, typename Method_t, typename state_t, typename value_t>
+    state_t
+    _split_solve( Problem_t & pb, Method_t & meth, state_t & ui, value_t ti, value_t dt )
+    {
+      value_t current_dt = dt;
+      value_t current_time = ti;
+      while ( current_time < ti+dt ) {
+        std::tie(current_time,ui,current_dt) = std::get<I>(meth)(std::get<I>(pb.system),current_time,ui,current_dt);
+        if ( current_time+current_dt > ti+dt ) {
+          current_dt = (ti+dt) - current_time;
+        }
+      }
+      return ui;
+    }
+  }
+
   /** @class lie
    *  Lie splitting method
    *  @tparam Methods_t list of methods to solve each sub-problem
@@ -17,8 +34,10 @@ namespace splitting {
 
     lie ( std::tuple<Methods_t...> const& t );
 
+    /*
     template < std::size_t I=0 , typename Problem_t , typename state_t , typename value_t >
     void _call_step ( Problem_t & f , value_t tn , state_t & ui , value_t dt );
+    */
 
     template < std::size_t I=0 , typename Problem_t , typename state_t , typename value_t >
     inline typename std::enable_if< (I == sizeof...(Methods_t)) ,void>::type
@@ -40,7 +59,7 @@ namespace splitting {
     methods(t)
   {}
 
-  /**
+  /*
    * call current step `I`
    * @tparam I step to call
    * @param f       \ref problem to solve
@@ -48,7 +67,6 @@ namespace splitting {
    * @param[in,out] ui solution of \f$\dot{u} = \sum_{k=0}^i f_i(t,u)\f$, with initial condition \f$u(t^n)=\texttt{ui}\f$
    * @param dt      time step \f$\Delta t\f$
    * @details compute a solution at time \f$t^n+\Delta t\f$ even with adaptive time step methods
-   */
   template < typename... Methods_t >
   template < std::size_t I , typename Problem_t , typename state_t , typename value_t >
   void
@@ -63,6 +81,7 @@ namespace splitting {
       }
     }
   }
+   */
 
   template < typename... Methods_t >
   template < std::size_t I , typename Problem_t , typename state_t , typename value_t >
@@ -84,7 +103,8 @@ namespace splitting {
   inline typename std::enable_if< (I < sizeof...(Methods_t)) ,void>::type
   lie<Methods_t...>::_call_inc ( Problem_t & f , value_t tn , state_t & ui , value_t dt )
   {
-    _call_step<I>(f,tn,ui,dt);
+    ui = detail::_split_solve<I>(f,methods,ui,tn,dt);
+    //_call_step<I>(f,tn,ui,dt);
     _call_inc<I+1>(f,tn,ui,dt);
   }
 
@@ -163,6 +183,7 @@ namespace splitting {
   struct strang : lie<Methods_t...>
   {
     using lie<Methods_t...>::lie;
+    using lie<Methods_t...>::methods;
 
     template < std::size_t I=0 , typename Problem_t , typename state_t , typename value_t >
     inline typename std::enable_if< (I == sizeof...(Methods_t)-1) ,void>::type
@@ -192,7 +213,8 @@ namespace splitting {
   inline typename std::enable_if< (I == sizeof...(Methods_t)-1) ,void>::type
   strang<Methods_t...>::_call_inc ( Problem_t & f , value_t tn , state_t & ui , value_t dt )
   {
-    _call_step<I>(f,tn,ui,dt);
+    //_call_step<I>(f,tn,ui,dt);
+    ui = detail::_split_solve<I>(f,methods,ui,tn,dt);
     _call_dec<I-1>(f,tn,ui,dt);
   }
 
@@ -210,7 +232,8 @@ namespace splitting {
   inline typename std::enable_if< (I < sizeof...(Methods_t)-1) ,void>::type
   strang<Methods_t...>::_call_inc ( Problem_t & f , value_t tn , state_t & ui , value_t dt )
   {
-    _call_step<I>(f,tn,ui,0.5*dt);
+    //_call_step<I>(f,tn,ui,0.5*dt);
+    ui = detail::_split_solve<I>(f,methods,ui,tn,dt);
     _call_inc<I+1>(f,tn,ui,dt);
   }
 
@@ -220,7 +243,8 @@ namespace splitting {
   inline typename std::enable_if< (I == 0) ,void>::type
   strang<Methods_t...>::_call_dec ( Problem_t & f , value_t tn , state_t & ui , value_t dt )
   {
-    _call_step<I>(f,tn,ui,0.5*dt);
+    //_call_step<I>(f,tn,ui,0.5*dt);
+    ui = detail::_split_solve<I>(f,methods,ui,tn,dt);
   }
 
   /**
@@ -237,7 +261,8 @@ namespace splitting {
   inline typename std::enable_if< (I > 0) ,void>::type
   strang<Methods_t...>::_call_dec ( Problem_t & f , value_t tn , state_t & ui , value_t dt )
   {
-    _call_step<I>(f,tn,ui,0.5*dt);
+    //_call_step<I>(f,tn,ui,0.5*dt);
+    ui = detail::_split_solve<I>(f,methods,ui,tn,dt);
     _call_dec<I-1>(f,tn,ui,dt);
   }
 
