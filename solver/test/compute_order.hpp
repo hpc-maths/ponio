@@ -6,6 +6,8 @@
 #include <cmath>
 #include <valarray>
 
+//#define DEBUG
+
 #ifdef DEBUG
 
 #include <sstream>
@@ -66,7 +68,7 @@ solve_brusselator ( T dt )
   #else
     auto obs = [](T,state_t,T){};
   #endif
-    return ode::solve( pb , Algorithm_t(1e-5) , y0 , t_span , dt , std::forward<decltype(obs)>(obs) );
+    return ode::solve( pb , Algorithm_t(1e-5) , y0 , t_span , dt , obs );
 }
 
 
@@ -96,7 +98,7 @@ order ()
   state_t u_exa = {1.96873, 1.38722}; // solution of Brusselator at time 1.0
 
   #ifdef DEBUG
-    fs::create_directories(std::string(Algorithm_t::id));
+    fs::create_directories("debug_info/" + std::string(Algorithm_t::id));
     std::ofstream f( std::string(Algorithm_t::id) + "/errors.dat"s );
   #endif
 
