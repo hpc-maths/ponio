@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <iostream>
 #include <concepts>
+#include <ranges>
 
 
 #include "detail.hpp"
@@ -17,7 +18,7 @@ namespace observer {
 
   /** @class capsule
    *  helper to display a value
-   *  @tparam state_t    type to display and test \ref detail::is_const_iterable to propose a stream redirection
+   *  @tparam state_t   type to display
    *  @details This class only store a reference of data.
    */
   template < typename state_t >
@@ -58,11 +59,11 @@ namespace observer {
   /**
    * display a \ref capsule which contains an iterable data or not
    */
-  template < typename state_t > requires ::detail::is_const_iterable<state_t>
+  template < typename state_t > requires std::ranges::range<state_t>
   std::ostream&
   operator << ( std::ostream & os , capsule<state_t> const& data )
   {
-    std::copy( std::cbegin(data.data) , std::cend(data.data) , std::ostream_iterator<decltype(*std::cbegin(data.data))>(os," ") );
+    std::copy( std::ranges::cbegin(data.data) , std::ranges::cend(data.data) , std::ostream_iterator<decltype(*std::ranges::cbegin(data.data))>(os," ") );
     return os;
   }
 

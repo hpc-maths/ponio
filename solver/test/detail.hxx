@@ -33,15 +33,6 @@ TEST_CASE("detail::init_fill_array")
   }
 }
 
-TEST_CASE("detail::is_iterable")
-{
-  REQUIRE(detail::is_iterable<std::array<int,1337>> == true);
-  REQUIRE(detail::is_const_iterable<std::array<int,1337>> == true);
-
-  const std::array<int,5> tab = detail::init_fill_array<5>(42);
-  REQUIRE(detail::is_const_iterable<decltype(tab)> == true);
-}
-
 TEST_CASE("detail::tpl_inner_product")
 {
   constexpr std::size_t N=10;

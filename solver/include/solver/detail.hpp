@@ -4,6 +4,7 @@
 #include <functional>
 #include <concepts>
 #include <array>
+#include <ranges>
 
 namespace detail {
 
@@ -101,33 +102,6 @@ namespace detail {
     return init_fill_array_impl(std::forward<Function_t>(f), std::make_index_sequence<N>());
   }
 #endif
-
-  /**
-   * @brief concept to check if a template is iterable
-   * 
-   * @tparam T type of container
-   * 
-   * @details just check if `std::begin` and `std::end` can be use on type \p T
-   */
-  template <typename T>
-  concept is_iterable = requires (T t) {
-    std::begin(t);
-    std::end(t);
-  };
-
-  /**
-   * @brief concept to check if a template is const iterable
-   * 
-   * @tparam T type of container
-   * 
-   * @details just check if `std::cbegin` and `std::cend` can be use on type \p T
-   */
-  template <typename T>
-  concept is_const_iterable = requires (T t) {
-    std::cbegin(t);
-    std::cend(t);
-  };
-
 
   template <typename Arithmetic, std::size_t ...Is>
   constexpr Arithmetic
