@@ -6,8 +6,6 @@
 #include <cmath>
 #include <valarray>
 
-//#define DEBUG
-
 #ifdef DEBUG
 
 #include <sstream>
@@ -64,10 +62,11 @@ solve_brusselator ( T dt )
   #ifdef DEBUG
     std::stringstream ss; ss << std::string(Algorithm_t::id) << "/dt_" << dt << ".dat";
     std::string filename = ss.str();
-    return ode::solve( pb , Algorithm_t() , y0 , t_span , dt , observer::file_observer(filename) );
+    auto obs = observer::file_observer(filename);
   #else
-    return ode::solve( pb , Algorithm_t(1e-5) , y0 , t_span , dt , [](T,state_t,T){} );
+    auto obs = [](T,state_t,T){};
   #endif
+    return ode::solve( pb , Algorithm_t(1e-5) , y0 , t_span , dt , std::forward<decltype(obs)>(obs) );
 }
 
 
@@ -103,12 +102,13 @@ order ()
 
   for ( auto n_iter : {500,200,100,50,25,10} ) {
     T dt = 2.0/static_cast<double>(n_iter);
-    state_t u_sol = state_t{solve_brusselator<Algorithm_t>(dt)};
-    errors.push_back(std::log( error( u_exa , u_sol ) ));
+    state_t u_sol = solve_brusselator<Algorithm_t>(dt);
+    auto e = error( u_exa , u_sol );
+    errors.push_back(std::log( e ));
     dts.push_back(std::log(dt));
 
     #ifdef DEBUG
-      f << dt << " " << std::abs(u_sol-std::exp(-2.0)) << "\n";
+      f << dt << " " << e << "\n";
     #endif
   }
 
