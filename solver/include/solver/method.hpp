@@ -235,5 +235,54 @@ namespace ode {
   {
     return method<Algorithm_t,state_t>(algo,shadow_of_u0);
   }
+  
+  /**
+   * factory of tuple of methods from a tuple of `Algorithm_t`
+   * @param algos        a tuple of `Algorithm_t` objets with predifined stages
+   * @param shadow_of_u0 an object with the same size of computed value for allocation
+   * @details this factory is to prevent duplucation of code in factory of methods for
+   * splitting methods (Lie or Strang method).
+   */
+  template < typename state_t , typename... Algorithms_t >
+  auto
+  make_tuple_methods ( std::tuple<Algorithms_t...> const& algos , state_t const& shadow_of_u0 )
+  {
+    return std::apply(
+        [&]( auto const&... args ) {
+          auto maker = [&](auto const& arg) {
+            return make_method(arg,shadow_of_u0); // maybe should use std::bind
+          };
+          return std::make_tuple(maker(args)...);
+        }, algos
+      );
+  }
+
+  /**
+   *  generic factory to build a method from an algoritm, it only reuses `method`
+   *  constructor
+   *  @param algos        a variadic `splitting::lie_tuple` of `Algorithms_t` 
+   *  @param shadow_of_u0 an object with the same size of computed value for allocation
+   */
+  template < typename... Algorithms_t , typename state_t >
+  auto
+  make_method ( splitting::lie_tuple<Algorithms_t...> const& algos , state_t const& shadow_of_u0 )
+  {
+    auto methods = make_tuple_methods(algos.algos,shadow_of_u0);
+    return splitting::make_lie_from_tuple(methods);
+  }
+
+  /**
+   *  generic factory to build a method from an algoritm, it only reuses `method`
+   *  constructor
+   *  @param algos        a variadic `splitting::strang_tuple` of `Algorithms_t` 
+   *  @param shadow_of_u0 an object with the same size of computed value for allocation
+   */
+  template < typename... Algorithms_t , typename state_t >
+  auto
+  make_method ( splitting::strang_tuple<Algorithms_t...> const& algos , state_t const& shadow_of_u0 )
+  {
+    auto methods = make_tuple_methods(algos.algos,shadow_of_u0);
+    return splitting::make_strang_from_tuple(methods);
+  }
 
 } // namespace ode
