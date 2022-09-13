@@ -137,6 +137,8 @@ namespace observer {
     file_observer ( std::string const& filename );
 
     file_observer ( std::filesystem::path const& path );
+
+    file_observer ( file_observer const& ) = delete;
   };
 
   /**

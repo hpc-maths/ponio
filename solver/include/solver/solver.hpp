@@ -20,7 +20,7 @@ namespace ode {
    */
   template < typename Problem_t , typename Algorithm_t , typename state_t , typename value_t , typename Observer_t >
   state_t
-  solve ( Problem_t & pb , Algorithm_t && algo , state_t const& u0 , std::vector<value_t> const& t_span , value_t dt , Observer_t obs )
+  solve ( Problem_t & pb , Algorithm_t && algo , state_t const& u0 , std::vector<value_t> const& t_span , value_t dt , Observer_t && obs )
   {
     value_t current_time = t_span.front();
     auto it_next_time = t_span.begin();
