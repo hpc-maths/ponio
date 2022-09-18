@@ -6,6 +6,9 @@ Usage:
     db.py split FILE PATH
     db.py concat PATH FILE...
     db.py display FILE...
+    db.py explicit FILE...
+    db.py implicit FILE...
+    db.py dirk FILE...
 
 Options:
     -h, --help    show help
@@ -55,6 +58,8 @@ def concat(filenames,outputfile="data.json"):
     json.dump(data,open(outputfile,'w'),indent=4)
 
 def display(filename):
+    """ display Butcher tableau
+    """
     import sympy as sp
     with open( filename ,'r') as f:
         data = json.load(f)
@@ -79,6 +84,51 @@ def display(filename):
     print(" "*lenCol[0],end=" │ ")
     print(" ".join([ "{{:^{}}}".format(lenCol[j+1]).format(str(bj)) for j,bj in enumerate(b) ]))
 
+def is_explicit(A):
+    """ test if a matrix A of a Butcher tableau represent an explicit RK method
+    """
+    import sympy as sp
+    return ( sum([
+        sum([ sp.Abs(A[i,j]) for j in range(i,A.shape[0]) ])
+        for i in range(0,A.shape[1])
+        ]) == 0 )
+
+def is_implicit(A):
+    """ test if a matrix A of a Butcher tableau represent an implicit RK method
+    """
+    return not is_explicit(A)
+
+def is_dirk(A):
+    """ test if a matrix A of a Butcher tableau represent a DIRK method
+    """
+    import sympy as sp
+    return ( sum([
+            sum([ sp.Abs(A[i,j]) for j in range(i+1,A.shape[0]) ])
+            for i in range(0,A.shape[1])
+            ]) == 0 ) and ( sum([ sp.Abs(A[i,i]) for i in range(0,A.shape[0]) ]) != 0 )
+
+def extract_A(filename):
+    """ extract matrix A in Butcher tableau in filename
+    """
+    import sympy as sp
+    with open(filename,'r') as f:
+        data = json.load(f)
+    return sp.Matrix(data['A'])
+
+def filter_rk(fn, filenames):
+    """ filter in filename with fn function
+    """
+    r = filter( lambda f:fn(extract_A(f)), filenames )
+    print(*list(r),sep=" ")
+
+def explicit(filenames):
+    filter_rk(is_explicit,filenames)
+
+def implicit(filenames):
+    filter_rk(is_implicit,filenames)
+
+def dirk(filenames):
+    filter_rk(is_dirk,filenames)
 
 if __name__ == '__main__':
     from docopt import docopt
@@ -93,5 +143,11 @@ if __name__ == '__main__':
         for file in args['FILE']:
             display(file)
             print()
+    elif args['explicit'] :
+        explicit(args['FILE'])
+    elif args['implicit'] :
+        implicit(args['FILE'])
+    elif args['dirk'] :
+        dirk(args['FILE'])
     else:
         print("error...")
