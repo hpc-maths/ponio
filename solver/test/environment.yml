@@ -9,5 +9,6 @@ dependencies:
   - eigen
   - numpy
   - sympy
+  - jinja2
   - pip:
     - docopt-ng
