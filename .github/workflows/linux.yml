@@ -60,7 +60,6 @@ jobs:
         shell: bash -l {0}
         run: |
           export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"
-          pip install docopt-ng
           cd solver
           make install
           cd test

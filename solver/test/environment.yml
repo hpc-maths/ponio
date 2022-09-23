@@ -7,3 +7,7 @@ dependencies:
   - make
   - doctest
   - eigen
+  - numpy
+  - sympy
+  - pip:
+    docopt-ng
