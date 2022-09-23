@@ -1,18 +1,25 @@
-name: MacOS CI
+name: Windows CI
 
 on: [pull_request]
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: windows-latest
     strategy:
       matrix:
         include:
-          - cpp-version: clang-14
-            cc: "clang"
-            cxx: "clang++"
+         - compiler: msvc
+           cc: "cl"
+           cxx: "cl"
+         - compiler: gcc
+           cc: "gcc"
+           cxx: "g++"
+         - compiler: gcc
+           cc: "clang"
+           cxx: "clang++"
     steps:
       - uses: actions/checkout@v2
+      - uses: ilammy/msvc-dev-cmd@v1
       - name: install mamba
         uses: mamba-org/provision-with-micromamba@main
         with:
