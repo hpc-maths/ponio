@@ -8,7 +8,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - cpp-version: clang-12
+          - cpp-version: clang-13
+            cc: "clang"
+            cxx: "clang++"
+          - cpp-version: clang-14
             cc: "clang"
             cxx: "clang++"
     steps:
