@@ -1,8 +1,8 @@
-name: solver-env
+name: ponio-env
 channels:
   - conda-forge
 dependencies:
-  - pip
-  - pip:
-    - -r requirements.txt
+  - cmake
+  - ninja
+
 

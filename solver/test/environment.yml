@@ -7,4 +7,3 @@ dependencies:
   - make
   - doctest
   - eigen
-  - cxx-compiler
