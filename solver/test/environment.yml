@@ -10,4 +10,4 @@ dependencies:
   - numpy
   - sympy
   - pip:
-    docopt-ng
+    - docopt-ng
