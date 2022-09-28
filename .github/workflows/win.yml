@@ -61,10 +61,10 @@ jobs:
           pip3 install conan sympy numpy docopt-ng jinja2
       - name: Configure CMake
         run: |
-          conan install . -pr:b=release --output-folder cmake-build --build=missing
+          conan install . --output-folder cmake-build --build=missing
           cmake . -G "${{matrix.CMAKE_GENERATOR}}" -DCMAKE_TOOLCHAIN_FILE=cmake-build/conan_toolchain.cmake
-          cmake -S . -B ./build -G "${{matrix.CMAKE_GENERATOR}}" --config Release
+          cmake -S . -B ./build -G "${{matrix.CMAKE_GENERATOR}}"
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
-          cmake --build ./build
+          cmake --build ./build --config Release
