@@ -45,6 +45,21 @@ struct butcher_{{ rk.id }} : public {{ "adaptive_" if 'b2' in rk else "" }}butch
 template <typename value_t=double>
 using {{ rk.id }} = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<value_t>>;
 
+/**
+ * @brief l{{ rk.label }} method
+ * @tparam value_t type of coefficient (``double``by default)
+ * 
+ * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
+ */
+//template <typename Exp_t, typename value_t=double>
+//using l{{ rk.id }} = lawson::explicit_rk_butcher<butcher_{{ rk.id }}<value_t>,Exp_t>;
+template <typename Exp_t>
+auto
+l{{ rk.id }}( Exp_t exp_ )
+{
+  return lawson::make_lawson<butcher_{{ rk.id }}<double>,Exp_t>(exp_);
+}
+
 {% endfor %}
 
 } // namespace ode::butcher
