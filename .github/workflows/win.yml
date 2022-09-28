@@ -26,12 +26,12 @@ jobs:
           environment-file: solver/test/environment.yml
           environment-name: ponio-solver-test
       - name: Conda informations
-        shell: powershell
+        shell: cmd /C CALL {0}
         run: |
           mamba info
           mamba list
       - name: Configure
-        shell: powershell
+        shell: cmd /C CALL {0}
         run: |
           export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"
           cd solver
