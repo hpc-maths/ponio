@@ -57,7 +57,7 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -S . -B ./build -G "${{matrix.generator}}"
+          cmake -S . -B ./build -G "${{matrix.CMAKE_GENERATOR}}"
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
