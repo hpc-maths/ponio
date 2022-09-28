@@ -25,11 +25,6 @@ jobs:
         with:
           environment-file: solver/test/environment.yml
           environment-name: ponio-solver-test
-      - name: Conda informations
-        shell: cmd /C CALL {0}
-        run: |
-          mamba info
-          mamba list
       - name: Configure
         shell: cmd /C CALL {0}
         run: |
