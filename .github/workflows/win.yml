@@ -14,8 +14,10 @@ jobs:
         # CMAKE_GENERATOR:
         #   - "Ninja Multi-Config"
         # include:
-        - compiler: msvc
-          CMAKE_GENERATOR: "Visual Studio 17 2022"
+        compiler
+          - msvc
+        CMAKE_GENERATOR:
+          - "Visual Studio 17 2022"
 
 
     steps:
