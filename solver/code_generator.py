@@ -44,7 +44,7 @@ def extract_meth(filename,Ndigit=36):
     A=data['A'],b=data['b'],c=data['c'],
     b2=data['b2'] if 'b2' in data else None
   )
-  
+
   A = rk.A.evalf(n=Ndigit).tolist()
   b = rk.b.evalf(n=Ndigit).T.tolist()[0]
   c = rk.c.evalf(n=Ndigit).T.tolist()[0]
@@ -61,11 +61,9 @@ def extract_meth(filename,Ndigit=36):
   if 'b2' in data:
     b2 = sp.Matrix(data['b2']).evalf(n=Ndigit).T.tolist()[0]
     butcher['b2'] = " , ".join(map(str,b2))
-  
+
   return butcher
 
-  
-  
 if __name__ == '__main__':
     from docopt import docopt
 
