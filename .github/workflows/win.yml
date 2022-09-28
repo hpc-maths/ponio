@@ -63,7 +63,7 @@ jobs:
         run: |
           conan install . -s build_type=Release --build=missing
           ls
-          cmake . -G "${{matrix.CMAKE_GENERATOR}}" -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+          cmake . -G "${{matrix.CMAKE_GENERATOR}}" -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake"
           cmake -S . -B ./build -G "${{matrix.CMAKE_GENERATOR}}"
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
