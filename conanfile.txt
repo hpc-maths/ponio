@@ -2,4 +2,4 @@
 doctest/2.4.9
 
 [generators]
-CMakeDeps
+CMakeToolchain
