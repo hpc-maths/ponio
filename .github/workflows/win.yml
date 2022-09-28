@@ -54,10 +54,14 @@ jobs:
           gcovr: false
           opencppcoverage: false
 
-
+      - name: Install dependencies
+        run: |
+          pip3 install conan sympy numpy docopt-ng jinja2
       - name: Configure CMake
         run: |
-          cmake -S . -B ./build -G "${{matrix.CMAKE_GENERATOR}}"
+          conan install . --output-folder cmake-build --build=missing
+          cmake . -G "Visual Studio 15 2017" -DCMAKE_TOOLCHAIN_FILE=cmake-build/conan_toolchain.cmake
+          cmake -S . -B ./build -G "${{matrix.CMAKE_GENERATOR}}" --config Release
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
