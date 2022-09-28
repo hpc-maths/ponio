@@ -30,5 +30,6 @@ jobs:
           cd solver
           make install
           cd test
-          {{ matrix.cxx }}  --version
+          ${{ matrix.cxx }}  --version
+          which ${{ matrix.cxx }}
           CC=${{ matrix.cc }} CXX=${{ matrix.cxx }} make test
