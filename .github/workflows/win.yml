@@ -46,13 +46,13 @@ jobs:
           ninja: true
           vcpkg: true
           ccache: true
-          clangtidy: true
-          task: true
+          clangtidy: false
+          task: false
 
-          cppcheck: true
+          cppcheck: false
 
-          gcovr: true
-          opencppcoverage: true
+          gcovr: false
+          opencppcoverage: false
 
 
       - name: Configure CMake
