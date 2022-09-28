@@ -30,4 +30,5 @@ jobs:
           cd solver
           make install
           cd test
+          clang --version
           CC=${{ matrix.cc }} CXX=${{ matrix.cxx }} make test
