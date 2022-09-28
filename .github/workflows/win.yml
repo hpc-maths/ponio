@@ -28,8 +28,8 @@ jobs:
       - name: Configure
         shell: cmd /C CALL {0}
         run: |
-          export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"
+          call micromamba activate ponio-solver-test
           cd solver
           make install
           cd test
-          CC=${{ matrix.cc }} CXX=${{ matrix.cxx }} make test
+          make test
