@@ -51,8 +51,6 @@ using {{ rk.id }} = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<value_t
  * 
  * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
  */
-//template <typename Exp_t, typename value_t=double>
-//using l{{ rk.id }} = lawson::explicit_rk_butcher<butcher_{{ rk.id }}<value_t>,Exp_t>;
 template <typename Exp_t>
 auto
 l{{ rk.id }}( Exp_t exp_ )
