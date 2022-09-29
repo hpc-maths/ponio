@@ -6,7 +6,7 @@
 #include <cmath>
 #include <valarray>
 
-//#define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 
@@ -45,24 +45,19 @@ mayor_method ( Container const& x , Container const& y )
 
 template <typename Algorithm_t, typename T=double>
 auto
-solve_brusselator ( T dt )
+solve_exp ( T dt , T Tf )
 {
-  using state_t = std::valarray<T>;
+  using state_t = T;
 
-  auto pb = [](T t,state_t y)->state_t {
-      double a = 1. , b=3.;
+  auto pb = [](T t, state_t y)->state_t {
+    return y;
+  };
 
-      return state_t{
-        1. - (b+1.)*y[0] + a*y[0]*y[0]*y[1] ,
-        b*y[0] - a*y[0]*y[0]*y[1]
-      };
-    };
-  
-  state_t y0 = { 1.5 , 3. };
-  std::vector<T> t_span = {0.,1.0};
+  state_t y0 = 1.0;
+  std::vector<T> t_span = {0.,Tf};
 
   #ifdef DEBUG
-    std::stringstream ss; ss << std::string(Algorithm_t::id) << "/dt_" << dt << ".dat";
+    std::stringstream ss; ss << "debug_info/" << std::string(Algorithm_t::id) << "/dt_" << dt << ".dat";
     std::string filename = ss.str();
     auto obs = observer::file_observer(filename);
   #else
@@ -71,40 +66,34 @@ solve_brusselator ( T dt )
     return ode::solve( pb , Algorithm_t(1e-5) , y0 , t_span , dt , obs );
 }
 
-
 template <typename T=double>
 auto
-error (std::valarray<T> const& u, std::valarray<T> const& v)
+error (T u, T v)
 {
-  T r = 0.;
-
-  auto it_u = std::begin(u);
-  for ( auto it_v=std::begin(v) ; it_v != std::end(v) ; ++it_v,++it_u )
-  {
-    r += std::abs( *it_u - *it_v );
-  }
-
-  return r/u.size();
+  return std::abs(u-v);
 }
 
 template <typename Algorithm_t, typename T=double>
+requires (!Algorithm_t::is_embedded)
 T
 order ()
 {
-  using state_t = std::valarray<T>;
+  using state_t = T;
 
   std::vector<T> errors, dts;
 
-  state_t u_exa = {1.96873, 1.38722}; // solution of Brusselator at time 1.0
+  T Tf = 1.0;
+
+  state_t u_exa = std::exp(Tf); // solution of Brusselator at time 1.0
 
   #ifdef DEBUG
     fs::create_directories("debug_info/" + std::string(Algorithm_t::id));
-    std::ofstream f( std::string(Algorithm_t::id) + "/errors.dat"s );
+    std::ofstream f("debug_info/" + std::string(Algorithm_t::id) + "/errors.dat"s );
   #endif
 
-  for ( auto n_iter : {500,200,100,50,25,10} ) {
-    T dt = 2.0/static_cast<double>(n_iter);
-    state_t u_sol = solve_brusselator<Algorithm_t>(dt);
+  for ( auto n_iter : {50,25,20,15,10} ) {
+    T dt = Tf/static_cast<double>(n_iter);
+    state_t u_sol = solve_exp<Algorithm_t>(dt,Tf);
     auto e = error( u_exa , u_sol );
     errors.push_back(std::log( e ));
     dts.push_back(std::log(dt));
@@ -121,5 +110,13 @@ order ()
   auto [a,b] = mayor_method(dts,errors);
 
   return a;
+}
+
+template <typename Algorithm_t, typename T=double>
+requires (Algorithm_t::is_embedded)
+T
+order ()
+{
+  return Algorithm_t::order;
 }
 
