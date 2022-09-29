@@ -24,7 +24,7 @@ main.cpp : $(TESTS)
 	echo $(foreach inc_test,$(TESTS),'#include "$(inc_test)"\n') >> $@
 
 %.out : %.cpp $(HEADER) $(BUTCHER_METHODS)
-	$(CXX) -std=c++2a -I $(INC_dir) -I ${CONDA_PREFIX}/include $< -o $@
+	$(CXX) -std=c++20 -I $(INC_dir) -I ${CONDA_PREFIX}/include $< -o $@
 
 %.run : %.out
 	./$<

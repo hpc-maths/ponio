@@ -4,6 +4,12 @@ channels:
   - conda-forge
 
 dependencies:
-  - make
+  - cmake
+  - ninja
   - doctest
   - eigen
+  - numpy
+  - sympy
+  - jinja2
+  - pip:
+    - docopt-ng

@@ -8,14 +8,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - cpp-version: gcc-8
-            package: "gcc-8 g++-8"
-            cc: "gcc-8"
-            cxx: "g++-8"
-          - cpp-version: gcc-9
-            package: "gcc-9 g++-9"
-            cc: "gcc-9"
-            cxx: "g++-9"
           - cpp-version: gcc-10
             package: "gcc-10 g++-10"
             cc: "gcc-10"
@@ -24,10 +16,6 @@ jobs:
             package: "gcc-11 g++-11"
             cc: "gcc-11"
             cxx: "g++-11"
-          - cpp-version: clang-9
-            package: "clang-9"
-            cc: "clang-9"
-            cxx: "clang++-9"
           - cpp-version: clang-10
             package: "clang-10"
             cc: "clang-10"
@@ -59,9 +47,12 @@ jobs:
       - name: Configure
         shell: bash -l {0}
         run: |
-          export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"
-          pip install docopt-ng
-          cd solver
-          make install
-          cd test
-          CC=${{ matrix.cc }} CXX=${{ matrix.cxx }} make test
+          CC=${{ matrix.cc }} CXX=${{ matrix.cxx }} cmake . -B ./build -G "Ninja Multi-Config"
+      - name: Build
+        shell: bash -l {0}
+        run: |
+          cmake --build ./build --config Release
+      - name: Test
+        shell: bash -l {0}
+        run: |
+          ./build/solver/test/Release/ponio_tests

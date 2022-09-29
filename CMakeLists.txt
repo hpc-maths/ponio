@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
 
 project(ponio CXX)
 
@@ -17,7 +17,7 @@ file(GLOB json_files
 
 add_custom_command(
     OUTPUT ${BUTCHER_METHODS} ${TEST_ORDER}
-    COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/solver/code_generator.py ${json_files}
+    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/solver/code_generator.py ${json_files}
                 -o ${BUTCHER_METHODS}
                 -t ${TEST_ORDER}
                 --Ndigit=${Ndigit}
