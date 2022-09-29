@@ -72,8 +72,11 @@ jobs:
       - name: Build
         run: |
           cmake --build ./build --config Release
-      - name: Test
+      - name: Unix test
+        if: runner.os != 'Windows'
         run: |
-          ls
-          ls build
-          ./solver/test/ponio_tests
+          ./solver/test/Release/ponio_tests
+      - name: Windows test
+        if: runner.os == 'Windows'
+        run: |
+          .\solver\test\Release\ponio_tests.exe

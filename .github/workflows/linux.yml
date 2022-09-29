@@ -55,6 +55,4 @@ jobs:
       - name: Test
         shell: bash -l {0}
         run: |
-          ls
-          ls build
-          ./build/solver/test/ponio_tests
+          ./build/solver/test/Release/ponio_tests
