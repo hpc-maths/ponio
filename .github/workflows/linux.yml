@@ -52,3 +52,7 @@ jobs:
         shell: bash -l {0}
         run: |
           cmake --build ./build --config Release
+      - name: Test
+        shell: bash -l {0}
+        run: |
+          ./build/solver/test/ponio_tests

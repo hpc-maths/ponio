@@ -70,6 +70,8 @@ jobs:
           conan install .
           cmake . -B ./build -G "${{matrix.CMAKE_GENERATOR}}" -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake"
       - name: Build
-        # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
           cmake --build ./build --config Release
+      - name: Test
+        run: |
+          ./build/solver/test/ponio_tests
