@@ -6,7 +6,7 @@
 #include <cmath>
 #include <valarray>
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 
