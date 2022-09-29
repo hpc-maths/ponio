@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.15)
 
 project(ponio CXX)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+endif()
+
+
 set(CMAKE_CXX_STANDARD 20)
 
 set(PONIO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/solver/include)
