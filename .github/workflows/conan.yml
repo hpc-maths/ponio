@@ -13,8 +13,7 @@ jobs:
           - ubuntu-22.04
           - macos-12
         compiler:
-          # you can specify the version after `-` like "llvm-13.0.0".
-          - llvm-14.0.0
+          - llvm
           - gcc
         CMAKE_GENERATOR:
           - "Ninja Multi-Config"
@@ -22,6 +21,10 @@ jobs:
           - os: windows-2022
             compiler: msvc
             CMAKE_GENERATOR: "Visual Studio 17 2022"
+
+        exclude:
+          - os: macos-12
+            compiler: llvm
 
     steps:
       - uses: actions/checkout@v2
