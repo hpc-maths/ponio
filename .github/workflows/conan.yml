@@ -1,12 +1,17 @@
-name: Windows CI
+name: CI with conan
 
 on: [pull_request]
 
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        fail-fast: false
+        os:
+          - windows-2022
+          - ubuntu-22.04
+          - macos-12
         compiler:
           # you can specify the version after `-` like "llvm-13.0.0".
           - llvm
