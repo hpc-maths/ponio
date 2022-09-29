@@ -74,6 +74,6 @@ jobs:
           cmake --build ./build --config Release
       - name: Test
         run: |
-        ls
-        ls build
+          ls
+          ls build
           ./solver/test/ponio_tests
