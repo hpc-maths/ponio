@@ -92,7 +92,7 @@ order ()
   #endif
 
   for ( auto n_iter : {50,25,20,15,10} ) {
-    T dt = Tf/static_cast<double>(n_iter);
+    T dt = Tf/n_iter;
     state_t u_sol = solve_exp<Algorithm_t>(dt,Tf);
     auto e = error( u_exa , u_sol );
     errors.push_back(std::log( e ));
