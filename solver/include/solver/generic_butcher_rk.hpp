@@ -119,184 +119,80 @@ namespace lawson {
 namespace chebyshev {
 
   /**
-   * @class T
-   * Chebyshev polynomial of first kind by recursive method: \f$$\begin{aligned}T_0(x) &= 1\\ T_1(x) &= x\\ T_{n+1}(x) &= 2xT_n(x) - T_{n-1}(x)\end{aligned}}\f$$
+   * @brief Chebyshev polynomial of first kind by recursive method: \f$$\begin{aligned}T_0(x) &= 1\\ T_1(x) &= x\\ T_{n+1}(x) &= 2xT_n(x) - T_{n-1}(x)\end{aligned}}\f$$
    * 
    * @tparam N degree of polynomial
-   */
-  template <std::size_t N>
-  struct T
-  {
-    template <typename value_t>
-    static constexpr value_t
-    value ( value_t x );
-  };
-
-  /**
-   * value of Chebyshev polynomial \f$T_N(x)\f$
-   * 
    * @tparam value_t type of \f$x\f$
-   * @param x value where evaluate \f$T_N\f$
+   * @param x value where evaluate \f$T_n\f$
    */
-  template <std::size_t N>
-  template <typename value_t>
-  constexpr value_t
-  T<N>::value ( value_t x )
+  template <std::size_t N, typename value_t>
+  value_t
+  T ( const value_t x )
   {
-    return static_cast<value_t>(2.)*x*T<N-1>::value(x) - T<N-2>::value(x);
-  }
-
-  template <>
-  struct T<0>
-  {
-    template <typename value_t>
-    static constexpr value_t
-    value ( value_t x )
-    {
+    if constexpr (N==0) {
       return static_cast<value_t>(1.);
-    }
-  };
-
-  template <>
-  struct T<1>
-  {
-    template <typename value_t>
-    static constexpr value_t
-    value ( value_t x )
-    {
+    } else if constexpr (N==1) {
       return x;
+    } else {
+      return 2*x*T<N-1>(x) - T<N-2>(x);
     }
-  };
-
-  /**
-   * @class U
-   * Chebyshev polynomial of second kind by recursive method: \f$$\begin{aligned}U_0(x) &= 1\\ U_1(x) &= 2x\\ U_{n+1}(x) &= 2xU_n(x) - U_{n-1}(x)\end{aligned}}\f$$
-   * 
-   * @tparam N degree of polynomial
-   */
-  template <std::size_t N>
-  struct U
-  {
-    template <typename value_t>
-    static constexpr value_t
-    value ( value_t x );
-  };
-
-  /**
-   * value of Chebyshev polynomial \f$U_N(x)\f$
-   * 
-   * @tparam value_t type of \f$x\f$
-   * @param x value where evaluate \f$U_N\f$
-   */
-  template <std::size_t N>
-  template <typename value_t>
-  constexpr value_t
-  U<N>::value ( value_t x )
-  {
-    return static_cast<value_t>(2.)*x*U<N-1>::value(x) - U<N-2>::value(x);
   }
 
-  template <>
-  struct U<0>
+  /**
+   * @brief Chebyshev polynomial of second kind by recursive method: \f$$\begin{aligned}U_0(x) &= 1\\ U_1(x) &= 2x\\ U_{n+1}(x) &= 2xU_n(x) - U_{n-1}(x)\end{aligned}}\f$$
+   * 
+   * @tparam N degree of polynomial
+   * @tparam value_t type of \f$x\f$
+   * @param x value where evaluate \f$U_n\f$
+   */
+  template <std::size_t N, typename value_t>
+  value_t
+  U ( const value_t x )
   {
-    template <typename value_t>
-    static constexpr value_t
-    value ( value_t x )
-    {
+    if constexpr (N==0) {
       return static_cast<value_t>(1.);
+    } else if constexpr (N==1) {
+      return 2*x;
+    } else {
+      return 2*x*U<N-1>(x) - U<N-2>(x);
     }
-  };
-
-  template <>
-  struct U<1>
-  {
-    template <typename value_t>
-    static constexpr value_t
-    value ( value_t x )
-    {
-      return static_cast<value_t>(2.)*x;
-    }
-  };
-
-  /**
-   * @class dT
-   * derivatives of Chebyshev polynomial: \f$\frac{\mathrm{d}T_N}{\mathrm{d}x}(x)=NU_{N-1}(x)\f$
-   * 
-   * @tparam N degree of polynomial
-   */
-  template <std::size_t N>
-  struct dT
-  {
-    template <typename value_t>
-    static constexpr value_t
-    value ( value_t x );
-  };
-
-  /**
-   * value of derivatives of Chebyshev polynomial: \f$\frac{\mathrm{d}T_N}{\mathrm{d}x}(x)\f$
-   * 
-   * @tparam value_t type of \f$x\f$
-   * @param x value where evaluate \f$\frac{\mathrm{d}T_N}{\mathrm{d}x}\f$
-   */
-  template <std::size_t N>
-  template <typename value_t>
-  constexpr value_t
-  dT<N>::value ( value_t x )
-  {
-    return N*U<N-1>::value(x);
   }
 
-  template <>
-  struct dT<0>
-  {
-    template <typename value_t>
-    static constexpr value_t
-    value ( value_t x )
-    {
-      return static_cast<value_t>(0.);
-    }
-  };
-
   /**
-   * @class ddT
-   * second derivative of Chebyshev polynomial: \f$\frac{\mathrm{d}^2T_N}{\mathrm{d}x^2}(x)=N\frac{NT_N(x) - xU_{N-1}(x)}{x^2 -1}\f$
+   * @brief derivatives of Chebyshev polynomial: \f$\frac{\mathrm{d}T_n}{\mathrm{d}x}(x)=nU_{n-1}(x)\f$
    * 
    * @tparam N degree of polynomial
-   */
-  template <std::size_t N>
-  struct ddT
-  {
-    template <typename value_t>
-    static constexpr value_t
-    value ( value_t x );
-  };
-
-  /**
-   * value of derivative of Chebyshev polynomial: \f$\frac{\mathrm{d}T_N}{\mathrm{d}x}(x)\f$
-   * 
    * @tparam value_t type of \f$x\f$
-   * @param x value where evaluate \f$\frac{\mathrm{d}T_N}{\mathrm{d}x}\f$
+   * @param x value where evaluate \f$\frac{\mathrm{d}T_n}{\mathrm{d}x}\f$
    */
-  template <std::size_t N>
-  template <typename value_t>
-  constexpr value_t
-  ddT<N>::value ( value_t x )
+  template <std::size_t N, typename value_t>
+  value_t
+  dT ( const value_t x )
   {
-    return N*(N*T<N>::value(x) - x*U<N-1>::value(x))/(x*x - static_cast<value_t>(1.));
+    if constexpr (N==0) {
+      return static_cast<value_t>(0.);
+    } else {
+      return N*U<N-1>(x);
+    }
   }
 
-  template <>
-  struct ddT<0>
+  /**
+   * @brief second derivative of Chebyshev polynomial: \f$\frac{\mathrm{d}^2T_n}{\mathrm{d}x^2}(x)=n\frac{nT_n(x) - xU_{n-1}(x)}{x^2 -1}\f$
+   * 
+   * @tparam N degree of polynomial
+   * @tparam value_t type of \f$x\f$
+   * @param x value where evaluate \f$\frac{\mathrm{d}^2T_n}{\mathrm{d}x^2}\f$
+   */
+  template <std::size_t N, typename value_t>
+  value_t
+  ddT ( const value_t x )
   {
-    template <typename value_t>
-    static constexpr value_t
-    value ( value_t x )
-    {
+    if constexpr (N==0) {
       return static_cast<value_t>(0.);
+    } else {
+      return N*(N*T<N>(x) - x*U<N-1>(x))/(x*x - static_cast<value_t>(1.));
     }
-  };
-
-
+  }
 
   /** @class explicit_rkc2
    *  @brief define RKC2 with user defined number of stages
@@ -312,50 +208,32 @@ namespace chebyshev {
     value_t w0;
     value_t w1;
 
-    template <std::size_t J, typename T=value_t>
-    struct b
+    template <std::size_t J>
+    static constexpr value_t
+    b ( const value_t x )
     {
-      static constexpr value_t
-      value( value_t x )
-      {
-        return ddT<J>::value(x) / ( dT<J>::value(x)*dT<J>::value(x) );
+      if constexpr (J==0 || J==1) {
+        return b<2>(x);
+      } else {
+        return ddT<J>(x) / ( ::detail::power<2>(dT<J>(x)) );
       }
-    };
-    template <typename T>
-    struct b<0,T>
-    {
-      static constexpr value_t
-      value( value_t x )
-      {
-        return b<2,value_t>::value(x);
-      }
-    };
-    template <typename T>
-    struct b<1,T>
-    {
-      static constexpr value_t
-      value( value_t x )
-      {
-        return b<2,value_t>::value(x);
-      }
-    };
-
+    }
 
     explicit_rkc2 ( value_t eps=static_cast<value_t>(2./13.) )
     : w0(1. + eps/(N_stages*N_stages))
     {
-      w1 = dT<N_stages>::value(w0)/ddT<N_stages>::value(w0);
+      w1 = dT<N_stages>(w0)/ddT<N_stages>(w0);
     }
 
     template < typename Problem_t , typename state_t , typename ArrayKi_t , std::size_t j >
     inline state_t
     stage ( Stage<j> , Problem_t & f , value_t tn , state_t const& un , ArrayKi_t const& Yi , value_t dt )
     {
-      value_t mj  = 2.*b<j>::value(w0)/b<j-1>::value(w0)*w0;
-      value_t nj  =   -b<j>::value(w0)/b<j-2>::value(w0);
-      value_t mjt = 2.*b<j>::value(w0)/b<j-1>::value(w0)*w1;
-      value_t gjt = -(1. - b<j-1>::value(w0)*T<j-1>::value(w0))*mjt;
-      value_t cjm1 = dT<N_stages>::value(w0)/ddT<N_stages>::value(w0)*ddT<j-1>::value(w0)/dT<j-1>::value(w0);
+      value_t mj  = 2.*b<j>(w0)/b<j-1>(w0)*w0;
+      value_t nj  =   -b<j>(w0)/b<j-2>(w0);
+      value_t mjt = 2.*b<j>(w0)/b<j-1>(w0)*w1;
+      value_t gjt = -(1. - b<j-1>(w0)*T<j-1>(w0))*mjt;
+      value_t cjm1 = dT<N_stages>(w0)/ddT<N_stages>(w0)*ddT<j-1>(w0)/dT<j-1>(w0);
 
       return (1.-mj-nj)*un + mj*Yi[j-1] + nj*Yi[j-2] + mjt*dt*f(tn+cjm1*dt,Yi[j-1]) + gjt*dt*Yi[0];
     }
@@ -371,7 +249,7 @@ namespace chebyshev {
     inline state_t
     stage ( Stage<1> , Problem_t & f , value_t tn , state_t const& un , ArrayKi_t const& Yi , value_t dt )
     {
-      value_t m1t = b<1>::value(w0)*w1;
+      value_t m1t = b<1>(w0)*w1;
       return un + dt*m1t*Yi[0];
     }
 
@@ -382,9 +260,9 @@ namespace chebyshev {
       value_t m2 = 2.*w0;
       value_t n2 = -1.;
       value_t m2t = 2.*w1;
-      value_t c2 = dT<N_stages>::value(w0)/ddT<N_stages>::value(w0)*ddT<2>::value(w0)/dT<2>::value(w0);
-      value_t c1 = c2/dT<2>::value(w0);
-      value_t g2t = -(1. - b<1>::value(w0)*T<1>::value(w0))*m2t;
+      value_t c2 = dT<N_stages>(w0)/ddT<N_stages>(w0)*ddT<2>(w0)/dT<2>(w0);
+      value_t c1 = c2/dT<2>(w0);
+      value_t g2t = -(1. - b<1>(w0)*T<1>(w0))*m2t;
 
       return (1.-m2-n2)*un + m2*Yi[1] + n2*un + m2t*dt*f(tn+c1*dt,Yi[1]) + g2t*dt*Yi[0];
     }
