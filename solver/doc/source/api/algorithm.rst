@@ -274,3 +274,10 @@ Embedded methods
 .. doxygenfunction:: ode::butcher::lrk54_7s
    :project: solver
 
+Runge-Kutta Chebyshev methods
+-----------------------------
+
+.. doxygenclass:: ode::butcher::chebyshev::explicit_rkc2
+   :project: solver
+   :members:
+
