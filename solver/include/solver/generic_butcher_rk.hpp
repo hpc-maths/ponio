@@ -203,6 +203,7 @@ namespace chebyshev {
   template <std::size_t _N_stages, typename value_t=double>
   struct explicit_rkc2
   {
+    static_assert(_N_stages>1,"Number of stages should be at least 2 in eRKC2");
     static constexpr bool is_embedded = false;
     static constexpr std::size_t N_stages = _N_stages;
     value_t w0;
@@ -219,7 +220,7 @@ namespace chebyshev {
       }
     }
 
-    explicit_rkc2 ( value_t eps=static_cast<value_t>(2./13.) )
+    explicit_rkc2 ( value_t eps=2./13. )
     : w0(1. + eps/(N_stages*N_stages))
     {
       w1 = dT<N_stages>(w0)/ddT<N_stages>(w0);
