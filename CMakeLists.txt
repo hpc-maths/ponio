@@ -31,4 +31,8 @@ target_include_directories(
                   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-add_subdirectory(solver/test)
+option(build_tests "build the tests" OFF)
+
+if (build_tests)
+    add_subdirectory(solver/test)
+endif
