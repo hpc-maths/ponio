@@ -35,4 +35,4 @@ option(build_tests "build the tests" OFF)
 
 if (build_tests)
     add_subdirectory(solver/test)
-endif
+endif()
