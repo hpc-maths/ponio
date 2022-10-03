@@ -3,9 +3,6 @@ conda:
     environment: solver/doc/environment.yml
 build:
     os: "ubuntu-20.04"
-    tools:
-        python: "3.10"
     jobs:
         pre_install:
-            - ls
-            - bash ./doc/scripts/pre_install.sh
+            - bash ./solver/doc/scripts/pre_install.sh
