@@ -3,6 +3,8 @@ conda:
     environment: solver/doc/environment.yml
 build:
     os: "ubuntu-20.04"
+    tools:
+        python: "mambaforge-4.10"
     jobs:
         pre_install:
             - bash ./solver/doc/scripts/pre_install.sh
