@@ -1,6 +1,6 @@
 version: 2
 conda:
-    file: solver/doc/environment.yml
+    environment: solver/doc/environment.yml
 build:
     os: "ubuntu-20.04"
     tools:
