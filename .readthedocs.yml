@@ -7,4 +7,5 @@ build:
         python: "3.10"
     jobs:
         pre_install:
-            - bash ./scripts/pre_install.sh
+            - ls
+            - bash ./doc/scripts/pre_install.sh
