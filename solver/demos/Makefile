@@ -1,25 +1,20 @@
-LIB_name = solver
-INC_dir = ../include
-HEADER  = $(wildcard $(INC_dir)/$(LIB_name)/*.hpp)
-MAINs   = $(wildcard *.cpp)
-EXEs    = $(MAINs:%.cpp=%)
+ Minimal makefile for Sphinx documentation
+#
 
-BUTCHER_METHODS = $(INC_dir)/$(LIB_name)/butcher_methods.hpp
+# You can set these variables from the command line.
+SPHINXOPTS    =
+SPHINXBUILD   = sphinx-build
+SOURCEDIR     = source
+BUILDDIR      = build
 
-#CXX = clang++ -std=c++2a
-CXX = g++-12 -std=c++20
+# Put it first so that "make" without argument is like "make help".
+help:
+	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-$(BUTCHER_METHODS):
-	$(MAKE) -C .. install
+.PHONY: help Makefile
 
-% : %.cpp $(HEADER) $(BUTCHER_METHODS)
-	$(CXX) -I $(INC_dir) -I ${CONDA_PREFIX}/include $< -o $@
-
-all: $(EXEs)
-
-clean :
-	rm -f $(EXEs)
-
-mrproper : clean
-	rm *.dat
-
+# Catch-all target: route all unknown targets to Sphinx using the new
+# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
+%: Makefile
+	doxygen
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

@@ -4,9 +4,12 @@ channels:
   - conda-forge
 
 dependencies:
-  - make
+  - cmake
+  - ninja
   - graphviz
   - doxygen
   - sphinx
   - sphinx_rtd_theme
   - breathe
+  - pip:
+    - -r ../../analysis/requirements.txt
