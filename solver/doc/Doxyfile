@@ -1,6 +1,6 @@
 PROJECT_NAME      = "solver"
 XML_OUTPUT        = xml
-INPUT             = ../include/solver
+INPUT             = ../include
 GENERATE_LATEX    = NO
 GENERATE_MAN      = NO
 GENERATE_RTF      = NO
