@@ -10,8 +10,11 @@
 #include <solver/butcher_methods.hpp>
 
 int
-main (int,char**)
+main (int argc,char** argv)
 {
+  std::size_t N = 10;
+  if (argc > 1) { N = std::atoi(argv[1]); }
+
   using namespace observer;
   using state_t = std::valarray<double>;
 
@@ -33,7 +36,6 @@ main (int,char**)
 
   state_t yini = { 0., 0. };
 
-  std::size_t N = 10;
   for ( auto i=0u ; i<N ; ++i ) {
     std::stringstream filename; filename << "example5/brownian_"<< i << ".dat";
     ode::solve( brownian_pb , ode::butcher::rk_33<>() , yini , {0.,10.} , dt , observer::file_observer(filename.str()) );
