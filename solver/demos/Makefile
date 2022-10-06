@@ -1,20 +1,26 @@
- Minimal makefile for Sphinx documentation
-#
+LIB_name = solver
+INC_dir = ../include
+HEADER  = $(wildcard $(INC_dir)/$(LIB_name)/*.hpp)
+MAINs   = $(wildcard *.cpp)
+EXEs    = $(MAINs:%.cpp=%)
 
-# You can set these variables from the command line.
-SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
-SOURCEDIR     = source
-BUILDDIR      = build
+BUTCHER_METHODS = $(INC_dir)/$(LIB_name)/butcher_methods.hpp
 
-# Put it first so that "make" without argument is like "make help".
-help:
-	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+$(BUTCHER_METHODS):
+	$(MAKE) -C .. install
 
-.PHONY: help Makefile
+% : %.cpp $(HEADER) $(BUTCHER_METHODS)
+	$(CXX) -std=c++20 -I $(INC_dir) -I ${CONDA_PREFIX}/include $< -o $@
 
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
-	doxygen
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+lokta_voltera : lokta_voltera.cpp lokta_voltera.py
+	$(CXX) -std=c++20 -I $(INC_dir) -I ${CONDA_PREFIX}/include $< -o $@
+	python $@.py
+
+all: $(EXEs)
+
+clean :
+	rm -f $(EXEs)
+
+mrproper : clean
+	rm *.dat
+

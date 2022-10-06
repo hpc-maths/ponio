@@ -11,11 +11,13 @@ filename_fmt = "lv/lokta_voltera_{:0.2f}.dat"
 
 os.makedirs("lv",exist_ok=True)
 
-subprocess.Popen(["make","lokta_voltera"])
+make = subprocess.Popen(["make","lokta_voltera"])
+make.wait()
 
 for x0 in X:
   args = ["./lokta_voltera",filename_fmt.format(x0),str(x0)]
-  subprocess.Popen(args)
+  process = subprocess.Popen(args)
+process.wait()
 
 for x0 in X:
   data = np.loadtxt(filename_fmt.format(x0))
