@@ -6,6 +6,8 @@ EXEs    = $(MAINs:%.cpp=%)
 
 BUTCHER_METHODS = $(INC_dir)/$(LIB_name)/butcher_methods.hpp
 
+all: $(EXEs)
+
 $(BUTCHER_METHODS):
 	$(MAKE) -C .. install
 
@@ -13,7 +15,6 @@ $(BUTCHER_METHODS):
 	$(CXX) -std=c++20 -I $(INC_dir) -I ${CONDA_PREFIX}/include $< -o $@
 	python $@.py
 
-all: $(EXEs)
 
 clean :
 	rm -f $(EXEs)
