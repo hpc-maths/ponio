@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 X = np.linspace(0.9,1.8,10)
-filename_fmt = "lv/lokta_voltera_{:0.2f}.dat"
+filename_fmt = "example2/lokta_voltera_{:0.2f}.dat"
 
-os.makedirs("lv",exist_ok=True)
+os.makedirs("example2",exist_ok=True)
 
 make = subprocess.Popen(["make","lokta_voltera"])
 make.wait()
