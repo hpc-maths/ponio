@@ -19,7 +19,7 @@ make.wait()
 for x0 in X:
   args = ["./lotka_volterra",filename_fmt.format(x0),str(x0)]
   process = subprocess.Popen(args)
-process.wait()
+  process.wait()
 
 for i,x0 in enumerate(X):
   data = np.loadtxt(filename_fmt.format(x0))
