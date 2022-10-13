@@ -9,12 +9,14 @@
 #include "compute_order.hpp"
 
 {% for rk in list_meth %}
-{% if rk.id != "rk_118" %}{# TODO: improve test to check order of this method #}
 TEST_CASE("order::{{ rk.id }}")
 {
   using rk_t = ode::butcher::{{ rk.id }}<>;
+{% if rk.order < 8 %}
   WARN( order<rk_t>() == doctest::Approx(rk_t::order).epsilon(0.05) );
-}
+{% else %}
+  WARN( order_lv<rk_t>() == doctest::Approx(rk_t::order).epsilon(0.05) );
 {% endif %}
+}
 {% endfor %}
 
