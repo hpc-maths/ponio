@@ -213,7 +213,6 @@ namespace splitting {
   inline typename std::enable_if< (I == sizeof...(Methods_t)-1) ,void>::type
   strang<Methods_t...>::_call_inc ( Problem_t & f , value_t tn , state_t & ui , value_t dt )
   {
-    //_call_step<I>(f,tn,ui,dt);
     ui = detail::_split_solve<I>(f,methods,ui,tn,dt);
     _call_dec<I-1>(f,tn,ui,dt);
   }
@@ -232,7 +231,6 @@ namespace splitting {
   inline typename std::enable_if< (I < sizeof...(Methods_t)-1) ,void>::type
   strang<Methods_t...>::_call_inc ( Problem_t & f , value_t tn , state_t & ui , value_t dt )
   {
-    //_call_step<I>(f,tn,ui,0.5*dt);
     ui = detail::_split_solve<I>(f,methods,ui,tn,0.5*dt);
     _call_inc<I+1>(f,tn,ui,dt);
   }
@@ -243,7 +241,6 @@ namespace splitting {
   inline typename std::enable_if< (I == 0) ,void>::type
   strang<Methods_t...>::_call_dec ( Problem_t & f , value_t tn , state_t & ui , value_t dt )
   {
-    //_call_step<I>(f,tn,ui,0.5*dt);
     ui = detail::_split_solve<I>(f,methods,ui,tn,0.5*dt);
   }
 
@@ -261,8 +258,7 @@ namespace splitting {
   inline typename std::enable_if< (I > 0) ,void>::type
   strang<Methods_t...>::_call_dec ( Problem_t & f , value_t tn , state_t & ui , value_t dt )
   {
-    //_call_step<I>(f,tn,ui,0.5*dt);
-    ui = detail::_split_solve<I>(f,methods,ui,tn,dt);
+    ui = detail::_split_solve<I>(f,methods,ui,tn,0.5*dt);
     _call_dec<I-1>(f,tn,ui,dt);
   }
 
