@@ -233,7 +233,7 @@ namespace splitting {
   strang<Methods_t...>::_call_inc ( Problem_t & f , value_t tn , state_t & ui , value_t dt )
   {
     //_call_step<I>(f,tn,ui,0.5*dt);
-    ui = detail::_split_solve<I>(f,methods,ui,tn,dt);
+    ui = detail::_split_solve<I>(f,methods,ui,tn,0.5*dt);
     _call_inc<I+1>(f,tn,ui,dt);
   }
 
@@ -244,7 +244,7 @@ namespace splitting {
   strang<Methods_t...>::_call_dec ( Problem_t & f , value_t tn , state_t & ui , value_t dt )
   {
     //_call_step<I>(f,tn,ui,0.5*dt);
-    ui = detail::_split_solve<I>(f,methods,ui,tn,dt);
+    ui = detail::_split_solve<I>(f,methods,ui,tn,0.5*dt);
   }
 
   /**
