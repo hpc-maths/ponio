@@ -3,4 +3,5 @@
 
 #include "detail.hxx"
 #include "test_order.hxx"
+#include "test_order_split.hxx"
 
