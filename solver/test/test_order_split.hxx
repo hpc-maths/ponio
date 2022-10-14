@@ -14,14 +14,17 @@
 
 TEST_CASE("detail::power")
 {
-  WARN( order_lv(ode::splitting::make_lie_tuple(
-      ode::butcher::rk_33<>(),
-      ode::butcher::rk_33<>(),
-      ode::butcher::rk_33<>()
-    )) == doctest::Approx(1.0).epsilon(0.05) );
-  WARN( order_lv(ode::splitting::make_strang_tuple(
-      ode::butcher::rk_33<>(),
-      ode::butcher::rk_33<>(),
-      ode::butcher::rk_33<>()
-    )) == doctest::Approx(2.0).epsilon(0.05) );
+  auto lie_splitting = ode::splitting::make_lie_tuple(
+    ode::butcher::rk_33<>(),
+    ode::butcher::rk_33<>(),
+    ode::butcher::rk_33<>()
+  );
+  auto strang_splitting = ode::splitting::make_strang_tuple(
+    ode::butcher::rk_33<>(),
+    ode::butcher::rk_33<>(),
+    ode::butcher::rk_33<>()
+  );
+
+  WARN( check_order(lie_splitting) == doctest::Approx(lie_splitting.order).epsilon(0.05) );
+  WARN( check_order(strang_splitting) == doctest::Approx(strang_splitting.order).epsilon(0.05) );
 }

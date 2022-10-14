@@ -12,11 +12,7 @@
 TEST_CASE("order::{{ rk.id }}")
 {
   using rk_t = ode::butcher::{{ rk.id }}<>;
-{% if rk.order < 8 %}
-  WARN( order<rk_t>() == doctest::Approx(rk_t::order).epsilon(0.05) );
-{% else %}
-  WARN( order_lv<rk_t>() == doctest::Approx(rk_t::order).epsilon(0.05) );
-{% endif %}
+  WARN( check_order(rk_t()) == doctest::Approx(rk_t::order).epsilon(0.05) );
 }
 {% endfor %}
 
