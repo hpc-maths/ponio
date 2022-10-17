@@ -6,18 +6,20 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-os.makedirs("example1",exist_ok=True)
+name = "exp"
+data_dir = name+"_data"
 
-make = subprocess.Popen(["make","exp"])
+make = subprocess.Popen(["make", name])
 make.wait()
 
-args = ["./exp"]
+args = [os.path.join(".", name)]
 process = subprocess.Popen(args)
 process.wait()
 
-data = np.loadtxt("example1/exp.dat")
-plt.plot(data[:,0],np.exp(data[:,0]),"--",label="exact solution")
-plt.plot(data[:,0],data[:,1],"-+",label="solution with RK NSSP (2,1)")
+data = np.loadtxt(os.path.join(data_dir, "exp.dat"))
+
+plt.plot(data[:,0], np.exp(data[:,0]), "--", label="exact solution")
+plt.plot(data[:,0], data[:,1],"-+", label="solution with RK NSSP (2,1)")
 
 plt.title("$\dot{u} = u$, $u(t=0)=1$")
 plt.legend()

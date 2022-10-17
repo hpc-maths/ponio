@@ -3,43 +3,45 @@
 #include <numeric>
 #include <random>
 #include <sstream>
+#include <filesystem>
 
 #include <solver/problem.hpp>
 #include <solver/solver.hpp>
 #include <solver/observer.hpp>
 #include <solver/butcher_methods.hpp>
 
-int
-main (int argc,char** argv)
+int main (int argc, char** argv)
 {
-  std::size_t N = 10;
-  if (argc > 1) { N = std::atoi(argv[1]); }
+    std::string dirname = "brownian_data";  
+    std::filesystem::create_directories(dirname);
 
-  using namespace observer;
-  using state_t = std::valarray<double>;
+    std::size_t n = 10;
+    if (argc > 1) { n = std::atoi(argv[1]); }
 
-  std::random_device rd;
-  std::mt19937 gen(rd());
+    using state_t = std::valarray<double>;
 
-  std::normal_distribution<> d{0.,2};
+    std::random_device rd;
+    std::mt19937 gen(rd());
 
-  double dt = 1e-3;
+    std::normal_distribution<> d{0.,2};
 
-  auto brownian_pb = ode::make_simple_problem(
-    [&](double t, state_t const& y)->state_t {
-      return {
-        d(gen),
-        d(gen)
-      };
+    double dt = 1e-3;
+
+    auto brownian_pb = ode::make_simple_problem(
+        [&](double t, state_t const& y)->state_t {
+            return {d(gen), d(gen)};
+        }
+    );
+
+    state_t yini = { 0., 0. };
+
+    for ( auto i=0u ; i<n ; ++i ) 
+    {
+        std::stringstream ssfilename; ssfilename << "brownian_"<< i << ".dat";
+        auto filename = std::filesystem::path(dirname) / ssfilename.str();
+        observer::file_observer fobs(filename);
+        ode::solve(brownian_pb, ode::butcher::rk_33<>(), yini, {0.,10.}, dt, fobs);
     }
-  );
-
-  state_t yini = { 0., 0. };
-
-  for ( auto i=0u ; i<N ; ++i ) {
-    std::stringstream filename; filename << "example5/brownian_"<< i << ".dat";
-    ode::solve( brownian_pb , ode::butcher::rk_33<>() , yini , {0.,10.} , dt , observer::file_observer(filename.str()) );
-  }
 
   return 0;
 }

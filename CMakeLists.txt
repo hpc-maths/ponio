@@ -36,3 +36,5 @@ option(BUILD_TESTS "build the tests" OFF)
 if (BUILD_TESTS)
     add_subdirectory(solver/test)
 endif()
+
+add_subdirectory(solver/demos)

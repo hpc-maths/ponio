@@ -23,30 +23,33 @@ $$
 
 */
 
-
-int
-main (int,char**)
+int main (int,char**)
 {
-  using namespace observer;
-  using state_t = std::valarray<double>;
+    std::string dirname = "pendulum_data";  
+    std::filesystem::create_directories(dirname);
+    auto filename = std::filesystem::path(dirname) / "pendulum.dat";
+    observer::file_observer fobs(filename);
 
-  double dt = 0.1;
+    using state_t = std::valarray<double>;
 
-  double b = 0.25, c=5.0;
+    double dt = 0.1;
 
-  auto pendulum_pb = ode::make_simple_problem(
-    [=](double, state_t const& y) -> state_t {
-      double theta = y[0], omega = y[1];
-      return {
-        omega,
-        -b*omega - c*std::sin(theta)
-      };
-    }
-  );
+    double b = 0.25, c=5.0;
 
-  state_t yini = { std::numbers::pi - 0.1 , 0. };
+    auto pendulum_pb = ode::make_simple_problem(
+        [=](double, state_t const& y) -> state_t {
+            double theta = y[0], omega = y[1];
+            return {
+                omega,
+                -b*omega - c*std::sin(theta)
+            };
+        }
+    );
 
-  ode::solve( pendulum_pb , ode::butcher::rk_44<>() , yini , {0.,10.0} , dt , "example3/pendulum.dat"_fobs );
+    state_t yini = { std::numbers::pi - 0.1 , 0. };
 
-  return 0;
+
+    ode::solve( pendulum_pb, ode::butcher::rk_44<>(), yini, {0.,10.0}, dt, fobs );
+
+    return 0;
 }
