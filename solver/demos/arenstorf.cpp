@@ -50,13 +50,13 @@ int main(int, char**)
 
     state_t yini = { 0.994, 0., 0., -2.00158510637908252240537862224 };
 
-    filename = std::filesystem::path(dirname) / "arenstorf_rk546m.dat";
+    filename = (std::filesystem::path(dirname) / "arenstorf_rk546m.dat").string();
     ode::solve(arenstorf_pb, ode::butcher::rk54_6m<>(1e-5), yini, {0.,tf}, dt, observer::file_observer(filename));
 
-    filename = std::filesystem::path(dirname) / "arenstorf_rk547m.dat";
+    filename = (std::filesystem::path(dirname) / "arenstorf_rk547m.dat").string();
     ode::solve(arenstorf_pb, ode::butcher::rk54_7m<>(1e-5), yini, {0.,tf}, dt, observer::file_observer(filename));
 
-    filename = std::filesystem::path(dirname) / "arenstorf_rk547s.dat";
+    filename = (std::filesystem::path(dirname) / "arenstorf_rk547s.dat").string();
     ode::solve(arenstorf_pb, ode::butcher::rk54_7s<>(1e-5), yini, {0.,tf}, dt, observer::file_observer(filename));
 
     return 0;
