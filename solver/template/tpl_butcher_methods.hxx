@@ -3,6 +3,7 @@
 
 #include "butcher_tableau.hpp"
 #include "generic_butcher_rk.hpp"
+#include "ponio_config.hpp"
 
 namespace ode::butcher {
 
@@ -53,7 +54,7 @@ using {{ rk.id }} = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<value_t
  */
 template <typename Exp_t>
 auto
-l{{ rk.id }}( Exp_t exp_ , double tol=1e-4 )
+l{{ rk.id }}( Exp_t exp_ , double tol=ponio::default_config::tol )
 {
   return lawson::make_lawson<butcher_{{ rk.id }}<double>,Exp_t>(exp_,tol);
 }

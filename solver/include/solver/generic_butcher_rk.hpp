@@ -4,6 +4,7 @@
 
 #include "stage.hpp"
 #include "detail.hpp"
+#include "ponio_config.hpp"
 
 namespace ode::butcher {
 
@@ -21,7 +22,7 @@ namespace runge_kutta {
     static constexpr std::size_t order = Tableau::order;
     static constexpr const char* id = Tableau::id;
 
-    explicit_rk_butcher(double tol_=1e-4)
+    explicit_rk_butcher(double tol_=ponio::default_config::tol)
     : butcher(), tol(tol_)
     {}
 
@@ -73,7 +74,7 @@ namespace lawson {
     static constexpr std::size_t order = Tableau::order;
     static constexpr const char* id = Tableau::id;
 
-    explicit_rk_butcher( Exp_t exp_, double tol_=1e-4 )
+    explicit_rk_butcher( Exp_t exp_, double tol_=ponio::default_config::tol )
     : lawson_base<Exp_t>(exp_) , butcher(), tol(tol_)
     {}
 
@@ -114,7 +115,7 @@ namespace lawson {
    */
   template <typename Tableau, typename Exp_t>
   auto
-  make_lawson( Exp_t exp_ , double tol_=1e-4 )
+  make_lawson( Exp_t exp_ , double tol_=ponio::default_config::tol )
   {
     return explicit_rk_butcher<Tableau,Exp_t>(exp_,tol_);
   }
