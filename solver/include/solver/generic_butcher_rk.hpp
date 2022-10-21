@@ -5,11 +5,9 @@
 #include "stage.hpp"
 #include "detail.hpp"
 #include "ponio_config.hpp"
+#include "butcher_tableau.hpp"
 
 namespace ode::butcher {
-
-template <typename Tableau>
-concept is_embedded_tableau = requires (Tableau t){ t.b2; };
 
 namespace runge_kutta {
 
