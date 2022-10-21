@@ -4,6 +4,7 @@
 
 #include "stage.hpp"
 #include "detail.hpp"
+#include "ponio_config.hpp"
 #include "butcher_tableau.hpp"
 
 namespace ode::butcher {
@@ -19,7 +20,7 @@ namespace runge_kutta {
     static constexpr std::size_t order = Tableau::order;
     static constexpr const char* id = Tableau::id;
 
-    explicit_rk_butcher(double tol_=1e-4)
+    explicit_rk_butcher(double tol_=ponio::default_config::tol)
     : butcher(), tol(tol_)
     {}
 
@@ -68,9 +69,11 @@ namespace lawson {
     Tableau butcher;
     static constexpr std::size_t N_stages = Tableau::N_stages;
     static constexpr bool is_embedded = is_embedded_tableau<Tableau>;
+    static constexpr std::size_t order = Tableau::order;
+    static constexpr const char* id = Tableau::id;
 
-    explicit_rk_butcher( Exp_t exp_ )
-    : lawson_base<Exp_t>(exp_) , butcher()
+    explicit_rk_butcher( Exp_t exp_, double tol_=ponio::default_config::tol )
+    : lawson_base<Exp_t>(exp_) , butcher(), tol(tol_)
     {}
 
     template < typename Problem_t , typename state_t , typename value_t , typename ArrayKi_t , std::size_t i >
@@ -96,6 +99,8 @@ namespace lawson {
     {
       return m_exp(dt*pb.l) * ::detail::tpl_inner_product<N_stages>(butcher.b2, Ki, un, dt);
     }
+
+    double tol;
   };
 
   /**
@@ -104,12 +109,13 @@ namespace lawson {
    * @tparam Tableau type of Butcher tableau
    * @tparam Exp_t type of exponential function
    * @param exp_ exponential function
+   * @param tol_ tolenrence of method for adaptative time step integrator
    */
   template <typename Tableau, typename Exp_t>
   auto
-  make_lawson( Exp_t exp_ )
+  make_lawson( Exp_t exp_ , double tol_=ponio::default_config::tol )
   {
-    return explicit_rk_butcher<Tableau,Exp_t>(exp_);
+    return explicit_rk_butcher<Tableau,Exp_t>(exp_,tol_);
   }
 
 } // namespace lawson
