@@ -2,7 +2,6 @@
 #include <tuple>
 #include <filesystem>
 
-#include <solver/problem.hpp>
 #include <solver/solver.hpp>
 #include <solver/observer.hpp>
 #include <solver/butcher_methods.hpp>
