@@ -10,8 +10,8 @@
 #include <solver/butcher_methods.hpp>
 
 /*
-Lokta-Voltera system
---------------------
+Lotka-Volterra system
+---------------------
 
 $$
   \begin{cases}
@@ -27,29 +27,34 @@ This system is solved by RK(11,8) Runge-Kutta method with time step $\Delta t=0.
 
 int main(int argc, char** argv)
 {
-  using state_t = std::valarray<double>;
+     // default filename
+    std::string dirname = "lv_data";  
+    std::filesystem::create_directories(dirname);
+    auto filename = std::filesystem::path(dirname) / "lv.dat";
 
-  std::string filename = "lv.dat"; // default filename
-  double x0 = 1.0; // default x0
-  if (argc > 1) {
-    filename = argv[1];
-    x0       = std::stof(argv[2]);
-  }
+    using state_t = std::valarray<double>;
 
-  double alpha=2./3., beta=4./3., gamma=1., delta=1.; // parameter
-  auto lokta_voltera_pb = ode::make_simple_problem( // define problem
-        [=]( double t , state_t const& u ) -> state_t {
-          return {
-            alpha*u[0] - beta*u[0]*u[1] ,
-            delta*u[0]*u[1] - gamma*u[1]
-          };
-        }
-      );
+    double x0 = 1.0; // default x0
+    if (argc > 1) {
+        filename = argv[1];
+        x0       = std::stof(argv[2]);
+    }
+    observer::file_observer fobs(filename);
 
-  std::vector<double> t_span = {0.,15.}; // begin and end time
-  double dt = 0.1; // time step
-  state_t u0 = {x0, x0}; // initial condition
-  ode::solve( lokta_voltera_pb , ode::butcher::rk_118<>() , u0 , t_span , dt , observer::file_observer(filename) );
+    double alpha=2./3., beta=4./3., gamma=1., delta=1.; // parameter
+    auto lotka_volterra_pb = ode::make_simple_problem( // define problem
+            [=]( double t , state_t const& u ) -> state_t {
+                return {
+                    alpha*u[0] - beta*u[0]*u[1] ,
+                    delta*u[0]*u[1] - gamma*u[1]
+                };
+            }
+        );
 
-  return 0;
+    std::vector<double> t_span = {0.,15.}; // begin and end time
+    double dt = 0.1; // time step
+    state_t u0 = {x0, x0}; // initial condition
+    ode::solve(lotka_volterra_pb, ode::butcher::rk_118<>(), u0, t_span, dt, fobs);
+
+    return 0;
 }

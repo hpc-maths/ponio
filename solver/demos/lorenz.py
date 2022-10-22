@@ -7,26 +7,24 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 
-os.makedirs("example6",exist_ok=True)
+name = "lorenz"
+data_dir = name+"_data"
 
-make = subprocess.Popen(["make","lorenz"])
+make = subprocess.Popen(["make", name])
 make.wait()
 
-N = 10
-
-args = ["./lorenz"]
+args = [os.path.join(".", name)]
 process = subprocess.Popen(args)
 process.wait()
 
-data = np.loadtxt("example6/lorenz.dat")
+data = np.loadtxt(os.path.join(data_dir, "lorenz.dat"))
 T,x,y,z = data[:,0],data[:,1],data[:,2],data[:,3]
-
 fig = plt.figure(constrained_layout=True,figsize=(8,8))
 gs = fig.add_gridspec(6,1)
 axlist = []
 
 ax = fig.add_subplot(gs[:3,0],projection='3d')
-ax.set_title("Lorenz attractor")
+ax.set_title("Lorenz attractor (solved  with RK NSSP (5,3))")
 ax.plot(x,y,z,label="Lorenz attractor",linewidth=0.375)
 ax.set_xlim3d([-20,20])
 ax.set_ylim3d([-20,20])

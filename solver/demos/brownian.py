@@ -6,22 +6,22 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-os.makedirs("example5",exist_ok=True)
+name = "brownian"
+data_dir = name+"_data"
 
-make = subprocess.Popen(["make","brownian"])
+make = subprocess.Popen(["make",name])
 make.wait()
 
-N = 10
+n = 10
 
-args = ["./brownian",str(N)]
+args = [os.path.join(".", name),str(n)]
 process = subprocess.Popen(args)
 process.wait()
 
-for i in range(N):
-  data = np.loadtxt("example5/brownian_{}.dat".format(i))
-  plt.plot(data[:,1],data[:,2],"-",linewidth=1)
+for i in range(n):
+    data = np.loadtxt(os.path.join(data_dir, "brownian_{}.dat".format(i)))
+    plt.plot(data[:,1],data[:,2],"-",linewidth=1)
 
 plt.axis('equal')
-
 plt.title("Brownian motion")
 plt.show()
