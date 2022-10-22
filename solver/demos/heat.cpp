@@ -25,7 +25,9 @@ class heat_model
         std::size_t nx = y.size();
         std::valarray<double> ydot(nx);
         ydot[0] = oneoverdxdx * (-2.*y[0] + y[1]);
-        for (std::size_t i=1; i<nx-1; ++i) ydot[i] = oneoverdxdx * (y[i-1] - 2.*y[i] + y[i+1]);
+        for (std::size_t i=1; i<nx-1; ++i) {
+            ydot[i] = oneoverdxdx * (y[i-1] - 2.*y[i] + y[i+1]);
+        }
         ydot[nx-1] = oneoverdxdx * (y[nx-2] - 2.*y[nx-1]);
         return ydot;
     }
