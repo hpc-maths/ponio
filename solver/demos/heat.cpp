@@ -8,10 +8,7 @@
 #include <filesystem>
 #include <numbers>
 
-#include <solver/problem.hpp>
 #include <solver/solver.hpp>
-#include <solver/observer.hpp>
-#include <solver/butcher_methods.hpp>
 #include <solver/generic_butcher_rk.hpp>
 
 // Heat
@@ -23,7 +20,7 @@ class heat_model
     heat_model(double dx): m_dx(dx) {}
 
     std::valarray<double> operator()(double t, const std::valarray<double> & y)     
-    {  
+    {
 	    double oneoverdxdx = 1./(m_dx*m_dx);
 	    std::size_t nx = y.size();
 	    std::valarray<double> ydot(nx);
@@ -76,13 +73,13 @@ int main (int argc, char** argv)
     std::cout << "L1 norm of error = " << err << std::endl;
 
     auto printer_xy = [](double x, double y){
-                        std::stringstream ss; ss << x << " " << y;
-                        return ss.str();
+                            std::stringstream ss; ss << x << " " << y;
+                            return ss.str();
                         };
 
-    auto filename_sol = std::filesystem::path(dirname) / "heat_sol.dat";
     {
-        std::ofstream of(filename_sol);
+        // save solution
+        std::ofstream of(std::filesystem::path(dirname) / "heat_sol.dat");
         std::transform(
                 std::begin(x), std::end(x),
                 std::begin(yend),
@@ -92,9 +89,9 @@ int main (int argc, char** argv)
         of.close();
     }
 
-    auto filename_exa = std::filesystem::path(dirname) / "heat_exa.dat";
     {
-        std::ofstream of(filename_exa);
+        // save exact solution
+        std::ofstream of(std::filesystem::path(dirname) / "heat_exa.dat");
         std::transform(
                 std::begin(x), std::end(x),
                 std::begin(yexa),
