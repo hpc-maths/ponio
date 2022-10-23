@@ -41,8 +41,8 @@ const sort_methods = {
   'order': (elm) => { return Number(elm.getAttribute("data-order")); } ,
   'stages': (elm) => { return Number(elm.getAttribute("data-nstages")); } ,
   'stage_order': (elm) => { return Number(elm.getAttribute("data-stage_order")); } ,
-  'xmax': (elm) => { return Number(elm.getAttribute("data-xmax")); } ,
-  'ymax': (elm) => { return Number(elm.getAttribute("data-ymax")); } ,
+  'x_max': (elm) => { return Number(elm.getAttribute("data-x_max")); } ,
+  'y_max': (elm) => { return Number(elm.getAttribute("data-y_max")); } ,
   'random': (elm) => { return Math.random() - 0.5; }
 }
 
