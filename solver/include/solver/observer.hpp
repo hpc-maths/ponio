@@ -133,39 +133,18 @@ namespace observer {
   {
     std::ofstream out;
 
-    file_observer ( std::string_view filename );
-    file_observer ( std::string const& filename );
-
-    file_observer ( std::filesystem::path const& path );
+    file_observer ( std::filesystem::path path );
 
     file_observer ( file_observer const& ) = delete;
   };
 
   /**
    * constructor of \ref file_observer
-   * @param filename string of the output file
-   * @warning this class doesn't create any folder
-   */
-  file_observer::file_observer ( std::string_view filename ):
-    out(filename.data())
-  {}
-
-  /**
-   * constructor of \ref file_observer
-   * @param filename string of the output file
-   * @warning this class doesn't create any folder
-   */
-  file_observer::file_observer ( std::string const& filename ):
-    out(filename)
-  {}
-
-  /**
-   * constructor of \ref file_observer
    * @param path path to the output file
-   * @warning this class doesn't create any folder
+   * @note this class creates folder if needed
    */
-  file_observer::file_observer ( std::filesystem::path const& path ):
-    out(path)
+  file_observer::file_observer ( std::filesystem::path path )
+  : out( (std::filesystem::create_directories(path.parent_path()), path) )
   {}
 
   /**
@@ -176,6 +155,25 @@ namespace observer {
   {
     return file_observer(std::string_view(str,len));
   }
+
+
+  /** @class null_observer
+   *  observer that do nothing
+   */
+  struct null_observer
+  {
+    template < typename state_t , typename value_t >
+    void
+    operator () ( value_t , state_t const& , value_t );
+  };
+
+  /**
+   * call operator that do nothing
+   */
+  template < typename state_t , typename value_t >
+  void
+  null_observer::operator() ( value_t , state_t const& , value_t )
+  {}
 
 } // namespace observer
 
