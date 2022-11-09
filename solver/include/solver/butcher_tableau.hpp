@@ -49,9 +49,9 @@ struct adaptive_butcher_tableau : public butcher_tableau<N,_value_t>
 };
 
 template <typename Tableau>
-concept is_embedded_tableau = is_butcher_tableau<Tableau> && requires (Tableau t){ t.b2; };
+concept is_embedded_tableau = requires (Tableau t){ t.b2; };
 
-template <typename T>
-concept is_embedded = is_embedded_tableau<T> || T::is_embedded == true;
+template <typename Algorithm_t>
+concept is_embedded = requires {Algorithm_t::is_embedded;};
 
 } // namespace ode::butcher
