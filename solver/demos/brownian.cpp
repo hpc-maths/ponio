@@ -10,6 +10,17 @@
 #include <solver/observer.hpp>
 #include <solver/butcher_methods.hpp>
 
+template <typename T>
+double d(T const& _)
+{
+    static double count = 0.;
+
+    double r = std::sin(count);
+
+    count += 0.1;
+    return r;
+}
+
 int main (int argc, char** argv)
 {
     std::string dirname = "brownian_data";
@@ -22,7 +33,7 @@ int main (int argc, char** argv)
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    std::normal_distribution<> d{0.,2};
+    // std::normal_distribution<> d{0.,2};
 
     double dt = 1e-3;
 
