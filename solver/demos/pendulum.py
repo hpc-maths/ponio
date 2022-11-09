@@ -7,16 +7,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import solve_ivp
 
-os.makedirs("example3",exist_ok=True)
+name = "pendulum"
+data_dir = name+"_data"
 
-make = subprocess.Popen(["make","pendulum"])
+make = subprocess.Popen(["make", name])
 make.wait()
 
-args = ["./pendulum"]
+args = [os.path.join(".", name)]
 process = subprocess.Popen(args)
 process.wait()
 
-data = np.loadtxt("example3/pendulum.dat")
+data = np.loadtxt(os.path.join(data_dir, "pendulum.dat"))
 
 def pendulum(t, y, b, c):
   theta,omega = y
