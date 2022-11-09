@@ -1,7 +1,7 @@
 #include <iostream>
 #include <valarray>
 #include <numeric>
-//#include <random>
+#include <random>
 #include <cstdlib>
 #include <sstream>
 #include <filesystem>
@@ -11,16 +11,16 @@
 #include <solver/observer.hpp>
 #include <solver/butcher_methods.hpp>
 
-template <typename T>
-double d(T const& _)
+struct C_random_device
 {
-    static double count = 0.;
+    using result_type = unsigned int;
 
-    double r = std::sin(count);
+    static constexpr result_type min () { return 0u; }
+    static constexpr result_type max () { return RAND_MAX; }
+    double entropy() const noexcept { return 42.0; }
 
-    count += 0.1;
-    return static_cast<double>(std::rand())/RAND_MAX-0.5;
-}
+    result_type operator() () { return std::rand(); }
+};
 
 int main (int argc, char** argv)
 {
@@ -32,10 +32,10 @@ int main (int argc, char** argv)
     using state_t = std::valarray<double>;
 
     //std::random_device rd;
-    //std::mt19937 gen(rd());
-    bool gen = true;
+    C_random_device rd;
+    std::mt19937 gen(rd());
 
-    // std::normal_distribution<> d{0.,2};
+    std::normal_distribution<> d{0.,2};
 
     double dt = 1e-3;
 
