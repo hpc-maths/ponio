@@ -78,11 +78,6 @@ namespace ode {
   { return static_cast<bool>(property[0]); }
 
 // --- SIMPLE_PROBLEM ----------------------------------------------------------
-  /** @class _simple_problem
-   *  define a dummy problem for inheritence of \ref simple_problem
-   */
-  struct _simple_problem : public parent_problem { using parent_problem::parent_problem; };
-
   /** @class simple_problem
    *  define a problem with a unique function
    *  @tparam Callable_t type of callable object (or function) stored in problem
@@ -90,8 +85,9 @@ namespace ode {
    *  This class represent a problem of the form \f( \dot{u}=f(t,u) \f)
    */
   template <typename Callable_t>
-  struct simple_problem : public _simple_problem
+  struct simple_problem : public parent_problem
   {
+    using parent_problem::parent_problem;
     Callable_t f;
 
     simple_problem ( Callable_t & f_ , std::size_t order=3 , bool is_stiff=false );
@@ -111,7 +107,7 @@ namespace ode {
   template < typename Callable_t >
   inline
   simple_problem<Callable_t>::simple_problem ( Callable_t & f_ , std::size_t order , bool is_stiff ) :
-    _simple_problem(order,is_stiff) , f(f_)
+    parent_problem(order,is_stiff) , f(f_)
   {}
 
   /**
@@ -140,11 +136,6 @@ namespace ode {
   { return simple_problem<Callable_t>(c,order,is_stiff); }
 
 // --- LAWSON_PROBLEM ----------------------------------------------------------
-  /** @class _lawson_problem
-   *  define a dummy problem for inheritence of \ref lawson_problem
-   */
-  struct _lawson_problem : public parent_problem { using parent_problem::parent_problem; };
-
   /** @class lawson_problem
    *  define a problem with a linear part and non-linear part
    *  @tparam Linear_t     type of the linear part (a matrix)
@@ -153,8 +144,9 @@ namespace ode {
    *  This class represent a problem of the form \f( \dot{u}=Lu + N(t,u) \f)
    */
   template < typename Linear_t , typename Nonlinear_t >
-  struct lawson_problem : public _lawson_problem
+  struct lawson_problem : public parent_problem
   {
+    using parent_problem::parent_problem;
     Linear_t l;
     Nonlinear_t n;
 
@@ -174,7 +166,7 @@ namespace ode {
    */
   template < typename Linear_t , typename Nonlinear_t >
   lawson_problem<Linear_t,Nonlinear_t>::lawson_problem ( Linear_t & l_ , Nonlinear_t & n_ , std::size_t order , bool is_stiff ) :
-    _lawson_problem(order,is_stiff) , l(l_) , n(n_)
+    parent_problem(order,is_stiff) , l(l_) , n(n_)
   {}
 
   /**
@@ -204,11 +196,6 @@ namespace ode {
   { return lawson_problem<Linear_t,Nonlinear_t>(l,n,order,is_stiff); }
 
 // --- IMEX_PROBLEM ------------------------------------------------------------
-  /** @class _imex_problem
-   *  define a dummy problem for inheritence of \ref imex_problem
-   */
-  struct _imex_problem : public parent_problem { using parent_problem::parent_problem; };
-
   /** @class imex_problem
    *  define a problem with a easy to implicit part and part which will be solve explicitly
    *  @tparam Implicit_t  type of the easy to implicit part
@@ -217,8 +204,9 @@ namespace ode {
    *  This class represent a problem of the form \f( \dot{u}=I(t,u) + E(t,u) \f)
    */
   template < typename Implicit_t , typename Explicit_t >
-  struct imex_problem : public _imex_problem
+  struct imex_problem : public parent_problem
   {
+    using parent_problem::parent_problem;
     Implicit_t i;
     Explicit_t e;
 
@@ -238,7 +226,7 @@ namespace ode {
    */
   template < typename Implicit_t , typename Explicit_t >
   imex_problem<Implicit_t,Explicit_t>::imex_problem ( Implicit_t & i_ , Explicit_t & e_ , std::size_t order , bool is_stiff ) :
-    _imex_problem(order,is_stiff) , i(i_) , e(e_)
+    parent_problem(order,is_stiff) , i(i_) , e(e_)
   {}
 
   /**
@@ -252,7 +240,7 @@ namespace ode {
   state_t
   imex_problem<Implicit_t,Explicit_t>::operator () ( value_t t , state_t const& u )
   {
-    return i(t,u) + e(t,u);
+    return i*u + e(t,u);
   }
 
   /**
