@@ -37,14 +37,17 @@ struct butcher_{{ rk.id }} : public {{ "adaptive_" if 'b2' in rk else "" }}butch
   )
   {}
 };
+
 /**
  * @brief {{ rk.label }} method
  * @tparam value_t type of coefficient (``double``by default)
  * 
  * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
  */
-template <typename value_t=double>
-using {{ rk.id }} = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<value_t>>;
+template <typename value_t>
+using {{ rk.id }}_t = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<value_t>>;
+
+using {{ rk.id }} = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<double>>;
 
 /**
  * @brief l{{ rk.label }} method
@@ -52,6 +55,13 @@ using {{ rk.id }} = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<value_t
  * 
  * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
  */
+template <typename value_t, typename Exp_t>
+auto
+l{{ rk.id }}_t( Exp_t exp_ , double tol=ponio::default_config::tol )
+{
+  return lawson::make_lawson<butcher_{{ rk.id }}<value_t>,Exp_t>(exp_,tol);
+}
+
 template <typename Exp_t>
 auto
 l{{ rk.id }}( Exp_t exp_ , double tol=ponio::default_config::tol )
