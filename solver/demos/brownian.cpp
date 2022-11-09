@@ -1,7 +1,7 @@
 #include <iostream>
 #include <valarray>
 #include <numeric>
-#include <random>
+//#include <random>
 #include <sstream>
 #include <filesystem>
 
@@ -30,8 +30,9 @@ int main (int argc, char** argv)
 
     using state_t = std::valarray<double>;
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    //std::random_device rd;
+    //std::mt19937 gen(rd());
+    bool gen = true;
 
     // std::normal_distribution<> d{0.,2};
 
