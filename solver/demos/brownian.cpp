@@ -2,6 +2,7 @@
 #include <valarray>
 #include <numeric>
 //#include <random>
+#include <cstdlib>
 #include <sstream>
 #include <filesystem>
 
@@ -18,7 +19,7 @@ double d(T const& _)
     double r = std::sin(count);
 
     count += 0.1;
-    return r;
+    return static_cast<double>(std::rand())/RAND_MAX-0.5;
 }
 
 int main (int argc, char** argv)
