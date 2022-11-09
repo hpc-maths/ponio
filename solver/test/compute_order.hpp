@@ -23,6 +23,7 @@ using namespace std::string_literals;
 #include <solver/solver.hpp>
 #include <solver/detail.hpp>
 #include <solver/problem.hpp>
+#include <solver/time_span.hpp>
 
 template <typename Container>
 auto
@@ -78,7 +79,7 @@ solve_exp (Algorithm_t & algo, T dt , T Tf )
   #else
     auto obs = [](T,state_t,T){};
   #endif
-    return ode::solve( pb , algo , y0 , t_span , dt , obs );
+    return ode::solve( pb , algo , y0 , {0.,Tf} , dt , obs );
 }
 
 
@@ -159,7 +160,7 @@ long_time_check_order (Algorithm_t & algo)
   state_t u_ini = {x0, x0};
   T V_ini = V(u_ini);
 
-  std::vector<T> t_span = {0.,1000.};
+  ponio::time_span<T> t_span = {0.,1000.};
   std::vector<T> dts = {0.25,0.125,0.1,0.075,0.05}; // find a way to adapt this range to the method
   std::vector<T> relative_errors, ldts;
 

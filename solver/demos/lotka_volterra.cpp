@@ -1,12 +1,13 @@
 #include <iostream>
 #include <valarray>
 #include <sstream>
-#include <vector>
 #include <string>
+#include <filesystem>
 
 #include <solver/problem.hpp>
 #include <solver/solver.hpp>
 #include <solver/observer.hpp>
+#include <solver/time_span.hpp>
 #include <solver/butcher_methods.hpp>
 
 /*
@@ -28,8 +29,7 @@ This system is solved by RK(11,8) Runge-Kutta method with time step $\Delta t=0.
 int main(int argc, char** argv)
 {
      // default filename
-    std::string dirname = "lv_data";  
-    std::filesystem::create_directories(dirname);
+    std::string dirname = "lv_data";
     auto filename = std::filesystem::path(dirname) / "lv.dat";
 
     using state_t = std::valarray<double>;
@@ -51,10 +51,10 @@ int main(int argc, char** argv)
             }
         );
 
-    std::vector<double> t_span = {0.,15.}; // begin and end time
+    ponio::time_span<double> t_span = {0.,15.}; // begin and end time
     double dt = 0.1; // time step
     state_t u0 = {x0, x0}; // initial condition
-    ode::solve(lotka_volterra_pb, ode::butcher::rk_118<>(), u0, t_span, dt, fobs);
+    ode::solve(lotka_volterra_pb, ode::butcher::rk_118(), u0, t_span, dt, fobs);
 
     return 0;
 }

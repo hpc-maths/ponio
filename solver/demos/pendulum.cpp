@@ -2,6 +2,7 @@
 #include <valarray>
 #include <numeric>
 #include <numbers>
+#include <filesystem>
 
 #include <solver/problem.hpp>
 #include <solver/solver.hpp>
@@ -25,8 +26,7 @@ $$
 
 int main (int,char**)
 {
-    std::string dirname = "pendulum_data";  
-    std::filesystem::create_directories(dirname);
+    std::string dirname = "pendulum_data";
     auto filename = std::filesystem::path(dirname) / "pendulum.dat";
     observer::file_observer fobs(filename);
 
@@ -49,7 +49,7 @@ int main (int,char**)
     state_t yini = { std::numbers::pi - 0.1 , 0. };
 
 
-    ode::solve( pendulum_pb, ode::butcher::rk_44<>(), yini, {0.,10.0}, dt, fobs );
+    ode::solve( pendulum_pb, ode::butcher::rk_44(), yini, {0.,10.0}, dt, fobs );
 
     return 0;
 }

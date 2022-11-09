@@ -12,8 +12,7 @@
 
 int main (int argc, char** argv)
 {
-    std::string dirname = "brownian_data";  
-    std::filesystem::create_directories(dirname);
+    std::string dirname = "brownian_data";
 
     std::size_t n = 10;
     if (argc > 1) { n = std::atoi(argv[1]); }
@@ -40,7 +39,7 @@ int main (int argc, char** argv)
         std::stringstream ssfilename; ssfilename << "brownian_"<< i << ".dat";
         auto filename = std::filesystem::path(dirname) / ssfilename.str();
         observer::file_observer fobs(filename);
-        ode::solve(brownian_pb, ode::butcher::rk_33<>(), yini, {0.,10.}, dt, fobs);
+        ode::solve(brownian_pb, ode::butcher::rk_33(), yini, {0.,10.}, dt, fobs);
     }
 
   return 0;
