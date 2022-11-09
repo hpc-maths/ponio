@@ -52,8 +52,9 @@ jobs:
 
           cmake: true
           ninja: true
-          vcpkg: true
-          ccache: true
+          vcpkg: false
+          ccache: false
+          conan: true
           clangtidy: false
           task: false
 
@@ -64,7 +65,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip3 install conan sympy numpy docopt-ng jinja2
+          pip3 install sympy numpy docopt-ng jinja2
       - name: Configure CMake
         run: |
           conan install .
