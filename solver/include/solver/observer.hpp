@@ -147,6 +147,11 @@ namespace observer {
     file_observer ( std::filesystem::path path );
 
     file_observer ( file_observer const& ) = delete;
+
+    private:
+
+    static std::filesystem::path
+    create_directory_if_needed ( std::filesystem::path const& path );
   };
 
   /**
@@ -155,8 +160,23 @@ namespace observer {
    * @note this class creates folder if needed
    */
   file_observer::file_observer ( std::filesystem::path path )
-  : out( (std::filesystem::create_directories(path.parent_path()), path) )
+  : out( create_directory_if_needed(path) )
   {}
+
+
+  /**
+   * create parent directory of path if needed and return the path
+   * @param path path of output file
+   */
+  std::filesystem::path
+  file_observer::create_directory_if_needed ( std::filesystem::path const& path )
+  {
+    auto parent = path.parent_path();
+    if ( parent.empty() ) {
+      std::filesystem::create_directories(parent);
+    }
+    return path;
+  }
 
   /**
    * litteral to convert a string into \ref file_observer
