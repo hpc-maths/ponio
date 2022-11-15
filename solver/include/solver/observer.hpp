@@ -9,6 +9,8 @@
 #include <iostream>
 #include <concepts>
 #include <ranges>
+#include <iomanip>
+#include <limits>
 
 
 #include "detail.hpp"
@@ -51,6 +53,7 @@ namespace observer {
   std::ostream&
   operator << ( std::ostream & os , capsule<state_t> const& data )
   {
+    os << std::setprecision(std::numeric_limits<state_t>::digits10 + 1);
     os << data.data;
     return os;
   }
@@ -63,7 +66,15 @@ namespace observer {
   std::ostream&
   operator << ( std::ostream & os , capsule<state_t> const& data )
   {
-    std::copy( std::ranges::cbegin(data.data) , std::ranges::cend(data.data) , std::ostream_iterator<decltype(*std::ranges::cbegin(data.data))>(os," ") );
+    using value_t = decltype(*std::ranges::cbegin(data.data));
+
+    os << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+
+    std::copy(
+      std::ranges::cbegin(data.data), std::ranges::cend(data.data) ,
+      std::ostream_iterator<value_t>(os, " ")
+    );
+
     return os;
   }
 
@@ -133,40 +144,39 @@ namespace observer {
   {
     std::ofstream out;
 
-    file_observer ( std::string_view filename );
-    file_observer ( std::string const& filename );
-
-    file_observer ( std::filesystem::path const& path );
+    file_observer ( std::filesystem::path path );
 
     file_observer ( file_observer const& ) = delete;
+
+    private:
+
+    static std::filesystem::path
+    create_directory_if_needed ( std::filesystem::path const& path );
   };
 
   /**
    * constructor of \ref file_observer
-   * @param filename string of the output file
-   * @warning this class doesn't create any folder
-   */
-  file_observer::file_observer ( std::string_view filename ):
-    out(filename.data())
-  {}
-
-  /**
-   * constructor of \ref file_observer
-   * @param filename string of the output file
-   * @warning this class doesn't create any folder
-   */
-  file_observer::file_observer ( std::string const& filename ):
-    out(filename)
-  {}
-
-  /**
-   * constructor of \ref file_observer
    * @param path path to the output file
-   * @warning this class doesn't create any folder
+   * @note this class creates folder if needed
    */
-  file_observer::file_observer ( std::filesystem::path const& path ):
-    out(path)
+  file_observer::file_observer ( std::filesystem::path path )
+  : out( create_directory_if_needed(path) )
   {}
+
+
+  /**
+   * create parent directory of path if needed and return the path
+   * @param path path of output file
+   */
+  std::filesystem::path
+  file_observer::create_directory_if_needed ( std::filesystem::path const& path )
+  {
+    auto parent = path.parent_path();
+    if ( parent.empty() ) {
+      std::filesystem::create_directories(parent);
+    }
+    return path;
+  }
 
   /**
    * litteral to convert a string into \ref file_observer
@@ -177,5 +187,50 @@ namespace observer {
     return file_observer(std::string_view(str,len));
   }
 
-} // namespace observer
 
+  /** @class null_observer
+   *  observer that do nothing
+   */
+  struct null_observer
+  {
+    template < typename state_t , typename value_t >
+    void
+    operator () ( value_t , state_t const& , value_t );
+  };
+
+  /**
+   * call operator that do nothing
+   */
+  template < typename state_t , typename value_t >
+  void
+  null_observer::operator() ( value_t , state_t const& , value_t )
+  {}
+
+  /**
+   * @class vector_observer
+   * 
+   * @tparam state_t type of variable \f$u^n\f$
+   * @tparam value_t type of \f$t^n\f$ and \f$\Delta t\f$
+   * 
+   * This observer saves all iterations inside a vector
+   */
+  template <typename state_t, typename value_t=double>
+  struct vector_observer
+  {
+    std::vector<std::tuple<value_t,state_t,value_t>> solutions;
+
+    void
+    operator () ( value_t tn, state_t const& un, value_t dt );
+  };
+
+  /**
+   * call operator to save all iteration: `(tn, un, dt)` as a tuple inside a `std::vector`
+   */
+  template <typename state_t, typename value_t>
+  void
+  vector_observer<state_t,value_t>::operator () ( value_t tn, state_t const& un, value_t dt )
+  {
+    solutions.push_back(std::make_tuple(tn,un,dt));
+  }
+
+} // namespace observer

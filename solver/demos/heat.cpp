@@ -10,6 +10,8 @@
 
 #include <solver/solver.hpp>
 #include <solver/generic_butcher_rk.hpp>
+#include <solver/observer.hpp>
+#include <solver/time_span.hpp>
 
 // Heat
 class heat_model
@@ -41,19 +43,25 @@ class heat_model
 
 int main (int argc, char** argv)
 {
-    std::string dirname = "heat_data";  
+    std::string dirname = "heat_data";
     std::filesystem::create_directories(dirname);
 
-    std::size_t nx = 1000; 
+    std::size_t nx = 1000;
  
-    double xmin = -5;  
-    double xmax = 5;  
+    double xmin = -5;
+    double xmax = 5;
 
     double dx = (xmax-xmin)/(nx+1);
     double dt = 10*dx*dx;
  
     std::valarray<double> x(nx);
-    std::generate(std::begin(x), std::end(x), [xmin, dx, count=0]()mutable{return xmin+dx*(++count);});
+    std::generate(
+        std::begin(x), std::end(x),
+        [xmin, dx, count=0]() mutable
+        {
+            return xmin+dx*(++count);
+        }
+    );
     //std::copy(std::begin(x), std::end(x), std::ostream_iterator<double>(std::cout, "  "));
     //std::cout << std::endl; 
 
@@ -63,11 +71,9 @@ int main (int argc, char** argv)
     double tend = 0.2;
     std::valarray<double> yini = pb_heat.fundamental_sol(tini, x);
     std::valarray<double> yend(0., nx); 
-    std::vector<double> tspan = {tini, tend};
+    ponio::time_span<double> tspan = {tini, tend};
 
-    auto null_observer = [](double, std::valarray<double>, double){};
- 
-    yend = ode::solve(pb_heat, ode::butcher::chebyshev::explicit_rkc2<28>(), yini, tspan, dt, null_observer);
+    yend = ode::solve(pb_heat, ode::butcher::chebyshev::explicit_rkc2<28>(), yini, tspan, dt, observer::null_observer());
  
     std::valarray<double> yexa = pb_heat.fundamental_sol(tend, x);
 

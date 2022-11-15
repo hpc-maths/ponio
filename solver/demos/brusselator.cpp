@@ -5,6 +5,7 @@
 #include <solver/solver.hpp>
 #include <solver/observer.hpp>
 #include <solver/butcher_methods.hpp>
+#include <solver/time_span.hpp>
 
 // Brusselator
 
@@ -26,8 +27,7 @@ class brusselator_model
 
 int main (int, char**)
 { 
-    std::string dirname = "brusselator_data";  
-    std::filesystem::create_directories(dirname);
+    std::string dirname = "brusselator_data";
     auto filename = std::filesystem::path(dirname) / "brusselator.dat";
     observer::file_observer fobs(filename);
 
@@ -35,11 +35,11 @@ int main (int, char**)
  
     std::valarray<double> uini = {1.5, 3}; 
  
-    std::vector<double> tspan = {0., 20.0};
+    ponio::time_span<double> tspan = {0., 20.0};
  
     double dt = 0.01;
  
-    ode::solve(pb_brusselator, ode::butcher::rk_86<>(), uini, tspan, dt, fobs );
+    ode::solve(pb_brusselator, ode::butcher::rk_86(), uini, tspan, dt, fobs );
  
     return 0;
 }

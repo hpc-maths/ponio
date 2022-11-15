@@ -15,14 +15,14 @@
 TEST_CASE("detail::power")
 {
   auto lie_splitting = ode::splitting::make_lie_tuple(
-    ode::butcher::rk_33<>(),
-    ode::butcher::rk_33<>(),
-    ode::butcher::rk_33<>()
+    ode::butcher::rk_33(),
+    ode::butcher::rk_33(),
+    ode::butcher::rk_33()
   );
   auto strang_splitting = ode::splitting::make_strang_tuple(
-    ode::butcher::rk_33<>(),
-    ode::butcher::rk_33<>(),
-    ode::butcher::rk_33<>()
+    ode::butcher::rk_33(),
+    ode::butcher::rk_33(),
+    ode::butcher::rk_33()
   );
 
   WARN( check_order(lie_splitting) == doctest::Approx(lie_splitting.order).epsilon(0.05) );

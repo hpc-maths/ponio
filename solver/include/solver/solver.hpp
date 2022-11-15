@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "method.hpp"
+#include "time_span.hpp"
 
 namespace ode {
 
@@ -20,11 +21,10 @@ namespace ode {
    */
   template < typename Problem_t , typename Algorithm_t , typename state_t , typename value_t , typename Observer_t >
   state_t
-  solve ( Problem_t & pb , Algorithm_t && algo , state_t const& u0 , std::vector<value_t> const& t_span , value_t dt , Observer_t && obs )
+  solve ( Problem_t & pb , Algorithm_t && algo , state_t const& u0 , ponio::time_span<value_t> const& t_span , value_t dt , Observer_t && obs )
   {
     value_t current_time = t_span.front();
-    auto it_next_time = t_span.begin();
-    ++it_next_time;
+    auto it_next_time = t_span.begin() + 1;
     auto it_end_time = t_span.end();
 
     value_t current_dt = dt;
@@ -43,8 +43,6 @@ namespace ode {
 
       std::tie( current_time , un1 , current_dt ) = meth( pb , current_time , un , current_dt );
       std::swap(un,un1);
-
-      //current_time += current_dt;
 
       obs( current_time , un , current_dt );
 

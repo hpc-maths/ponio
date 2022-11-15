@@ -45,15 +45,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.compiler }}-${{ hashFiles('./vcpkg.json') }}-
       - name: Setup Cpp
-        uses: aminya/setup-cpp@v1
+        uses: aminya/setup-cpp@v0.21.1
         with:
           compiler: ${{ matrix.compiler }}
           vcvarsall: ${{ contains(matrix.os, 'windows' )}}
 
           cmake: true
           ninja: true
-          vcpkg: true
-          ccache: true
+          vcpkg: false
+          ccache: false
+          conan: true
           clangtidy: false
           task: false
 
@@ -64,7 +65,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip3 install conan sympy numpy docopt-ng jinja2
+          pip3 install sympy numpy docopt-ng jinja2
       - name: Configure CMake
         run: |
           conan install .
