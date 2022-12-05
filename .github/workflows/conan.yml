@@ -25,6 +25,8 @@ jobs:
         exclude:
           - os: macos-12
             compiler: llvm
+          - os: windows-2022
+            compiler: llvm
 
     steps:
       - uses: actions/checkout@v2
