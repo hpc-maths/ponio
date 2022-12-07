@@ -25,12 +25,14 @@ jobs:
         exclude:
           - os: macos-12
             compiler: llvm
+          - os: windows-2022
+            compiler: llvm
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/vcpkg
@@ -45,7 +47,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.compiler }}-${{ hashFiles('./vcpkg.json') }}-
       - name: Setup Cpp
-        uses: aminya/setup-cpp@v0.21.1
+        uses: aminya/setup-cpp@v0.22.0
         with:
           compiler: ${{ matrix.compiler }}
           vcvarsall: ${{ contains(matrix.os, 'windows' )}}
