@@ -176,7 +176,7 @@ namespace observer {
   file_observer::create_directory_if_needed ( std::filesystem::path const& path )
   {
     auto parent = path.parent_path();
-    if ( parent.empty() ) {
+    if ( !parent.empty() ) {
       std::filesystem::create_directories(parent);
     }
     return path;
