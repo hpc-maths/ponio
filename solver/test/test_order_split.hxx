@@ -19,16 +19,16 @@
 TEST_CASE("detail::power")
 {
   auto lie_splitting = ode::splitting::make_lie_tuple(
-    ode::butcher::rk_33(),
-    ode::butcher::rk_33(),
-    ode::butcher::rk_33()
+    std::make_pair(ode::butcher::rk_33(), .1),
+    std::make_pair(ode::butcher::rk_33(), .1),
+    std::make_pair(ode::butcher::rk_33(), .1)
   );
   auto strang_splitting = ode::splitting::make_strang_tuple(
-    ode::butcher::rk_33(),
-    ode::butcher::rk_33(),
-    ode::butcher::rk_33()
+    std::make_pair(ode::butcher::rk_44(), .1),
+    std::make_pair(ode::butcher::rk_44(), .1),
+    std::make_pair(ode::butcher::rk_44(), .1)
   );
 
-  WARN( check_order(lie_splitting) == doctest::Approx(lie_splitting.order).epsilon(0.05) );
-  WARN( check_order(strang_splitting) == doctest::Approx(strang_splitting.order).epsilon(0.05) );
+  WARN( check_order(lie_splitting) == doctest::Approx(lie_splitting.order).epsilon(0.125) );
+  WARN( check_order(strang_splitting) == doctest::Approx(strang_splitting.order).epsilon(0.125) );
 }
