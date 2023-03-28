@@ -11,7 +11,8 @@
 
 namespace ode::butcher {
 
-{% for rk in list_meth %}
+// explicit Runge-Kutta methods
+{% for rk in list_erk %}
 /**
  * @brief Butcher tableau of {{ rk.label }} method
  * @tparam value_t type of coefficient (``double``by default)
@@ -72,6 +73,47 @@ l{{ rk.id }}( Exp_t exp_ , double tol=ponio::default_config::tol )
 {
   return lawson::make_lawson<butcher_{{ rk.id }}<double>,Exp_t>(exp_,tol);
 }
+
+{% endfor %}
+
+// exponential Runge-Kutta methods
+{% for rk in list_exprk %}
+/**
+ * @brief Butcher tableau of {{ rk.label }} method
+ * @tparam _value_t type of coefficient (``double`` by default)
+ * @tparam _linear_t type of linear part (``double`` by default)
+ */
+template <typename _value_t=double, typename _linear_t=double>
+struct butcher_{{ rk.id }}
+{
+  using value_t  = _value_t;
+  using linear_t = _linear_t;
+  using func_t   = std::function<linear_t(linear_t const&)>;
+  static constexpr std::size_t N_stages = {{ rk.b.type|length }};
+  static constexpr std::size_t order = 1;
+  static constexpr const char* id = "{{ rk.id }}";
+
+  std::tuple<{% for t in rk.A.type -%}{{ t }}{{ " , " if not loop.last else "" }}{%- endfor %}> a;
+  std::tuple<{% for t in rk.b.type -%}{{ t }}{{ " , " if not loop.last else "" }}{%- endfor %}> b;
+  std::array<value_t, N_stages> c;
+
+  butcher_{{ rk.id }}()
+  : a( {% for aij in rk.A.code %}{{ aij }}{{ " , " if not loop.last else "" }}{%- endfor %} )
+  , b( {% for bi  in rk.b.code %}{{ bi  }}{{ " , " if not loop.last else "" }}{%- endfor %} )
+  , c({ {{ rk.c }} })
+  {}
+};
+
+/**
+ * @brief {{ rk.label }} method
+ * @tparam value_t type of coefficient (``double``by default)
+ * @tparam linear_t type of coefficient (``double``by default)
+ */
+template <typename value_t, typename linear_t>
+using {{ rk.id }}_t = exp_runge_kutta::explicit_exp_rk_butcher<butcher_{{ rk.id }}<value_t, linear_t>>;
+
+using {{ rk.id }} = exp_runge_kutta::explicit_exp_rk_butcher<butcher_{{ rk.id }}<double, double>>;
+
 
 {% endfor %}
 
