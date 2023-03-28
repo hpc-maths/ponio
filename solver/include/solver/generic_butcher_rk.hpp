@@ -124,6 +124,103 @@ namespace lawson {
 
 } // namespace lawson
 
+namespace exp_runge_kutta {
+
+  namespace detail {
+    template <typename func_t, typename linear_t>
+    requires std::invocable<func_t, linear_t>
+    auto
+    coefficient_eval( func_t && f, linear_t && l )
+    {
+      return f(l);
+    }
+
+    template <typename value_t, typename linear_t>
+    requires std::is_arithmetic_v<std::remove_cvref_t<value_t>>
+    auto
+    coefficient_eval( value_t && val, linear_t && )
+    {
+      return val;
+    }
+
+    template <std::size_t I, std::size_t J, typename tuple_t>
+    auto
+    triangular_get ( tuple_t & t )
+    {
+      return std::get< I*(I-1)/2 + J >(t);
+    }
+
+    template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t, std::size_t... Is>
+    constexpr state_t
+    tpl_inner_product_impl ( tuple_t const& a, array_t const& k, state_t const& init , linear_t const& l, value_t mul_coeff, std::index_sequence<Is...> )
+    {
+      return ( init + ... + ( mul_coeff*coefficient_eval(triangular_get<I,Is>(a), mul_coeff*l)*(k[Is] + l*init) ) );
+    }
+
+    template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t>
+    constexpr state_t
+    tpl_inner_product ( tuple_t const& a, array_t const& k, state_t const& init, linear_t const& l, value_t mul_coeff )
+    {
+      return tpl_inner_product_impl<I>(a, k, init, l, mul_coeff, std::make_index_sequence<I>());
+    }
+
+    template <typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t, std::size_t... Is>
+    constexpr state_t
+    tpl_inner_product_b_impl ( tuple_t const& b, array_t const& k, state_t const& init , linear_t const& l, value_t mul_coeff, std::index_sequence<Is...> )
+    {
+      return ( init + ... + ( mul_coeff*coefficient_eval(std::get<Is>(b), mul_coeff*l)*(k[Is] + l*init) ) );
+    }
+
+    template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t>
+    constexpr state_t
+    tpl_inner_product_b ( tuple_t const& b, array_t const& k, state_t const& init, linear_t const& l, value_t mul_coeff )
+    {
+      return tpl_inner_product_b_impl(b, k, init, l, mul_coeff, std::make_index_sequence<I>());
+    }
+  } // namespace detail
+
+  template <typename Tableau>
+  struct explicit_exp_rk_butcher
+  {
+    Tableau butcher;
+    static constexpr std::size_t N_stages = Tableau::N_stages;
+    static constexpr bool is_embedded = is_embedded_tableau<Tableau>;
+    static constexpr std::size_t order = Tableau::order;
+    static constexpr const char* id = Tableau::id;
+    
+    explicit_exp_rk_butcher(double tol_=ponio::default_config::tol)
+    : butcher(), tol(tol_)
+    {}
+
+    template <typename problem_t, typename state_t, typename value_t, typename arrayKi_t, std::size_t i>
+    inline state_t
+    stage ( Stage<i>, problem_t & pb, value_t tn, state_t const& un, arrayKi_t const& Ki, value_t dt )
+    {
+      return pb.n(
+        tn + butcher.c[i]*dt,
+        detail::tpl_inner_product<i>( butcher.a, Ki, un, pb.l, dt )
+      );
+    }
+
+    template <typename problem_t, typename state_t, typename value_t, typename arrayKi_t>
+    inline state_t
+    stage ( Stage<N_stages>, problem_t & pb, value_t tn, state_t const& un, arrayKi_t const& Ki, value_t dt )
+    {
+      return detail::tpl_inner_product_b<N_stages>( butcher.b , Ki, un, pb.l, dt );
+    }
+
+    template <typename problem_t, typename state_t, typename value_t, typename arrayKi_t, typename tab_t=Tableau > requires std::same_as<tab_t,Tableau> && is_embedded
+    inline state_t
+    stage ( Stage<N_stages+1>, problem_t & pb, value_t tn, state_t const& un, arrayKi_t const& Ki, value_t dt )
+    {
+      return detail::tpl_inner_product_b<N_stages>( butcher.b2 , Ki, un, pb.l, dt );
+    }
+
+    double tol;
+  };
+
+} // namespace exp_runge_kutta
+
 namespace chebyshev {
 
   /**
