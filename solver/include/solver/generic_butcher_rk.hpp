@@ -32,7 +32,7 @@ namespace runge_kutta {
     inline state_t
     stage ( Stage<I> , Problem_t & f , value_t tn , state_t const& un , ArrayKi_t const& Ki , value_t dt )
     {
-      return f( tn + butcher.c[I] , ::detail::tpl_inner_product<I>(butcher.A[I], Ki, un, dt) );
+      return f( tn + butcher.c[I]*dt , ::detail::tpl_inner_product<I>(butcher.A[I], Ki, un, dt) );
     }
 
     template < typename Problem_t , typename state_t , typename value_t , typename ArrayKi_t >
@@ -85,7 +85,7 @@ namespace lawson {
     stage ( Stage<i> , Problem_t & pb , value_t tn , state_t const& un , ArrayKi_t const& Ki , value_t dt )
     {
       return m_exp(-butcher.c[i]*dt*pb.l)*pb.n(
-        tn + butcher.c[i] ,
+        tn + butcher.c[i]*dt ,
         m_exp(butcher.c[i]*dt*pb.l) * ::detail::tpl_inner_product<i>(butcher.A[i], Ki, un, dt)
       );
     }
@@ -132,7 +132,7 @@ namespace exp_runge_kutta {
     auto
     coefficient_eval( func_t && f, linear_t && l )
     {
-      return f(l);
+      return f(std::move(l));
     }
 
     template <typename value_t, typename linear_t>
