@@ -138,7 +138,7 @@ def expRK_code_skeleton( X: list , c: list ):
       r['code'].append(x.evalf())
     else:
       r['type'].append("func_t")
-      r['code'].append("[](linear_t const& {}) {{ return {}; }}".format(
+      r['code'].append("[](linear_t && {}) -> linear_t {{ return {}; }}".format(
         str(z),
         sp.cxxcode( x.doit().simplify() )
       ))
