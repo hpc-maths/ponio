@@ -14,7 +14,7 @@ namespace splitting {
 
   namespace detail {
     /**
-     * tiny solve method only for splitting method, it solve a problem betwen `ti` and `tf` with the time step `dt` and return state at final time
+     * tiny solve method only for splitting method, it solves a problem betwen `ti` and `tf` with the time step `dt` and returns state at final time
      * 
      * @tparam I index of subproblem to solve
      * @param pb   problem to solve
