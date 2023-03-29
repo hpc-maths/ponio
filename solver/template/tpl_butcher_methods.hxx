@@ -88,7 +88,7 @@ struct butcher_{{ rk.id }}
 {
   using value_t  = _value_t;
   using linear_t = _linear_t;
-  using func_t   = std::function<linear_t(linear_t const&)>;
+  using func_t   = std::function<linear_t(linear_t &&)>;
   static constexpr std::size_t N_stages = {{ rk.b.type|length }};
   static constexpr std::size_t order = 1;
   static constexpr const char* id = "{{ rk.id }}";
