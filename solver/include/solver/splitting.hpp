@@ -30,7 +30,7 @@ namespace splitting {
     {
       value_t current_dt = std::min(dt, tf-ti);
       value_t current_time = ti;
-      while ( current_time < tf ) {
+      while ( current_time != tf ) {
         std::tie(current_time, ui, current_dt) = std::get<I>(meth)(std::get<I>(pb.system), current_time, ui, current_dt);
         if ( current_time+current_dt > tf ) {
           current_dt = tf - current_time;
