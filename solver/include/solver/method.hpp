@@ -273,7 +273,7 @@ namespace ode {
   make_method ( splitting::lie_tuple<Algorithms_t...> const& algos , state_t const& shadow_of_u0 )
   {
     auto methods = make_tuple_methods(algos.algos,shadow_of_u0);
-    return splitting::make_lie_from_tuple(methods);
+    return splitting::make_lie_from_tuple(methods, algos.time_steps);
   }
 
   /**
@@ -287,7 +287,7 @@ namespace ode {
   make_method ( splitting::strang_tuple<Algorithms_t...> const& algos , state_t const& shadow_of_u0 )
   {
     auto methods = make_tuple_methods(algos.algos,shadow_of_u0);
-    return splitting::make_strang_from_tuple(methods);
+    return splitting::make_strang_from_tuple(methods, algos.time_steps);
   }
 
 } // namespace ode
