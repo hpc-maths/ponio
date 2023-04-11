@@ -73,7 +73,7 @@ function stability_function(R_expr) {
   
   return div;
 }
-function resume_tableau(nstages,order,stage_order) {
+function resume_tableau(nstages,order,stage_order,x_max,y_max) {
   let tab = document.createElement("table");
   tab.classList.add("resume_tableau");
   
@@ -94,6 +94,28 @@ function resume_tableau(nstages,order,stage_order) {
   let td3 = document.createElement("td"); td3.appendChild(document.createTextNode(stage_order));
   tr3.appendChild(th3); tr3.appendChild(td3);
   tab.appendChild(tr3);
+
+  let tr4 = document.createElement("tr");
+  let th4 = document.createElement("th"); th4.setAttribute('scope',"row"); th4.appendChild(document.createTextNode("stability on negative real axis"));
+  let td4 = document.createElement("td");
+  if ( x_max === Infinity ) {
+    render(String.raw`\infty`,td4);
+  } else {
+    td4.appendChild(document.createTextNode(x_max));
+  }
+  tr4.appendChild(th4); tr4.appendChild(td4);
+  tab.appendChild(tr4);
+
+  let tr5 = document.createElement("tr");
+  let th5 = document.createElement("th"); th5.setAttribute('scope',"row"); th5.appendChild(document.createTextNode("stability on imaginary axis"));
+  let td5 = document.createElement("td");
+  if ( y_max === Infinity ) {
+    render(String.raw`\infty`,td5);
+  } else {
+    td5.appendChild(document.createTextNode(y_max));
+  }
+  tr5.appendChild(th5); tr5.appendChild(td5);
+  tab.appendChild(tr5);
 
   return tab;
 }
@@ -366,12 +388,19 @@ function doi_bib(doi) {
 
 function rk_to_elm(rk,elm,options) {
   elm.id = rk.id;
+  if (rk.x_max === "inf") {
+    rk.x_max = Infinity;
+  }
+  if (rk.y_max === "inf") {
+    rk.y_max = Infinity;
+  }
+
   elm.classList.add('method');
   elm.setAttribute("data-order",rk.order);
   elm.setAttribute("data-nstages",rk.nstages);
   elm.setAttribute("data-stage_order",rk.stage_order);
-  elm.setAttribute("data-xmax",0.);
-  elm.setAttribute("data-ymax",0.);
+  elm.setAttribute("data-x_max",Number(rk.x_max));
+  elm.setAttribute("data-y_max",Number(rk.y_max));
   elm.setAttribute("data-explicit",rk.is_explicit);
   elm.setAttribute("data-dirk",rk.is_dirk);
   elm.setAttribute("data-embedded",rk.is_embedded);
@@ -392,7 +421,7 @@ function rk_to_elm(rk,elm,options) {
     title_R.innerHTML = "Stability function "+R.outerHTML+":";
     p.appendChild(title_R);
     p.appendChild(stability_function(rk.stability_function));
-    p.appendChild(resume_tableau(rk.nstages,rk.order,rk.stage_order));
+    p.appendChild(resume_tableau(rk.nstages,rk.order,rk.stage_order,Number(rk.x_max),Number(rk.y_max)));
     p.appendChild(prepare_canvas(rk.id));
     
     summary.addEventListener('click',function (event){

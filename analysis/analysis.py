@@ -42,6 +42,8 @@ class rk_butcher:
         self._A = None
         self._P = None
         self._id = None
+        self._x_max = None
+        self._y_max = None
     
     def __iter__(self):
         """ to convert object into dictionary
@@ -158,6 +160,57 @@ class rk_butcher:
             z = sp.symbols("z")
             self._P = sp.Abs( (self.stability_function() - sp.exp(z))/sp.exp(z) )
         return self._P
+
+    def _stability_on_real_negative_axis_explicit(self,R,x):
+        xsol = sp.reduce_abs_inequality( sp.Abs(R.evalf())-1 , '<=' , x ).as_set()
+        return sp.Abs(sp.Intersection(xsol,sp.Interval(-sp.oo,0)).start)
+
+    def _stability_on_real_negative_axis_implicit(self,R,x):
+        # force to write $R^2 - 1$ as a rational function (if implicit method)
+        expr = (1/(1/ (R**2-1) ).simplify())
+
+        if type(expr) == sp.Mul:
+            # implicit method because of rational function (sp.Mul)
+            numerator,denominator = (1,1)
+            for arg in expr.args:
+                if type(arg) == sp.Pow and arg.args[1]<0:
+                    denominator = denominator * 1/arg
+                else:
+                    numerator = numerator * arg
+        else:
+            numerator,denominator = (expr,1)
+        return sp.Abs(sp.solve_poly_inequality(sp.Poly(sp.N(numerator),x)-sp.Poly(sp.N(denominator),x),"<=")[0].evalf().start)
+
+    def stability_on_real_negative_axis(self):
+        if self._x_max is None:
+            z = sp.symbols("z")
+            x = sp.symbols("x",real=True)
+            R = self.stability_function().subs(z,x)
+            if self.is_explicit:
+                self._x_max = self._stability_on_real_negative_axis_explicit(R,x)
+            else:
+                self._x_max = self._stability_on_real_negative_axis_implicit(R,x)
+        return self._x_max
+    
+    @property
+    def x_max(self):
+        return self.stability_on_real_negative_axis()
+    
+    def stability_on_imaginary_axis(self):
+        if self._y_max is None:
+            z = sp.symbols("z")
+            y = sp.symbols("y",real=True)
+            f = sp.lambdify(y,sp.re(sp.Abs(self.stability_function().subs(z,sp.I*y))**2),'numpy')
+
+            X = np.linspace(0.,5.,1000)
+            Y = np.asarray([f(xi) for xi in X])
+            self._y_max = sp.N(min(X[Y>1.],default=sp.oo)-X[1])
+        return self._y_max
+
+    @property
+    def y_max(self):
+        return self.stability_on_imaginary_axis()
+    
 
     def scheme(self,latex=True,lawson=False):
         if latex:
@@ -320,16 +373,39 @@ else:
 
         return "\n    ".join(r)
 
+def compute_box(rk):
+    def pseudo_y_max(rk):
+        z = sp.symbols("z")
+        y = sp.symbols("y",real=True)
+        expr = sp.re(sp.Abs(rk.stability_function().subs(z,sp.I*y))**2)
+        f = sp.lambdify(y,expr,'numpy')
+        X = np.linspace(0.,5.,1000)
+        Y = np.asarray([f(xi) for xi in X])
+        return sp.N(max(X[Y<=1.001],default=sp.oo))
+
+    xmax = rk.x_max
+    #use a more relaxing ymax computing
+    ymax = pseudo_y_max(rk)
+
+    maxaxis = max(xmax,ymax)
+    if maxaxis == sp.oo:
+        maxaxis = 5.0
+
+    maxaxis = 1.2*float(sp.N(maxaxis))
+    return (-maxaxis-0.5j*(maxaxis+1), 2+0.5j*(maxaxis+1))
+
 def analysis_butcher(rk):
     # to remove parenthesis around fractions in Lawson scheme expressions
     pattern = re.compile("\\\\left\(\\\\frac\{(?P<numerator>[^{}]+)\}\{(?P<denominator>[^{}]+)\}\\\\right\)")
-    
+
     analysis = {}
     # update butcher with new values
     analysis['id']          = rk.id
     analysis['nstages']     = rk.nstages
     analysis['order']       = rk.order
     analysis['stage_order'] = rk.stage_order
+    analysis['x_max']       = str(float(rk.x_max))
+    analysis['y_max']       = str(float(rk.y_max))
 
     # flags
     analysis['is_explicit'] = rk.is_explicit
@@ -396,8 +472,11 @@ if __name__ == '__main__':
 
         # add some data evaluated on complex domain
         # stability domaine
-        zmin = -5-3.5j
-        zmax =  2+3.5j
+        max_axis = max(rk.x_max,rk.y_max)
+        if max_axis == sp.oo:
+            max_axis = 5.0
+        max_axis = float(sp.N(max_axis))
+        zmin, zmax = compute_box(rk)
         N = (512,512)
         stability_domain = { 'xmin':np.real(zmin), 'xmax':np.real(zmax), 'ymin':np.imag(zmin), 'ymax':np.imag(zmax) }
         stability_domain['data'] = evalf_Cdomain( sp.symbols("z") , rk.stability_function() , zmin , zmax , N ).tolist()
