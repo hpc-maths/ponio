@@ -118,7 +118,7 @@ pre {
   transform-origin: center;
   transition-duration: 1s;
 }
-#add:hover .add { 
+#add:hover .add {
   transform: scale(2.5);
 }
 

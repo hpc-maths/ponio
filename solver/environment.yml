@@ -4,5 +4,3 @@ channels:
 dependencies:
   - cmake
   - ninja
-
-

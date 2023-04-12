@@ -17,9 +17,9 @@ Runge-Kutta solver
 First we need to write a problem:
 
 .. code-block:: cpp
-  
+
   using state_t = std::valarray<double>;
-  
+
   state_t lorenz(double t, const state_t& u)
   {
     double sigma=10. , rho=28., beta=8./3.;
@@ -47,4 +47,3 @@ Next we define the initial condition and call :cpp:func:`ode::solve`:
   using namespace observer; // to use _fobs litteral
 
   ode::solve( pb_rk , ode::runge_kutta::rk33() , u0 , {0.,20.} , 0.01 , "lorenz_rk33.dat"_fobs );
-    

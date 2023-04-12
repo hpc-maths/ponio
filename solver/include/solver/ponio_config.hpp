@@ -6,8 +6,8 @@
 
 namespace ponio
 {
-  namespace default_config
-  {
-    static constexpr double tol = 1e-4;
-  }
+    namespace default_config
+    {
+        static constexpr double tol = 1e-4;
+    }
 }

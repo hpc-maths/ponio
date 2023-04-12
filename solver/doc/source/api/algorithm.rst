@@ -3,11 +3,11 @@ Algorithms
 
 List of all algorithms (skeleton of each numerical method to solve)
 
-Runge-Kutta methods 
+Runge-Kutta methods
 -------------------
 
 Explicit methods
-~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~
 
 .. doxygentypedef:: ode::butcher::euler
    :project: solver
@@ -121,7 +121,7 @@ Embedded methods
    :project: solver
 
 
-Lawson methods 
+Lawson methods
 --------------
 
 This Lawson methods have a underlying Runge-Kutta method, they have the same name just prefixed by ``l``.
@@ -160,7 +160,7 @@ We solve this equation with a classical Runge-Kutta method RK(:math:`s`,:math:`n
    \end{aligned}
 
 Explicit methods
-~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~
 
 .. doxygenfunction:: ode::butcher::leuler
    :project: solver
@@ -280,4 +280,3 @@ Runge-Kutta Chebyshev methods
 .. doxygenclass:: ode::butcher::chebyshev::explicit_rkc2
    :project: solver
    :members:
-

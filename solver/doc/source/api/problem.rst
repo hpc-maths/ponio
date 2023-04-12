@@ -5,22 +5,22 @@ Problems
   :caption: UML diagram of problems
   :align: center
   :layout: dot
-   
+
   compound=true;
   fontname = "Bitstream Vera Sans"
   fontsize = 8
-  
+
   node [
     fontname = "Bitstream Vera Sans"
     fontsize = 8
     shape = "record"
   ]
-  
+
   edge [
     fontname = "Bitstream Vera Sans"
     fontsize = 8
   ]
-  
+
   // classes
   parent_problem [
     label = "{parent_problem}"
@@ -100,4 +100,3 @@ A problem is a collection of sub-problems defined by previous problems.
 .. doxygenclass:: ode::problem
    :project: solver
    :members:
-

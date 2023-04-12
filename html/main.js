@@ -16,7 +16,7 @@ function label(id,lab) {
   a.href = "#" + id;
   a.appendChild(document.createTextNode(lab));
   header.appendChild(a);
-  
+
   return header;
 }
 
@@ -70,13 +70,13 @@ function stability_function(R_expr) {
   let div = document.createElement("div");
   div.classList.add("stability_function");
   render(R_expr,div);
-  
+
   return div;
 }
 function resume_tableau(nstages,order,stage_order) {
   let tab = document.createElement("table");
   tab.classList.add("resume_tableau");
-  
+
   let tr1 = document.createElement("tr");
   let th1 = document.createElement("th"); th1.setAttribute('scope',"row"); th1.appendChild(document.createTextNode("#stages"));
   let td1 = document.createElement("td"); td1.appendChild(document.createTextNode(nstages));
@@ -230,7 +230,7 @@ function order_star( data , options ) {
 function relative_error( data , stab_data , options ) {
   let fig = document.createElement("figure");
   let canvas = data_to_canvas(data.data,[data.xmin,data.xmax],[data.ymin,data.ymax],[1.0],options=options,inside=false);
-  
+
   const n = data.data[0].length , m = data.data.length;
   context = canvas.getContext("2d");
   projection = d3.geoIdentity().scale(canvas.width / n);
@@ -293,7 +293,7 @@ function code(c,id) {
   code.classList.add("language-py");
   code.innerHTML = hljs.highlight(c,{language: 'python'}).value;
   code.id = "code-"+id;
-  
+
   let btn = document.createElement('button');
   btn.classList.add("clipboard");
   btn.setAttribute("data-clipboard-target","#"+code.id);
@@ -317,7 +317,7 @@ function lscheme(stages) {
 
 function doi_bib(doi) {
   let url_crossref = "https://api.crossref.org/works/" + doi;
-  
+
   let elm = document.createElement("blockquote");
   elm.classList.add("doi");
 
@@ -338,7 +338,7 @@ function doi_bib(doi) {
         authors.appendChild(auth);
       });
       elm.appendChild(authors);
-      
+
       let title = document.createElement("span");
       title.classList.add("title");
       title.appendChild(document.createTextNode(out.title[0]));
@@ -375,17 +375,17 @@ function rk_to_elm(rk,elm,options) {
   elm.setAttribute("data-explicit",rk.is_explicit);
   elm.setAttribute("data-dirk",rk.is_dirk);
   elm.setAttribute("data-embedded",rk.is_embedded);
-  
+
   elm.appendChild(label(rk.id,rk.label));
   elm.appendChild(butcher_tableau(rk.A,rk.b,rk.c,rk.b2));
-  
+
   if (rk.hasOwnProperty('stability_function')) {
     let details = document.createElement("details");
-    
+
     let summary = document.createElement("summary");
     summary.appendChild(document.createTextNode("Details"))
     details.appendChild(summary);
-    
+
     let p = document.createElement("p");
     let title_R = document.createElement("h6");
     let R = document.createElement("span"); katex.render("R(z)",R);
@@ -394,7 +394,7 @@ function rk_to_elm(rk,elm,options) {
     p.appendChild(stability_function(rk.stability_function));
     p.appendChild(resume_tableau(rk.nstages,rk.order,rk.stage_order));
     p.appendChild(prepare_canvas(rk.id));
-    
+
     summary.addEventListener('click',function (event){
         let div = event.target.parentElement.children[1].getElementsByClassName("drawing")[0];
         let id = div.getAttribute("data-id");
@@ -408,22 +408,22 @@ function rk_to_elm(rk,elm,options) {
           });
       },{'once':true});
 
-    
+
 
     let title_edo = document.createElement("h6"); title_edo.appendChild(document.createTextNode("Runge-Kutta scheme:")); p.appendChild(title_edo);
     let edo = document.createElement("p"); katex.render("\\dot{u}=f(t,u)",edo,{displayMode:true});
     p.appendChild(edo);
     p.appendChild(scheme(rk.scheme));
-  
+
     if (rk.hasOwnProperty('code')) {
       p.appendChild(code(rk.code,rk.id));
     }
-    
+
     let title_ledo = document.createElement("h6"); title_ledo.appendChild(document.createTextNode("Lawson scheme:")); p.appendChild(title_ledo);
     let ledo = document.createElement("p"); katex.render("\\dot{u}=Lu + N(t,u)",ledo,{displayMode:true});
     p.appendChild(ledo);
     p.appendChild(scheme(rk.lawson_scheme));
-  
+
     if (rk.hasOwnProperty('lawson_code')) {
       p.appendChild(code(rk.lawson_code,"l_"+rk.id));
       let warning = document.createElement("blockquote");

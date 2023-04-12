@@ -2,4 +2,3 @@ sympy
 docopt-ng
 jinja2
 numpy
-

@@ -36,4 +36,3 @@ clean :
 
 mrproper : clean
 	rm *.dat
-

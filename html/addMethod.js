@@ -6,7 +6,7 @@ function add_btn(list_id) {
 
     let meth = document.createElement("article");
     meth.classList.add('method');
-    
+
     let h2 = label("rk_"+document.getElementsByClassName('method').length,"New method");
     h2.setAttribute('contenteditable',true);
     meth.appendChild(h2);
@@ -68,7 +68,7 @@ function add_btn(list_id) {
           let A = Array(Nstages);
           let b = Array(Nstages);
           let c = Array(Nstages);
-          
+
           // read Butcher tableau (and parse expressions)
           let tab = this_parent.children[1];
           for (i=0;i<tab.childElementCount-1;++i) {
@@ -96,7 +96,7 @@ function add_btn(list_id) {
           let save_zone = document.createElement("textarea");
           save_zone.value = JSON.stringify(data,null,2);
           visu.appendChild(save_zone);
-          
+
           let preview = document.createElement("div");
           preview.classList.add("preview");
           visu.appendChild(rk_to_elm(data,preview));
@@ -111,7 +111,7 @@ function add_btn(list_id) {
       }
     });
     meth.appendChild(btn);
-    
+
     document.getElementById(list_id).appendChild(meth);
     meth.scrollIntoView();
   });
