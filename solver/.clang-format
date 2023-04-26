@@ -9,8 +9,8 @@ AlignOperands: AlignAfterOperator
 AllowAllArgumentsOnNextLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortLambdasOnASingleLine: Empty
-AlwaysBreakAfterDefinitionReturnType: None
-AlwaysBreakAfterReturnType: None
+AlwaysBreakAfterDefinitionReturnType: All
+AlwaysBreakAfterReturnType: All
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Allman
 BreakInheritanceList: AfterComma
@@ -37,3 +37,4 @@ QualifierAlignment: Right
 SeparateDefinitionBlocks: Always
 SpaceAfterTemplateKeyword: true
 SpacesInContainerLiterals: false
+SpacesInParentheses: true
