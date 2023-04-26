@@ -73,7 +73,7 @@ def display(filename):
         lenCol[i+1] = max([ len(str(aij)) for aij in A.col(i) ])
     for i,bi in enumerate(b):
         lenCol[i+1] = max(lenCol[i+1],len(str(bi)))
-    
+
     print(data['label'])
 
     for i in range(A.shape[1]):
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     from docopt import docopt
 
     args = docopt( __doc__ , sys.argv[1:] )
-    
+
     if args['concat'] :
         concat(args['FILE'],args['PATH'])
     elif args['split'] :

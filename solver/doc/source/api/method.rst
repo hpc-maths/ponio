@@ -34,4 +34,3 @@ An helper function for splitting method factory.
 
 .. doxygenfunction:: ode::make_tuple_methods
    :project: solver
-

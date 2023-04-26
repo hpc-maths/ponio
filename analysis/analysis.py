@@ -42,7 +42,7 @@ class rk_butcher:
         self._A = None
         self._P = None
         self._id = None
-    
+
     def __iter__(self):
         """ to convert object into dictionary
         """
@@ -53,14 +53,14 @@ class rk_butcher:
         ]
         yield 'b', [ str(bi) for bi in self.b ]
         yield 'c', [ str(ci) for ci in self.c ]
-        
+
         if self.b2 is not None:
             yield 'b2', [ str(bi) for bi in self.b2 ]
 
     @property
     def nstages(self):
         return len(self.b)
-    
+
     @property
     def order(self):
         r""" compute order of a Runge-Kutta method
@@ -78,7 +78,7 @@ class rk_butcher:
                     self._order += 1
             self._order = int(self._order/2)-1
         return self._order
-    
+
     @property
     def stage_order(self):
         r""" compute stage order of a Runge-Kutta method with the following equation:
@@ -97,7 +97,7 @@ class rk_butcher:
                 for s in range(1,self.order+1) # could be a while...
             ])
         return self._stage_order
-    
+
     @property
     def is_explicit(self):
         if self._is_explicit is None:
@@ -106,7 +106,7 @@ class rk_butcher:
                 for i in range(0,self.nstages)
             ]) == 0 )
         return self._is_explicit
-    
+
     @property
     def is_dirk(self):
         if self._is_dirk is None:
@@ -121,7 +121,7 @@ class rk_butcher:
         if self._is_approched_method is None:
             self._is_approched_method = any([ type(x) is sp.Float for x in itertools.chain(self.A,self.b,self.c) ])
         return self._is_approched_method
-    
+
     @property
     def is_embedded(self):
         return self.b2 is not None
@@ -146,13 +146,13 @@ class rk_butcher:
         if self._R is None:
             self._R = stab_func(self.A,self.b,approched_method=self.is_approched_method)
         return self._R
-    
+
     def order_star_function(self):
         if self._A is None:
             z = sp.symbols("z")
             self._A = sp.exp(-z)*self.stability_function()
         return self._A
-    
+
     def relative_error_function(self):
         if self._P is None:
             z = sp.symbols("z")
@@ -178,7 +178,7 @@ class rk_butcher:
             if lawson:
                 ks = [ sp.MatrixSymbol(str(ki),3,1) for ki in ks ]
                 un,unp1,ubnp1 = ( sp.MatrixSymbol(str(ui),3,1) for ui in (un,unp1,ubnp1) )
-        
+
         f = sp.Function("f",nargs=2)
         a = 1
         if lawson:
@@ -190,7 +190,7 @@ class rk_butcher:
                 else:
                     expr_str = r"exp({})".format(str(expr.simplify().evalf()).replace("1.0*",""))
                 return sp.MatrixSymbol( expr_str , *expr.shape)
-            
+
             L = sp.MatrixSymbol("L",3,3)
             #N = sp.Function("N",nargs=2)
             def N(t,u):
@@ -213,7 +213,7 @@ class rk_butcher:
                 ks[i],
                 f( tn+self.c[i]*dt , un + dt*expr )
             ))
-        
+
         args = [ self.b[i]*ks[i] for i in range(0,self.nstages) ]
         if not lawson:
             expr = sum(args)
@@ -256,7 +256,7 @@ class rk_butcher:
     def code(self,lawson=False):
         def func_name(rk_id,lawson=False):
             return ("lawson_" if lawson else "")+rk_id
-        
+
         args = {"f": "function f(t,u)"}
         if lawson:
             args = {"L": "linar part, a scalar or a matrix", "N": "non-linear part, a function N(t,u)"}
@@ -281,7 +281,7 @@ class rk_butcher:
         docstring = """\"\"\"{meth.label}
     {embedded}{lawson}Runge-Kuta method with {meth.nstages} stages, of order {meth.order}
     {arguments}
-    
+
     return {output}
 
     {warning}
@@ -323,7 +323,7 @@ else:
 def analysis_butcher(rk):
     # to remove parenthesis around fractions in Lawson scheme expressions
     pattern = re.compile("\\\\left\(\\\\frac\{(?P<numerator>[^{}]+)\}\{(?P<denominator>[^{}]+)\}\\\\right\)")
-    
+
     analysis = {}
     # update butcher with new values
     analysis['id']          = rk.id
@@ -351,7 +351,7 @@ def analysis_butcher(rk):
     if rk.is_explicit:
         analysis['code']        = rk.code()
         analysis['lawson_code'] = rk.code(lawson=True)
-    
+
     return analysis
 
 
@@ -369,7 +369,7 @@ import re
 
 if __name__ == '__main__':
     args = docopt( __doc__ , sys.argv[1:] )
-    
+
     vprint = print if args['--verbose'] else lambda *args,**kwargs:None
 
     output = args['--output']
@@ -404,7 +404,7 @@ if __name__ == '__main__':
 
         if rk.is_embedded:
             stability_domain['data_embedded'] = evalf_Cdomain( sp.symbols("z") , rk.stability_function(embedded=True) , zmin , zmax , N ).tolist()
-        
+
         # relative error (or precision) thanks to Laurent François
         relative_error = { 'xmin':np.real(zmin), 'xmax':np.real(zmax), 'ymin':np.imag(zmin), 'ymax':np.imag(zmax) }
         relative_error['data'] = evalf_Cdomain( sp.symbols("z") , rk.relative_error_function() , zmin , zmax , N ).tolist()
@@ -427,8 +427,7 @@ if __name__ == '__main__':
             )
 
     vprint()
-    
+
     if args['--standalone']:
         json_analysis = os.path.join(output,"analysis.json")
         json.dump(rk_analysis, open(json_analysis,'w')  ,indent=4)
-

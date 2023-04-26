@@ -4,10 +4,10 @@ This notebooks are writing to explain how to start with Ponio. To compile and la
 
 * a C++ 20 compiler
 * Jupyter with a complet scientific Python environment:
-	+ NumPy
-	+ Matplotlib
-	+ SciPy
-	+ SymPy
+    + NumPy
+    + Matplotlib
+    + SciPy
+    + SymPy
 
 ```sh
 conda create env -n ponio-notebook
@@ -34,4 +34,3 @@ and chose one of tutorial:
 3. `lotka_volterra_splitting.ipynb`: how to use a Lie or Strang splitting method.
 4. `lotka_volterra_tuto.ipynb`: same as 3 firsts examples with tutorial of how to implement an observer
 5. `arenstorf_adaptivetimestep.ipynb`: example with adaptive time step methods (and underlying Lawson methods)
-

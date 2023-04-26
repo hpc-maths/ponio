@@ -19,4 +19,3 @@ TEST_CASE("order::{{ rk.id }}")
   WARN( check_order(rk_t()) == doctest::Approx(rk_t::order).epsilon(0.05) );
 }
 {% endfor %}
-

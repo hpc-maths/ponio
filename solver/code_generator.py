@@ -29,13 +29,13 @@ import glob
 
 def phi(i, j=None, c=None):
   ij = j is not None and c is not None # set True if j and c are not None (so compute phi_{ij})
-  
+
   classname = f"phi_{i}" if not ij else f"phi_{i}_{j}"
-  
+
   @classmethod
   def phi_i_eval(cls, z):
     pass
-      
+
   def phi_i_doit(self, deep=False, **hints):
     z = self.cj*self.args[0]
     if i == 0:
@@ -44,14 +44,14 @@ def phi(i, j=None, c=None):
       return sp.Rational(1,sp.factorial(i))
     else:
       return ( (phi(i-1)(z) - phi(i-1)(0))/z ).simplify().expand().simplify()
-      
+
   def phi_i_latex(self, printer):
     return f"\\varphi_{{{i}}}"
     #return str( type(self).mro()[0] ).replace(" ","\ ")
-      
+
   def phi_ij_latex(self, printer):
     return f"\\varphi_{{{i},{j}}}"
-  
+
   return type(
     classname,
     (sp.Function,),
@@ -132,7 +132,7 @@ def expRK_code_skeleton( X: list , c: list ):
     for symbol in x.free_symbols:
       # substitute all phi function
       x = x.subs(symbol, phi(*map(int, str(symbol).split("_")[1:]),c=c)(z) )
-    
+
     if len(x.free_symbols) == 0:
       r['type'].append("value_t")
       r['code'].append(x.evalf())
@@ -142,7 +142,7 @@ def expRK_code_skeleton( X: list , c: list ):
         str(z),
         sp.cxxcode( x.doit().simplify() )
       ))
-  
+
   return r
 
 def prepare_expRK(rk: dict):
@@ -156,7 +156,7 @@ def prepare_expRK(rk: dict):
     for x in extra_tableaus
   }
   r['A'] = expRK_code_skeleton( [ rk['A'][i,j] for i,j in zip(*np.tril_indices(rk['A'].cols, k=-1)) ] , rk['c'] )
-  
+
   c = rk['c'].evalf(n=Ndigit).T.tolist()[0]
   r['c'] = " , ".join(map(str,c))
 
@@ -191,7 +191,7 @@ def prepare_eRK(rk: dict, Ndigit: int):
   if 'b2' in rk:
     b2 = rk['b2'].evalf(n=Ndigit).T.tolist()[0]
     r['b2'] = " , ".join(map(str,b2))
-  
+
   return r
 
 if __name__ == '__main__':
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     butcher_hxx.write(
       template.render(list_erk=cg_list_erk, list_exprk=cg_list_exprk)
     )
-  
+
   template = env.get_template("template/tpl_test_order.hxx")
   with open(args['--test'], 'w') as test_hxx:
     test_hxx.write(

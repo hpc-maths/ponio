@@ -9,7 +9,7 @@ ode_solver |version| documentation
    :glob:
 
    api/*
-  
+
 .. toctree::
    :caption: User Documentation
 

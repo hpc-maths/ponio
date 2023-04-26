@@ -1,0 +1,40 @@
+---
+BasedOnStyle: Mozilla
+AlignAfterOpenBracket: DontAlign
+AlignArrayOfStructures: Left
+AlignConsecutiveAssignments:
+  Enabled: true
+AlignEscapedNewlines: Left
+AlignOperands: AlignAfterOperator
+AllowAllArgumentsOnNextLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortLambdasOnASingleLine: Empty
+AlwaysBreakAfterDefinitionReturnType: All
+AlwaysBreakAfterReturnType: All
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Allman
+BreakInheritanceList: AfterComma
+BreakStringLiterals: false
+ColumnLimit: 140
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+Cpp11BracedListStyle: true
+EmptyLineAfterAccessModifier: Always
+EmptyLineBeforeAccessModifier: Always
+ExperimentalAutoDetectBinPacking: true
+IndentWidth: 4
+InsertBraces: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+NamespaceIndentation: All
+PackConstructorInitializers: Never
+PenaltyBreakAssignment: 100000000
+PenaltyBreakBeforeFirstCallParameter: 0
+PenaltyBreakComment: 10
+PenaltyBreakTemplateDeclaration: 0
+PenaltyExcessCharacter: 10
+PenaltyReturnTypeOnItsOwnLine: 10
+QualifierAlignment: Right
+SeparateDefinitionBlocks: Always
+SpaceAfterTemplateKeyword: true
+SpacesInContainerLiterals: false
+SpacesInParentheses: true
