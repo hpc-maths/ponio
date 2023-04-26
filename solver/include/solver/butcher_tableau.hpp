@@ -21,10 +21,10 @@ namespace ode::butcher
         using matrix_t = std::array<std::array<value_t, N_stages>, N_stages>;
         using vector_t = std::array<value_t, N_stages>;
 
-        constexpr butcher_tableau(matrix_t&& A_, vector_t&& b_, vector_t&& c_)
-            : A(std::forward<matrix_t>(A_))
-            , b(std::forward<vector_t>(b_))
-            , c(std::forward<vector_t>(c_))
+        constexpr butcher_tableau( matrix_t&& A_, vector_t&& b_, vector_t&& c_ )
+            : A( std::forward<matrix_t>( A_ ) )
+            , b( std::forward<vector_t>( b_ ) )
+            , c( std::forward<vector_t>( c_ ) )
         {
         }
 
@@ -46,9 +46,9 @@ namespace ode::butcher
 
         using base_t::N_stages;
 
-        constexpr adaptive_butcher_tableau(matrix_t&& A_, vector_t&& b1_, vector_t&& b2_, vector_t&& c_)
-            : base_t(std::forward<matrix_t>(A_), std::forward<vector_t>(b1_), std::forward<vector_t>(c_))
-            , b2(std::forward<vector_t>(b2_))
+        constexpr adaptive_butcher_tableau( matrix_t&& A_, vector_t&& b1_, vector_t&& b2_, vector_t&& c_ )
+            : base_t( std::forward<matrix_t>( A_ ), std::forward<vector_t>( b1_ ), std::forward<vector_t>( c_ ) )
+            , b2( std::forward<vector_t>( b2_ ) )
         {
         }
 
@@ -56,7 +56,7 @@ namespace ode::butcher
     };
 
     template <typename Tableau>
-    concept is_embedded_tableau = requires(Tableau t) { t.b2; };
+    concept is_embedded_tableau = requires( Tableau t ) { t.b2; };
 
     template <typename Algorithm_t>
     concept is_embedded = requires { Algorithm_t::is_embedded; };

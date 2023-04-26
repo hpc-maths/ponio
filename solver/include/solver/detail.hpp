@@ -16,9 +16,9 @@ namespace detail
     /* tpl_inner_product */
     template <typename state_t, typename value_t, typename ArrayA_t, typename ArrayB_t, std::size_t... Is>
     constexpr state_t
-    tpl_inner_product_impl(ArrayA_t const& a, ArrayB_t const& b, state_t const& init, value_t mul_coeff, std::index_sequence<Is...>)
+    tpl_inner_product_impl( ArrayA_t const& a, ArrayB_t const& b, state_t const& init, value_t mul_coeff, std::index_sequence<Is...> )
     {
-        return (init + ... + (mul_coeff * a[Is] * b[Is]));
+        return ( init + ... + ( mul_coeff * a[Is] * b[Is] ) );
     }
 
     /**
@@ -38,17 +38,19 @@ namespace detail
      * @details This function compute \f$\texttt{init} + \sum_{i=0}^N \texttt{mul_coeff}a_ib_i\f$ without loop thanks to template.
      */
     template <std::size_t N, typename state_t, typename value_t, typename ArrayA_t, typename ArrayB_t>
-    constexpr state_t tpl_inner_product(ArrayA_t const& a, ArrayB_t const& b, state_t const& init, value_t mul_coeff = value_t{1.0})
+    constexpr state_t
+    tpl_inner_product( ArrayA_t const& a, ArrayB_t const& b, state_t const& init, value_t mul_coeff = value_t{ 1.0 } )
     {
-        return tpl_inner_product_impl(a, b, init, mul_coeff, std::make_index_sequence<N>());
+        return tpl_inner_product_impl( a, b, init, mul_coeff, std::make_index_sequence<N>() );
     }
 
     /* init_fill_array */
     // first version with a value
     template <typename T, std::size_t... Is>
-    constexpr std::array<std::remove_cvref_t<T>, sizeof...(Is)> init_fill_array_impl(T&& value, std::index_sequence<Is...>)
+    constexpr std::array<std::remove_cvref_t<T>, sizeof...( Is )>
+    init_fill_array_impl( T&& value, std::index_sequence<Is...> )
     {
-        return {{(static_cast<void>(Is), value)...}};
+        return { { ( static_cast<void>( Is ), value )... } };
     }
 
     /**
@@ -72,19 +74,20 @@ namespace detail
      *
      */
     template <std::size_t N, typename T>
-    constexpr std::array<std::remove_cvref_t<T>, N> init_fill_array(T&& value)
+    constexpr std::array<std::remove_cvref_t<T>, N>
+    init_fill_array( T&& value )
     {
-        return init_fill_array_impl(std::forward<T>(value), std::make_index_sequence<N>());
+        return init_fill_array_impl( std::forward<T>( value ), std::make_index_sequence<N>() );
     }
 
 #ifndef IN_DOXYGEN
     // second version with a invocable parameter (thanks concepts)
     template <typename Function_t, std::size_t... Is>
         requires std::invocable<Function_t, std::size_t>
-    constexpr std::array<typename decltype(std::function{std::declval<Function_t>()})::result_type, sizeof...(Is)>
-    init_fill_array_impl(Function_t&& f, std::index_sequence<Is...>)
+    constexpr std::array<typename decltype( std::function{ std::declval<Function_t>() } )::result_type, sizeof...( Is )>
+    init_fill_array_impl( Function_t&& f, std::index_sequence<Is...> )
     {
-        return {{(static_cast<void>(Is), f(Is))...}};
+        return { { ( static_cast<void>( Is ), f( Is ) )... } };
     }
 
     /**
@@ -101,16 +104,18 @@ namespace detail
      */
     template <std::size_t N, typename Function_t>
         requires std::invocable<Function_t, std::size_t>
-    constexpr std::array<typename decltype(std::function{std::declval<Function_t>()})::result_type, N> init_fill_array(Function_t&& f)
+    constexpr std::array<typename decltype( std::function{ std::declval<Function_t>() } )::result_type, N>
+    init_fill_array( Function_t&& f )
     {
-        return init_fill_array_impl(std::forward<Function_t>(f), std::make_index_sequence<N>());
+        return init_fill_array_impl( std::forward<Function_t>( f ), std::make_index_sequence<N>() );
     }
 #endif
 
     template <typename Arithmetic, std::size_t... Is>
-    constexpr Arithmetic power_impl(Arithmetic&& value, std::index_sequence<Is...>)
+    constexpr Arithmetic
+    power_impl( Arithmetic&& value, std::index_sequence<Is...> )
     {
-        return (static_cast<Arithmetic>(1.0) * ... * (static_cast<void>(Is), value));
+        return ( static_cast<Arithmetic>( 1.0 ) * ... * ( static_cast<void>( Is ), value ) );
     }
 
     /**
@@ -126,9 +131,10 @@ namespace detail
      * `Arithmetic_t`.
      */
     template <std::size_t Iexp, typename Arithmetic_t>
-    constexpr Arithmetic_t power(Arithmetic_t&& value)
+    constexpr Arithmetic_t
+    power( Arithmetic_t&& value )
     {
-        return power_impl(std::forward<Arithmetic_t>(value), std::make_index_sequence<Iexp>());
+        return power_impl( std::forward<Arithmetic_t>( value ), std::make_index_sequence<Iexp>() );
     }
 
 } // namespace detail

@@ -30,15 +30,15 @@ namespace observer
     {
         state_t const& data;
 
-        capsule(state_t const& dat);
+        capsule( state_t const& dat );
     };
 
     /**
      * constructor of \ref capsule
      */
     template <typename state_t>
-    inline capsule<state_t>::capsule(state_t const& dat)
-        : data(dat)
+    inline capsule<state_t>::capsule( state_t const& dat )
+        : data( dat )
     {
     }
 
@@ -46,16 +46,18 @@ namespace observer
      * factory of \ref capsule fron a reference to a data
      */
     template <typename state_t>
-    auto make_capsule(state_t const& dat)
+    auto
+    make_capsule( state_t const& dat )
     {
-        return capsule<state_t>(dat);
+        return capsule<state_t>( dat );
     }
 
 #ifndef IN_DOXYGEN
     template <typename state_t>
-    std::ostream& operator<<(std::ostream& os, capsule<state_t> const& data)
+    std::ostream&
+    operator<<( std::ostream& os, capsule<state_t> const& data )
     {
-        os << std::setprecision(std::numeric_limits<state_t>::digits10 + 1);
+        os << std::setprecision( std::numeric_limits<state_t>::digits10 + 1 );
         os << data.data;
         return os;
     }
@@ -66,13 +68,14 @@ namespace observer
      */
     template <typename state_t>
         requires std::ranges::range<state_t>
-    std::ostream& operator<<(std::ostream& os, capsule<state_t> const& data)
+    std::ostream&
+    operator<<( std::ostream& os, capsule<state_t> const& data )
     {
-        using value_t = decltype(*std::ranges::cbegin(data.data));
+        using value_t = decltype( *std::ranges::cbegin( data.data ) );
 
-        os << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+        os << std::setprecision( std::numeric_limits<long double>::digits10 + 1 );
 
-        std::copy(std::ranges::cbegin(data.data), std::ranges::cend(data.data), std::ostream_iterator<value_t>(os, " "));
+        std::copy( std::ranges::cbegin( data.data ), std::ranges::cend( data.data ), std::ostream_iterator<value_t>( os, " " ) );
 
         return os;
     }
@@ -88,7 +91,8 @@ namespace observer
         using derived_t = Derived_t;
 
         template <typename state_t, typename value_t>
-        void operator()(value_t tn, state_t const& un, value_t dt);
+        void
+        operator()( value_t tn, state_t const& un, value_t dt );
     };
 
     /**
@@ -96,9 +100,10 @@ namespace observer
      */
     template <typename Derived_t>
     template <typename state_t, typename value_t>
-    void base_observer<Derived_t>::operator()(value_t tn, state_t const& un, value_t dt)
+    void
+    base_observer<Derived_t>::operator()( value_t tn, state_t const& un, value_t dt )
     {
-        static_cast<derived_t*>(this)->out << tn << " " << make_capsule(un) << " " << dt << "\n";
+        static_cast<derived_t*>( this )->out << tn << " " << make_capsule( un ) << " " << dt << "\n";
     }
 
     /** @class stream_observer
@@ -108,15 +113,15 @@ namespace observer
     {
         std::ostream out;
 
-        stream_observer(std::ostream& os);
+        stream_observer( std::ostream& os );
     };
 
     /**
      * constructor of \ref stream_observer
      * @param os output stream where put the output
      */
-    stream_observer::stream_observer(std::ostream& os)
-        : out(os.rdbuf())
+    stream_observer::stream_observer( std::ostream& os )
+        : out( os.rdbuf() )
     {
     }
 
@@ -132,7 +137,7 @@ namespace observer
      * constructor of \ref cout_observer
      */
     cout_observer::cout_observer()
-        : stream_observer(std::cout)
+        : stream_observer( std::cout )
     {
     }
 
@@ -143,13 +148,14 @@ namespace observer
     {
         std::ofstream out;
 
-        file_observer(std::filesystem::path path);
+        file_observer( std::filesystem::path path );
 
-        file_observer(file_observer const&) = delete;
+        file_observer( file_observer const& ) = delete;
 
       private:
 
-        static std::filesystem::path create_directory_if_needed(std::filesystem::path const& path);
+        static std::filesystem::path
+        create_directory_if_needed( std::filesystem::path const& path );
     };
 
     /**
@@ -157,8 +163,8 @@ namespace observer
      * @param path path to the output file
      * @note this class creates folder if needed
      */
-    file_observer::file_observer(std::filesystem::path path)
-        : out(create_directory_if_needed(path))
+    file_observer::file_observer( std::filesystem::path path )
+        : out( create_directory_if_needed( path ) )
     {
     }
 
@@ -166,12 +172,13 @@ namespace observer
      * create parent directory of path if needed and return the path
      * @param path path of output file
      */
-    std::filesystem::path file_observer::create_directory_if_needed(std::filesystem::path const& path)
+    std::filesystem::path
+    file_observer::create_directory_if_needed( std::filesystem::path const& path )
     {
         auto parent = path.parent_path();
-        if (!parent.empty())
+        if ( !parent.empty() )
         {
-            std::filesystem::create_directories(parent);
+            std::filesystem::create_directories( parent );
         }
         return path;
     }
@@ -179,9 +186,9 @@ namespace observer
     /**
      * litteral to convert a string into \ref file_observer
      */
-    file_observer operator"" _fobs(char const* str, std::size_t len)
+    file_observer operator"" _fobs( char const* str, std::size_t len )
     {
-        return file_observer(std::string_view(str, len));
+        return file_observer( std::string_view( str, len ) );
     }
 
     /** @class null_observer
@@ -190,14 +197,16 @@ namespace observer
     struct null_observer
     {
         template <typename state_t, typename value_t>
-        void operator()(value_t, state_t const&, value_t);
+        void
+        operator()( value_t, state_t const&, value_t );
     };
 
     /**
      * call operator that do nothing
      */
     template <typename state_t, typename value_t>
-    void null_observer::operator()(value_t, state_t const&, value_t)
+    void
+    null_observer::operator()( value_t, state_t const&, value_t )
     {
     }
 
@@ -214,16 +223,18 @@ namespace observer
     {
         std::vector<std::tuple<value_t, state_t, value_t>> solutions;
 
-        void operator()(value_t tn, state_t const& un, value_t dt);
+        void
+        operator()( value_t tn, state_t const& un, value_t dt );
     };
 
     /**
      * call operator to save all iteration: `(tn, un, dt)` as a tuple inside a `std::vector`
      */
     template <typename state_t, typename value_t>
-    void vector_observer<state_t, value_t>::operator()(value_t tn, state_t const& un, value_t dt)
+    void
+    vector_observer<state_t, value_t>::operator()( value_t tn, state_t const& un, value_t dt )
     {
-        solutions.push_back(std::make_tuple(tn, un, dt));
+        solutions.push_back( std::make_tuple( tn, un, dt ) );
     }
 
 } // namespace observer

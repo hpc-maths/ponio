@@ -20,30 +20,32 @@ namespace ode
 {
 
     template <typename state_t>
-    auto error_estimate(state_t const& un, state_t const& unp1, state_t const& unp1bis)
+    auto
+    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
     {
-        return std::abs((unp1 - unp1bis) / (1.0 + std::max(std::abs(un), std::abs(unp1))));
+        return std::abs( ( unp1 - unp1bis ) / ( 1.0 + std::max( std::abs( un ), std::abs( unp1 ) ) ) );
     }
 
     template <typename state_t>
         requires std::ranges::range<state_t>
-    auto error_estimate(state_t const& un, state_t const& unp1, state_t const& unp1bis)
+    auto
+    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
     {
-        auto it_unp1    = std::ranges::cbegin(unp1);
-        auto it_unp1bis = std::ranges::cbegin(unp1bis);
-        auto last       = std::ranges::cend(un);
+        auto it_unp1    = std::ranges::cbegin( unp1 );
+        auto it_unp1bis = std::ranges::cbegin( unp1bis );
+        auto last       = std::ranges::cend( un );
 
-        auto n_elm = std::distance(std::ranges::cbegin(un), last);
+        auto n_elm = std::distance( std::ranges::cbegin( un ), last );
 
-        using value_t = std::remove_cvref_t<decltype(*it_unp1)>;
-        auto r        = static_cast<value_t>(0.);
+        using value_t = std::remove_cvref_t<decltype( *it_unp1 )>;
+        auto r        = static_cast<value_t>( 0. );
 
-        for (auto it_un = std::ranges::cbegin(un); it_un != last; ++it_un, ++it_unp1, ++it_unp1bis)
+        for ( auto it_un = std::ranges::cbegin( un ); it_un != last; ++it_un, ++it_unp1, ++it_unp1bis )
         {
-            auto tmp = (*it_unp1 - *it_unp1bis) / (1.0 + std::max(std::abs(*it_un), std::abs(*it_unp1)));
+            auto tmp = ( *it_unp1 - *it_unp1bis ) / ( 1.0 + std::max( std::abs( *it_un ), std::abs( *it_unp1 ) ) );
             r += tmp * tmp;
         }
-        return std::sqrt((1. / static_cast<double>(n_elm)) * r);
+        return std::sqrt( ( 1. / static_cast<double>( n_elm ) ) * r );
 
         /*
         return std::sqrt(
@@ -80,32 +82,35 @@ namespace ode
         Algorithm_t alg;
         step_storage_t kis;
 
-        method(Algorithm_t const& alg_, state_t const& shadow_of_u0);
+        method( Algorithm_t const& alg_, state_t const& shadow_of_u0 );
 
         template <typename Problem_t, typename value_t>
-        inline std::tuple<value_t, state_t, value_t> operator()(Problem_t& f, value_t tn, state_t const& un, value_t dt);
+        inline std::tuple<value_t, state_t, value_t>
+        operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt );
 
         template <std::size_t I = 0, typename Problem_t, typename value_t, typename Algo_t = Algorithm_t>
             requires std::same_as<Algo_t, Algorithm_t> && Algorithm_t::is_embedded
-        typename std::enable_if<(I == Algorithm_t::N_stages + 1), void>::type
-        _call_stage(Problem_t& f, value_t tn, state_t const& un, value_t dt);
+        typename std::enable_if<( I == Algorithm_t::N_stages + 1 ), void>::type
+        _call_stage( Problem_t& f, value_t tn, state_t const& un, value_t dt );
 
         template <std::size_t I = 0, typename Problem_t, typename value_t, typename Algo_t = Algorithm_t>
             requires std::same_as<Algo_t, Algorithm_t>
-        typename std::enable_if<(I == Algorithm_t::N_stages + 1), void>::type
-        _call_stage(Problem_t& f, value_t tn, state_t const& un, value_t dt);
+        typename std::enable_if<( I == Algorithm_t::N_stages + 1 ), void>::type
+        _call_stage( Problem_t& f, value_t tn, state_t const& un, value_t dt );
 
         template <std::size_t I = 0, typename Problem_t, typename value_t, typename Algo_t = Algorithm_t>
             requires std::same_as<Algo_t, Algorithm_t>
-        typename std::enable_if<(I < Algorithm_t::N_stages + 1), void>::type
-        _call_stage(Problem_t& f, value_t tn, state_t const& un, value_t dt);
+        typename std::enable_if<( I < Algorithm_t::N_stages + 1 ), void>::type
+        _call_stage( Problem_t& f, value_t tn, state_t const& un, value_t dt );
 
         template <typename value_t, typename Algo_t = Algorithm_t>
-        std::tuple<value_t, state_t, value_t> _return(value_t tn, state_t const& un, value_t dt);
+        std::tuple<value_t, state_t, value_t>
+        _return( value_t tn, state_t const& un, value_t dt );
 
         template <typename value_t, typename Algo_t = Algorithm_t>
             requires std::same_as<Algo_t, Algorithm_t> && Algorithm_t::is_embedded
-        std::tuple<value_t, state_t, value_t> _return(value_t tn, state_t const& un, value_t dt);
+        std::tuple<value_t, state_t, value_t>
+        _return( value_t tn, state_t const& un, value_t dt );
     };
 
     /**
@@ -115,9 +120,9 @@ namespace ode
      * @param shadow_of_u0 an object with the same size of computed value for allocation
      */
     template <typename Algorithm_t, typename state_t>
-    method<Algorithm_t, state_t>::method(Algorithm_t const& alg_, state_t const& shadow_of_u0)
-        : alg(alg_)
-        , kis(::detail::init_fill_array<std::tuple_size<step_storage_t>::value>(shadow_of_u0))
+    method<Algorithm_t, state_t>::method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
+        : alg( alg_ )
+        , kis( ::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
     {
     }
 
@@ -135,27 +140,27 @@ namespace ode
     template <typename Algorithm_t, typename state_t>
     template <typename Problem_t, typename value_t>
     inline std::tuple<value_t, state_t, value_t>
-    method<Algorithm_t, state_t>::operator()(Problem_t& f, value_t tn, state_t const& un, value_t dt)
+    method<Algorithm_t, state_t>::operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
     {
-        _call_stage(f, tn, un, dt);
+        _call_stage( f, tn, un, dt );
 
-        return _return(tn, un, dt);
+        return _return( tn, un, dt );
     }
 
     template <typename Algorithm_t, typename state_t>
     template <std::size_t I, typename Problem_t, typename value_t, typename Algo_t>
         requires std::same_as<Algo_t, Algorithm_t> && Algorithm_t::is_embedded
-    typename std::enable_if<(I == Algorithm_t::N_stages + 1), void>::type
-    method<Algorithm_t, state_t>::_call_stage(Problem_t& f, value_t tn, state_t const& un, value_t dt)
+    typename std::enable_if<( I == Algorithm_t::N_stages + 1 ), void>::type
+    method<Algorithm_t, state_t>::_call_stage( Problem_t& f, value_t tn, state_t const& un, value_t dt )
     {
-        kis[I] = alg.stage(Stage<I>{}, f, tn, un, kis, dt);
+        kis[I] = alg.stage( Stage<I>{}, f, tn, un, kis, dt );
     }
 
     template <typename Algorithm_t, typename state_t>
     template <std::size_t I, typename Problem_t, typename value_t, typename Algo_t>
         requires std::same_as<Algo_t, Algorithm_t>
-    typename std::enable_if<(I == Algorithm_t::N_stages + 1), void>::type
-    method<Algorithm_t, state_t>::_call_stage(Problem_t& f, value_t tn, state_t const& un, value_t dt)
+    typename std::enable_if<( I == Algorithm_t::N_stages + 1 ), void>::type
+    method<Algorithm_t, state_t>::_call_stage( Problem_t& f, value_t tn, state_t const& un, value_t dt )
     {
     }
 
@@ -171,11 +176,11 @@ namespace ode
     template <typename Algorithm_t, typename state_t>
     template <std::size_t I, typename Problem_t, typename value_t, typename Algo_t>
         requires std::same_as<Algo_t, Algorithm_t>
-    typename std::enable_if<(I < Algorithm_t::N_stages + 1), void>::type
-    method<Algorithm_t, state_t>::_call_stage(Problem_t& f, value_t tn, state_t const& un, value_t dt)
+    typename std::enable_if<( I < Algorithm_t::N_stages + 1 ), void>::type
+    method<Algorithm_t, state_t>::_call_stage( Problem_t& f, value_t tn, state_t const& un, value_t dt )
     {
-        kis[I] = alg.stage(Stage<I>{}, f, tn, un, kis, dt);
-        _call_stage<I + 1>(f, tn, un, dt);
+        kis[I] = alg.stage( Stage<I>{}, f, tn, un, kis, dt );
+        _call_stage<I + 1>( f, tn, un, dt );
     }
 
     /**
@@ -189,28 +194,30 @@ namespace ode
      */
     template <typename Algorithm_t, typename state_t>
     template <typename value_t, typename Algo_t>
-    std::tuple<value_t, state_t, value_t> method<Algorithm_t, state_t>::_return(value_t tn, state_t const& un, value_t dt)
+    std::tuple<value_t, state_t, value_t>
+    method<Algorithm_t, state_t>::_return( value_t tn, state_t const& un, value_t dt )
     {
-        return std::make_tuple(tn + dt, kis.back(), dt);
+        return std::make_tuple( tn + dt, kis.back(), dt );
     }
 
     template <typename Algorithm_t, typename state_t>
     template <typename value_t, typename Algo_t>
         requires std::same_as<Algo_t, Algorithm_t> && Algorithm_t::is_embedded
-    std::tuple<value_t, state_t, value_t> method<Algorithm_t, state_t>::_return(value_t tn, state_t const& un, value_t dt)
+    std::tuple<value_t, state_t, value_t>
+    method<Algorithm_t, state_t>::_return( value_t tn, state_t const& un, value_t dt )
     {
-        auto error = error_estimate(un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1]);
+        auto error = error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
 
-        value_t new_dt = 0.9 * std::pow(alg.tol / error, 1. / static_cast<value_t>(Algorithm_t::order)) * dt;
-        new_dt         = std::min(std::max(0.2 * dt, new_dt), 5. * dt);
+        value_t new_dt = 0.9 * std::pow( alg.tol / error, 1. / static_cast<value_t>( Algorithm_t::order ) ) * dt;
+        new_dt         = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
 
-        if (error > alg.tol)
+        if ( error > alg.tol )
         {
-            return std::make_tuple(tn, un, new_dt);
+            return std::make_tuple( tn, un, new_dt );
         }
         else
         {
-            return std::make_tuple(tn + dt, kis[Algorithm_t::N_stages], new_dt);
+            return std::make_tuple( tn + dt, kis[Algorithm_t::N_stages], new_dt );
         }
     }
 
@@ -221,9 +228,10 @@ namespace ode
      *  @param shadow_of_u0 an object with the same size of computed value for allocation
      */
     template <typename Algorithm_t, typename state_t>
-    auto make_method(Algorithm_t const& algo, state_t const& shadow_of_u0)
+    auto
+    make_method( Algorithm_t const& algo, state_t const& shadow_of_u0 )
     {
-        return method<Algorithm_t, state_t>(algo, shadow_of_u0);
+        return method<Algorithm_t, state_t>( algo, shadow_of_u0 );
     }
 
     /**
@@ -234,18 +242,19 @@ namespace ode
      * splitting methods (Lie or Strang method).
      */
     template <typename state_t, typename... Algorithms_t>
-    auto make_tuple_methods(std::tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0)
+    auto
+    make_tuple_methods( std::tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
     {
         return std::apply(
-            [&](auto const&... args)
+            [&]( auto const&... args )
             {
-                auto maker = [&](auto const& arg)
+                auto maker = [&]( auto const& arg )
                 {
-                    return make_method(arg, shadow_of_u0); // maybe should use std::bind
+                    return make_method( arg, shadow_of_u0 ); // maybe should use std::bind
                 };
-                return std::make_tuple(maker(args)...);
+                return std::make_tuple( maker( args )... );
             },
-            algos);
+            algos );
     }
 
     /**
@@ -255,10 +264,11 @@ namespace ode
      *  @param shadow_of_u0 an object with the same size of computed value for allocation
      */
     template <typename... Algorithms_t, typename state_t>
-    auto make_method(splitting::lie_tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0)
+    auto
+    make_method( splitting::lie_tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
     {
-        auto methods = make_tuple_methods(algos.algos, shadow_of_u0);
-        return splitting::make_lie_from_tuple(methods, algos.time_steps);
+        auto methods = make_tuple_methods( algos.algos, shadow_of_u0 );
+        return splitting::make_lie_from_tuple( methods, algos.time_steps );
     }
 
     /**
@@ -268,10 +278,11 @@ namespace ode
      *  @param shadow_of_u0 an object with the same size of computed value for allocation
      */
     template <typename... Algorithms_t, typename state_t>
-    auto make_method(splitting::strang_tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0)
+    auto
+    make_method( splitting::strang_tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
     {
-        auto methods = make_tuple_methods(algos.algos, shadow_of_u0);
-        return splitting::make_strang_from_tuple(methods, algos.time_steps);
+        auto methods = make_tuple_methods( algos.algos, shadow_of_u0 );
+        return splitting::make_strang_from_tuple( methods, algos.time_steps );
     }
 
 } // namespace ode

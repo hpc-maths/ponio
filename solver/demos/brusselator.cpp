@@ -20,35 +20,37 @@ class brusselator_model
 
   public:
 
-    brusselator_model(double a, double b)
-        : m_a(a)
-        , m_b(b)
+    brusselator_model( double a, double b )
+        : m_a( a )
+        , m_b( b )
     {
     }
 
-    std::valarray<double> operator()(double t, std::valarray<double> u)
+    std::valarray<double>
+    operator()( double t, std::valarray<double> u )
     {
-        double du1 = m_a - (m_b + 1) * u[0] + u[0] * u[0] * u[1];
+        double du1 = m_a - ( m_b + 1 ) * u[0] + u[0] * u[0] * u[1];
         double du2 = m_b * u[0] - u[0] * u[0] * u[1];
-        return std::valarray<double>{du1, du2};
+        return std::valarray<double>{ du1, du2 };
     }
 };
 
-int main(int, char**)
+int
+main( int, char** )
 {
     std::string dirname = "brusselator_data";
-    auto filename       = std::filesystem::path(dirname) / "brusselator.dat";
-    observer::file_observer fobs(filename);
+    auto filename       = std::filesystem::path( dirname ) / "brusselator.dat";
+    observer::file_observer fobs( filename );
 
-    auto pb_brusselator = ode::make_simple_problem(brusselator_model(1., 3.));
+    auto pb_brusselator = ode::make_simple_problem( brusselator_model( 1., 3. ) );
 
-    std::valarray<double> uini = {1.5, 3};
+    std::valarray<double> uini = { 1.5, 3 };
 
-    ponio::time_span<double> tspan = {0., 20.0};
+    ponio::time_span<double> tspan = { 0., 20.0 };
 
     double dt = 0.01;
 
-    ode::solve(pb_brusselator, ode::butcher::rk_86(), uini, tspan, dt, fobs);
+    ode::solve( pb_brusselator, ode::butcher::rk_86(), uini, tspan, dt, fobs );
 
     return 0;
 }

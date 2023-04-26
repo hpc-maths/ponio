@@ -24,15 +24,19 @@ namespace ode
         std::bitset<3 + 1> property;
         // 3 bits for minimal order and 1 bit for stiffness
 
-        parent_problem(std::size_t order = 3, bool is_stiff = false);
+        parent_problem( std::size_t order = 3, bool is_stiff = false );
 
-        void set_order(std::size_t o);
+        void
+        set_order( std::size_t o );
 
-        unsigned long order();
+        unsigned long
+        order();
 
-        void set_stiffness(bool s);
+        void
+        set_stiffness( bool s );
 
-        bool stiffness();
+        bool
+        stiffness();
     };
 
     /**
@@ -41,8 +45,8 @@ namespace ode
      * @param order    minimum order for solving the probleme
      * @param is_stiff hint on stiffness of considering problem
      */
-    inline parent_problem::parent_problem(std::size_t order, bool is_stiff)
-        : property((order << 1) | is_stiff)
+    inline parent_problem::parent_problem( std::size_t order, bool is_stiff )
+        : property( ( order << 1 ) | is_stiff )
     {
     }
 
@@ -50,25 +54,28 @@ namespace ode
      * change the hint of order
      * @param o new minimum order of solving method
      */
-    inline void parent_problem::set_order(std::size_t o)
+    inline void
+    parent_problem::set_order( std::size_t o )
     {
-        property = (o << 1) | property[0];
+        property = ( o << 1 ) | property[0];
     }
 
     /**
      * get the hint on order
      * @return minimum order of time integrator choosen for solving the method
      */
-    inline unsigned long parent_problem::order()
+    inline unsigned long
+    parent_problem::order()
     {
-        return (property >> 1).to_ulong();
+        return ( property >> 1 ).to_ulong();
     }
 
     /**
      * set the stiffness hint on a specific value
      * @param s hint is problem is stiff
      */
-    inline void parent_problem::set_stiffness(bool s)
+    inline void
+    parent_problem::set_stiffness( bool s )
     {
         property[0] = s;
     }
@@ -77,9 +84,10 @@ namespace ode
      * get the hint on stifness
      * @return Returns `true` if problem is indicate as stiff
      */
-    inline bool parent_problem::stiffness()
+    inline bool
+    parent_problem::stiffness()
     {
-        return static_cast<bool>(property[0]);
+        return static_cast<bool>( property[0] );
     }
 
     // --- SIMPLE_PROBLEM ----------------------------------------------------------
@@ -95,10 +103,11 @@ namespace ode
         using parent_problem::parent_problem;
         Callable_t f;
 
-        simple_problem(Callable_t& f_, std::size_t order = 3, bool is_stiff = false);
+        simple_problem( Callable_t& f_, std::size_t order = 3, bool is_stiff = false );
 
         template <typename state_t, typename value_t>
-        state_t operator()(value_t t, state_t const& u);
+        state_t
+        operator()( value_t t, state_t const& u );
     };
 
     /**
@@ -108,9 +117,9 @@ namespace ode
      * @param is_stiff hint on stiffness of considering problem
      */
     template <typename Callable_t>
-    inline simple_problem<Callable_t>::simple_problem(Callable_t& f_, std::size_t order, bool is_stiff)
-        : parent_problem(order, is_stiff)
-        , f(f_)
+    inline simple_problem<Callable_t>::simple_problem( Callable_t& f_, std::size_t order, bool is_stiff )
+        : parent_problem( order, is_stiff )
+        , f( f_ )
     {
     }
 
@@ -122,9 +131,10 @@ namespace ode
      */
     template <typename Callable_t>
     template <typename state_t, typename value_t>
-    inline state_t simple_problem<Callable_t>::operator()(value_t t, state_t const& u)
+    inline state_t
+    simple_problem<Callable_t>::operator()( value_t t, state_t const& u )
     {
-        return f(t, u);
+        return f( t, u );
     }
 
     /**
@@ -134,9 +144,10 @@ namespace ode
      * @param is_stiff hint on stiffness of problem
      */
     template <typename Callable_t>
-    simple_problem<Callable_t> make_simple_problem(Callable_t c, std::size_t order = 3, bool is_stiff = false)
+    simple_problem<Callable_t>
+    make_simple_problem( Callable_t c, std::size_t order = 3, bool is_stiff = false )
     {
-        return simple_problem<Callable_t>(c, order, is_stiff);
+        return simple_problem<Callable_t>( c, order, is_stiff );
     }
 
     // --- LAWSON_PROBLEM ----------------------------------------------------------
@@ -154,10 +165,11 @@ namespace ode
         Linear_t l;
         Nonlinear_t n;
 
-        lawson_problem(Linear_t& l_, Nonlinear_t& n_, std::size_t order = 3, bool is_stiff = false);
+        lawson_problem( Linear_t& l_, Nonlinear_t& n_, std::size_t order = 3, bool is_stiff = false );
 
         template <typename state_t, typename value_t>
-        state_t operator()(value_t t, state_t const& u);
+        state_t
+        operator()( value_t t, state_t const& u );
     };
 
     /**
@@ -168,10 +180,10 @@ namespace ode
      * @param is_stiff hint on stiffness of considering problem
      */
     template <typename Linear_t, typename Nonlinear_t>
-    lawson_problem<Linear_t, Nonlinear_t>::lawson_problem(Linear_t& l_, Nonlinear_t& n_, std::size_t order, bool is_stiff)
-        : parent_problem(order, is_stiff)
-        , l(l_)
-        , n(n_)
+    lawson_problem<Linear_t, Nonlinear_t>::lawson_problem( Linear_t& l_, Nonlinear_t& n_, std::size_t order, bool is_stiff )
+        : parent_problem( order, is_stiff )
+        , l( l_ )
+        , n( n_ )
     {
     }
 
@@ -183,9 +195,10 @@ namespace ode
      */
     template <typename Linear_t, typename Nonlinear_t>
     template <typename state_t, typename value_t>
-    state_t lawson_problem<Linear_t, Nonlinear_t>::operator()(value_t t, state_t const& u)
+    state_t
+    lawson_problem<Linear_t, Nonlinear_t>::operator()( value_t t, state_t const& u )
     {
-        return l * u + n(t, u);
+        return l * u + n( t, u );
     }
 
     /**
@@ -196,9 +209,10 @@ namespace ode
      * @param is_stiff hint on stiffness of problem
      */
     template <typename Linear_t, typename Nonlinear_t>
-    lawson_problem<Linear_t, Nonlinear_t> make_lawson_problem(Linear_t l, Nonlinear_t n, std::size_t order = 3, bool is_stiff = false)
+    lawson_problem<Linear_t, Nonlinear_t>
+    make_lawson_problem( Linear_t l, Nonlinear_t n, std::size_t order = 3, bool is_stiff = false )
     {
-        return lawson_problem<Linear_t, Nonlinear_t>(l, n, order, is_stiff);
+        return lawson_problem<Linear_t, Nonlinear_t>( l, n, order, is_stiff );
     }
 
     // --- IMEX_PROBLEM ------------------------------------------------------------
@@ -216,10 +230,11 @@ namespace ode
         Implicit_t i;
         Explicit_t e;
 
-        imex_problem(Implicit_t& i_, Explicit_t& e_, std::size_t order = 3, bool is_stiff = false);
+        imex_problem( Implicit_t& i_, Explicit_t& e_, std::size_t order = 3, bool is_stiff = false );
 
         template <typename state_t, typename value_t>
-        state_t operator()(value_t t, state_t const& u);
+        state_t
+        operator()( value_t t, state_t const& u );
     };
 
     /**
@@ -230,10 +245,10 @@ namespace ode
      * @param is_stiff hint on stiffness of considering problem
      */
     template <typename Implicit_t, typename Explicit_t>
-    imex_problem<Implicit_t, Explicit_t>::imex_problem(Implicit_t& i_, Explicit_t& e_, std::size_t order, bool is_stiff)
-        : parent_problem(order, is_stiff)
-        , i(i_)
-        , e(e_)
+    imex_problem<Implicit_t, Explicit_t>::imex_problem( Implicit_t& i_, Explicit_t& e_, std::size_t order, bool is_stiff )
+        : parent_problem( order, is_stiff )
+        , i( i_ )
+        , e( e_ )
     {
     }
 
@@ -245,9 +260,10 @@ namespace ode
      */
     template <typename Implicit_t, typename Explicit_t>
     template <typename state_t, typename value_t>
-    state_t imex_problem<Implicit_t, Explicit_t>::operator()(value_t t, state_t const& u)
+    state_t
+    imex_problem<Implicit_t, Explicit_t>::operator()( value_t t, state_t const& u )
     {
-        return i * u + e(t, u);
+        return i * u + e( t, u );
     }
 
     /**
@@ -258,9 +274,10 @@ namespace ode
      * @param is_stiff hint on stiffness of problem
      */
     template <typename Implicit_t, typename Explicit_t>
-    imex_problem<Implicit_t, Explicit_t> make_imex_problem(Implicit_t i, Explicit_t e, std::size_t order = 3, bool is_stiff = false)
+    imex_problem<Implicit_t, Explicit_t>
+    make_imex_problem( Implicit_t i, Explicit_t e, std::size_t order = 3, bool is_stiff = false )
     {
-        return imex_problem<Implicit_t, Explicit_t>(i, e, order, is_stiff);
+        return imex_problem<Implicit_t, Explicit_t>( i, e, order, is_stiff );
     }
 
     // --- PROBLEM -----------------------------------------------------------------
@@ -275,19 +292,22 @@ namespace ode
     template <typename... Callables_t>
     struct problem
     {
-        static const std::size_t size = sizeof...(Callables_t);
+        static const std::size_t size = sizeof...( Callables_t );
         std::tuple<Callables_t...> system;
 
-        problem(Callables_t... args);
+        problem( Callables_t... args );
 
         template <typename value_t, typename state_t, std::size_t... Is>
-        state_t _sum_components_impl(value_t t, state_t const& u, std::index_sequence<Is...>);
+        state_t
+        _sum_components_impl( value_t t, state_t const& u, std::index_sequence<Is...> );
 
         template <typename value_t, typename state_t>
-        state_t operator()(value_t t, state_t const& u);
+        state_t
+        operator()( value_t t, state_t const& u );
 
         template <std::size_t Index, typename value_t, typename state_t>
-        state_t call(value_t t, state_t const& u);
+        state_t
+        call( value_t t, state_t const& u );
     };
 
     /**
@@ -295,8 +315,8 @@ namespace ode
      * @param args list of sub-problems
      */
     template <typename... Callables_t>
-    inline problem<Callables_t...>::problem(Callables_t... args)
-        : system(args...)
+    inline problem<Callables_t...>::problem( Callables_t... args )
+        : system( args... )
     {
     }
 
@@ -309,9 +329,10 @@ namespace ode
      */
     template <typename... Callables_t>
     template <typename value_t, typename state_t, std::size_t... Is>
-    inline state_t problem<Callables_t...>::_sum_components_impl(value_t t, state_t const& u, std::index_sequence<Is...>)
+    inline state_t
+    problem<Callables_t...>::_sum_components_impl( value_t t, state_t const& u, std::index_sequence<Is...> )
     {
-        return (call<Is>(t, u) + ...);
+        return ( call<Is>( t, u ) + ... );
     }
 
     /**
@@ -322,10 +343,11 @@ namespace ode
      */
     template <typename... Callables_t>
     template <typename value_t, typename state_t>
-    inline state_t problem<Callables_t...>::operator()(value_t t, state_t const& u)
+    inline state_t
+    problem<Callables_t...>::operator()( value_t t, state_t const& u )
     {
-        constexpr auto size = sizeof...(Callables_t);
-        return _sum_components_impl(t, u, std::make_index_sequence<size>{});
+        constexpr auto size = sizeof...( Callables_t );
+        return _sum_components_impl( t, u, std::make_index_sequence<size>{} );
     }
 
     /**
@@ -337,9 +359,10 @@ namespace ode
      */
     template <typename... Callables_t>
     template <std::size_t Index, typename value_t, typename state_t>
-    inline state_t problem<Callables_t...>::call(value_t t, state_t const& u)
+    inline state_t
+    problem<Callables_t...>::call( value_t t, state_t const& u )
     {
-        return std::get<Index>(system)(t, u);
+        return std::get<Index>( system )( t, u );
     }
 
     /**
@@ -347,9 +370,10 @@ namespace ode
      * @param f list of sub-problems
      */
     template <typename... Callables_t>
-    problem<Callables_t...> make_problem(Callables_t... f)
+    problem<Callables_t...>
+    make_problem( Callables_t... f )
     {
-        return problem<Callables_t...>(f...);
+        return problem<Callables_t...>( f... );
     }
 
 } // namespace ode

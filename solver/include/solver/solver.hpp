@@ -26,7 +26,8 @@ namespace ode
      * @return returns the last value of solution \f$u^n\f$
      */
     template <typename Problem_t, typename Algorithm_t, typename state_t, typename value_t, typename Observer_t>
-    state_t solve(Problem_t& pb, Algorithm_t&& algo, state_t const& u0, ponio::time_span<value_t> const& t_span, value_t dt, Observer_t&& obs)
+    state_t
+    solve( Problem_t& pb, Algorithm_t&& algo, state_t const& u0, ponio::time_span<value_t> const& t_span, value_t dt, Observer_t&& obs )
     {
         value_t current_time = t_span.front();
         auto it_next_time    = t_span.begin() + 1;
@@ -40,25 +41,25 @@ namespace ode
 
         value_t last_time = t_span.back();
 
-        auto meth = make_method(algo, un);
+        auto meth = make_method( algo, un );
 
-        obs(current_time, un, dt);
+        obs( current_time, un, dt );
 
-        while (current_time < last_time)
+        while ( current_time < last_time )
         {
-            std::tie(current_time, un1, current_dt) = meth(pb, current_time, un, current_dt);
-            std::swap(un, un1);
+            std::tie( current_time, un1, current_dt ) = meth( pb, current_time, un, current_dt );
+            std::swap( un, un1 );
 
-            obs(current_time, un, current_dt);
+            obs( current_time, un, current_dt );
 
             // prepare next step
-            if (current_time + current_dt > *it_next_time)
+            if ( current_time + current_dt > *it_next_time )
             {
                 current_dt = *it_next_time - current_time;
                 reset_dt   = true;
                 ++it_next_time;
             }
-            else if (reset_dt)
+            else if ( reset_dt )
             {
                 reset_dt   = false;
                 current_dt = dt;

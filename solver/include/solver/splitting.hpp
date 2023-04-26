@@ -29,14 +29,15 @@ namespace ode
              * @param dt   time step
              */
             template <std::size_t I, typename Problem_t, typename Method_t, typename state_t, typename value_t>
-            state_t _split_solve(Problem_t& pb, Method_t& meth, state_t& ui, value_t ti, value_t tf, value_t dt)
+            state_t
+            _split_solve( Problem_t& pb, Method_t& meth, state_t& ui, value_t ti, value_t tf, value_t dt )
             {
-                value_t current_dt   = std::min(dt, tf - ti);
+                value_t current_dt   = std::min( dt, tf - ti );
                 value_t current_time = ti;
-                while (current_time != tf)
+                while ( current_time != tf )
                 {
-                    std::tie(current_time, ui, current_dt) = std::get<I>(meth)(std::get<I>(pb.system), current_time, ui, current_dt);
-                    if (current_time + current_dt > tf)
+                    std::tie( current_time, ui, current_dt ) = std::get<I>( meth )( std::get<I>( pb.system ), current_time, ui, current_dt );
+                    if ( current_time + current_dt > tf )
                     {
                         current_dt = tf - current_time;
                     }
@@ -57,36 +58,37 @@ namespace ode
             static constexpr bool is_splitting_method = true;
 
             std::tuple<Methods_t...> methods;
-            std::array<value_t, sizeof...(Methods_t)> time_steps;
+            std::array<value_t, sizeof...( Methods_t )> time_steps;
 
-            lie(std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...(Methods_t)> const& dts);
-
-            template <std::size_t I = 0, typename Problem_t, typename state_t>
-                requires(I == sizeof...(Methods_t))
-            inline void _call_inc(Problem_t& f, value_t tn, state_t& ui, value_t dt);
+            lie( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts );
 
             template <std::size_t I = 0, typename Problem_t, typename state_t>
-                requires(I < sizeof...(Methods_t))
-            inline void _call_inc(Problem_t& f, value_t tn, state_t& ui, value_t dt);
+                requires( I == sizeof...( Methods_t ) )
+            inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt );
+
+            template <std::size_t I = 0, typename Problem_t, typename state_t>
+                requires( I < sizeof...( Methods_t ) )
+            inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt );
 
             template <typename Problem_t, typename state_t>
-            auto operator()(Problem_t& f, value_t tn, state_t const& un, value_t dt);
+            auto
+            operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt );
         };
 
         /**
          * constructor of \ref lie from a tuple
          */
         template <typename value_t, typename... Methods_t>
-        lie<value_t, Methods_t...>::lie(std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...(Methods_t)> const& dts)
-            : methods(meths)
-            , time_steps(dts)
+        lie<value_t, Methods_t...>::lie( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
+            : methods( meths )
+            , time_steps( dts )
         {
         }
 
         template <typename value_t, typename... Methods_t>
         template <std::size_t I, typename Problem_t, typename state_t>
-            requires(I == sizeof...(Methods_t))
-        inline void lie<value_t, Methods_t...>::_call_inc(Problem_t& f, value_t tn, state_t& ui, value_t dt)
+            requires( I == sizeof...( Methods_t ) )
+        inline void lie<value_t, Methods_t...>::_call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
         }
 
@@ -101,11 +103,11 @@ namespace ode
          */
         template <typename value_t, typename... Methods_t>
         template <std::size_t I, typename Problem_t, typename state_t>
-            requires(I < sizeof...(Methods_t))
-        inline void lie<value_t, Methods_t...>::_call_inc(Problem_t& f, value_t tn, state_t& ui, value_t dt)
+            requires( I < sizeof...( Methods_t ) )
+        inline void lie<value_t, Methods_t...>::_call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
-            ui = detail::_split_solve<I>(f, methods, ui, tn, tn + dt, time_steps[I]);
-            _call_inc<I + 1>(f, tn, ui, dt);
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
+            _call_inc<I + 1>( f, tn, ui, dt );
         }
 
         /**
@@ -117,11 +119,12 @@ namespace ode
          */
         template <typename value_t, typename... Methods_t>
         template <typename Problem_t, typename state_t>
-        auto lie<value_t, Methods_t...>::operator()(Problem_t& f, value_t tn, state_t const& un, value_t dt)
+        auto
+        lie<value_t, Methods_t...>::operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
         {
             state_t ui = un;
-            _call_inc(f, tn, ui, dt);
-            return std::make_tuple(tn + dt, ui, dt);
+            _call_inc( f, tn, ui, dt );
+            return std::make_tuple( tn + dt, ui, dt );
         }
 
         /**
@@ -130,9 +133,10 @@ namespace ode
          * @return a \ref lie object build from the tuple of methods
          */
         template <typename value_t, typename... Methods_t>
-        auto make_lie_from_tuple(std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...(Methods_t)> const& dts)
+        auto
+        make_lie_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
         {
-            return lie<value_t, Methods_t...>(meths, dts);
+            return lie<value_t, Methods_t...>( meths, dts );
         }
 
         /** @class lie_tuple
@@ -148,19 +152,19 @@ namespace ode
             static constexpr bool is_splitting_method = true;
 
             std::tuple<Algorithms_t...> algos;
-            std::array<value_t, sizeof...(Algorithms_t)> time_steps;
+            std::array<value_t, sizeof...( Algorithms_t )> time_steps;
 
-            lie_tuple(std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...(Algorithms_t)>&& dts);
+            lie_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts );
         };
 
         /**
          * constructor of \ref lie_tuple from a variadic number of algorithms
          */
         template <typename value_t, typename... Algorithms_t>
-        inline lie_tuple<value_t, Algorithms_t...>::lie_tuple(std::tuple<Algorithms_t...>&& algs,
-            std::array<value_t, sizeof...(Algorithms_t)>&& dts)
-            : algos(algs)
-            , time_steps(dts)
+        inline lie_tuple<value_t, Algorithms_t...>::lie_tuple( std::tuple<Algorithms_t...>&& algs,
+            std::array<value_t, sizeof...( Algorithms_t )>&& dts )
+            : algos( algs )
+            , time_steps( dts )
         {
         }
 
@@ -170,9 +174,10 @@ namespace ode
          * @return a \ref lie_tuple object build from the tuple of methods
          */
         template <typename value_t, typename... Algorithms_t>
-        auto make_lie_tuple(std::pair<Algorithms_t, value_t>&&... args)
+        auto
+        make_lie_tuple( std::pair<Algorithms_t, value_t>&&... args )
         {
-            return lie_tuple<value_t, Algorithms_t...>(std::forward_as_tuple((args.first)...), {args.second...});
+            return lie_tuple<value_t, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
         }
 
         /** @class strang
@@ -190,33 +195,34 @@ namespace ode
             static constexpr bool is_splitting_method = true;
 
             template <std::size_t I = 0, typename Problem_t, typename state_t>
-                requires(I == sizeof...(Methods_t) - 1)
-            inline void _call_inc(Problem_t& f, value_t tn, state_t& ui, value_t dt);
+                requires( I == sizeof...( Methods_t ) - 1 )
+            inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt );
 
             template <std::size_t I = 0, typename Problem_t, typename state_t>
-                requires(I < sizeof...(Methods_t) - 1)
-            inline void _call_inc(Problem_t& f, value_t tn, state_t& ui, value_t dt);
+                requires( I < sizeof...( Methods_t ) - 1 )
+            inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt );
 
-            template <std::size_t I = sizeof...(Methods_t) - 1, typename Problem_t, typename state_t>
-                requires(I == 0)
-            inline void _call_dec(Problem_t& f, value_t tn, state_t& ui, value_t dt);
+            template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
+                requires( I == 0 )
+            inline void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt );
 
-            template <std::size_t I = sizeof...(Methods_t) - 1, typename Problem_t, typename state_t>
-                requires(I > 0)
-            inline void _call_dec(Problem_t& f, value_t tn, state_t& ui, value_t dt);
+            template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
+                requires( I > 0 )
+            inline void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt );
 
             template <typename Problem_t, typename state_t>
-            auto operator()(Problem_t& f, value_t tn, state_t const& un, value_t dt);
+            auto
+            operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt );
         };
 
         // end of incremental recursion, start of decremental recursion
         template <typename value_t, typename... Methods_t>
         template <std::size_t I, typename Problem_t, typename state_t>
-            requires(I == sizeof...(Methods_t) - 1)
-        inline void strang<value_t, Methods_t...>::_call_inc(Problem_t& f, value_t tn, state_t& ui, value_t dt)
+            requires( I == sizeof...( Methods_t ) - 1 )
+        inline void strang<value_t, Methods_t...>::_call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
-            ui = detail::_split_solve<I>(f, methods, ui, tn, tn + dt, time_steps[I]);
-            _call_dec<I - 1>(f, tn, ui, dt);
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
+            _call_dec<I - 1>( f, tn, ui, dt );
         }
 
         /**
@@ -230,20 +236,20 @@ namespace ode
          */
         template <typename value_t, typename... Methods_t>
         template <std::size_t I, typename Problem_t, typename state_t>
-            requires(I < sizeof...(Methods_t) - 1)
-        inline void strang<value_t, Methods_t...>::_call_inc(Problem_t& f, value_t tn, state_t& ui, value_t dt)
+            requires( I < sizeof...( Methods_t ) - 1 )
+        inline void strang<value_t, Methods_t...>::_call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
-            ui = detail::_split_solve<I>(f, methods, ui, tn, tn + 0.5 * dt, time_steps[I]);
-            _call_inc<I + 1>(f, tn, ui, dt);
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I] );
+            _call_inc<I + 1>( f, tn, ui, dt );
         }
 
         // end of decremental recursion, end of recursion
         template <typename value_t, typename... Methods_t>
         template <std::size_t I, typename Problem_t, typename state_t>
-            requires(I == 0)
-        inline void strang<value_t, Methods_t...>::_call_dec(Problem_t& f, value_t tn, state_t& ui, value_t dt)
+            requires( I == 0 )
+        inline void strang<value_t, Methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
-            ui = detail::_split_solve<I>(f, methods, ui, tn, tn + 0.5 * dt, time_steps[I]);
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I] );
         }
 
         /**
@@ -258,11 +264,11 @@ namespace ode
          */
         template <typename value_t, typename... Methods_t>
         template <std::size_t I, typename Problem_t, typename state_t>
-            requires(I > 0)
-        inline void strang<value_t, Methods_t...>::_call_dec(Problem_t& f, value_t tn, state_t& ui, value_t dt)
+            requires( I > 0 )
+        inline void strang<value_t, Methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
-            ui = detail::_split_solve<I>(f, methods, ui, tn, tn + 0.5 * dt, time_steps[I]);
-            _call_dec<I - 1>(f, tn, ui, dt);
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I] );
+            _call_dec<I - 1>( f, tn, ui, dt );
         }
 
         /**
@@ -274,11 +280,12 @@ namespace ode
          */
         template <typename value_t, typename... Methods_t>
         template <typename Problem_t, typename state_t>
-        auto strang<value_t, Methods_t...>::operator()(Problem_t& f, value_t tn, state_t const& un, value_t dt)
+        auto
+        strang<value_t, Methods_t...>::operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
         {
             state_t ui = un;
-            _call_inc(f, tn, ui, dt);
-            return std::make_tuple(tn + dt, ui, dt);
+            _call_inc( f, tn, ui, dt );
+            return std::make_tuple( tn + dt, ui, dt );
         }
 
         /**
@@ -287,9 +294,10 @@ namespace ode
          * @return a \ref strang object build from the tuple of methods
          */
         template <typename value_t, typename... Methods_t>
-        auto make_strang_from_tuple(std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...(Methods_t)> const& dts)
+        auto
+        make_strang_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
         {
-            return strang<value_t, Methods_t...>(meths, dts);
+            return strang<value_t, Methods_t...>( meths, dts );
         }
 
         /** @class strang_tuple
@@ -304,19 +312,19 @@ namespace ode
             static constexpr bool is_splitting_method = true;
 
             std::tuple<Algorithms_t...> algos;
-            std::array<value_t, sizeof...(Algorithms_t)> time_steps;
+            std::array<value_t, sizeof...( Algorithms_t )> time_steps;
 
-            strang_tuple(std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...(Algorithms_t)>&& dts);
+            strang_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts );
         };
 
         /**
          * constructor of \ref strang_tuple from a variadic number of algorithms
          */
         template <typename value_t, typename... Algorithms_t>
-        inline strang_tuple<value_t, Algorithms_t...>::strang_tuple(std::tuple<Algorithms_t...>&& algs,
-            std::array<value_t, sizeof...(Algorithms_t)>&& dts)
-            : algos(algs)
-            , time_steps(dts)
+        inline strang_tuple<value_t, Algorithms_t...>::strang_tuple( std::tuple<Algorithms_t...>&& algs,
+            std::array<value_t, sizeof...( Algorithms_t )>&& dts )
+            : algos( algs )
+            , time_steps( dts )
         {
         }
 
@@ -326,13 +334,14 @@ namespace ode
          * @return a \ref strang_tuple object build from the tuple of methods
          */
         template <typename value_t, typename... Algorithms_t>
-        auto make_strang_tuple(std::pair<Algorithms_t, value_t>&&... args)
+        auto
+        make_strang_tuple( std::pair<Algorithms_t, value_t>&&... args )
         {
-            return strang_tuple<value_t, Algorithms_t...>(std::forward_as_tuple((args.first)...), {args.second...});
+            return strang_tuple<value_t, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
         }
 
         template <typename T>
-        concept is_splitting_method = requires(T t) { T::is_splitting_method == true; };
+        concept is_splitting_method = requires( T t ) { T::is_splitting_method == true; };
 
     } // namespace splitting
 } // namespace ode

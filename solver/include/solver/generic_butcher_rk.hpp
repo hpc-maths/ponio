@@ -26,29 +26,32 @@ namespace ode::butcher
             static constexpr std::size_t order    = Tableau::order;
             static constexpr char const* id       = Tableau::id;
 
-            explicit_rk_butcher(double tol_ = ponio::default_config::tol)
+            explicit_rk_butcher( double tol_ = ponio::default_config::tol )
                 : butcher()
-                , tol(tol_)
+                , tol( tol_ )
             {
             }
 
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t, std::size_t I>
-            inline state_t stage(Stage<I>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt)
+            inline state_t
+            stage( Stage<I>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
-                return f(tn + butcher.c[I] * dt, ::detail::tpl_inner_product<I>(butcher.A[I], Ki, un, dt));
+                return f( tn + butcher.c[I] * dt, ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt ) );
             }
 
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t>
-            inline state_t stage(Stage<N_stages>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt)
+            inline state_t
+            stage( Stage<N_stages>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
-                return ::detail::tpl_inner_product<N_stages>(butcher.b, Ki, un, dt);
+                return ::detail::tpl_inner_product<N_stages>( butcher.b, Ki, un, dt );
             }
 
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t, typename Tab = Tableau>
                 requires std::same_as<Tab, Tableau> && is_embedded
-            inline state_t stage(Stage<N_stages + 1>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt)
+            inline state_t
+            stage( Stage<N_stages + 1>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
-                return ::detail::tpl_inner_product<N_stages>(butcher.b2, Ki, un, dt);
+                return ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
             }
 
             double tol;
@@ -64,8 +67,8 @@ namespace ode::butcher
         {
             Exp_t m_exp;
 
-            lawson_base(Exp_t exp_)
-                : m_exp(exp_)
+            lawson_base( Exp_t exp_ )
+                : m_exp( exp_ )
             {
             }
         };
@@ -81,32 +84,35 @@ namespace ode::butcher
             static constexpr std::size_t order    = Tableau::order;
             static constexpr char const* id       = Tableau::id;
 
-            explicit_rk_butcher(Exp_t exp_, double tol_ = ponio::default_config::tol)
-                : lawson_base<Exp_t>(exp_)
+            explicit_rk_butcher( Exp_t exp_, double tol_ = ponio::default_config::tol )
+                : lawson_base<Exp_t>( exp_ )
                 , butcher()
-                , tol(tol_)
+                , tol( tol_ )
             {
             }
 
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t, std::size_t i>
-            inline state_t stage(Stage<i>, Problem_t& pb, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt)
+            inline state_t
+            stage( Stage<i>, Problem_t& pb, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
-                return m_exp(-butcher.c[i] * dt * pb.l)
-                     * pb.n(tn + butcher.c[i] * dt,
-                         m_exp(butcher.c[i] * dt * pb.l) * ::detail::tpl_inner_product<i>(butcher.A[i], Ki, un, dt));
+                return m_exp( -butcher.c[i] * dt * pb.l )
+                     * pb.n( tn + butcher.c[i] * dt,
+                         m_exp( butcher.c[i] * dt * pb.l ) * ::detail::tpl_inner_product<i>( butcher.A[i], Ki, un, dt ) );
             }
 
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t>
-            inline state_t stage(Stage<N_stages>, Problem_t& pb, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt)
+            inline state_t
+            stage( Stage<N_stages>, Problem_t& pb, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
-                return m_exp(dt * pb.l) * ::detail::tpl_inner_product<N_stages>(butcher.b, Ki, un, dt);
+                return m_exp( dt * pb.l ) * ::detail::tpl_inner_product<N_stages>( butcher.b, Ki, un, dt );
             }
 
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t, typename Tab = Tableau>
                 requires std::same_as<Tab, Tableau> && is_embedded
-            inline state_t stage(Stage<N_stages + 1>, Problem_t& pb, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt)
+            inline state_t
+            stage( Stage<N_stages + 1>, Problem_t& pb, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
-                return m_exp(dt * pb.l) * ::detail::tpl_inner_product<N_stages>(butcher.b2, Ki, un, dt);
+                return m_exp( dt * pb.l ) * ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
             }
 
             double tol;
@@ -121,9 +127,10 @@ namespace ode::butcher
          * @param tol_ tolenrence of method for adaptative time step integrator
          */
         template <typename Tableau, typename Exp_t>
-        auto make_lawson(Exp_t exp_, double tol_ = ponio::default_config::tol)
+        auto
+        make_lawson( Exp_t exp_, double tol_ = ponio::default_config::tol )
         {
-            return explicit_rk_butcher<Tableau, Exp_t>(exp_, tol_);
+            return explicit_rk_butcher<Tableau, Exp_t>( exp_, tol_ );
         }
 
     } // namespace lawson
@@ -135,57 +142,63 @@ namespace ode::butcher
         {
             template <typename func_t, typename linear_t>
                 requires std::invocable<func_t, linear_t>
-            auto coefficient_eval(func_t&& f, linear_t&& l)
+            auto
+            coefficient_eval( func_t&& f, linear_t&& l )
             {
-                return f(std::move(l));
+                return f( std::move( l ) );
             }
 
             template <typename value_t, typename linear_t>
                 requires std::is_arithmetic_v<std::remove_cvref_t<value_t>>
-            auto coefficient_eval(value_t&& val, linear_t&&)
+            auto
+            coefficient_eval( value_t&& val, linear_t&& )
             {
                 return val;
             }
 
             template <std::size_t I, std::size_t J, typename tuple_t>
-            auto triangular_get(tuple_t& t)
+            auto
+            triangular_get( tuple_t& t )
             {
-                return std::get<I*(I - 1) / 2 + J>(t);
+                return std::get<I*( I - 1 ) / 2 + J>( t );
             }
 
             template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t, std::size_t... Is>
-            constexpr state_t tpl_inner_product_impl(tuple_t const& a,
+            constexpr state_t
+            tpl_inner_product_impl( tuple_t const& a,
                 array_t const& k,
                 state_t const& init,
                 linear_t const& l,
                 value_t mul_coeff,
-                std::index_sequence<Is...>)
+                std::index_sequence<Is...> )
             {
-                return (init + ... + (mul_coeff * coefficient_eval(triangular_get<I, Is>(a), mul_coeff * l) * (k[Is] + l * init)));
-            }
-
-            template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t>
-            constexpr state_t tpl_inner_product(tuple_t const& a, array_t const& k, state_t const& init, linear_t const& l, value_t mul_coeff)
-            {
-                return tpl_inner_product_impl<I>(a, k, init, l, mul_coeff, std::make_index_sequence<I>());
-            }
-
-            template <typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t, std::size_t... Is>
-            constexpr state_t tpl_inner_product_b_impl(tuple_t const& b,
-                array_t const& k,
-                state_t const& init,
-                linear_t const& l,
-                value_t mul_coeff,
-                std::index_sequence<Is...>)
-            {
-                return (init + ... + (mul_coeff * coefficient_eval(std::get<Is>(b), mul_coeff * l) * (k[Is] + l * init)));
+                return ( init + ... + ( mul_coeff * coefficient_eval( triangular_get<I, Is>( a ), mul_coeff * l ) * ( k[Is] + l * init ) ) );
             }
 
             template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t>
             constexpr state_t
-            tpl_inner_product_b(tuple_t const& b, array_t const& k, state_t const& init, linear_t const& l, value_t mul_coeff)
+            tpl_inner_product( tuple_t const& a, array_t const& k, state_t const& init, linear_t const& l, value_t mul_coeff )
             {
-                return tpl_inner_product_b_impl(b, k, init, l, mul_coeff, std::make_index_sequence<I>());
+                return tpl_inner_product_impl<I>( a, k, init, l, mul_coeff, std::make_index_sequence<I>() );
+            }
+
+            template <typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t, std::size_t... Is>
+            constexpr state_t
+            tpl_inner_product_b_impl( tuple_t const& b,
+                array_t const& k,
+                state_t const& init,
+                linear_t const& l,
+                value_t mul_coeff,
+                std::index_sequence<Is...> )
+            {
+                return ( init + ... + ( mul_coeff * coefficient_eval( std::get<Is>( b ), mul_coeff * l ) * ( k[Is] + l * init ) ) );
+            }
+
+            template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t>
+            constexpr state_t
+            tpl_inner_product_b( tuple_t const& b, array_t const& k, state_t const& init, linear_t const& l, value_t mul_coeff )
+            {
+                return tpl_inner_product_b_impl( b, k, init, l, mul_coeff, std::make_index_sequence<I>() );
             }
         } // namespace detail
 
@@ -198,29 +211,32 @@ namespace ode::butcher
             static constexpr std::size_t order    = Tableau::order;
             static constexpr char const* id       = Tableau::id;
 
-            explicit_exp_rk_butcher(double tol_ = ponio::default_config::tol)
+            explicit_exp_rk_butcher( double tol_ = ponio::default_config::tol )
                 : butcher()
-                , tol(tol_)
+                , tol( tol_ )
             {
             }
 
             template <typename problem_t, typename state_t, typename value_t, typename arrayKi_t, std::size_t i>
-            inline state_t stage(Stage<i>, problem_t& pb, value_t tn, state_t const& un, arrayKi_t const& Ki, value_t dt)
+            inline state_t
+            stage( Stage<i>, problem_t& pb, value_t tn, state_t const& un, arrayKi_t const& Ki, value_t dt )
             {
-                return pb.n(tn + butcher.c[i] * dt, detail::tpl_inner_product<i>(butcher.a, Ki, un, pb.l, dt));
+                return pb.n( tn + butcher.c[i] * dt, detail::tpl_inner_product<i>( butcher.a, Ki, un, pb.l, dt ) );
             }
 
             template <typename problem_t, typename state_t, typename value_t, typename arrayKi_t>
-            inline state_t stage(Stage<N_stages>, problem_t& pb, value_t tn, state_t const& un, arrayKi_t const& Ki, value_t dt)
+            inline state_t
+            stage( Stage<N_stages>, problem_t& pb, value_t tn, state_t const& un, arrayKi_t const& Ki, value_t dt )
             {
-                return detail::tpl_inner_product_b<N_stages>(butcher.b, Ki, un, pb.l, dt);
+                return detail::tpl_inner_product_b<N_stages>( butcher.b, Ki, un, pb.l, dt );
             }
 
             template <typename problem_t, typename state_t, typename value_t, typename arrayKi_t, typename tab_t = Tableau>
                 requires std::same_as<tab_t, Tableau> && is_embedded
-            inline state_t stage(Stage<N_stages + 1>, problem_t& pb, value_t tn, state_t const& un, arrayKi_t const& Ki, value_t dt)
+            inline state_t
+            stage( Stage<N_stages + 1>, problem_t& pb, value_t tn, state_t const& un, arrayKi_t const& Ki, value_t dt )
             {
-                return detail::tpl_inner_product_b<N_stages>(butcher.b2, Ki, un, pb.l, dt);
+                return detail::tpl_inner_product_b<N_stages>( butcher.b2, Ki, un, pb.l, dt );
             }
 
             double tol;
@@ -240,19 +256,20 @@ namespace ode::butcher
          * @param x value where evaluate \f$T_n\f$
          */
         template <std::size_t N, typename value_t>
-        value_t T(const value_t x)
+        value_t
+        T( const value_t x )
         {
-            if constexpr (N == 0)
+            if constexpr ( N == 0 )
             {
-                return static_cast<value_t>(1.);
+                return static_cast<value_t>( 1. );
             }
-            else if constexpr (N == 1)
+            else if constexpr ( N == 1 )
             {
                 return x;
             }
             else
             {
-                return 2 * x * T<N - 1>(x) - T<N - 2>(x);
+                return 2 * x * T<N - 1>( x ) - T<N - 2>( x );
             }
         }
 
@@ -265,19 +282,20 @@ namespace ode::butcher
          * @param x value where evaluate \f$U_n\f$
          */
         template <std::size_t N, typename value_t>
-        value_t U(const value_t x)
+        value_t
+        U( const value_t x )
         {
-            if constexpr (N == 0)
+            if constexpr ( N == 0 )
             {
-                return static_cast<value_t>(1.);
+                return static_cast<value_t>( 1. );
             }
-            else if constexpr (N == 1)
+            else if constexpr ( N == 1 )
             {
                 return 2 * x;
             }
             else
             {
-                return 2 * x * U<N - 1>(x) - U<N - 2>(x);
+                return 2 * x * U<N - 1>( x ) - U<N - 2>( x );
             }
         }
 
@@ -289,15 +307,16 @@ namespace ode::butcher
          * @param x value where evaluate \f$\frac{\mathrm{d}T_n}{\mathrm{d}x}\f$
          */
         template <std::size_t N, typename value_t>
-        value_t dT(const value_t x)
+        value_t
+        dT( const value_t x )
         {
-            if constexpr (N == 0)
+            if constexpr ( N == 0 )
             {
-                return static_cast<value_t>(0.);
+                return static_cast<value_t>( 0. );
             }
             else
             {
-                return N * U<N - 1>(x);
+                return N * U<N - 1>( x );
             }
         }
 
@@ -310,15 +329,16 @@ namespace ode::butcher
          * @param x value where evaluate \f$\frac{\mathrm{d}^2T_n}{\mathrm{d}x^2}\f$
          */
         template <std::size_t N, typename value_t>
-        value_t ddT(const value_t x)
+        value_t
+        ddT( const value_t x )
         {
-            if constexpr (N == 0)
+            if constexpr ( N == 0 )
             {
-                return static_cast<value_t>(0.);
+                return static_cast<value_t>( 0. );
             }
             else
             {
-                return N * (N * T<N>(x) - x * U<N - 1>(x)) / (x * x - static_cast<value_t>(1.));
+                return N * ( N * T<N>( x ) - x * U<N - 1>( x ) ) / ( x * x - static_cast<value_t>( 1. ) );
             }
         }
 
@@ -331,67 +351,72 @@ namespace ode::butcher
         template <std::size_t _N_stages, typename value_t = double>
         struct explicit_rkc2
         {
-            static_assert(_N_stages > 1, "Number of stages should be at least 2 in eRKC2");
+            static_assert( _N_stages > 1, "Number of stages should be at least 2 in eRKC2" );
             static constexpr bool is_embedded     = false;
             static constexpr std::size_t N_stages = _N_stages;
             value_t w0;
             value_t w1;
 
             template <std::size_t J>
-            static constexpr value_t b(const value_t x)
+            static constexpr value_t
+            b( const value_t x )
             {
-                if constexpr (J == 0 || J == 1)
+                if constexpr ( J == 0 || J == 1 )
                 {
-                    return b<2>(x);
+                    return b<2>( x );
                 }
                 else
                 {
-                    return ddT<J>(x) / (::detail::power<2>(dT<J>(x)));
+                    return ddT<J>( x ) / ( ::detail::power<2>( dT<J>( x ) ) );
                 }
             }
 
-            explicit_rkc2(value_t eps = 2. / 13.)
-                : w0(1. + eps / (N_stages * N_stages))
+            explicit_rkc2( value_t eps = 2. / 13. )
+                : w0( 1. + eps / ( N_stages * N_stages ) )
             {
-                w1 = dT<N_stages>(w0) / ddT<N_stages>(w0);
+                w1 = dT<N_stages>( w0 ) / ddT<N_stages>( w0 );
             }
 
             template <typename Problem_t, typename state_t, typename ArrayKi_t, std::size_t j>
-            inline state_t stage(Stage<j>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Yi, value_t dt)
+            inline state_t
+            stage( Stage<j>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Yi, value_t dt )
             {
-                value_t mj   = 2. * b<j>(w0) / b<j - 1>(w0) * w0;
-                value_t nj   = -b<j>(w0) / b<j - 2>(w0);
-                value_t mjt  = 2. * b<j>(w0) / b<j - 1>(w0) * w1;
-                value_t gjt  = -(1. - b<j - 1>(w0) * T<j - 1>(w0)) * mjt;
-                value_t cjm1 = dT<N_stages>(w0) / ddT<N_stages>(w0) * ddT<j - 1>(w0) / dT<j - 1>(w0);
+                value_t mj   = 2. * b<j>( w0 ) / b<j - 1>( w0 ) * w0;
+                value_t nj   = -b<j>( w0 ) / b<j - 2>( w0 );
+                value_t mjt  = 2. * b<j>( w0 ) / b<j - 1>( w0 ) * w1;
+                value_t gjt  = -( 1. - b<j - 1>( w0 ) * T<j - 1>( w0 ) ) * mjt;
+                value_t cjm1 = dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) * ddT<j - 1>( w0 ) / dT<j - 1>( w0 );
 
-                return (1. - mj - nj) * un + mj * Yi[j - 1] + nj * Yi[j - 2] + mjt * dt * f(tn + cjm1 * dt, Yi[j - 1]) + gjt * dt * Yi[0];
+                return ( 1. - mj - nj ) * un + mj * Yi[j - 1] + nj * Yi[j - 2] + mjt * dt * f( tn + cjm1 * dt, Yi[j - 1] ) + gjt * dt * Yi[0];
             }
 
             template <typename Problem_t, typename state_t, typename ArrayKi_t>
-            inline state_t stage(Stage<0>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Yi, value_t dt)
+            inline state_t
+            stage( Stage<0>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Yi, value_t dt )
             {
-                return f(tn, un); // be careful Yi[0] stores f(tn,un) not un!!!
+                return f( tn, un ); // be careful Yi[0] stores f(tn,un) not un!!!
             }
 
             template <typename Problem_t, typename state_t, typename ArrayKi_t>
-            inline state_t stage(Stage<1>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Yi, value_t dt)
+            inline state_t
+            stage( Stage<1>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Yi, value_t dt )
             {
-                value_t m1t = b<1>(w0) * w1;
+                value_t m1t = b<1>( w0 ) * w1;
                 return un + dt * m1t * Yi[0];
             }
 
             template <typename Problem_t, typename state_t, typename ArrayKi_t>
-            inline state_t stage(Stage<2>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Yi, value_t dt)
+            inline state_t
+            stage( Stage<2>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Yi, value_t dt )
             {
                 value_t m2  = 2. * w0;
                 value_t n2  = -1.;
                 value_t m2t = 2. * w1;
-                value_t c2  = dT<N_stages>(w0) / ddT<N_stages>(w0) * ddT<2>(w0) / dT<2>(w0);
-                value_t c1  = c2 / dT<2>(w0);
-                value_t g2t = -(1. - b<1>(w0) * T<1>(w0)) * m2t;
+                value_t c2  = dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) * ddT<2>( w0 ) / dT<2>( w0 );
+                value_t c1  = c2 / dT<2>( w0 );
+                value_t g2t = -( 1. - b<1>( w0 ) * T<1>( w0 ) ) * m2t;
 
-                return (1. - m2 - n2) * un + m2 * Yi[1] + n2 * un + m2t * dt * f(tn + c1 * dt, Yi[1]) + g2t * dt * Yi[0];
+                return ( 1. - m2 - n2 ) * un + m2 * Yi[1] + n2 * un + m2t * dt * f( tn + c1 * dt, Yi[1] ) + g2t * dt * Yi[0];
             }
         };
 
