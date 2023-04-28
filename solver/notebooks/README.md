@@ -18,7 +18,7 @@ conda install -c conda-forge cxx-compiler jupyter numpy matplotlib scipy sympy
 Some examples needs [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page).
 
 ```sh
-conda instal -c conda-forge eigen
+conda install -c conda-forge eigen
 ```
 
 Then launch Jupyter
