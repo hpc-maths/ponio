@@ -8,6 +8,7 @@
 
 #include "butcher_tableau.hpp"
 #include "detail.hpp"
+#include "linear_algebra.hpp"
 #include "ponio_config.hpp"
 #include "stage.hpp"
 
@@ -105,7 +106,7 @@ namespace ode::butcher
                 xk  = xk + increment;
                 res = norm( f( xk ) );
 
-                count_oter += 1;
+                count_iter += 1;
             }
 
             return xk;
@@ -115,12 +116,12 @@ namespace ode::butcher
         struct diagonal_implicit_rk_butcher
         {
             Tableau butcher;
-            static constexpr std::size_t N_stages = Tableau::N_stages;
-            static constexpr bool is_embedded     = is_embedded_tableau<Tableau>;
-            static constexpr std::size_t order    = Tableau::order;
-            static constexpr char* id             = Tableau::id;
-            static constexpr void_linear_algebra  = std::is_void<LinearAlgebra_t>::value;
-            using linear_algebra_t                = typename std::conditional<void_linear_algebra,
+            static constexpr std::size_t N_stages     = Tableau::N_stages;
+            static constexpr bool is_embedded         = is_embedded_tableau<Tableau>;
+            static constexpr std::size_t order        = Tableau::order;
+            static constexpr char* id                 = Tableau::id;
+            static constexpr bool void_linear_algebra = std::is_void<LinearAlgebra_t>::value;
+            using linear_algebra_t                    = typename std::conditional<void_linear_algebra,
                 bool, // just a small valid type
                 LinearAlgebra_t>::type;
 
