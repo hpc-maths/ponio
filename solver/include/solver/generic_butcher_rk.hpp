@@ -5,6 +5,8 @@
 #pragma once
 
 #include <concepts>
+#include <ranges>
+#include <type_traits>
 
 #include "butcher_tableau.hpp"
 #include "detail.hpp"
