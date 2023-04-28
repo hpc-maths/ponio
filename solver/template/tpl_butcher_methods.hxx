@@ -116,6 +116,53 @@ using {{ rk.id }}_t = exp_runge_kutta::explicit_exp_rk_butcher<butcher_{{ rk.id 
 
 using {{ rk.id }} = exp_runge_kutta::explicit_exp_rk_butcher<butcher_{{ rk.id }}<double, double>>;
 
+{% endfor %}
+
+// diagonal implicit Runge-Kutta methods
+{% for rk in list_dirk %}
+/**
+ * @brief Butcher tableau of {{ rk.label }} method
+ * @tparam value_t type of coefficient (``double``by default)
+ */
+template <typename value_t=double>
+struct butcher_{{ rk.id }} : public {{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }},value_t>
+{
+  using base_t = {{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }},value_t>;
+  static constexpr std::size_t N_stages = base_t::N_stages;
+  static constexpr std::size_t order = {{ rk.order }};
+  static constexpr const char* id = "{{ rk.id }}";
+
+  using base_t::A;
+  using base_t::b;
+  using base_t::c;
+
+  butcher_{{ rk.id }}()
+  : base_t(
+    {{ '{{' }}
+    {% for ai in rk.A -%}
+      { {{ ai }} }{{ ",\n      " if not loop.last else "" }}
+    {%- endfor %}
+    {{ '}}' }}, // A
+    { {{ rk.b }} }, // b
+    {% if 'b2' in rk -%}{ {{ rk.b2 }} }, // b2 {%- endif %}
+    { {{ rk.c }} }  // c
+  )
+  {}
+};
+
+template <typename value_t, typename linear_algebra_t=void, typename ... Args>
+auto
+{{ rk.id }}_t ( Args ... args )
+{
+  return runge_kutta::make_dirk<butcher_{{ rk.id }}<value_t>, linear_algebra_t>(args...);
+}
+
+template <typename linear_algebra_t=void, typename ... Args>
+auto
+{{ rk.id }} ( Args ... args )
+{
+  return runge_kutta::make_dirk<butcher_{{ rk.id }}<double>, linear_algebra_t>(args...);
+}
 
 {% endfor %}
 
