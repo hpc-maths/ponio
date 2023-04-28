@@ -132,7 +132,7 @@ class multisplit_list:
     self.n = n
 
   def __call__(self, seq:list, condition):
-    r = [ [] ] * self.n
+    r = [ [] for _ in range(self.n) ]
     for x in seq:
       r[ condition(x) ].append(x)
     return r
