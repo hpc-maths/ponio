@@ -150,6 +150,47 @@ namespace ode
         return simple_problem<Callable_t>( c, order, is_stiff );
     }
 
+    // --- IMPLICIT_PROBLEM --------------------------------------------------------
+    /** @class implicit_problem
+     *  define a problem with its jacobian to use implicit Runge-Kutta method
+     *  @tparam Callable_t type of callable object (or function) stored in problem
+     *  @tparam Jacobian_t type of callable object (or function) that represents the jacobian
+     */
+    template <typename Callable_t, typename Jacobian_t>
+    struct implicit_problem : public simple_problem<Callable_t>
+    {
+        using simple_problem<Callable_t>::simple_problem;
+
+        Jacobian_t df;
+
+        implicit_problem( Callable_t& f_, Jacobian_t& df_ );
+    };
+
+    /**
+     * constructor of \ref implicit_problem from a callable and hints
+     * @param f_       callable object
+     * @param order    minimum order for solving the probleme
+     * @param is_stiff hint on stiffness of considering problem
+     */
+    template <typename Callable_t, typename Jacobian_t>
+    inline implicit_problem<Callable_t, Jacobian_t>::implicit_problem( Callable_t& f_, Jacobian_t& df_ )
+        : simple_problem<Callable_t>( f_ )
+        , df( df_ )
+    {
+    }
+
+    /**
+     * factory of \ref implicit_problem
+     * @param f        callable object (function or functor) which represent the function of the problem
+     * @param df       jacobian of \f$f\f$ function
+     */
+    template <typename Callable_t, typename Jacobian_t>
+    implicit_problem<Callable_t, Jacobian_t>
+    make_implicit_problem( Callable_t f, Jacobian_t df )
+    {
+        return implicit_problem<Callable_t, Jacobian_t>( f, df );
+    }
+
     // --- LAWSON_PROBLEM ----------------------------------------------------------
     /** @class lawson_problem
      *  define a problem with a linear part and non-linear part
