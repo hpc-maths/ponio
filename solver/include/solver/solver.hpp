@@ -88,16 +88,10 @@ namespace ode
             //   sol.time_step = final_time - sol.time;
             //   ++it_next_time;
             // }
-            std::cout << sol.time << " " << next_time();
             if ( next_time() > final_time )
             {
                 sol.time_step = final_time - sol.time;
             }
-            if ( sol.time >= final_time )
-            {
-                sol.time_step = 0.1;
-            }
-            std::cout << " " << next_time() << std::endl;
             increment();
             return *this;
         }
@@ -273,10 +267,9 @@ namespace ode
         auto meth = ode::make_method( algo, u0 );
 
         double next_final_time = std::nextafter( t_span.back(), dt * std::numeric_limits<value_t>::infinity() );
-        auto first             = make_time_iterator( pb, meth, u0, t_span.front(), dt, t_span.back() );
 
-        // std::cout << std::setprecision(15) << t_span.back() << " " << next_final_time << std::endl;
-        auto last = make_time_iterator( pb, meth, u0, next_final_time, dt, t_span.back() );
+        auto first = make_time_iterator( pb, meth, u0, t_span.front(), dt, t_span.back() );
+        auto last  = make_time_iterator( pb, meth, u0, t_span.back(), dt, t_span.back() );
 
         return solver_range<value_t, state_t, decltype( meth ), problem_t>( first, last );
     }
