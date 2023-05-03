@@ -29,7 +29,6 @@ int
 main( int, char** )
 {
     std::string dirname = "ch_data";
-    std::string filename;
 
     using state_t = double;
 
@@ -46,8 +45,8 @@ main( int, char** )
     state_t y_0 = 2.0;
 
     { // example of time loop with while loop controlled by user
-        filename = std::filesystem::path( dirname ) / "sol_rk_33_ralston.dat";
-        auto obs = observer::file_observer( filename );
+        auto filename = std::filesystem::path( dirname ) / "sol_rk_33_ralston.dat";
+        auto obs      = observer::file_observer( filename );
 
         auto sol_range = ode::make_solver_range( ch_pb, ode::butcher::rk_33_ralston(), y_0, { 0., 0.464, tf }, dt );
         auto it_sol    = sol_range.begin();
@@ -70,8 +69,8 @@ main( int, char** )
     }
 
     { // example of time loop with for loop on range
-        filename = std::filesystem::path( dirname ) / "sol_rk54_6m.dat";
-        auto obs = observer::file_observer( filename );
+        auto filename = std::filesystem::path( dirname ) / "sol_rk54_6m.dat";
+        auto obs      = observer::file_observer( filename );
 
         auto sol_range = ode::make_solver_range( ch_pb, ode::butcher::rk54_6m(), y_0, { 0., 0.464, tf }, dt );
 
