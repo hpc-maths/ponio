@@ -47,9 +47,10 @@ namespace ode
         value_type sol;
         method_t meth;
         problem_t& pb;
-        // ponio::time_span<value_t> t_span;
-        // typename ponio::time_span<value_t>::iterator it_next_time;
+        ponio::time_span<value_t> t_span;
+        typename ponio::time_span<value_t>::iterator it_next_time;
         value_t final_time; // should be a ponio::time_span;
+        static constexpr value_t sentinel = std::numeric_limits<value_t>::max();
 
         // time_iterator ( problem_t & pb_, method_t meth_, state_t const& u0, ponio::time_span<value_t> && times, value_t dt )
         // : sol(times.front(), u0, dt)
@@ -60,11 +61,23 @@ namespace ode
         // {
         // }
 
-        time_iterator( problem_t& pb_, method_t meth_, state_t const& u0, value_t t_init, value_t dt, value_t t_final )
-            : sol( t_init, u0, dt )
+        time_iterator( problem_t& pb_, method_t meth_, state_t const& u0, ponio::time_span<value_t> const& t_span_, value_t dt )
+            : sol( ( t_span_.front() == t_span_.back() ) ? sentinel : t_span_.front(), u0, dt )
             , meth( meth_ )
             , pb( pb_ )
-            , final_time( t_final )
+            , t_span( t_span_ )
+            , it_next_time( std::begin( t_span ) )
+            , final_time( t_span.back() )
+        {
+        }
+
+        time_iterator( time_iterator const& rhs )
+            : sol( rhs.sol )
+            , meth( rhs.meth )
+            , pb( rhs.pb )
+            , t_span( rhs.t_span )
+            , it_next_time( std::begin( t_span ) + ( rhs.it_next_time - std::begin( rhs.t_span ) ) )
+            , final_time( rhs.final_time )
         {
         }
 
@@ -88,11 +101,30 @@ namespace ode
             //   sol.time_step = final_time - sol.time;
             //   ++it_next_time;
             // }
-            if ( next_time() > final_time )
+            if ( sol.time == final_time )
             {
-                sol.time_step = final_time - sol.time;
+                sol.time = sentinel;
             }
+
+            if ( sol.time == sentinel )
+            {
+                return *this;
+            }
+
+            auto save_dt   = sol.time_step;
+            bool change_dt = false;
+            if ( next_time() > *it_next_time )
+            {
+                sol.time_step = *it_next_time - sol.time;
+                ++it_next_time;
+                change_dt = true;
+            }
+
             increment();
+            if ( change_dt )
+            {
+                sol.time_step = save_dt;
+            }
             return *this;
         }
 
@@ -181,9 +213,9 @@ namespace ode
      */
     template <typename value_t, typename state_t, typename method_t, typename problem_t>
     auto
-    make_time_iterator( problem_t& pb, method_t meth, state_t const& u0, value_t t_init, value_t dt, value_t t_final )
+    make_time_iterator( problem_t& pb, method_t meth, state_t const& u0, ponio::time_span<value_t> const& t_span, value_t dt )
     {
-        return time_iterator<value_t, state_t, method_t, problem_t>( pb, meth, u0, t_init, dt, t_final );
+        return time_iterator<value_t, state_t, method_t, problem_t>( pb, meth, u0, t_span, dt );
     }
 
     /**
@@ -266,10 +298,8 @@ namespace ode
     {
         auto meth = ode::make_method( algo, u0 );
 
-        double next_final_time = std::nextafter( t_span.back(), dt * std::numeric_limits<value_t>::infinity() );
-
-        auto first = make_time_iterator( pb, meth, u0, t_span.front(), dt, t_span.back() );
-        auto last  = make_time_iterator( pb, meth, u0, t_span.back(), dt, t_span.back() );
+        auto first = make_time_iterator( pb, meth, u0, t_span, dt );
+        auto last  = make_time_iterator( pb, meth, u0, { t_span.back() }, dt );
 
         return solver_range<value_t, state_t, decltype( meth ), problem_t>( first, last );
     }
