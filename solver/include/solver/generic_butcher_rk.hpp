@@ -105,7 +105,7 @@ namespace ode::butcher
             value_t residual = norm( f( xk ) );
             std::size_t iter = 0;
 
-            while ( iter < max_iter && res > tol )
+            while ( iter < max_iter && residual > tol )
             {
                 auto increment = solver( df( xk ), -f( xk ) );
 
