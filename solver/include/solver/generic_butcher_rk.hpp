@@ -6,6 +6,7 @@
 
 #include <concepts>
 #include <ranges>
+#include <string_view>
 #include <type_traits>
 
 #include "butcher_tableau.hpp"
@@ -27,7 +28,7 @@ namespace ode::butcher
             static constexpr std::size_t N_stages = Tableau::N_stages;
             static constexpr bool is_embedded     = is_embedded_tableau<Tableau>;
             static constexpr std::size_t order    = Tableau::order;
-            static constexpr char const* id       = Tableau::id;
+            static constexpr std::string_view id  = Tableau::id;
 
             explicit_rk_butcher( double tol_ = ponio::default_config::tol )
                 : butcher()
@@ -121,7 +122,7 @@ namespace ode::butcher
             static constexpr std::size_t N_stages     = Tableau::N_stages;
             static constexpr bool is_embedded         = is_embedded_tableau<Tableau>;
             static constexpr std::size_t order        = Tableau::order;
-            static constexpr char* id                 = Tableau::id;
+            static constexpr std::string_view id      = Tableau::id;
             static constexpr bool void_linear_algebra = std::is_void<LinearAlgebra_t>::value;
             using linear_algebra_t                    = typename std::conditional<void_linear_algebra,
                 bool, // just a small valid type
@@ -283,7 +284,7 @@ namespace ode::butcher
             static constexpr std::size_t N_stages = Tableau::N_stages;
             static constexpr bool is_embedded     = is_embedded_tableau<Tableau>;
             static constexpr std::size_t order    = Tableau::order;
-            static constexpr char const* id       = Tableau::id;
+            static constexpr std::string_view id  = Tableau::id;
 
             explicit_rk_butcher( Exp_t exp_, double tol_ = ponio::default_config::tol )
                 : lawson_base<Exp_t>( exp_ )
@@ -410,7 +411,7 @@ namespace ode::butcher
             static constexpr std::size_t N_stages = Tableau::N_stages;
             static constexpr bool is_embedded     = is_embedded_tableau<Tableau>;
             static constexpr std::size_t order    = Tableau::order;
-            static constexpr char const* id       = Tableau::id;
+            static constexpr std::string_view id  = Tableau::id;
 
             explicit_exp_rk_butcher( double tol_ = ponio::default_config::tol )
                 : butcher()
