@@ -5,6 +5,7 @@
 #pragma once
 
 #include <concepts>
+#include <numeric>
 #include <ranges>
 #include <string_view>
 #include <type_traits>
@@ -78,13 +79,15 @@ namespace ode::butcher
         auto
         norm( state_t const& x )
         {
-            auto r = static_cast<decltype( *std::begin( x ) )>( 0. );
-            for ( auto const& xi : x )
-            {
-                r += std::abs( xi ) * std::abs( xi );
-            }
-
-            return std::sqrt( r );
+            auto zero = static_cast<decltype( *std::begin( x ) )>( 0. );
+            auto accu = std::accumulate( std::begin( x ),
+                std::end( x ),
+                zero,
+                []( auto const& acc, auto const& xi )
+                {
+                    return std::abs( xi ) * std::abs( xi );
+                } );
+            return std::sqrt( accu );
         }
 
         template <typename state_t>
@@ -98,18 +101,18 @@ namespace ode::butcher
         state_t
         newton( func_t&& f, jacobian_t&& df, state_t const& x0, solver_t&& solver, value_t tol = 1e-10, std::size_t max_iter = 50 )
         {
-            state_t xk             = x0;
-            value_t res            = norm( f( xk ) );
-            std::size_t count_iter = 0;
+            state_t xk       = x0;
+            value_t residual = norm( f( xk ) );
+            std::size_t iter = 0;
 
-            while ( count_iter < max_iter && res > tol )
+            while ( iter < max_iter && res > tol )
             {
                 auto increment = solver( df( xk ), -f( xk ) );
 
-                xk  = xk + increment;
-                res = norm( f( xk ) );
+                xk       = xk + increment;
+                residual = norm( f( xk ) );
 
-                count_iter += 1;
+                iter += 1;
             }
 
             return xk;
