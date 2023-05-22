@@ -160,9 +160,7 @@ namespace ode::butcher
             inline state_t
             stage( Stage<I>, Problem_t& pb, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
-                using matrix_t         = decltype( pb.df( tn, un ) );
-                using linear_algebra_t = typename std::
-                    conditional<void_linear_algebra, ::ponio::linear_algebra::linear_algebra<matrix_t>, LinearAlgebra_t>::type;
+                using matrix_t = decltype( pb.df( tn, un ) );
 
                 auto identity = [&]( state_t const& u )
                 {
@@ -211,7 +209,8 @@ namespace ode::butcher
                     {
                         if constexpr ( detail::has_solver_method<LinearAlgebra_t> )
                         {
-                            return std::bind_front( std::mem_fn( &linear_algebra_t::solver ), linalg );
+                            using namespace std::placeholders;
+                            return std::bind( &LinearAlgebra_t::solver, linalg, _1, _2 );
                         }
                         else
                         {
