@@ -1,4 +1,4 @@
-set(demos arenstorf brownian brusselator exp heat pendulum lorenz lotka_volterra)
+set(demos arenstorf brownian brusselator brusselator_dirk exp heat pendulum lorenz lotka_volterra)
 
 foreach(demo IN LISTS demos)
     message(STATUS "demo=${demo}")
