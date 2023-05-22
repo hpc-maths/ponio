@@ -1,8 +1,17 @@
 set(demos arenstorf brownian brusselator brusselator_dirk exp heat pendulum lorenz lotka_volterra)
+set(demos_eigen brusselator_dirk)
+
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 20)
 
 foreach(demo IN LISTS demos)
     message(STATUS "demo=${demo}")
     add_executable(${demo} ${demo}.cpp)
+    if(${demo} IN_LIST demos_eigen)
+        message(STATUS "EIGEN=${demo}")
+        find_package (Eigen3 3.4 REQUIRED NO_MODULE)
+        target_link_libraries(${demo} Eigen3::Eigen)
+    endif()
     target_link_libraries(${demo} ponio)
 endforeach()
 

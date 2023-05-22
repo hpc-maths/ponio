@@ -5,7 +5,7 @@
 #include <functional>
 #include <iostream>
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 #include <solver/butcher_methods.hpp>
 #include <solver/eigen_linear_algebra.hpp>
