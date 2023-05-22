@@ -11,5 +11,6 @@ dependencies:
   - numpy
   - sympy
   - jinja2
+  - eigen
   - pip:
     - docopt-ng
