@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cmath>
+#include <iterator>
 #include <limits>
 
 #include "method.hpp"
@@ -37,12 +38,13 @@ namespace ode
     template <typename value_t, typename state_t, typename method_t, typename problem_t>
     struct time_iterator
     {
-        using difference_type = value_t;
-        using value_type      = current_solution<value_t, state_t>;
-        using pointer         = value_type*;
-        using reference       = value_type&;
-        using const_pointer   = value_type const*;
-        using const_reference = value_type const&;
+        using difference_type   = value_t;
+        using value_type        = current_solution<value_t, state_t>;
+        using pointer           = value_type*;
+        using reference         = value_type&;
+        using const_pointer     = value_type const*;
+        using const_reference   = value_type const&;
+        using iterator_category = std::output_iterator_tag;
 
         value_type sol;
         method_t meth;
