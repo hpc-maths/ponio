@@ -194,6 +194,17 @@ def prepare_eRK(rk: dict, Ndigit: int):
 
   return r
 
+def sformat(value, fmt, attribute=None):
+  """
+    filter for Jinja2 to transform a list into a list of string with format `fmt`
+  """
+  if attribute is not None:
+    for elm in value:
+      yield(fmt.format(elm[attribute]))
+  else:
+    for elm in value:
+      yield(fmt.format(elm))
+
 if __name__ == '__main__':
   from docopt import docopt
 
@@ -210,6 +221,7 @@ if __name__ == '__main__':
   local_dir = os.path.dirname(os.path.abspath(__file__))
 
   import jinja2
+  jinja2.filters.FILTERS['sformat'] = sformat
   env = jinja2.Environment(loader=jinja2.FileSystemLoader(local_dir))
   template = env.get_template("template/tpl_butcher_methods.hxx")
 
