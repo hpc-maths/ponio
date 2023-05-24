@@ -228,9 +228,3 @@ if __name__ == '__main__':
     butcher_hxx.write(
       template.render(list_erk=cg_list_erk, list_exprk=cg_list_exprk)
     )
-
-  #template = env.get_template("template/tpl_test_order.hxx")
-  #with open(args['--test'], 'w') as test_hxx:
-  #  test_hxx.write(
-  #    template.render(list_meth=cg_list_erk)
-  #  )
