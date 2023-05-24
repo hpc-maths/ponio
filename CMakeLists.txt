@@ -8,7 +8,6 @@ set(PONIO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/solver/include)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 set(BUTCHER_METHODS "${CMAKE_CURRENT_SOURCE_DIR}/solver/include/solver/butcher_methods.hpp")
-set(TEST_ORDER "${CMAKE_CURRENT_SOURCE_DIR}/solver/test/test_order.hxx")
 
 set(Ndigit 36)
 
@@ -16,10 +15,9 @@ file(GLOB json_files
     "database/*.json")
 
 add_custom_command(
-    OUTPUT ${BUTCHER_METHODS} ${TEST_ORDER}
+    OUTPUT ${BUTCHER_METHODS}
     COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/solver/code_generator.py ${json_files}
                 -o ${BUTCHER_METHODS}
-                -t ${TEST_ORDER}
                 --Ndigit=${Ndigit}
     VERBATIM
 )
