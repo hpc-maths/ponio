@@ -22,28 +22,31 @@ process.wait()
 
 methods = {
             'dirk23': "DIRK (2,3)",
-            'rk33': "RK (3,3)"
+            'dirk23_exact_solver': "DIRK (2,3) (exact solver)",
+            'rk33': "RK (3,3)",
         }
 
-for tag, label in methods.items():
+lines = ["+-", "x:", "+--"]
+
+for i, (tag, label) in enumerate(methods.items()):
     data = np.loadtxt(os.path.join(data_dir, f"brusselator_{tag}.dat"))
     t  = data[:,0]
     u1 = data[:,1]
     u2 = data[:,2]
-    plt.plot(t, u1,"-+", label=f"$u_1$ with {label}")
-    plt.plot(t, u2,"-+", label=f"$u_2$ with {label}")
+    plt.plot(t, u1, lines[i], label=f"$u_1$ with {label}")
+    plt.plot(t, u2, lines[i], label=f"$u_2$ with {label}")
 
 plt.title("Solution of Brusselator system")
 plt.xlabel('time')
 plt.legend()
 plt.show()
 
-for tag, label in methods.items():
+for i, (tag, label) in enumerate(methods.items()):
     data = np.loadtxt(os.path.join(data_dir, f"brusselator_{tag}.dat"))
     t  = data[:,0]
     u1 = data[:,1]
     u2 = data[:,2]
-    plt.plot(u1, u2, "-+", label=label)
+    plt.plot(u1, u2, lines[i], label=label)
 
 plt.title("Phase plane")
 plt.xlabel('$u_1$')

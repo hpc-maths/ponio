@@ -73,9 +73,11 @@ main( int, char** )
 
     std::string dirname = "brusselator_dirk_data";
     auto filename_1     = std::filesystem::path( dirname ) / "brusselator_dirk23.dat";
-    auto filename_2     = std::filesystem::path( dirname ) / "brusselator_rk33.dat";
+    auto filename_2     = std::filesystem::path( dirname ) / "brusselator_dirk23_exact_solver.dat";
+    auto filename_3     = std::filesystem::path( dirname ) / "brusselator_rk33.dat";
     observer::file_observer fobs_1( filename_1 );
     observer::file_observer fobs_2( filename_2 );
+    observer::file_observer fobs_3( filename_3 );
 
     auto model          = brusselator_model( 1., 3. );
     auto pb_brusselator = ode::make_implicit_problem( model, std::bind( &brusselator_model::jacobian, &model, _1, _2 ) );
@@ -86,8 +88,9 @@ main( int, char** )
 
     double dt = 0.25;
 
-    ode::solve( pb_brusselator, ode::butcher::dirk23<lin_alg_2_2>(), uini, tspan, dt, fobs_1 );
-    ode::solve( pb_brusselator, ode::butcher::rk_33(), uini, tspan, dt, fobs_2 );
+    ode::solve( pb_brusselator, ode::butcher::dirk23(), uini, tspan, dt, fobs_1 );
+    ode::solve( pb_brusselator, ode::butcher::dirk23<lin_alg_2_2>(), uini, tspan, dt, fobs_2 );
+    ode::solve( pb_brusselator, ode::butcher::rk_33(), uini, tspan, dt, fobs_3 );
 
     return 0;
 }
