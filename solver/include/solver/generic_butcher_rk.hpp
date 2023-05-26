@@ -67,8 +67,8 @@ namespace ode::butcher
             template <typename T>
             concept has_identity_method = std::is_member_function_pointer_v<decltype( &T::identity )>;
 
-            template <typename T>
-            concept has_solver_method = std::is_member_function_pointer_v<decltype( &T::solver )>;
+            template <typename T, typename... Args>
+            concept has_solver_method = std::is_member_function_pointer_v<decltype( &T::template solver<Args...> )>;
 
             template <typename T, typename... Args>
             concept has_newton_method = std::is_member_function_pointer_v<decltype( &T::template newton<Args...> )>;
@@ -207,7 +207,7 @@ namespace ode::butcher
                 {
                     auto solver = [&]()
                     {
-                        if constexpr ( detail::has_solver_method<LinearAlgebra_t> )
+                        if constexpr ( detail::has_solver_method<LinearAlgebra_t, matrix_t, state_t> )
                         {
                             using namespace std::placeholders;
                             return std::bind( &LinearAlgebra_t::solver, linalg, _1, _2 );

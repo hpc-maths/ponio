@@ -19,7 +19,7 @@
 namespace ponio::linear_algebra
 {
 
-    template <typename scalar_t, std::size_t size>
+    template <typename scalar_t, int size>
     struct linear_algebra<Eigen::Matrix<scalar_t, size, size>>
     {
         using matrix_type = Eigen::Matrix<scalar_t, size, size>;
