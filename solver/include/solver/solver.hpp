@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iterator>
 #include <limits>
+#include <optional>
 
 #include "method.hpp"
 #include "time_span.hpp"
@@ -51,6 +52,7 @@ namespace ode
         problem_t& pb;
         ponio::time_span<value_t> t_span;
         typename ponio::time_span<value_t>::iterator it_next_time;
+        std::optional<value_t> dt_reference;
         static constexpr value_t sentinel = std::numeric_limits<value_t>::max();
 
         // time_iterator ( problem_t & pb_, method_t meth_, state_t const& u0, ponio::time_span<value_t> && times, value_t dt )
@@ -68,6 +70,7 @@ namespace ode
             , pb( pb_ )
             , t_span( t_span_ )
             , it_next_time( std::begin( t_span ) )
+            , dt_reference( std::nullopt )
         {
         }
 
@@ -77,6 +80,7 @@ namespace ode
             , pb( rhs.pb )
             , t_span( rhs.t_span )
             , it_next_time( std::begin( t_span ) + ( rhs.it_next_time - std::begin( rhs.t_span ) ) )
+            , dt_reference( rhs.dt_reference )
         {
         }
 
@@ -105,20 +109,20 @@ namespace ode
                 return *this;
             }
 
-            auto save_dt   = sol.time_step;
-            bool change_dt = false;
+            if ( dt_reference.has_value() )
+            {
+                sol.time_step = dt_reference.value();
+                dt_reference  = std::nullopt;
+            }
+
             if ( next_time() > *it_next_time )
             {
+                dt_reference  = sol.time_step;
                 sol.time_step = *it_next_time - sol.time;
                 ++it_next_time;
-                change_dt = true;
             }
 
             increment();
-            if ( change_dt )
-            {
-                sol.time_step = save_dt;
-            }
             return *this;
         }
 
