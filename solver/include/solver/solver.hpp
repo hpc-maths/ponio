@@ -130,14 +130,6 @@ namespace ode
             return copy;
         }
 
-        time_iterator&
-        operator+=( difference_type dt )
-        {
-            sol.time_step = dt;
-            increment();
-            return *this;
-        }
-
         reference
         operator*()
         {

@@ -26,7 +26,7 @@ $y_0 = 2$
 */
 
 int
-main( int, char** )
+main()
 {
     std::string dirname = "ch_data";
 
@@ -62,7 +62,8 @@ main( int, char** )
             }
             else
             {
-                it_sol += 0.05;
+                it_sol->time_step = 0.05;
+                ++it_sol;
             }
         }
         obs( it_sol->time, it_sol->state, tf - it_sol->time ); // to save iteration where it_sol->time == tf
