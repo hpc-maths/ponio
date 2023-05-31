@@ -18,18 +18,25 @@ template <typename rk_t>
 void
 test_order()
 {
-  INFO("test order of ", rk_t::id);
-  WARN( check_order(rk_t()) == doctest::Approx(rk_t::order).epsilon(0.05) );
+    INFO( "test order of ", rk_t::id );
+    WARN( check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
 }
 
 template <typename rk_tuple, std::size_t... Is>
 void
-test_order_impl(std::index_sequence<Is...>)
+test_order_impl( std::index_sequence<Is...> )
 {
-  ((test_order<typename std::tuple_element<Is, rk_tuple>::type>()), ...);
+    ( ( test_order<typename std::tuple_element<Is, rk_tuple>::type>() ), ... );
 }
 
-TEST_CASE("order::explict_runge_kutta")
+template <typename rk_tuple>
+void
+test_order_on()
 {
-  test_order_impl<ode::butcher::erk_tuple<double>>(std::make_index_sequence<std::tuple_size<ode::butcher::erk_tuple<double>>::value>());
+    test_order_impl<rk_tuple>( std::make_index_sequence<std::tuple_size<rk_tuple>::value>() );
+}
+
+TEST_CASE( "order::explict_runge_kutta" )
+{
+    test_order_on<ode::butcher::erk_tuple<double>>();
 }
