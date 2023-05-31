@@ -51,7 +51,6 @@ namespace ode
         problem_t& pb;
         ponio::time_span<value_t> t_span;
         typename ponio::time_span<value_t>::iterator it_next_time;
-        value_t final_time; // should be a ponio::time_span;
         static constexpr value_t sentinel = std::numeric_limits<value_t>::max();
 
         // time_iterator ( problem_t & pb_, method_t meth_, state_t const& u0, ponio::time_span<value_t> && times, value_t dt )
@@ -69,7 +68,6 @@ namespace ode
             , pb( pb_ )
             , t_span( t_span_ )
             , it_next_time( std::begin( t_span ) )
-            , final_time( t_span.back() )
         {
         }
 
@@ -79,7 +77,6 @@ namespace ode
             , pb( rhs.pb )
             , t_span( rhs.t_span )
             , it_next_time( std::begin( t_span ) + ( rhs.it_next_time - std::begin( rhs.t_span ) ) )
-            , final_time( rhs.final_time )
         {
         }
 
@@ -98,12 +95,7 @@ namespace ode
         time_iterator&
         operator++()
         {
-            // if ( next_time() > *it_next_time )
-            // {
-            //   sol.time_step = final_time - sol.time;
-            //   ++it_next_time;
-            // }
-            if ( sol.time == final_time )
+            if ( sol.time == t_span.back() )
             {
                 sol.time = sentinel;
             }
@@ -235,9 +227,9 @@ namespace ode
         iterator_type _begin;
         iterator_type _end;
 
-        solver_range( iterator_type const& first, iterator_type const& last )
-            : _begin( first )
-            , _end( last )
+        solver_range( iterator_type const& begin, iterator_type const& end )
+            : _begin( begin )
+            , _end( end )
         {
         }
 
@@ -300,10 +292,10 @@ namespace ode
     {
         auto meth = ode::make_method( algo, u0 );
 
-        auto first = make_time_iterator( pb, meth, u0, t_span, dt );
-        auto last  = make_time_iterator( pb, meth, u0, { t_span.back() }, dt );
+        auto begin = make_time_iterator( pb, meth, u0, t_span, dt );
+        auto end   = make_time_iterator( pb, meth, u0, { t_span.back() }, dt );
 
-        return solver_range<value_t, state_t, decltype( meth ), problem_t>( first, last );
+        return solver_range<value_t, state_t, decltype( meth ), problem_t>( begin, end );
     }
 
     /**
