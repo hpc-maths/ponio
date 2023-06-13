@@ -19,8 +19,8 @@
 namespace ponio::linear_algebra
 {
 
-    template <typename scalar_t, int size>
-    struct linear_algebra<Eigen::Matrix<scalar_t, size, size>>
+    template <typename scalar_t, int size, int options, int maxrows, int maxcols>
+    struct linear_algebra<Eigen::Matrix<scalar_t, size, size, options, maxrows, maxcols>>
     {
         using matrix_type = Eigen::Matrix<scalar_t, size, size>;
         using vector_type = Eigen::Vector<scalar_t, size>;
