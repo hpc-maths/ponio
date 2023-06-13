@@ -86,7 +86,15 @@ def label_to_id(label: str):
     r = r.replace(old,new)
   return r
 
-def extract_explicit_method(file_list: str):
+def tag(butcher: dict):
+  if is_strictly_lower_matrix(butcher['A']):
+    return "eRK"
+  elif is_lower_matrix(butcher['A']):
+    return "diRK"
+  else:
+    return "iRK"
+
+def extract_method(file_list: str):
   for filename in file_list:
     with open(filename, 'r') as f:
       data = json.load(f)
@@ -107,17 +115,35 @@ def extract_explicit_method(file_list: str):
       butcher['b2'] = sp.Matrix([
         sp.parse_expr(str(bi), transformations="all") for bi in data['b2']
       ])
-    butcher['tag'] = data['tag'] if 'tag' in data else "eRK"
+    butcher['tag'] = data['tag'] if 'tag' in data else tag(butcher)
 
-    if is_strictly_lower_matrix(butcher['A']):
-      # returns data only if this is an explicit method
-      yield butcher
+    yield butcher
 
-def split_list(seq: list, condition):
-  l1, l2 = [], []
-  for x in seq:
-    ( l1 if condition(x) else l2 ).append(x)
-  return (l1, l2)
+
+class multisplit_list:
+  """
+    functor to split into multiple sublist a list
+
+    condition should return a int between 0 and n-1
+  """
+
+  def __init__(self, n:int):
+    self.n = n
+
+  def __call__(self, seq:list, condition):
+    r = [ [] for _ in range(self.n) ]
+    for x in seq:
+      r[ condition(x) ].append(x)
+    return r
+
+def tag_id( rk ):
+  select = {
+    'eRK': 0,
+    'expRK': 1,
+    'diRK': 2,
+    'iRK': 3
+  }
+  return select[rk['tag']]
 
 def expRK_code_skeleton( X: list , c: list ):
   z = sp.symbols('z')
@@ -164,7 +190,7 @@ def prepare_expRK(rk: dict):
 
   return r
 
-def prepare_eRK(rk: dict, Ndigit: int):
+def prepare_RK(rk: dict, Ndigit: int):
   print(rk['label']+" "*10, end="\r")
   sys.path.append("../analysis")
   from analysis import rk_butcher
@@ -210,10 +236,11 @@ if __name__ == '__main__':
   args = docopt(__doc__, sys.argv[1:])
   Ndigit = int(args['--Ndigit'])
 
-  list_erk , list_exprk = split_list( extract_explicit_method(args['FILE']) , lambda rk: rk['tag'] != "expRK" )
+  list_erk, list_exprk, list_dirk, list_irk = multisplit_list(4)( extract_method(args['FILE']), tag_id )
 
-  cg_list_erk   = [ prepare_eRK(rk, Ndigit) for rk in list_erk ]
-  cg_list_exprk = [ prepare_expRK(rk)       for rk in list_exprk ]
+  cg_list_erk   = [ prepare_RK(rk, Ndigit) for rk in list_erk   ]
+  cg_list_exprk = [ prepare_expRK(rk)      for rk in list_exprk ]
+  cg_list_dirk  = [ prepare_RK(rk, Ndigit) for rk in list_dirk  ]
 
   print("code generation")
 
@@ -226,5 +253,5 @@ if __name__ == '__main__':
 
   with open(args['--output'], 'w') as butcher_hxx :
     butcher_hxx.write(
-      template.render(list_erk=cg_list_erk, list_exprk=cg_list_exprk)
+      template.render(list_erk=cg_list_erk, list_exprk=cg_list_exprk, list_dirk=cg_list_dirk)
     )

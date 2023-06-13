@@ -1,5 +1,6 @@
 [requires]
 doctest/2.4.10
+eigen/3.4.0
 
 [generators]
 CMakeDeps
