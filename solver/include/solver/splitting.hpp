@@ -88,7 +88,7 @@ namespace ode
         template <typename value_t, typename... Methods_t>
         template <std::size_t I, typename Problem_t, typename state_t>
             requires( I == sizeof...( Methods_t ) )
-        inline void lie<value_t, Methods_t...>::_call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+        inline void lie<value_t, Methods_t...>::_call_inc( Problem_t&, value_t, state_t&, value_t )
         {
         }
 

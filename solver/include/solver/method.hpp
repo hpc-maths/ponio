@@ -160,7 +160,7 @@ namespace ode
     template <std::size_t I, typename Problem_t, typename value_t, typename Algo_t>
         requires std::same_as<Algo_t, Algorithm_t>
     typename std::enable_if<( I == Algorithm_t::N_stages + 1 ), void>::type
-    method<Algorithm_t, state_t>::_call_stage( Problem_t& f, value_t tn, state_t const& un, value_t dt )
+    method<Algorithm_t, state_t>::_call_stage( Problem_t&, value_t, state_t const&, value_t )
     {
     }
 
@@ -195,7 +195,7 @@ namespace ode
     template <typename Algorithm_t, typename state_t>
     template <typename value_t, typename Algo_t>
     std::tuple<value_t, state_t, value_t>
-    method<Algorithm_t, state_t>::_return( value_t tn, state_t const& un, value_t dt )
+    method<Algorithm_t, state_t>::_return( value_t tn, state_t const&, value_t dt )
     {
         return std::make_tuple( tn + dt, kis.back(), dt );
     }

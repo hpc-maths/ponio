@@ -8,6 +8,7 @@
 #include <iterator>
 #include <limits>
 #include <optional>
+#include <ranges>
 
 #include "method.hpp"
 #include "time_span.hpp"
