@@ -387,7 +387,6 @@ namespace ode
     inline state_t
     problem<Callables_t...>::operator()( value_t t, state_t const& u )
     {
-        constexpr auto size = sizeof...( Callables_t );
         return _sum_components_impl( t, u, std::make_index_sequence<size>{} );
     }
 

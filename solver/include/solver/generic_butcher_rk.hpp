@@ -46,7 +46,7 @@ namespace ode::butcher
 
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t>
             inline state_t
-            stage( Stage<N_stages>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
+            stage( Stage<N_stages>, Problem_t&, value_t, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
                 return ::detail::tpl_inner_product<N_stages>( butcher.b, Ki, un, dt );
             }
@@ -54,7 +54,7 @@ namespace ode::butcher
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t, typename Tab = Tableau>
                 requires std::same_as<Tab, Tableau> && is_embedded
             inline state_t
-            stage( Stage<N_stages + 1>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
+            stage( Stage<N_stages + 1>, Problem_t&, value_t, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
                 return ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
             }
@@ -85,7 +85,7 @@ namespace ode::butcher
                 zero,
                 []( auto const& acc, auto const& xi )
                 {
-                    return std::abs( xi ) * std::abs( xi );
+                    return acc + std::abs( xi ) * std::abs( xi );
                 } );
             return std::sqrt( accu );
         }
@@ -223,7 +223,7 @@ namespace ode::butcher
 
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t>
             inline state_t
-            stage( Stage<N_stages>, Problem_t& pb, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
+            stage( Stage<N_stages>, Problem_t&, value_t, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
                 // last stage is always explicit and just equals to:
                 // $$
@@ -235,7 +235,7 @@ namespace ode::butcher
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t, typename Tab = Tableau>
                 requires std::same_as<Tab, Tableau> && is_embedded
             inline state_t
-            stage( Stage<N_stages + 1>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
+            stage( Stage<N_stages + 1>, Problem_t&, value_t, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
                 return ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
             }
@@ -306,7 +306,7 @@ namespace ode::butcher
 
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t>
             inline state_t
-            stage( Stage<N_stages>, Problem_t& pb, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
+            stage( Stage<N_stages>, Problem_t& pb, value_t, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
                 return m_exp( dt * pb.l ) * ::detail::tpl_inner_product<N_stages>( butcher.b, Ki, un, dt );
             }
@@ -314,7 +314,7 @@ namespace ode::butcher
             template <typename Problem_t, typename state_t, typename value_t, typename ArrayKi_t, typename Tab = Tableau>
                 requires std::same_as<Tab, Tableau> && is_embedded
             inline state_t
-            stage( Stage<N_stages + 1>, Problem_t& pb, value_t tn, state_t const& un, ArrayKi_t const& Ki, value_t dt )
+            stage( Stage<N_stages + 1>, Problem_t& pb, value_t, state_t const& un, ArrayKi_t const& Ki, value_t dt )
             {
                 return m_exp( dt * pb.l ) * ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
             }
@@ -430,7 +430,7 @@ namespace ode::butcher
 
             template <typename problem_t, typename state_t, typename value_t, typename arrayKi_t>
             inline state_t
-            stage( Stage<N_stages>, problem_t& pb, value_t tn, state_t const& un, arrayKi_t const& Ki, value_t dt )
+            stage( Stage<N_stages>, problem_t& pb, value_t, state_t const& un, arrayKi_t const& Ki, value_t dt )
             {
                 return detail::tpl_inner_product_b<N_stages>( butcher.b, Ki, un, pb.l, dt );
             }
@@ -438,7 +438,7 @@ namespace ode::butcher
             template <typename problem_t, typename state_t, typename value_t, typename arrayKi_t, typename tab_t = Tableau>
                 requires std::same_as<tab_t, Tableau> && is_embedded
             inline state_t
-            stage( Stage<N_stages + 1>, problem_t& pb, value_t tn, state_t const& un, arrayKi_t const& Ki, value_t dt )
+            stage( Stage<N_stages + 1>, problem_t& pb, value_t, state_t const& un, arrayKi_t const& Ki, value_t dt )
             {
                 return detail::tpl_inner_product_b<N_stages>( butcher.b2, Ki, un, pb.l, dt );
             }
@@ -596,14 +596,14 @@ namespace ode::butcher
 
             template <typename Problem_t, typename state_t, typename ArrayKi_t>
             inline state_t
-            stage( Stage<0>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Yi, value_t dt )
+            stage( Stage<0>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const&, value_t )
             {
                 return f( tn, un ); // be careful Yi[0] stores f(tn,un) not un!!!
             }
 
             template <typename Problem_t, typename state_t, typename ArrayKi_t>
             inline state_t
-            stage( Stage<1>, Problem_t& f, value_t tn, state_t const& un, ArrayKi_t const& Yi, value_t dt )
+            stage( Stage<1>, Problem_t&, value_t, state_t const& un, ArrayKi_t const& Yi, value_t dt )
             {
                 value_t m1t = b<1>( w0 ) * w1;
                 return un + dt * m1t * Yi[0];
