@@ -30,7 +30,7 @@ class heat_model
     }
 
     std::valarray<double>
-    operator()( double t, std::valarray<double> const& y )
+    operator()( double, std::valarray<double> const& y ) const
     {
         double oneoverdxdx = 1. / ( m_dx * m_dx );
         std::size_t nx     = y.size();
@@ -44,7 +44,7 @@ class heat_model
         return ydot;
     }
 
-    std::valarray<double>
+    static std::valarray<double>
     fundamental_sol( double t, std::valarray<double> const& x )
     {
         double pi = std::numbers::pi;
@@ -52,8 +52,23 @@ class heat_model
     }
 };
 
+void
+save( std::valarray<double> const& x, std::valarray<double> const& y, std::filesystem::path const& filename )
+{
+    auto printer_xy = []( double x, double y )
+    {
+        std::stringstream ss;
+        ss << x << " " << y;
+        return ss.str();
+    };
+
+    std::ofstream of( filename );
+    std::transform( std::begin( x ), std::end( x ), std::begin( y ), std::ostream_iterator<std::string>( of, "\n" ), printer_xy );
+    of.close();
+}
+
 int
-main( int argc, char** argv )
+main()
 {
     std::string dirname = "heat_data";
     std::filesystem::create_directories( dirname );
@@ -63,7 +78,7 @@ main( int argc, char** argv )
     double xmin = -5;
     double xmax = 5;
 
-    double dx = ( xmax - xmin ) / ( nx + 1 );
+    double dx = ( xmax - xmin ) / static_cast<double>( nx + 1 );
     double dt = 10 * dx * dx;
 
     std::valarray<double> x( nx );
@@ -79,38 +94,22 @@ main( int argc, char** argv )
     auto pb_heat = heat_model( dx );
 
     double tini                = 0.001;
-    double tend                = 0.2;
-    std::valarray<double> yini = pb_heat.fundamental_sol( tini, x );
+    double tend                = 0.5;
+    std::valarray<double> yini = heat_model::fundamental_sol( tini, x );
     std::valarray<double> yend( 0., nx );
     ponio::time_span<double> tspan = { tini, tend };
 
-    yend = ode::solve( pb_heat, ode::butcher::chebyshev::explicit_rkc2<28>(), yini, tspan, dt, observer::null_observer() );
+    // save( x, yini, std::filesystem::path( dirname ) / "heat_ini.dat" );
 
-    std::valarray<double> yexa = pb_heat.fundamental_sol( tend, x );
+    yend = ode::solve( pb_heat, ode::butcher::chebyshev::explicit_rkc2<15>(), yini, tspan, dt, observer::null_observer() );
 
-    auto err = std::abs( yexa - yend ).sum() / nx;
+    std::valarray<double> yexa = heat_model::fundamental_sol( tend, x );
+
+    auto err = std::abs( yexa - yend ).sum() / static_cast<double>( nx );
     std::cout << "L1 norm of error = " << err << std::endl;
 
-    auto printer_xy = []( double x, double y )
-    {
-        std::stringstream ss;
-        ss << x << " " << y;
-        return ss.str();
-    };
-
-    {
-        // save solution
-        std::ofstream of( std::filesystem::path( dirname ) / "heat_sol.dat" );
-        std::transform( std::begin( x ), std::end( x ), std::begin( yend ), std::ostream_iterator<std::string>( of, "\n" ), printer_xy );
-        of.close();
-    }
-
-    {
-        // save exact solution
-        std::ofstream of( std::filesystem::path( dirname ) / "heat_exa.dat" );
-        std::transform( std::begin( x ), std::end( x ), std::begin( yexa ), std::ostream_iterator<std::string>( of, "\n" ), printer_xy );
-        of.close();
-    }
+    save( x, yend, std::filesystem::path( dirname ) / "heat_sol.dat" );
+    save( x, yexa, std::filesystem::path( dirname ) / "heat_exa.dat" );
 
     return 0;
 }

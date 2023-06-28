@@ -31,7 +31,7 @@ This system is solved by RK(11,8) Runge-Kutta method with time step $\Delta t=0.
  */
 
 int
-main( int argc, char** argv )
+main( int argc, char* argv[] )
 {
     // default filename
     std::string dirname = "lv_data";
@@ -47,9 +47,14 @@ main( int argc, char** argv )
     }
     observer::file_observer fobs( filename );
 
-    double alpha = 2. / 3., beta = 4. / 3., gamma = 1., delta = 1.; // parameter
-    auto lotka_volterra_pb = ode::make_simple_problem(              // define problem
-        [=]( double t, state_t const& u ) -> state_t
+    // parameters
+    double alpha = 2. / 3.;
+    double beta  = 4. / 3.;
+    double gamma = 1.;
+    double delta = 1.;
+
+    auto lotka_volterra_pb = ode::make_simple_problem( // define problem
+        [=]( double, state_t const& u ) -> state_t
         {
             return { alpha * u[0] - beta * u[0] * u[1], delta * u[0] * u[1] - gamma * u[1] };
         } );

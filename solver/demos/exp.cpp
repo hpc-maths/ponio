@@ -19,7 +19,7 @@ main( int, char** )
     auto filename       = std::filesystem::path( dirname ) / "exp.dat";
     observer::file_observer fobs( filename );
 
-    auto identity = []( double t, double u )
+    auto identity = []( double, double u )
     {
         return u;
     };

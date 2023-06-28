@@ -39,12 +39,14 @@ main( int, char** )
 
     double dt = 0.1;
 
-    double b = 0.25, c = 5.0;
+    double b = 0.25;
+    double c = 5.0;
 
     auto pendulum_pb = ode::make_simple_problem(
         [=]( double, state_t const& y ) -> state_t
         {
-            double theta = y[0], omega = y[1];
+            double theta = y[0];
+            double omega = y[1];
             return { omega, -b * omega - c * std::sin( theta ) };
         } );
 

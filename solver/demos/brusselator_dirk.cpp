@@ -19,7 +19,7 @@ struct lin_alg_2_2
     using vector_type = Eigen::Vector<double, 2>;
     using matrix_type = Eigen::Matrix<double, 2, 2>;
 
-    vector_type
+    static vector_type
     solver( matrix_type const& dfx, vector_type const& fx )
     {
         double det = dfx( 0, 0 ) * dfx( 1, 1 ) - dfx( 1, 0 ) * dfx( 0, 1 );
@@ -46,7 +46,7 @@ class brusselator_model
     }
 
     vector_type
-    operator()( double t, vector_type const& u )
+    operator()( double, vector_type const& u ) const
     {
         double du1 = m_a - ( m_b + 1 ) * u[0] + u[0] * u[0] * u[1];
         double du2 = m_b * u[0] - u[0] * u[0] * u[1];
@@ -54,9 +54,11 @@ class brusselator_model
     }
 
     matrix_type
-    jacobian( double t, vector_type const& u )
+    jacobian( double, vector_type const& u ) const
     {
-        double y1 = u[0], y2 = u[1];
+        double y1 = u[0];
+        double y2 = u[1];
+
         return matrix_type{
             {2.0 * y1 * y2 - ( m_b + 1.0 ), y1 * y1 },
             { -2.0 * y1 * y2 + m_b,         -y1 * y1}
@@ -80,7 +82,11 @@ main( int, char** )
     observer::file_observer fobs_3( filename_3 );
 
     auto model          = brusselator_model( 1., 3. );
-    auto pb_brusselator = ode::make_implicit_problem( model, std::bind( &brusselator_model::jacobian, &model, _1, _2 ) );
+    auto pb_brusselator = ode::make_implicit_problem( model,
+        [&]( double t, vector_type const& u )
+        {
+            return model.jacobian( t, u );
+        } );
 
     vector_type uini = { 1.5, 3 };
 

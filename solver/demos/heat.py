@@ -21,7 +21,7 @@ process = subprocess.Popen(args)
 process.wait()
 
 data = np.loadtxt(os.path.join(data_dir, "heat_sol.dat"))
-plt.plot(data[:,0], data[:,1],"-", label="solution with RKC (28,2)")
+plt.plot(data[:,0], data[:,1],"-", label="solution with RKC (15,2)")
 
 data = np.loadtxt(os.path.join(data_dir, "heat_exa.dat"))
 plt.plot(data[:,0], data[:,1],":", label="exact solution")
