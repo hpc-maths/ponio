@@ -21,22 +21,22 @@ namespace ode
      */
     struct parent_problem
     {
-        std::bitset<3 + 1> property;
+        // std::bitset<3 + 1> property;
         // 3 bits for minimal order and 1 bit for stiffness
 
-        parent_problem( std::size_t order = 3, bool is_stiff = false );
+        // parent_problem( std::size_t order = 3, bool is_stiff = false );
 
-        void
-        set_order( std::size_t o );
+        // void
+        // set_order( std::size_t o );
 
-        unsigned long
-        order();
+        // unsigned long
+        // order();
 
-        void
-        set_stiffness( bool s );
+        // void
+        // set_stiffness( bool s );
 
-        bool
-        stiffness();
+        // bool
+        // stiffness();
     };
 
     /**
@@ -45,50 +45,50 @@ namespace ode
      * @param order    minimum order for solving the probleme
      * @param is_stiff hint on stiffness of considering problem
      */
-    inline parent_problem::parent_problem( std::size_t order, bool is_stiff )
-        : property( ( order << 1 ) | is_stiff )
-    {
-    }
+    // inline parent_problem::parent_problem( std::size_t order, bool is_stiff )
+    //     : property( ( order << 1 ) | is_stiff )
+    // {
+    // }
 
     /**
      * change the hint of order
      * @param o new minimum order of solving method
      */
-    inline void
-    parent_problem::set_order( std::size_t o )
-    {
-        property = ( o << 1 ) | property[0];
-    }
+    // inline void
+    // parent_problem::set_order( std::size_t o )
+    // {
+    //     property = ( o << 1 ) | property[0];
+    // }
 
     /**
      * get the hint on order
      * @return minimum order of time integrator choosen for solving the method
      */
-    inline unsigned long
-    parent_problem::order()
-    {
-        return ( property >> 1 ).to_ulong();
-    }
+    // inline unsigned long
+    // parent_problem::order()
+    // {
+    //     return ( property >> 1 ).to_ulong();
+    // }
 
     /**
      * set the stiffness hint on a specific value
      * @param s hint is problem is stiff
      */
-    inline void
-    parent_problem::set_stiffness( bool s )
-    {
-        property[0] = s;
-    }
+    // inline void
+    // parent_problem::set_stiffness( bool s )
+    // {
+    //     property[0] = s;
+    // }
 
     /**
      * get the hint on stifness
      * @return Returns `true` if problem is indicate as stiff
      */
-    inline bool
-    parent_problem::stiffness()
-    {
-        return static_cast<bool>( property[0] );
-    }
+    // inline bool
+    // parent_problem::stiffness()
+    // {
+    //     return static_cast<bool>( property[0] );
+    // }
 
     // --- SIMPLE_PROBLEM ----------------------------------------------------------
     /** @class simple_problem
@@ -100,10 +100,10 @@ namespace ode
     template <typename Callable_t>
     struct simple_problem : public parent_problem
     {
-        using parent_problem::parent_problem;
+        // using parent_problem::parent_problem;
         Callable_t f;
 
-        simple_problem( Callable_t& f_, std::size_t order = 3, bool is_stiff = false );
+        simple_problem( Callable_t& f_ );
 
         template <typename state_t, typename value_t>
         state_t
@@ -113,13 +113,10 @@ namespace ode
     /**
      * constructor of \ref simple_problem from a callable and hints
      * @param f_       callable object
-     * @param order    minimum order for solving the probleme
-     * @param is_stiff hint on stiffness of considering problem
      */
     template <typename Callable_t>
-    inline simple_problem<Callable_t>::simple_problem( Callable_t& f_, std::size_t order, bool is_stiff )
-        : parent_problem( order, is_stiff )
-        , f( f_ )
+    inline simple_problem<Callable_t>::simple_problem( Callable_t& f_ )
+        : f( f_ )
     {
     }
 
@@ -140,14 +137,12 @@ namespace ode
     /**
      * factory of \ref simple_problem
      * @param c        callable object (function or functor) which represent the function of the problem
-     * @param order    minimum order for automatic method deduction
-     * @param is_stiff hint on stiffness of problem
      */
     template <typename Callable_t>
     simple_problem<Callable_t>
-    make_simple_problem( Callable_t c, std::size_t order = 3, bool is_stiff = false )
+    make_simple_problem( Callable_t c )
     {
-        return simple_problem<Callable_t>( c, order, is_stiff );
+        return simple_problem<Callable_t>( c );
     }
 
     // --- IMPLICIT_PROBLEM --------------------------------------------------------
@@ -169,8 +164,6 @@ namespace ode
     /**
      * constructor of \ref implicit_problem from a callable and hints
      * @param f_       callable object
-     * @param order    minimum order for solving the probleme
-     * @param is_stiff hint on stiffness of considering problem
      */
     template <typename Callable_t, typename Jacobian_t>
     inline implicit_problem<Callable_t, Jacobian_t>::implicit_problem( Callable_t& f_, Jacobian_t& df_ )
@@ -202,11 +195,11 @@ namespace ode
     template <typename Linear_t, typename Nonlinear_t>
     struct lawson_problem : public parent_problem
     {
-        using parent_problem::parent_problem;
+        // using parent_problem::parent_problem;
         Linear_t l;
         Nonlinear_t n;
 
-        lawson_problem( Linear_t& l_, Nonlinear_t& n_, std::size_t order = 3, bool is_stiff = false );
+        lawson_problem( Linear_t& l_, Nonlinear_t& n_ );
 
         template <typename state_t, typename value_t>
         state_t
@@ -217,13 +210,10 @@ namespace ode
      * constructor of \ref lawson_problem
      * @param l_       linerar part \f$L\f$ of Lawson problem
      * @param n_       nonlinerar part \f$N(t,u)\f$ of Lawson problem
-     * @param order    minimum order for solving the probleme
-     * @param is_stiff hint on stiffness of considering problem
      */
     template <typename Linear_t, typename Nonlinear_t>
-    lawson_problem<Linear_t, Nonlinear_t>::lawson_problem( Linear_t& l_, Nonlinear_t& n_, std::size_t order, bool is_stiff )
-        : parent_problem( order, is_stiff )
-        , l( l_ )
+    lawson_problem<Linear_t, Nonlinear_t>::lawson_problem( Linear_t& l_, Nonlinear_t& n_ )
+        : l( l_ )
         , n( n_ )
     {
     }
@@ -246,14 +236,12 @@ namespace ode
      * factory of \ref lawson_problem
      * @param l        linerar part \f$L\f$ of Lawson problem
      * @param n        nonlinerar part \f$N(t,u)\f$ of Lawson problem
-     * @param order    minimum order for automatic method deduction
-     * @param is_stiff hint on stiffness of problem
      */
     template <typename Linear_t, typename Nonlinear_t>
     lawson_problem<Linear_t, Nonlinear_t>
-    make_lawson_problem( Linear_t l, Nonlinear_t n, std::size_t order = 3, bool is_stiff = false )
+    make_lawson_problem( Linear_t l, Nonlinear_t n )
     {
-        return lawson_problem<Linear_t, Nonlinear_t>( l, n, order, is_stiff );
+        return lawson_problem<Linear_t, Nonlinear_t>( l, n );
     }
 
     // --- IMEX_PROBLEM ------------------------------------------------------------
@@ -271,7 +259,7 @@ namespace ode
         Implicit_t i;
         Explicit_t e;
 
-        imex_problem( Implicit_t& i_, Explicit_t& e_, std::size_t order = 3, bool is_stiff = false );
+        imex_problem( Implicit_t& i_, Explicit_t& e_ );
 
         template <typename state_t, typename value_t>
         state_t
@@ -282,13 +270,10 @@ namespace ode
      * constructor of \ref imex_problem
      * @param i_       easy to implicit part \f$I(t,u)\f$ of IMEX problem
      * @param e_       explicit part \f$E(t,u)\f$ of IMEX problem
-     * @param order    minimum order for solving the probleme
-     * @param is_stiff hint on stiffness of considering problem
      */
     template <typename Implicit_t, typename Explicit_t>
-    imex_problem<Implicit_t, Explicit_t>::imex_problem( Implicit_t& i_, Explicit_t& e_, std::size_t order, bool is_stiff )
-        : parent_problem( order, is_stiff )
-        , i( i_ )
+    imex_problem<Implicit_t, Explicit_t>::imex_problem( Implicit_t& i_, Explicit_t& e_ )
+        : i( i_ )
         , e( e_ )
     {
     }
@@ -311,14 +296,12 @@ namespace ode
      * factory of \ref imex_problem
      * @param i        easy to implicit part \f$I(t,u)\f$ of IMEX problem
      * @param e        explicit part \f$E(t,u)\f$ of IMEX problem
-     * @param order    minimum order for automatic method deduction
-     * @param is_stiff hint on stiffness of problem
      */
     template <typename Implicit_t, typename Explicit_t>
     imex_problem<Implicit_t, Explicit_t>
-    make_imex_problem( Implicit_t i, Explicit_t e, std::size_t order = 3, bool is_stiff = false )
+    make_imex_problem( Implicit_t i, Explicit_t e )
     {
-        return imex_problem<Implicit_t, Explicit_t>( i, e, order, is_stiff );
+        return imex_problem<Implicit_t, Explicit_t>( i, e );
     }
 
     // --- PROBLEM -----------------------------------------------------------------

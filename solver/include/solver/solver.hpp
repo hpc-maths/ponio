@@ -85,6 +85,22 @@ namespace ode
         {
         }
 
+        time_iterator&
+        operator=( time_iterator const& rhs )
+        {
+            if ( this != &rhs )
+            {
+                sol          = rhs.sol;
+                meth         = rhs.meth;
+                pb           = rhs.pb;
+                t_span       = rhs.t_span;
+                it_next_time = std::begin( t_span ) + std::ranges::distance( std::begin( rhs.t_span ), rhs.it_next_time );
+                dt_reference = rhs.dt_reference;
+            }
+
+            return *this;
+        }
+
         void
         increment()
         {

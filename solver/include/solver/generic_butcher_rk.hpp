@@ -132,7 +132,7 @@ namespace ode::butcher
                 LinearAlgebra_t>::type;
 
             template <typename>
-            diagonal_implicit_rk_butcher( double tol_ = 1e-10, std::size_t max_iter_ = 50 )
+            diagonal_implicit_rk_butcher( double tol_, std::size_t max_iter_ )
                 : butcher()
                 , tol( tol_ )
                 , max_iter( max_iter_ )
@@ -140,7 +140,7 @@ namespace ode::butcher
             }
 
             template <typename... Args>
-            diagonal_implicit_rk_butcher( double tol_ = 1e-10, std::size_t max_iter_ = 50, Args... args )
+            diagonal_implicit_rk_butcher( double tol_, std::size_t max_iter_, Args... args )
                 : butcher()
                 , tol( tol_ )
                 , max_iter( max_iter_ )
@@ -152,6 +152,8 @@ namespace ode::butcher
                 requires detail::has_newton_method<LinearAlgebra_t>
             diagonal_implicit_rk_butcher( Args... args )
                 : butcher()
+                , tol( ponio::default_config::newton_tolerance )
+                , max_iter( ponio::default_config::newton_max_iterations )
                 , linalg( args... )
             {
             }
@@ -256,7 +258,9 @@ namespace ode::butcher
          */
         template <typename Tableau, typename LinearAlgebra_t, typename... Args>
         auto
-        make_dirk( double tol = 1e-10, std::size_t max_iter = 50, Args... args )
+        make_dirk( double tol    = ponio::default_config::newton_tolerance,
+            std::size_t max_iter = ponio::default_config::newton_max_iterations,
+            Args... args )
         {
             return diagonal_implicit_rk_butcher<Tableau, LinearAlgebra_t>( tol, max_iter, args... );
         }
@@ -349,7 +353,7 @@ namespace ode::butcher
             auto
             coefficient_eval( func_t&& f, linear_t&& l )
             {
-                return f( std::move( l ) );
+                return f( std::forward<linear_t>( l ) );
             }
 
             template <typename value_t, typename linear_t>
@@ -549,15 +553,15 @@ namespace ode::butcher
         /** @class explicit_rkc2
          *  @brief define RKC2 with user defined number of stages
          *
-         *  @tparam _Nstages number of stages
+         *  @tparam M_stages number of stages
          *  @tparam value_t type of coefficients
          */
-        template <std::size_t _N_stages, typename value_t = double>
+        template <std::size_t M_stages, typename value_t = double>
         struct explicit_rkc2
         {
-            static_assert( _N_stages > 1, "Number of stages should be at least 2 in eRKC2" );
+            static_assert( M_stages > 1, "Number of stages should be at least 2 in eRKC2" );
             static constexpr bool is_embedded     = false;
-            static constexpr std::size_t N_stages = _N_stages;
+            static constexpr std::size_t N_stages = M_stages;
             value_t w0;
             value_t w1;
 
@@ -577,8 +581,8 @@ namespace ode::butcher
 
             explicit_rkc2( value_t eps = 2. / 13. )
                 : w0( 1. + eps / ( N_stages * N_stages ) )
+                , w1( dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) )
             {
-                w1 = dT<N_stages>( w0 ) / ddT<N_stages>( w0 );
             }
 
             template <typename Problem_t, typename state_t, typename ArrayKi_t, std::size_t j>

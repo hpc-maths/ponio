@@ -14,14 +14,15 @@ namespace ponio
     struct time_span : public std::vector<value_t>
     {
         using std::vector<value_t>::vector;
+        using std::vector<value_t>::operator=;
 
         template <typename Container>
-        time_span( Container&& c );
+        time_span( Container const& c );
     };
 
     template <typename value_t>
     template <typename Container>
-    time_span<value_t>::time_span( Container&& c )
+    time_span<value_t>::time_span( Container const& c )
         : std::vector<value_t>( c.size() )
     {
         std::copy( std::begin( c ), std::end( c ), std::vector<value_t>::begin() );

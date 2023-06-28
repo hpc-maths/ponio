@@ -109,18 +109,20 @@ namespace observer
     /** @class stream_observer
      *  observer that put data into a `std::ostream` done by user
      */
-    struct stream_observer : public base_observer<stream_observer>
+    template <typename char_t>
+    struct stream_observer : public base_observer<stream_observer<char_t>>
     {
-        std::ostream out;
+        std::basic_ostream<char_t> out;
 
-        stream_observer( std::ostream& os );
+        stream_observer( std::basic_ostream<char_t>& os );
     };
 
     /**
      * constructor of \ref stream_observer
      * @param os output stream where put the output
      */
-    stream_observer::stream_observer( std::ostream& os )
+    template <typename char_t>
+    stream_observer<char_t>::stream_observer( std::basic_ostream<char_t>& os )
         : out( os.rdbuf() )
     {
     }
@@ -128,7 +130,7 @@ namespace observer
     /** @class cout_observer
      *  observer that put data into `std::cout`
      */
-    struct cout_observer : public stream_observer
+    struct cout_observer : public stream_observer<char>
     {
         cout_observer();
     };
@@ -136,21 +138,22 @@ namespace observer
     /**
      * constructor of \ref cout_observer
      */
-    cout_observer::cout_observer()
-        : stream_observer( std::cout )
+    inline cout_observer::cout_observer()
+        : stream_observer<char>( std::cout )
     {
     }
 
     /** @class file_observer
      *  observer that put data into a file
      */
-    struct file_observer : public base_observer<file_observer>
+    template <typename char_t = char>
+    struct file_observer : public base_observer<file_observer<char_t>>
     {
-        std::ofstream out;
+        std::basic_ofstream<char_t> out;
 
         file_observer( std::filesystem::path path );
 
-        file_observer( file_observer const& ) = delete;
+        // file_observer( file_observer const& ) = delete;
 
       private:
 
@@ -163,7 +166,8 @@ namespace observer
      * @param path path to the output file
      * @note this class creates folder if needed
      */
-    file_observer::file_observer( std::filesystem::path path )
+    template <typename char_t>
+    file_observer<char_t>::file_observer( std::filesystem::path path )
         : out( create_directory_if_needed( path ) )
     {
     }
@@ -172,8 +176,9 @@ namespace observer
      * create parent directory of path if needed and return the path
      * @param path path of output file
      */
+    template <typename char_t>
     std::filesystem::path
-    file_observer::create_directory_if_needed( std::filesystem::path const& path )
+    file_observer<char_t>::create_directory_if_needed( std::filesystem::path const& path )
     {
         auto parent = path.parent_path();
         if ( !parent.empty() )
@@ -186,9 +191,9 @@ namespace observer
     /**
      * litteral to convert a string into \ref file_observer
      */
-    file_observer operator"" _fobs( char const* str, std::size_t len )
+    inline file_observer<char> operator"" _fobs( char const* str, std::size_t len )
     {
-        return file_observer( std::string_view( str, len ) );
+        return { std::string_view( str, len ) };
     }
 
     /** @class null_observer

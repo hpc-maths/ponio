@@ -215,10 +215,7 @@ namespace ode
         {
             return std::make_tuple( tn, un, new_dt );
         }
-        else
-        {
-            return std::make_tuple( tn + dt, kis[Algorithm_t::N_stages], new_dt );
-        }
+        return std::make_tuple( tn + dt, kis[Algorithm_t::N_stages], new_dt );
     }
 
     /**
