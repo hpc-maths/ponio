@@ -28,9 +28,13 @@ struct arenstorf_model
     }
 
     state_t
-    operator()( double t, state_t const& y )
+    operator()( double, state_t const& y ) const
     {
-        double y1 = y[0], y2 = y[1], y3 = y[2], y4 = y[3];
+        double y1 = y[0];
+        double y2 = y[1];
+        double y3 = y[2];
+        double y4 = y[3];
+
         double r1  = sqrt( ( y1 + mu ) * ( y1 + mu ) + y2 * y2 );
         double r2  = sqrt( ( y1 - 1 + mu ) * ( y1 - 1 + mu ) + y2 * y2 );
         double dy1 = y3;

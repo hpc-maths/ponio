@@ -8,6 +8,7 @@
 #include <numeric>
 #include <random>
 #include <sstream>
+#include <string>
 #include <valarray>
 
 #include <solver/butcher_methods.hpp>
@@ -22,7 +23,7 @@ struct C_random_device
     static constexpr result_type
     min()
     {
-        return 0u;
+        return 0;
     }
 
     static constexpr result_type
@@ -31,8 +32,8 @@ struct C_random_device
         return RAND_MAX;
     }
 
-    double
-    entropy() const noexcept
+    static double
+    entropy() noexcept
     {
         return 42.0;
     }
@@ -45,14 +46,14 @@ struct C_random_device
 };
 
 int
-main( int argc, char** argv )
+main( int argc, char* argv[] )
 {
     std::string dirname = "brownian_data";
 
     std::size_t n = 10;
     if ( argc > 1 )
     {
-        n = std::atoi( argv[1] );
+        n = std::stoul( argv[1] );
     }
 
     using state_t = std::valarray<double>;
@@ -66,14 +67,14 @@ main( int argc, char** argv )
     double dt = 1e-3;
 
     auto brownian_pb = ode::make_simple_problem(
-        [&]( double t, state_t const& y ) -> state_t
+        [&]( double, state_t const& ) -> state_t
         {
             return { d( gen ), d( gen ) };
         } );
 
     state_t yini = { 0., 0. };
 
-    for ( auto i = 0u; i < n; ++i )
+    for ( unsigned int i = 0; i < n; ++i )
     {
         std::stringstream ssfilename;
         ssfilename << "brownian_" << i << ".dat";

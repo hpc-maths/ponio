@@ -21,8 +21,10 @@ main( int, char** )
 
     using state_t = std::valarray<double>;
 
-    double sigma = 10., rho = 28., beta = 8. / 3.;
-    auto lorenz = [=]( double t, state_t const& u ) -> state_t
+    double sigma = 10.;
+    double rho   = 28.;
+    double beta  = 8. / 3.;
+    auto lorenz  = [=]( double, state_t const& u ) -> state_t
     {
         auto du1 = sigma * ( u[1] - u[0] );
         auto du2 = rho * u[0] - u[1] - u[0] * u[2];
