@@ -67,7 +67,7 @@ using {{ rk.id }} = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<double>
  * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
  */
 template <typename value_t, typename Exp_t>
-auto l{{ rk.id }}_t = []( Exp_t exp_ , double tol=ponio::default_config::tol )
+constexpr auto l{{ rk.id }}_t = []( Exp_t exp_ , double tol=ponio::default_config::tol )
 {
   return lawson::make_lawson<butcher_{{ rk.id }}<value_t>,Exp_t>(exp_,tol);
 };
@@ -132,7 +132,7 @@ using {{ rk.id }}_t = exp_runge_kutta::explicit_exp_rk_butcher<butcher_{{ rk.id 
 using {{ rk.id }} = exp_runge_kutta::explicit_exp_rk_butcher<butcher_{{ rk.id }}<double, double>>;
 
 {% endfor %}
-  
+
 /**
  * @brief Type of tuple that contains all exponential Runge-Kutta methods of ponio
 */
