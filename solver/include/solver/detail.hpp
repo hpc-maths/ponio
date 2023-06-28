@@ -80,14 +80,32 @@ namespace detail
         return init_fill_array_impl( std::forward<T>( value ), std::make_index_sequence<N>() );
     }
 
-#ifndef IN_DOXYGEN
-    // second version with a invocable parameter (thanks concepts)
-    template <typename Function_t, std::size_t... Is>
-        requires std::invocable<Function_t, std::size_t>
-    constexpr std::array<typename decltype( std::function{ std::declval<Function_t>() } )::result_type, sizeof...( Is )>
-    init_fill_array_impl( Function_t&& f, std::index_sequence<Is...> )
+    /* applyable_impl */
+    // unpack tuple to test if `function_t` is invocable with types in tuple
+    template <typename function_t, typename tuple_args_t, std::size_t... Is>
+    constexpr bool
+    applyable_impl( std::index_sequence<Is...> )
     {
-        return { { ( static_cast<void>( Is ), f( Is ) )... } };
+        return std::invocable<function_t, std::tuple_element_t<Is, tuple_args_t>...>;
+    }
+
+    /**
+     * @brief concept that specifies that a callable type `function_t` can be called with the unpacked `tuple_args_t` tuple
+     *
+     * @tparam function_t   type of callable
+     * @tparam tuple_args_t type of tuple to unpack
+     */
+    template <typename function_t, typename tuple_args_t>
+    concept applyable = applyable_impl<function_t, tuple_args_t>( std::make_index_sequence<std::tuple_size<tuple_args_t>::value>{} );
+
+#ifndef IN_DOXYGEN
+    // second version with a invocable parameter and its arguments
+    template <typename Return_t, typename Function_t, typename TupleArgs_t, std::size_t... Is>
+        requires applyable<Function_t, TupleArgs_t>
+    constexpr std::array<Return_t, sizeof...( Is )>
+    init_fill_array_impl( Function_t&& f, TupleArgs_t&& args, std::index_sequence<Is...> )
+    {
+        return { { ( static_cast<void>( Is ), std::apply( f, args ) )... } };
     }
 
     /**
@@ -95,19 +113,23 @@ namespace detail
      *
      * @tparam N size of array to fill
      * @tparam Function_t type of invocable object
+     * @tparam Args       types of arguments to call Function_t
      *
-     * @param f invocable object that need to get a `std::size_t` and return the value type of output array
+     * @param f invocable object that need to get a `Args...` and return the value type of output array
+     * @param args arguments of function `f`
      *
      * @code{,cpp}
-     *   const std::array<int,8> arr = detail::init_fill_array<8>([](int i){ return i*i; }); // get {0,1,4,9,16,25,36,49}
+     *   const std::array<int,8> arr = detail::init_fill_array<3>([](int i){ return i*i; }, 2); // get {4,4,4}
      * @endcode
      */
-    template <std::size_t N, typename Function_t>
-        requires std::invocable<Function_t, std::size_t>
-    constexpr std::array<typename decltype( std::function{ std::declval<Function_t>() } )::result_type, N>
-    init_fill_array( Function_t&& f )
+    template <std::size_t N, typename Function_t, typename... Args>
+        requires std::invocable<Function_t, Args...>
+    constexpr std::array<typename std::invoke_result<Function_t, Args...>::type, N>
+    init_fill_array( Function_t&& f, Args&&... args )
     {
-        return init_fill_array_impl( std::forward<Function_t>( f ), std::make_index_sequence<N>() );
+        return init_fill_array_impl<typename std::invoke_result<Function_t, Args...>::type>( std::forward<Function_t>( f ),
+            std::forward_as_tuple( args... ),
+            std::make_index_sequence<N>() );
     }
 #endif
 
