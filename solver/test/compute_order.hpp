@@ -69,7 +69,7 @@ solve_exp( Algorithm_t& algo, T dt, T Tf )
 {
     using state_t = T;
 
-    auto pb = []( T t, state_t y ) -> state_t
+    auto pb = []( T, state_t y ) -> state_t
     {
         return y;
     };
@@ -94,7 +94,8 @@ short_time_check_order( Algorithm_t algo = Algorithm_t() )
 {
     using state_t = T;
 
-    std::vector<T> errors, dts;
+    std::vector<T> errors;
+    std::vector<T> dts;
 
     T Tf = 1.0;
 
@@ -133,19 +134,22 @@ long_time_check_order( Algorithm_t& algo )
 {
     using state_t = std::valarray<T>;
 
-    T alpha = 2. / 3., beta = 4. / 3., gamma = 1., delta = 1.;
+    T alpha = 2. / 3.;
+    T beta  = 4. / 3.;
+    T gamma = 1.;
+    T delta = 1.;
 
     // make a problem that can be use also for splitting (in 3 parts) methods
     auto pb = ode::make_problem(
-        [=]( T t, state_t const& u ) -> state_t
+        [=]( T, state_t const& u ) -> state_t
         {
             return { alpha * u[0] - beta * u[0] * u[1], 0. };
         },
-        [=]( T t, state_t const& u ) -> state_t
+        [=]( T, state_t const& u ) -> state_t
         {
             return { 0., delta * u[0] * u[1] };
         },
-        [=]( T t, state_t const& u ) -> state_t
+        [=]( T, state_t const& u ) -> state_t
         {
             return { 0., -gamma * u[1] };
         } );
@@ -162,16 +166,17 @@ long_time_check_order( Algorithm_t& algo )
 
     ponio::time_span<T> t_span = { 0., 1000. };
     std::vector<T> dts         = { 0.25, 0.125, 0.1, 0.075, 0.05 }; // find a way to adapt this range to the method
-    std::vector<T> relative_errors, ldts;
+    std::vector<T> relative_errors;
+    std::vector<T> log_dts;
 
     for ( auto dt : dts )
     {
         state_t u_end = ode::solve( pb, algo, u_ini, t_span, dt, []( T, state_t const&, T ) {} );
         relative_errors.push_back( std::log10( relative_error( V_ini, V( u_end ) ) ) );
-        ldts.push_back( std::log10( dt ) );
+        log_dts.push_back( std::log10( dt ) );
     }
 
-    auto [a, b] = mayor_method( ldts, relative_errors );
+    auto [a, b] = mayor_method( log_dts, relative_errors );
 
     return a;
 }

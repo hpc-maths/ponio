@@ -64,7 +64,11 @@ namespace ponio::linear_algebra
         using vector_type = Eigen::SparseVector<scalar_t>;
         using solver_type = Eigen::SimplicialCholesky<matrix_type>;
 
+      private:
+
         static matrix_type I;
+
+      public:
 
         static matrix_type const&
         identity( vector_type const& u )
