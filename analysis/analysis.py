@@ -6,16 +6,19 @@
 
 """analysis.py
 
-Usage:
-  analysis.py (FILE...) (--output=<output_dir>) [--verbose] [--standalone]
+usage: analysis.py [-h] [-o OUTPUT] [-v] [-s] [FILE ...]
 
-Options:
-  -h, --help                                 Show help
-  FILE                                       File which contain a Butcher tableau
-  -o <output_dir>, --output=<output_dir>     Output directory where store Runge-Kutta scheme analysis and static API on stability domain and order stars
-  --verbose                                  Verbose mode
-  -s, --standalone                           All analysis in one file (by default each analysis of each method is in its own file)
+analysis of Runge-Kutta method script
 
+positional arguments:
+  FILE                  File which contain a Butcher tableau
+
+options:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        Output directory where store Runge-Kutta scheme analysis and static API on stability domain and order stars
+  -v, --verbose         Verbose mode
+  -s, --standalone      All analysis in one file (by default each analysis of each method is in its own file)
 """
 
 import sympy as sp
@@ -24,6 +27,8 @@ import itertools
 
 import json
 import os, sys
+import argparse
+import re
 
 class rk_butcher:
     def __init__(self,label,A,b,c,b2=None):
@@ -364,22 +369,25 @@ def evalf_Cdomain( z , expr , zmin , zmax , N ):
     Z = X + 1j*Y
     return np.abs( func(Z) )
 
-from docopt import docopt
-import re
+parser = argparse.ArgumentParser(description="analysis of Runge-Kutta method script")
+parser.add_argument('FILE', nargs='*', help="File which contain a Butcher tableau")
+parser.add_argument('-o', '--output', type=str, help="Output directory where store Runge-Kutta scheme analysis and static API on stability domain and order stars")
+parser.add_argument('-v', '--verbose', action='store_true', help="Verbose mode")
+parser.add_argument('-s', '--standalone', action='store_true', help="All analysis in one file (by default each analysis of each method is in its own file)")
 
 if __name__ == '__main__':
-    args = docopt( __doc__ , sys.argv[1:] )
+    args = parser.parse_args()
 
-    vprint = print if args['--verbose'] else lambda *args,**kwargs:None
+    vprint = print if args.verbose else lambda *args, **kwargs : None
 
-    output = args['--output']
+    output = args.output
     os.makedirs(output,exist_ok=True)
 
     rk_analysis = []
-    for i,file in enumerate(args['FILE']):
+    for i,file in enumerate(args.FILE):
         with open(file,'r') as f:
             butcher = json.load(f)
-        vprint("{}/{} {:25}".format(i+1,len(args['FILE']),butcher['label']), end="\r")
+        vprint("{}/{} {:25}".format(i+1,len(args.FILE),butcher['label']), end="\r")
 
         rk = rk_butcher(
             label=butcher['label'],
@@ -388,7 +396,7 @@ if __name__ == '__main__':
         )
         butcher.update(analysis_butcher(rk))
 
-        if args['--standalone']:
+        if args.standalone :
             rk_analysis.append(butcher)
         else:
             with open(os.path.join(output,rk.id+".json"),'w') as f:
@@ -428,6 +436,6 @@ if __name__ == '__main__':
 
     vprint()
 
-    if args['--standalone']:
+    if args.standalone:
         json_analysis = os.path.join(output,"analysis.json")
         json.dump(rk_analysis, open(json_analysis,'w')  ,indent=4)

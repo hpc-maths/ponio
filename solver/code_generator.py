@@ -6,16 +6,18 @@
 
 """code_generator.py
 
-Usage:
-    code_generator.py FILE... (--output=<header>) [--Ndigit=<N>]
+usage: code_generator.py [-h] [-o OUTPUT] [--Ndigit NDIGIT] [FILE ...]
 
-Options:
-    -h, --help                      show help
-    FILE                            json file to split or join and name of output (last)
-    -o=<header>, --output=<header>  name of output file header C++
-    --Ndigit=<N>                    number of digit in output Butcher tableau [default: 36]
+code generator of Runge-Kutta method from them Butcher tableau
 
-Output is include/butcher_methods.hpp
+positional arguments:
+  FILE                  Files which contain a Butcher tableau
+
+options:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        Name of output file header C++
+  --Ndigit NDIGIT       number of digit in output Butcher tableau [default: 36]
 """
 
 import sympy as sp
@@ -24,7 +26,7 @@ import itertools
 
 import json
 import os, sys
-import glob
+import argparse
 
 def phi(i, j=None, c=None):
   ij = j is not None and c is not None # set True if j and c are not None (so compute phi_{ij})
@@ -170,7 +172,7 @@ def expRK_code_skeleton( X: list , c: list ):
 
   return r
 
-def prepare_expRK(rk: dict):
+def prepare_expRK(rk: dict, Ndigit: int):
   print(rk['label']+" "*10, end="\r")
   extra_tableaus = ['b']
   if 'b2' in rk:
@@ -230,17 +232,20 @@ def sformat(value, fmt, attribute=None):
     for elm in value:
       yield(fmt.format(elm))
 
+
+parser = argparse.ArgumentParser(description="code generator of Runge-Kutta method from them Butcher tableau")
+parser.add_argument('FILE', nargs='*', help="Files which contain a Butcher tableau")
+parser.add_argument('-o', '--output', type=str, help="Name of output file header C++")
+parser.add_argument('--Ndigit', type=int, default=36, required=False, help="number of digit in output Butcher tableau [default: 36]")
+
 if __name__ == '__main__':
-  from docopt import docopt
+  args = parser.parse_args()
 
-  args = docopt(__doc__, sys.argv[1:])
-  Ndigit = int(args['--Ndigit'])
+  list_erk, list_exprk, list_dirk, list_irk = multisplit_list(4)( extract_method(args.FILE), tag_id )
 
-  list_erk, list_exprk, list_dirk, list_irk = multisplit_list(4)( extract_method(args['FILE']), tag_id )
-
-  cg_list_erk   = [ prepare_RK(rk, Ndigit) for rk in list_erk   ]
-  cg_list_exprk = [ prepare_expRK(rk)      for rk in list_exprk ]
-  cg_list_dirk  = [ prepare_RK(rk, Ndigit) for rk in list_dirk  ]
+  cg_list_erk   = [ prepare_RK(rk, args.Ndigit)    for rk in list_erk   ]
+  cg_list_exprk = [ prepare_expRK(rk, args.Ndigit) for rk in list_exprk ]
+  cg_list_dirk  = [ prepare_RK(rk, args.Ndigit)    for rk in list_dirk  ]
 
   print("code generation")
 
@@ -251,7 +256,7 @@ if __name__ == '__main__':
   env = jinja2.Environment(loader=jinja2.FileSystemLoader(local_dir))
   template = env.get_template("template/tpl_butcher_methods.hxx")
 
-  with open(args['--output'], 'w') as butcher_hxx :
+  with open(args.output, 'w') as butcher_hxx :
     butcher_hxx.write(
       template.render(list_erk=cg_list_erk, list_exprk=cg_list_exprk, list_dirk=cg_list_dirk)
     )
