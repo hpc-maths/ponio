@@ -389,6 +389,9 @@ if __name__ == '__main__':
             butcher = json.load(f)
         vprint("{}/{} {:25}".format(i+1,len(args.FILE),butcher['label']), end="\r")
 
+        if "expRK" == (butcher['tag'] if 'tag' in butcher else "RK"):
+            continue
+
         rk = rk_butcher(
             label=butcher['label'],
             A=butcher['A'],b=butcher['b'],c=butcher['c'],
