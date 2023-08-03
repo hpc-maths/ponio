@@ -36,6 +36,7 @@ jobs:
             package: "clang-14"
             cc: "clang-14"
             cxx: "clang++-14"
+
     steps:
       - uses: actions/checkout@v3
       - name: install compiler
@@ -64,3 +65,7 @@ jobs:
         shell: bash -l {0}
         run: |
           ./build/solver/test/Release/ponio_tests
+      - name: NotebookTest
+        shell: bash -l {0}
+        run: |
+          cd solver/notebooks; pytest --nbval --current-env -p no:warnings lotka_volterra_rungekutta.ipynb lotka_volterra_lawson.ipynb lotka_volterra_expRK.ipynb lotka_volterra_splitting.ipynb arenstorf_adaptivetimestep.ipynb belousov_zhabotinsky.ipynb curtiss_hirschfelder.ipynb
