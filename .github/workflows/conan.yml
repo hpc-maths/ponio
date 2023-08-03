@@ -67,7 +67,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip3 install sympy numpy jinja2
+          pip3 install -r environment/requirements.txt
       - name: Configure CMake
         run: |
           conan install .
