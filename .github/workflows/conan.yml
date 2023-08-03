@@ -1,4 +1,4 @@
-name: CI with conan
+name: Conan CI - multi-OS test
 
 on: [pull_request]
 
