@@ -68,4 +68,4 @@ jobs:
       - name: NotebookTest
         shell: bash -l {0}
         run: |
-          cd solver/notebooks; pytest --nbval --current-env -p no:warnings lotka_volterra_rungekutta.ipynb lotka_volterra_lawson.ipynb lotka_volterra_expRK.ipynb lotka_volterra_splitting.ipynb arenstorf_adaptivetimestep.ipynb belousov_zhabotinsky.ipynb curtiss_hirschfelder.ipynb
+          cd solver/notebooks; CXX=${{ matrix.cxx }} pytest --nbval --current-env -p no:warnings lotka_volterra_rungekutta.ipynb lotka_volterra_lawson.ipynb lotka_volterra_expRK.ipynb lotka_volterra_splitting.ipynb arenstorf_adaptivetimestep.ipynb belousov_zhabotinsky.ipynb curtiss_hirschfelder.ipynb
