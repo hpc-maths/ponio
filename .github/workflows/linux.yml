@@ -45,8 +45,8 @@ jobs:
       - name: install mamba
         uses: mamba-org/provision-with-micromamba@main
         with:
-          environment-file: solver/test/environment.yml
-          environment-name: ponio-solver-test
+          environment-file: environment/conda-environment-test.yml
+          environment-name: ponio-test
       - name: Conda informations
         shell: bash -l {0}
         run: |

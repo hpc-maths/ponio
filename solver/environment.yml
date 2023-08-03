@@ -1,6 +1,0 @@
-name: ponio-env
-channels:
-  - conda-forge
-dependencies:
-  - cmake
-  - ninja

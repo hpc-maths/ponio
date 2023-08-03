@@ -1,0 +1,8 @@
+name: ponio-analysis
+
+channels:
+  - conda-forge
+dependencies:
+  - sympy
+  - numpy
+  - jinja2

@@ -1,16 +1,16 @@
-name: ponio-solver-test
+name: ponio
 
 channels:
   - conda-forge
-
 dependencies:
   - cmake
   - ninja
-  - doctest
-  - eigen
-  - numpy
   - sympy
+  - numpy
+  - scipy
+  - matplotlib
+  - notebook
   - jinja2
   - eigen
-  - pip:
-    - docopt-ng
+  - samurai
+  - cxx-compiler
