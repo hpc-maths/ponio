@@ -67,7 +67,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip3 install sympy numpy docopt-ng jinja2
+          pip3 install sympy numpy jinja2
       - name: Configure CMake
         run: |
           conan install .
