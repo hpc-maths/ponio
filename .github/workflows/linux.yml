@@ -1,4 +1,4 @@
-name: Linux CI
+name: Linux CI - compiler tests
 
 on: [pull_request]
 
@@ -67,5 +67,6 @@ jobs:
           ./build/solver/test/Release/ponio_tests
       - name: NotebookTest
         shell: bash -l {0}
+        # should fix lotka_volterra_tuto.ipynb and three_body_choregraphy.ipynb to run this command on all solver/notebooks folder
         run: |
           cd solver/notebooks; CXX=${{ matrix.cxx }} pytest --nbval --current-env -p no:warnings lotka_volterra_rungekutta.ipynb lotka_volterra_lawson.ipynb lotka_volterra_expRK.ipynb lotka_volterra_splitting.ipynb arenstorf_adaptivetimestep.ipynb belousov_zhabotinsky.ipynb curtiss_hirschfelder.ipynb
