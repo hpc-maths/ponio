@@ -1,0 +1,56 @@
+name: Midnight CI - clang-tidy check
+
+on:
+  workflow_dispatch: # allows manual triggering
+  schedule:
+    - cron: "0 0 * * *" # runs daily at 00:00
+
+jobs:
+  check_new_commit:
+    runs-on: ubuntu-latest
+    outputs:
+      nb_commits: ${{ steps.new_commits.outputs.nb_commits }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: new_commits
+        run: echo "nb_commits=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_OUTPUT
+
+  clang-tidy-check:
+    needs: check_new_commit
+    if: needs.check_new_commit.outputs.nb_commits > 0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/ccache
+            ~/micromamba-root/envs/ponio-test
+          key: clang-tidy
+
+      - name: mamba and ponio env installation
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: environment/conda-environment-test.yml
+          environment-name: ponio-test
+          cache-environment: true
+
+      - name: clang-tidy installation
+        shell: bash -l {0}
+        run: |
+          conda install -y clang-tools cxx-compiler clang clangxx
+          pip install compdb
+
+      - name: Configure
+        shell: bash -l {0}
+        run: |
+          cmake . -Bbuild -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug
+          compdb -p build list > compile_commands.json
+
+      - name: Run clang-tidy on ponio
+        shell: bash -l {0}
+        run: |
+          run-clang-tidy
