@@ -56,8 +56,8 @@ TEST_CASE( "detail::tpl_inner_product" )
         },
         0 );
 
-    CHECK( detail::tpl_inner_product<N + 1>( tab, tab, 0, 1 ) == static_cast<std::size_t>( N * ( N + 1 ) * ( 2 * N + 1 ) / 6 ) );
+    CHECK( detail::tpl_inner_product<N + 1>( tab, tab, 0, 1 ) == ( N * ( N + 1 ) * ( 2 * N + 1 ) / 6 ) );
 
     constexpr std::size_t M = 5;
-    CHECK( detail::tpl_inner_product<M + 1>( tab, tab, 0, 1 ) == static_cast<std::size_t>( M * ( M + 1 ) * ( 2 * M + 1 ) / 6 ) );
+    CHECK( detail::tpl_inner_product<M + 1>( tab, tab, 0, 1 ) == ( M * ( M + 1 ) * ( 2 * M + 1 ) / 6 ) );
 }
