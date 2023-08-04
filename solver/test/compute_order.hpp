@@ -38,10 +38,10 @@ mayor_method( Container const& x, Container const& y )
     auto x_mid = std::begin( x ) + ( std::end( x ) - std::begin( x ) ) / 2;
     auto y_mid = std::begin( y ) + ( std::end( y ) - std::begin( y ) ) / 2;
 
-    value_t x1_avg = std::accumulate( x.begin(), x_mid, value_t{ 0.0 } ) / ( x_mid - x.begin() );
-    value_t x2_avg = std::accumulate( x_mid, x.end(), value_t{ 0.0 } ) / ( x.end() - x_mid );
-    value_t y1_avg = std::accumulate( y.begin(), y_mid, value_t{ 0.0 } ) / ( y_mid - y.begin() );
-    value_t y2_avg = std::accumulate( y_mid, y.end(), value_t{ 0.0 } ) / ( y.end() - y_mid );
+    value_t x1_avg = std::accumulate( x.begin(), x_mid, value_t{ 0.0 } ) / static_cast<value_t>( x_mid - x.begin() );
+    value_t x2_avg = std::accumulate( x_mid, x.end(), value_t{ 0.0 } ) / static_cast<value_t>( x.end() - x_mid );
+    value_t y1_avg = std::accumulate( y.begin(), y_mid, value_t{ 0.0 } ) / static_cast<value_t>( y_mid - y.begin() );
+    value_t y2_avg = std::accumulate( y_mid, y.end(), value_t{ 0.0 } ) / static_cast<value_t>( y.end() - y_mid );
 
     value_t a = ( y2_avg - y1_avg ) / ( x2_avg - x1_avg );
     value_t b = y1_avg - a * x1_avg;

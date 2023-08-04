@@ -23,13 +23,13 @@ struct C_random_device
     static constexpr result_type
     min()
     {
-        return 0;
+        return static_cast<result_type>( 0 );
     }
 
     static constexpr result_type
     max()
     {
-        return RAND_MAX;
+        return static_cast<result_type>( RAND_MAX );
     }
 
     static double
@@ -41,7 +41,7 @@ struct C_random_device
     result_type
     operator()()
     {
-        return std::rand();
+        return static_cast<result_type>( std::rand() );
     }
 };
 

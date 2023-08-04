@@ -58,10 +58,10 @@ class heat_model
 void
 save( std::valarray<double> const& x, std::valarray<double> const& y, std::filesystem::path const& filename )
 {
-    auto printer_xy = []( double x, double y )
+    auto printer_xy = []( double a, double b )
     {
         std::stringstream ss;
-        ss << x << " " << y;
+        ss << a << " " << b;
         return ss.str();
     };
 

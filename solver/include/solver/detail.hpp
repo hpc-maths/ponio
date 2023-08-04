@@ -16,7 +16,11 @@ namespace detail
     /* tpl_inner_product */
     template <typename state_t, typename value_t, typename ArrayA_t, typename ArrayB_t, std::size_t... Is>
     constexpr state_t
-    tpl_inner_product_impl( ArrayA_t const& a, ArrayB_t const& b, state_t const& init, value_t mul_coeff, std::index_sequence<Is...> )
+    tpl_inner_product_impl( ArrayA_t const& a,
+        ArrayB_t const& b,
+        state_t const& init,
+        [[maybe_unused]] value_t mul_coeff,
+        std::index_sequence<Is...> )
     {
         return ( init + ... + ( mul_coeff * a[Is] * b[Is] ) );
     }
