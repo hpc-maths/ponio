@@ -32,22 +32,25 @@ class heat_model
     std::valarray<double>
     operator()( double, std::valarray<double> const& y ) const
     {
-        double oneoverdxdx = 1. / ( m_dx * m_dx );
-        std::size_t nx     = y.size();
+        double const oneoverdxdx = 1. / ( m_dx * m_dx );
+        std::size_t const nx     = y.size();
+
         std::valarray<double> ydot( nx );
+
         ydot[0] = oneoverdxdx * ( -2. * y[0] + y[1] );
         for ( std::size_t i = 1; i < nx - 1; ++i )
         {
             ydot[i] = oneoverdxdx * ( y[i - 1] - 2. * y[i] + y[i + 1] );
         }
         ydot[nx - 1] = oneoverdxdx * ( y[nx - 2] - 2. * y[nx - 1] );
+
         return ydot;
     }
 
     static std::valarray<double>
     fundamental_sol( double t, std::valarray<double> const& x )
     {
-        double pi = std::numbers::pi;
+        double const pi = std::numbers::pi;
         return ( 1. / ( 2. * std::sqrt( pi * t ) ) ) * ( std::exp( -( x * x ) / ( 4. * t ) ) );
     }
 };
@@ -70,16 +73,16 @@ save( std::valarray<double> const& x, std::valarray<double> const& y, std::files
 int
 main()
 {
-    std::string dirname = "heat_data";
+    std::string const dirname = "heat_data";
     std::filesystem::create_directories( dirname );
 
-    std::size_t nx = 1000;
+    std::size_t const nx = 1000;
 
-    double xmin = -5;
-    double xmax = 5;
+    double const xmin = -5;
+    double const xmax = 5;
 
-    double dx = ( xmax - xmin ) / static_cast<double>( nx + 1 );
-    double dt = 10 * dx * dx;
+    double const dx = ( xmax - xmin ) / static_cast<double>( nx + 1 );
+    double const dt = 10 * dx * dx;
 
     std::valarray<double> x( nx );
     std::generate( std::begin( x ),
@@ -93,19 +96,20 @@ main()
 
     auto pb_heat = heat_model( dx );
 
-    double tini                = 0.001;
-    double tend                = 0.5;
-    std::valarray<double> yini = heat_model::fundamental_sol( tini, x );
+    double const tini = 0.001;
+    double const tend = 0.5;
+
+    std::valarray<double> const yini = heat_model::fundamental_sol( tini, x );
     std::valarray<double> yend( 0., nx );
-    ponio::time_span<double> tspan = { tini, tend };
+    ponio::time_span<double> const tspan = { tini, tend };
 
     // save( x, yini, std::filesystem::path( dirname ) / "heat_ini.dat" );
 
     yend = ode::solve( pb_heat, ode::butcher::chebyshev::explicit_rkc2<15>(), yini, tspan, dt, observer::null_observer() );
 
-    std::valarray<double> yexa = heat_model::fundamental_sol( tend, x );
+    std::valarray<double> const yexa = heat_model::fundamental_sol( tend, x );
 
-    auto err = std::abs( yexa - yend ).sum() / static_cast<double>( nx );
+    auto const err = std::abs( yexa - yend ).sum() / static_cast<double>( nx );
     std::cout << "L1 norm of error = " << err << std::endl;
 
     save( x, yend, std::filesystem::path( dirname ) / "heat_sol.dat" );

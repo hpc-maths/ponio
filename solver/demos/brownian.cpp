@@ -48,7 +48,7 @@ struct C_random_device
 int
 main( int argc, char* argv[] )
 {
-    std::string dirname = "brownian_data";
+    std::string const dirname = "brownian_data";
 
     std::size_t n = 10;
     if ( argc > 1 )
@@ -64,7 +64,7 @@ main( int argc, char* argv[] )
 
     std::normal_distribution<> d{ 0., 2 };
 
-    double dt = 1e-3;
+    double const dt = 1e-3;
 
     auto brownian_pb = ode::make_simple_problem(
         [&]( double, state_t const& ) -> state_t
@@ -72,7 +72,7 @@ main( int argc, char* argv[] )
             return { d( gen ), d( gen ) };
         } );
 
-    state_t yini = { 0., 0. };
+    state_t const yini = { 0., 0. };
 
     for ( unsigned int i = 0; i < n; ++i )
     {

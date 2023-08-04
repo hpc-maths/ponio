@@ -34,8 +34,8 @@ int
 main( int argc, char* argv[] )
 {
     // default filename
-    std::string dirname = "lv_data";
-    auto filename       = std::filesystem::path( dirname ) / "lv.dat";
+    std::string const dirname = "lv_data";
+    auto filename             = std::filesystem::path( dirname ) / "lv.dat";
 
     using state_t = std::valarray<double>;
 
@@ -43,15 +43,15 @@ main( int argc, char* argv[] )
     if ( argc > 1 )
     {
         filename = argv[1];
-        x0       = std::stof( argv[2] );
+        x0       = std::stod( argv[2] );
     }
     observer::file_observer fobs( filename );
 
     // parameters
-    double alpha = 2. / 3.;
-    double beta  = 4. / 3.;
-    double gamma = 1.;
-    double delta = 1.;
+    double const alpha = 2. / 3.;
+    double const beta  = 4. / 3.;
+    double const gamma = 1.;
+    double const delta = 1.;
 
     auto lotka_volterra_pb = ode::make_simple_problem( // define problem
         [=]( double, state_t const& u ) -> state_t
@@ -59,9 +59,11 @@ main( int argc, char* argv[] )
             return { alpha * u[0] - beta * u[0] * u[1], delta * u[0] * u[1] - gamma * u[1] };
         } );
 
-    ponio::time_span<double> t_span = { 0., 15. }; // begin and end time
-    double dt                       = 0.1;         // time step
-    state_t u0                      = { x0, x0 };  // initial condition
+    ponio::time_span<double> const t_span = { 0., 15. }; // begin and end time
+
+    double const dt  = 0.1;        // time step
+    state_t const u0 = { x0, x0 }; // initial condition
+
     ode::solve( lotka_volterra_pb, ode::butcher::rk_118(), u0, t_span, dt, fobs );
 
     return 0;

@@ -28,21 +28,21 @@ $y_0 = 2$
 int
 main()
 {
-    std::string dirname = "ch_data";
+    const std::string dirname = "ch_data";
 
     using state_t = double;
 
-    double tf = 2.0;
-    double dt = 0.01;
+    double const tf = 2.0;
+    double const dt = 0.01;
 
-    double k = 50;
+    double const k = 50;
 
     auto ch_pb = [=]( double t, double y )
     {
         return k * ( std::cos( t ) - y );
     };
 
-    state_t y_0 = 2.0;
+    state_t const y_0 = 2.0;
 
     { // example of time loop with while loop controlled by user
         auto filename = std::filesystem::path( dirname ) / "sol_rk_33_ralston.dat";

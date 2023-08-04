@@ -29,8 +29,8 @@ class brusselator_model
     std::valarray<double>
     operator()( double, std::valarray<double> u ) const
     {
-        double du1 = m_a - ( m_b + 1 ) * u[0] + u[0] * u[0] * u[1];
-        double du2 = m_b * u[0] - u[0] * u[0] * u[1];
+        double const du1 = m_a - ( m_b + 1 ) * u[0] + u[0] * u[0] * u[1];
+        double const du2 = m_b * u[0] - u[0] * u[0] * u[1];
         return std::valarray<double>{ du1, du2 };
     }
 };
@@ -38,17 +38,17 @@ class brusselator_model
 int
 main( int, char** )
 {
-    std::string dirname = "brusselator_data";
-    auto filename       = std::filesystem::path( dirname ) / "brusselator.dat";
+    std::string const dirname = "brusselator_data";
+    auto filename             = std::filesystem::path( dirname ) / "brusselator.dat";
     observer::file_observer fobs( filename );
 
     auto pb_brusselator = ode::make_simple_problem( brusselator_model( 1., 3. ) );
 
-    std::valarray<double> uini = { 1.5, 3 };
+    std::valarray<double> const uini = { 1.5, 3 };
 
-    ponio::time_span<double> tspan = { 0., 20.0 };
+    ponio::time_span<double> const tspan = { 0., 20.0 };
 
-    double dt = 0.01;
+    double const dt = 0.01;
 
     ode::solve( pb_brusselator, ode::butcher::rk_86(), uini, tspan, dt, fobs );
 

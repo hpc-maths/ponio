@@ -75,6 +75,8 @@ namespace ode
         {
         }
 
+        time_iterator() = delete;
+
         time_iterator( time_iterator const& rhs )
             : sol( rhs.sol )
             , meth( rhs.meth )
@@ -82,6 +84,16 @@ namespace ode
             , t_span( rhs.t_span )
             , it_next_time( std::begin( t_span ) + std::ranges::distance( std::begin( rhs.t_span ), rhs.it_next_time ) )
             , dt_reference( rhs.dt_reference )
+        {
+        }
+
+        time_iterator( time_iterator&& rhs ) noexcept
+            : sol( std::move( rhs.sol ) )
+            , meth( std::move( rhs.meth ) )
+            , pb( std::move( rhs.pb ) )
+            , t_span( std::move( rhs.t_span ) )
+            , it_next_time( std::move( rhs.it_next_time ) )
+            , dt_reference( std::move( rhs.dt_reference ) )
         {
         }
 
@@ -100,6 +112,24 @@ namespace ode
 
             return *this;
         }
+
+        time_iterator&
+        operator=( time_iterator&& rhs ) noexcept
+        {
+            if ( this != &rhs )
+            {
+                sol          = std::move( rhs.sol );
+                meth         = std::move( rhs.meth );
+                pb           = std::move( rhs.pb );
+                t_span       = std::move( rhs.t_span );
+                it_next_time = std::move( rhs.it_next_time );
+                dt_reference = std::move( rhs.dt_reference );
+            }
+
+            return *this;
+        }
+
+        ~time_iterator() = default;
 
         void
         increment()
@@ -327,9 +357,9 @@ namespace ode
     state_t
     solve( Problem_t& pb, Algorithm_t&& algo, state_t const& u0, ponio::time_span<value_t> const& t_span, value_t dt, Observer_t&& obs )
     {
+        // TODO: change this function to use time_iterator
         value_t current_time = t_span.front();
         auto it_next_time    = t_span.begin() + 1;
-        auto it_end_time     = t_span.end();
 
         value_t current_dt = dt;
         bool reset_dt      = false;
