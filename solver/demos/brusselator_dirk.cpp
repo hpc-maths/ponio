@@ -22,7 +22,8 @@ struct lin_alg_2_2
     static vector_type
     solver( matrix_type const& dfx, vector_type const& fx )
     {
-        double det = dfx( 0, 0 ) * dfx( 1, 1 ) - dfx( 1, 0 ) * dfx( 0, 1 );
+        double const det = dfx( 0, 0 ) * dfx( 1, 1 ) - dfx( 1, 0 ) * dfx( 0, 1 );
+
         return vector_type{ -dfx( 0, 1 ) / det * fx[1] + dfx( 1, 1 ) / det * fx[0], dfx( 0, 0 ) / det * fx[1] - dfx( 1, 0 ) / det * fx[0] };
     }
 };
@@ -48,16 +49,16 @@ class brusselator_model
     vector_type
     operator()( double, vector_type const& u ) const
     {
-        double du1 = m_a - ( m_b + 1 ) * u[0] + u[0] * u[0] * u[1];
-        double du2 = m_b * u[0] - u[0] * u[0] * u[1];
+        double const du1 = m_a - ( m_b + 1 ) * u[0] + u[0] * u[0] * u[1];
+        double const du2 = m_b * u[0] - u[0] * u[0] * u[1];
         return vector_type{ du1, du2 };
     }
 
     matrix_type
     jacobian( double, vector_type const& u ) const
     {
-        double y1 = u[0];
-        double y2 = u[1];
+        double const y1 = u[0];
+        double const y2 = u[1];
 
         return matrix_type{
             {2.0 * y1 * y2 - ( m_b + 1.0 ), y1 * y1 },
@@ -71,12 +72,13 @@ main( int, char** )
 {
     using namespace std::placeholders;
     using vector_type = Eigen::Vector<double, 2>;
-    using matrix_type = Eigen::Matrix<double, 2, 2>;
 
-    std::string dirname = "brusselator_dirk_data";
-    auto filename_1     = std::filesystem::path( dirname ) / "brusselator_dirk23.dat";
-    auto filename_2     = std::filesystem::path( dirname ) / "brusselator_dirk23_exact_solver.dat";
-    auto filename_3     = std::filesystem::path( dirname ) / "brusselator_rk33.dat";
+    std::string const dirname = "brusselator_dirk_data";
+
+    auto filename_1 = std::filesystem::path( dirname ) / "brusselator_dirk23.dat";
+    auto filename_2 = std::filesystem::path( dirname ) / "brusselator_dirk23_exact_solver.dat";
+    auto filename_3 = std::filesystem::path( dirname ) / "brusselator_rk33.dat";
+
     observer::file_observer fobs_1( filename_1 );
     observer::file_observer fobs_2( filename_2 );
     observer::file_observer fobs_3( filename_3 );
@@ -88,11 +90,11 @@ main( int, char** )
             return model.jacobian( t, u );
         } );
 
-    vector_type uini = { 1.5, 3 };
+    vector_type const uini = { 1.5, 3 };
 
-    ponio::time_span<double> tspan = { 0., 20.0 };
+    ponio::time_span<double> const tspan = { 0., 20.0 };
 
-    double dt = 0.25;
+    double const dt = 0.25;
 
     ode::solve( pb_brusselator, ode::butcher::dirk23(), uini, tspan, dt, fobs_1 );
     ode::solve( pb_brusselator, ode::butcher::dirk23<lin_alg_2_2>(), uini, tspan, dt, fobs_2 );

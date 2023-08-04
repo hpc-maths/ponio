@@ -31,26 +31,26 @@ $$
 int
 main( int, char** )
 {
-    std::string dirname = "pendulum_data";
-    auto filename       = std::filesystem::path( dirname ) / "pendulum.dat";
+    std::string const dirname = "pendulum_data";
+    auto filename             = std::filesystem::path( dirname ) / "pendulum.dat";
     observer::file_observer fobs( filename );
 
     using state_t = std::valarray<double>;
 
-    double dt = 0.1;
+    double const dt = 0.1;
 
-    double b = 0.25;
-    double c = 5.0;
+    double const b = 0.25;
+    double const c = 5.0;
 
     auto pendulum_pb = ode::make_simple_problem(
         [=]( double, state_t const& y ) -> state_t
         {
-            double theta = y[0];
-            double omega = y[1];
+            double const theta = y[0];
+            double const omega = y[1];
             return { omega, -b * omega - c * std::sin( theta ) };
         } );
 
-    state_t yini = { std::numbers::pi - 0.1, 0. };
+    state_t const yini = { std::numbers::pi - 0.1, 0. };
 
     ode::solve( pendulum_pb, ode::butcher::rk_44(), yini, { 0., 10.0 }, dt, fobs );
 

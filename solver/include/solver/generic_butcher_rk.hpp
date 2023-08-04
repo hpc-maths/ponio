@@ -242,8 +242,8 @@ namespace ode::butcher
                 return ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
             }
 
-            double tol;           // tolerance of Newton method
-            std::size_t max_iter; // max iterations of Newton method
+            double tol           = ponio::default_config::newton_tolerance;      // tolerance of Newton method
+            std::size_t max_iter = ponio::default_config::newton_max_iterations; // max iterations of Newton method
 
             linear_algebra_t linalg;
         };
@@ -376,18 +376,20 @@ namespace ode::butcher
             tpl_inner_product_impl( tuple_t const& a,
                 array_t const& k,
                 state_t const& init,
-                linear_t const& l,
+                linear_t const& linear_part,
                 value_t mul_coeff,
                 std::index_sequence<Is...> )
             {
-                return ( init + ... + ( mul_coeff * coefficient_eval( triangular_get<I, Is>( a ), mul_coeff * l ) * ( k[Is] + l * init ) ) );
+                return ( init + ...
+                         + ( mul_coeff * coefficient_eval( triangular_get<I, Is>( a ), mul_coeff * linear_part )
+                             * ( k[Is] + linear_part * init ) ) );
             }
 
             template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t>
             constexpr state_t
-            tpl_inner_product( tuple_t const& a, array_t const& k, state_t const& init, linear_t const& l, value_t mul_coeff )
+            tpl_inner_product( tuple_t const& a, array_t const& k, state_t const& init, linear_t const& linear_part, value_t mul_coeff )
             {
-                return tpl_inner_product_impl<I>( a, k, init, l, mul_coeff, std::make_index_sequence<I>() );
+                return tpl_inner_product_impl<I>( a, k, init, linear_part, mul_coeff, std::make_index_sequence<I>() );
             }
 
             template <typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t, std::size_t... Is>
@@ -395,18 +397,19 @@ namespace ode::butcher
             tpl_inner_product_b_impl( tuple_t const& b,
                 array_t const& k,
                 state_t const& init,
-                linear_t const& l,
+                linear_t const& linear_part,
                 value_t mul_coeff,
                 std::index_sequence<Is...> )
             {
-                return ( init + ... + ( mul_coeff * coefficient_eval( std::get<Is>( b ), mul_coeff * l ) * ( k[Is] + l * init ) ) );
+                return ( init + ...
+                         + ( mul_coeff * coefficient_eval( std::get<Is>( b ), mul_coeff * linear_part ) * ( k[Is] + linear_part * init ) ) );
             }
 
             template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t>
             constexpr state_t
-            tpl_inner_product_b( tuple_t const& b, array_t const& k, state_t const& init, linear_t const& l, value_t mul_coeff )
+            tpl_inner_product_b( tuple_t const& b, array_t const& k, state_t const& init, linear_t const& linear_part, value_t mul_coeff )
             {
-                return tpl_inner_product_b_impl( b, k, init, l, mul_coeff, std::make_index_sequence<I>() );
+                return tpl_inner_product_b_impl( b, k, init, linear_part, mul_coeff, std::make_index_sequence<I>() );
             }
         } // namespace detail
 
