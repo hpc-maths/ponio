@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <concepts>
 #include <numeric>
 #include <ranges>
