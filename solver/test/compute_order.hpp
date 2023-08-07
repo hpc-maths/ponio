@@ -85,7 +85,7 @@ solve_exp( Algorithm_t& algo, T dt, T Tf )
 #else
     auto obs = []( T, state_t, T ) {};
 #endif
-    return ode::solve( pb, algo, y0, { 0., Tf }, dt, obs );
+    return ponio::solve( pb, algo, y0, { 0., Tf }, dt, obs );
 }
 
 template <typename Algorithm_t, typename T = double>
@@ -140,7 +140,7 @@ long_time_check_order( Algorithm_t& algo )
     T delta = 1.;
 
     // make a problem that can be use also for splitting (in 3 parts) methods
-    auto pb = ode::make_problem(
+    auto pb = ponio::make_problem(
         [=]( T, state_t const& u ) -> state_t
         {
             return { alpha * u[0] - beta * u[0] * u[1], 0. };
@@ -171,7 +171,7 @@ long_time_check_order( Algorithm_t& algo )
 
     for ( auto dt : dts )
     {
-        state_t u_end = ode::solve( pb, algo, u_ini, t_span, dt, []( T, state_t const&, T ) {} );
+        state_t u_end = ponio::solve( pb, algo, u_ini, t_span, dt, []( T, state_t const&, T ) {} );
         relative_errors.push_back( std::log10( relative_error( V_ini, V( u_end ) ) ) );
         log_dts.push_back( std::log10( dt ) );
     }
@@ -185,11 +185,11 @@ template <typename Algorithm_t, typename T = double>
 T
 check_order( Algorithm_t algo = Algorithm_t() )
 {
-    if constexpr ( ode::butcher::is_embedded<Algorithm_t> )
+    if constexpr ( ponio::runge_kutta::butcher::is_embedded<Algorithm_t> )
     {
         return Algorithm_t::order;
     }
-    else if constexpr ( Algorithm_t::order >= 8 || ode::splitting::is_splitting_method<Algorithm_t> )
+    else if constexpr ( Algorithm_t::order >= 8 || ponio::splitting::is_splitting_method<Algorithm_t> )
     {
         return long_time_check_order( algo );
     }

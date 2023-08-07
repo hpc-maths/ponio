@@ -9,7 +9,7 @@
 
 #include <doctest/doctest.h>
 
-#include <solver/butcher_methods.hpp>
+#include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 
 #include "compute_order.hpp"
@@ -38,5 +38,5 @@ test_order_on()
 
 TEST_CASE( "order::explict_runge_kutta" )
 {
-    test_order_on<ode::butcher::erk_tuple<double>>();
+    test_order_on<ponio::runge_kutta::erk_tuple<double>>();
 }
