@@ -7,9 +7,9 @@
 #include <numbers>
 #include <numeric>
 
-#include <solver/butcher_methods.hpp>
 #include <solver/observer.hpp>
 #include <solver/problem.hpp>
+#include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 
 /*
@@ -48,7 +48,7 @@ main()
         auto filename = std::filesystem::path( dirname ) / "sol_rk_33_ralston.dat";
         auto obs      = observer::file_observer( filename );
 
-        auto sol_range = ode::make_solver_range( ch_pb, ode::butcher::rk_33_ralston(), y_0, { 0., 0.464, tf }, dt );
+        auto sol_range = ponio::make_solver_range( ch_pb, ponio::runge_kutta::rk_33_ralston(), y_0, { 0., 0.464, tf }, dt );
         auto it_sol    = sol_range.begin();
 
         while ( it_sol->time < tf )
@@ -73,7 +73,7 @@ main()
         auto filename = std::filesystem::path( dirname ) / "sol_rk54_6m.dat";
         auto obs      = observer::file_observer( filename );
 
-        auto sol_range = ode::make_solver_range( ch_pb, ode::butcher::rk54_6m(), y_0, { 0., 0.464, tf }, dt );
+        auto sol_range = ponio::make_solver_range( ch_pb, ponio::runge_kutta::rk54_6m(), y_0, { 0., 0.464, tf }, dt );
 
         for ( auto ui : sol_range )
         {
