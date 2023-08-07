@@ -9,11 +9,15 @@
 #include <string_view>
 #include <tuple>
 
-#include "butcher_tableau.hpp"
-#include "generic_butcher_rk.hpp"
-#include "ponio_config.hpp"
+#include "../butcher_tableau.hpp"
+#include "../ponio_config.hpp"
+#include "../runge_kutta/dirk.hpp"
+#include "../runge_kutta/erk.hpp"
+#include "../runge_kutta/exprk.hpp"
+#include "../runge_kutta/lrk.hpp"
+#include "../runge_kutta/rkc.hpp"
 
-namespace ode::butcher
+namespace ponio::runge_kutta
 {
     // clang-format off
 
@@ -24,9 +28,9 @@ namespace ode::butcher
  * @tparam value_t type of coefficient (``double``by default)
  */
 template <typename value_t=double>
-struct butcher_{{ rk.id }} : public {{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }}, value_t>
+struct butcher_{{ rk.id }} : public butcher::{{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }}, value_t>
 {
-  using base_t = {{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }}, value_t>;
+  using base_t = butcher::{{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }}, value_t>;
   static constexpr std::size_t N_stages = base_t::N_stages;
   static constexpr std::size_t order = {{ rk.order }};
   static constexpr std::string_view id = "{{ rk.id }}";
@@ -56,9 +60,9 @@ struct butcher_{{ rk.id }} : public {{ "adaptive_" if 'b2' in rk else "" }}butch
  * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
  */
 template <typename value_t>
-using {{ rk.id }}_t = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<value_t>>;
+using {{ rk.id }}_t = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id }}<value_t>>;
 
-using {{ rk.id }} = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<double>>;
+using {{ rk.id }} = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id }}<double>>;
 
 /**
  * @brief l{{ rk.label }} method
@@ -69,14 +73,14 @@ using {{ rk.id }} = runge_kutta::explicit_rk_butcher<butcher_{{ rk.id }}<double>
 template <typename value_t, typename Exp_t>
 constexpr auto l{{ rk.id }}_t = []( Exp_t exp_ , double tol=ponio::default_config::tol )
 {
-  return lawson::make_lawson<butcher_{{ rk.id }}<value_t>,Exp_t>(exp_,tol);
+  return lawson_runge_kutta::make_lawson<butcher_{{ rk.id }}<value_t>,Exp_t>(exp_,tol);
 };
 
 template <typename Exp_t>
 auto
 l{{ rk.id }}( Exp_t exp_ , double tol=ponio::default_config::tol )
 {
-  return lawson::make_lawson<butcher_{{ rk.id }}<double>,Exp_t>(exp_,tol);
+  return lawson_runge_kutta::make_lawson<butcher_{{ rk.id }}<double>,Exp_t>(exp_,tol);
 }
 
 {% endfor %}
@@ -127,9 +131,9 @@ struct butcher_{{ rk.id }}
  * @tparam linear_t type of coefficient (``double``by default)
  */
 template <typename value_t, typename linear_t>
-using {{ rk.id }}_t = exp_runge_kutta::explicit_exp_rk_butcher<butcher_{{ rk.id }}<value_t, linear_t>>;
+using {{ rk.id }}_t = exponential_runge_kutta::explicit_exp_rk_butcher<butcher_{{ rk.id }}<value_t, linear_t>>;
 
-using {{ rk.id }} = exp_runge_kutta::explicit_exp_rk_butcher<butcher_{{ rk.id }}<double, double>>;
+using {{ rk.id }} = exponential_runge_kutta::explicit_exp_rk_butcher<butcher_{{ rk.id }}<double, double>>;
 
 {% endfor %}
 
@@ -146,9 +150,9 @@ using exprk_tuple = std::tuple< {{ list_exprk | sformat("{}_t<value_t, linear_t>
  * @tparam value_t type of coefficient (``double``by default)
  */
 template <typename value_t=double>
-struct butcher_{{ rk.id }} : public {{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }},value_t>
+struct butcher_{{ rk.id }} : public butcher::{{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }},value_t>
 {
-  using base_t = {{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }},value_t>;
+  using base_t = butcher::{{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }},value_t>;
   static constexpr std::size_t N_stages = base_t::N_stages;
   static constexpr std::size_t order = {{ rk.order }};
   static constexpr const char* id = "{{ rk.id }}";
@@ -175,18 +179,18 @@ template <typename value_t, typename linear_algebra_t=void, typename ... Args>
 auto
 {{ rk.id }}_t ( Args ... args )
 {
-  return runge_kutta::make_dirk<butcher_{{ rk.id }}<value_t>, linear_algebra_t>(args...);
+  return diagonal_implicit_runge_kutta::make_dirk<butcher_{{ rk.id }}<value_t>, linear_algebra_t>(args...);
 }
 
 template <typename linear_algebra_t=void, typename ... Args>
 auto
 {{ rk.id }} ( Args ... args )
 {
-  return runge_kutta::make_dirk<butcher_{{ rk.id }}<double>, linear_algebra_t>(args...);
+  return diagonal_implicit_runge_kutta::make_dirk<butcher_{{ rk.id }}<double>, linear_algebra_t>(args...);
 }
 
 {% endfor %}
 
     // clang-format on
 
-} // namespace ode::butcher
+} // namespace ponio::runge_kutta
