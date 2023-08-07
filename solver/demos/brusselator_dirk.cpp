@@ -7,10 +7,10 @@
 
 #include <Eigen/Dense>
 
-#include <solver/butcher_methods.hpp>
 #include <solver/eigen_linear_algebra.hpp>
 #include <solver/observer.hpp>
 #include <solver/problem.hpp>
+#include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 #include <solver/time_span.hpp>
 
@@ -84,7 +84,7 @@ main( int, char** )
     observer::file_observer fobs_3( filename_3 );
 
     auto model          = brusselator_model( 1., 3. );
-    auto pb_brusselator = ode::make_implicit_problem( model,
+    auto pb_brusselator = ponio::make_implicit_problem( model,
         [&]( double t, vector_type const& u )
         {
             return model.jacobian( t, u );
@@ -96,9 +96,9 @@ main( int, char** )
 
     double const dt = 0.25;
 
-    ode::solve( pb_brusselator, ode::butcher::dirk23(), uini, tspan, dt, fobs_1 );
-    ode::solve( pb_brusselator, ode::butcher::dirk23<lin_alg_2_2>(), uini, tspan, dt, fobs_2 );
-    ode::solve( pb_brusselator, ode::butcher::rk_33(), uini, tspan, dt, fobs_3 );
+    ponio::solve( pb_brusselator, ponio::runge_kutta::dirk23(), uini, tspan, dt, fobs_1 );
+    ponio::solve( pb_brusselator, ponio::runge_kutta::dirk23<lin_alg_2_2>(), uini, tspan, dt, fobs_2 );
+    ponio::solve( pb_brusselator, ponio::runge_kutta::rk_33(), uini, tspan, dt, fobs_3 );
 
     return 0;
 }

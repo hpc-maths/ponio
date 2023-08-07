@@ -8,9 +8,9 @@
 #include <numeric>
 #include <valarray>
 
-#include <solver/butcher_methods.hpp>
 #include <solver/observer.hpp>
 #include <solver/problem.hpp>
+#include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 
 /*
@@ -42,7 +42,7 @@ main( int, char** )
     double const b = 0.25;
     double const c = 5.0;
 
-    auto pendulum_pb = ode::make_simple_problem(
+    auto pendulum_pb = ponio::make_simple_problem(
         [=]( double, state_t const& y ) -> state_t
         {
             double const theta = y[0];
@@ -52,7 +52,7 @@ main( int, char** )
 
     state_t const yini = { std::numbers::pi - 0.1, 0. };
 
-    ode::solve( pendulum_pb, ode::butcher::rk_44(), yini, { 0., 10.0 }, dt, fobs );
+    ponio::solve( pendulum_pb, ponio::runge_kutta::rk_44(), yini, { 0., 10.0 }, dt, fobs );
 
     return 0;
 }

@@ -11,9 +11,9 @@
 #include <string>
 #include <valarray>
 
-#include <solver/butcher_methods.hpp>
 #include <solver/observer.hpp>
 #include <solver/problem.hpp>
+#include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 
 struct C_random_device
@@ -66,7 +66,7 @@ main( int argc, char* argv[] )
 
     double const dt = 1e-3;
 
-    auto brownian_pb = ode::make_simple_problem(
+    auto brownian_pb = ponio::make_simple_problem(
         [&]( double, state_t const& ) -> state_t
         {
             return { d( gen ), d( gen ) };
@@ -80,7 +80,7 @@ main( int argc, char* argv[] )
         ssfilename << "brownian_" << i << ".dat";
         auto filename = std::filesystem::path( dirname ) / ssfilename.str();
         observer::file_observer fobs( filename );
-        ode::solve( brownian_pb, ode::butcher::rk_33(), yini, { 0., 10. }, dt, fobs );
+        ponio::solve( brownian_pb, ponio::runge_kutta::rk_33(), yini, { 0., 10. }, dt, fobs );
     }
 
     return 0;
