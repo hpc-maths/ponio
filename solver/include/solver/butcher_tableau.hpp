@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <utility>
 
-namespace ode::butcher
+namespace ponio::runge_kutta::butcher
 {
 
     template <std::size_t N, typename _value_t = double>
@@ -61,4 +61,4 @@ namespace ode::butcher
     template <typename Algorithm_t>
     concept is_embedded = requires { Algorithm_t::is_embedded; };
 
-} // namespace ode::butcher
+} // namespace ponio::butcher

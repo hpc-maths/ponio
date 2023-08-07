@@ -6,7 +6,7 @@
 
 #include <type_traits>
 
-namespace ode
+namespace ponio
 {
 
     /** @class Stage
