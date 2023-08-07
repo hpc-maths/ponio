@@ -13,7 +13,7 @@
 #include "method.hpp"
 #include "time_span.hpp"
 
-namespace ode
+namespace ponio
 {
 
     /**
@@ -333,7 +333,7 @@ namespace ode
     auto
     make_solver_range( problem_t& pb, algorithm_t&& algo, state_t const& u0, ponio::time_span<value_t> const& t_span, value_t dt )
     {
-        auto meth = ode::make_method( algo, u0 );
+        auto meth = make_method( algo, u0 );
 
         auto begin = make_time_iterator( pb, meth, u0, t_span, dt );
         auto end   = make_time_iterator( pb, meth, u0, { t_span.back() }, dt );
@@ -397,4 +397,4 @@ namespace ode
         return un;
     }
 
-}
+} // namespace ponio
