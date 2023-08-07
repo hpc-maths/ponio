@@ -6,8 +6,8 @@
 #include <iostream>
 #include <tuple>
 
-#include <solver/butcher_methods.hpp>
 #include <solver/observer.hpp>
+#include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 
 // solve $\dot{u} = u$ with $u(t=0) = 1$, and $t\in[0,2]$.
@@ -26,7 +26,7 @@ main( int, char** )
     double const x0 = 1.0;
     double const dt = 0.1;
 
-    ode::solve( identity, ode::butcher::rk_nssp_21(), x0, { 0., 2.0 }, dt, fobs );
+    ponio::solve( identity, ponio::runge_kutta::rk_nssp_21(), x0, { 0., 2.0 }, dt, fobs );
 
     return 0;
 }

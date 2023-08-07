@@ -7,8 +7,8 @@
 #include <numeric>
 #include <valarray>
 
-#include <solver/butcher_methods.hpp>
 #include <solver/observer.hpp>
+#include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 #include <solver/time_span.hpp>
 
@@ -38,7 +38,7 @@ main( int, char** )
     ponio::time_span<double> const tspan = { 0., 20. };
     double const dt                      = 0.01;
 
-    ode::solve( lorenz, ode::butcher::rk_nssp_53(), u0, tspan, dt, fobs );
+    ponio::solve( lorenz, ponio::runge_kutta::rk_nssp_53(), u0, tspan, dt, fobs );
 
     return 0;
 }

@@ -5,9 +5,9 @@
 #include <iostream>
 #include <valarray>
 
-#include <solver/butcher_methods.hpp>
 #include <solver/observer.hpp>
 #include <solver/problem.hpp>
+#include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 #include <solver/time_span.hpp>
 
@@ -42,7 +42,7 @@ main( int, char** )
     auto filename             = std::filesystem::path( dirname ) / "brusselator.dat";
     observer::file_observer fobs( filename );
 
-    auto pb_brusselator = ode::make_simple_problem( brusselator_model( 1., 3. ) );
+    auto pb_brusselator = ponio::make_simple_problem( brusselator_model( 1., 3. ) );
 
     std::valarray<double> const uini = { 1.5, 3 };
 
@@ -50,7 +50,7 @@ main( int, char** )
 
     double const dt = 0.01;
 
-    ode::solve( pb_brusselator, ode::butcher::rk_86(), uini, tspan, dt, fobs );
+    ponio::solve( pb_brusselator, ponio::runge_kutta::rk_86(), uini, tspan, dt, fobs );
 
     return 0;
 }

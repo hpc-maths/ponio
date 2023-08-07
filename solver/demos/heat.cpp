@@ -12,8 +12,8 @@
 #include <numbers>
 #include <sstream>
 
-#include <solver/generic_butcher_rk.hpp>
 #include <solver/observer.hpp>
+#include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 #include <solver/time_span.hpp>
 
@@ -105,7 +105,7 @@ main()
 
     // save( x, yini, std::filesystem::path( dirname ) / "heat_ini.dat" );
 
-    yend = ode::solve( pb_heat, ode::butcher::chebyshev::explicit_rkc2<15>(), yini, tspan, dt, observer::null_observer() );
+    yend = ponio::solve( pb_heat, ponio::runge_kutta::explicit_rkc2<15>(), yini, tspan, dt, observer::null_observer() );
 
     std::valarray<double> const yexa = heat_model::fundamental_sol( tend, x );
 

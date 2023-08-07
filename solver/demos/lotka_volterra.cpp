@@ -8,9 +8,9 @@
 #include <string>
 #include <valarray>
 
-#include <solver/butcher_methods.hpp>
 #include <solver/observer.hpp>
 #include <solver/problem.hpp>
+#include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 #include <solver/time_span.hpp>
 
@@ -53,7 +53,7 @@ main( int argc, char* argv[] )
     double const gamma = 1.;
     double const delta = 1.;
 
-    auto lotka_volterra_pb = ode::make_simple_problem( // define problem
+    auto lotka_volterra_pb = ponio::make_simple_problem( // define problem
         [=]( double, state_t const& u ) -> state_t
         {
             return { alpha * u[0] - beta * u[0] * u[1], delta * u[0] * u[1] - gamma * u[1] };
@@ -64,7 +64,7 @@ main( int argc, char* argv[] )
     double const dt  = 0.1;        // time step
     state_t const u0 = { x0, x0 }; // initial condition
 
-    ode::solve( lotka_volterra_pb, ode::butcher::rk_118(), u0, t_span, dt, fobs );
+    ponio::solve( lotka_volterra_pb, ponio::runge_kutta::rk_118(), u0, t_span, dt, fobs );
 
     return 0;
 }

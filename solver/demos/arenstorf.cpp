@@ -7,9 +7,9 @@
 #include <numeric>
 #include <valarray>
 
-#include <solver/butcher_methods.hpp>
 #include <solver/observer.hpp>
 #include <solver/problem.hpp>
+#include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 
 /*
@@ -60,18 +60,18 @@ main( int, char** )
 
     double const mu = 0.012277471;
 
-    auto arenstorf_pb = ode::make_problem( arenstorf_model( mu ) );
+    auto arenstorf_pb = ponio::make_problem( arenstorf_model( mu ) );
 
     state_t const yini = { 0.994, 0., 0., -2.00158510637908252240537862224 };
 
     filename = ( std::filesystem::path( dirname ) / "arenstorf_rk546m.dat" ).string();
-    ode::solve( arenstorf_pb, ode::butcher::rk54_6m( 1e-5 ), yini, { 0., tf }, dt, observer::file_observer( filename ) );
+    ponio::solve( arenstorf_pb, ponio::runge_kutta::rk54_6m( 1e-5 ), yini, { 0., tf }, dt, observer::file_observer( filename ) );
 
     filename = ( std::filesystem::path( dirname ) / "arenstorf_rk547m.dat" ).string();
-    ode::solve( arenstorf_pb, ode::butcher::rk54_7m( 1e-5 ), yini, { 0., tf }, dt, observer::file_observer( filename ) );
+    ponio::solve( arenstorf_pb, ponio::runge_kutta::rk54_7m( 1e-5 ), yini, { 0., tf }, dt, observer::file_observer( filename ) );
 
     filename = ( std::filesystem::path( dirname ) / "arenstorf_rk547s.dat" ).string();
-    ode::solve( arenstorf_pb, ode::butcher::rk54_7s( 1e-5 ), yini, { 0., tf }, dt, observer::file_observer( filename ) );
+    ponio::solve( arenstorf_pb, ponio::runge_kutta::rk54_7s( 1e-5 ), yini, { 0., tf }, dt, observer::file_observer( filename ) );
 
     return 0;
 }
