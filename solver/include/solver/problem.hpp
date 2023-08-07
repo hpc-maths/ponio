@@ -7,7 +7,7 @@
 #include <bitset>
 #include <tuple>
 
-namespace ode
+namespace ponio
 {
 
     // --- PARENT_PROBLEM ----------------------------------------------------------
@@ -399,4 +399,4 @@ namespace ode
         return problem<Callables_t...>( f... );
     }
 
-} // namespace ode
+} // namespace ponio

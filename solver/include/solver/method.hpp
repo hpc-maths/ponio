@@ -12,11 +12,10 @@
 #include <type_traits>
 
 #include "detail.hpp"
-#include "generic_butcher_rk.hpp"
 #include "splitting.hpp"
 #include "stage.hpp"
 
-namespace ode
+namespace ponio
 {
 
     template <typename state_t>
@@ -262,10 +261,10 @@ namespace ode
      */
     template <typename... Algorithms_t, typename state_t>
     auto
-    make_method( splitting::lie_tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
+    make_method( splitting::lie::lie_tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
     {
         auto methods = make_tuple_methods( algos.algos, shadow_of_u0 );
-        return splitting::make_lie_from_tuple( methods, algos.time_steps );
+        return splitting::lie::make_lie_from_tuple( methods, algos.time_steps );
     }
 
     /**
@@ -276,10 +275,10 @@ namespace ode
      */
     template <typename... Algorithms_t, typename state_t>
     auto
-    make_method( splitting::strang_tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
+    make_method( splitting::strang::strang_tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
     {
         auto methods = make_tuple_methods( algos.algos, shadow_of_u0 );
-        return splitting::make_strang_from_tuple( methods, algos.time_steps );
+        return splitting::strang::make_strang_from_tuple( methods, algos.time_steps );
     }
 
-} // namespace ode
+} // namespace ponio
