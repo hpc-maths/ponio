@@ -48,6 +48,7 @@ jobs:
         shell: bash -l {0}
         run: |
           cmake . -Bbuild -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug
+          make -C build ponio
           compdb -p build list > compile_commands.json
 
       - name: Run clang-tidy on ponio
