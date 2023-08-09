@@ -4,7 +4,9 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
+#include <tuple>
 
 namespace ponio::splitting::detail
 {

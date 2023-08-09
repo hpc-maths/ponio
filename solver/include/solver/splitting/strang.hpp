@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include "detail.hpp"
+#include "lie.hpp"
 
 namespace ponio::splitting::strang
 {
