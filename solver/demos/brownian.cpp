@@ -41,7 +41,7 @@ struct C_random_device
     result_type
     operator()()
     {
-        return static_cast<result_type>( std::rand() );
+        return static_cast<result_type>( std::rand() ); // NOLINT: GitHub Action doesn't allow `std::random_device`
     }
 };
 
@@ -58,7 +58,7 @@ main( int argc, char* argv[] )
 
     using state_t = std::valarray<double>;
 
-    // std::random_device rd;
+    // std::random_device rd; // can't be use in GitHub Action...
     C_random_device rd;
     std::mt19937 gen( rd() );
 

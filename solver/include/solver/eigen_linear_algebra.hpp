@@ -66,7 +66,7 @@ namespace ponio::linear_algebra
 
       private:
 
-        static matrix_type I;
+        static matrix_type I; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
       public:
 
