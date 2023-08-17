@@ -13,6 +13,7 @@ dependencies:
   - jinja2
   - eigen
   - samurai
+  - cli11
   - doctest
   - pytest
   - nbval
