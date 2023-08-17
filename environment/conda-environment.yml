@@ -13,4 +13,5 @@ dependencies:
   - jinja2
   - eigen
   - samurai
+  - cli11
   - cxx-compiler
