@@ -20,7 +20,7 @@ namespace ponio::runge_kutta
 
     // using lawson_runge_kutta::make_lawson;
 
-    using chebyshev::explicit_rkc2;
+    using chebyshev::explicit_rkc2; // NOLINT(misc-unused-using-decls): using to improve interface
 
 } // namespace ponio::runge_kutta
 
