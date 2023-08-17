@@ -1,5 +1,6 @@
 set(demos arenstorf brownian brusselator brusselator_dirk exp heat pendulum lorenz lotka_volterra curtiss_hirschfelder)
 set(demos_eigen brusselator_dirk)
+set(demos_cli11 brownian lotka_volterra)
 
 foreach(demo IN LISTS demos)
     message(STATUS "demo=${demo}")
@@ -9,6 +10,12 @@ foreach(demo IN LISTS demos)
         find_package (Eigen3 3.4 REQUIRED NO_MODULE)
         target_link_libraries(${demo} Eigen3::Eigen)
     endif()
+    if(${demo} IN_LIST demos_cli11)
+        message(STATUS "CLI11=${demo}")
+        find_package(CLI11)
+        target_link_libraries(${demo} CLI11::CLI11)
+    endif()
+
     target_link_libraries(${demo} ponio)
 endforeach()
 
