@@ -173,7 +173,7 @@ namespace ponio
             return *this;
         }
 
-        time_iterator
+        time_iterator // NOLINT(cert-dcl21-cpp): This check is deprecated since it’s no longer part of the CERT standard
         operator++( int )
         {
             auto copy = *this;
