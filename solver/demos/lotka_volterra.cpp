@@ -14,6 +14,8 @@
 #include <solver/solver.hpp>
 #include <solver/time_span.hpp>
 
+#include <CLI/CLI.hpp>
+
 /*
 Lotka-Volterra system
 ---------------------
@@ -33,6 +35,8 @@ This system is solved by RK(11,8) Runge-Kutta method with time step $\Delta t=0.
 int
 main( int argc, char* argv[] )
 {
+    CLI::App app{ "Launch Lotka-Volerra equation simulation solved by RK(11,8) method" };
+
     // default filename
     std::string const dirname = "lv_data";
     auto filename             = std::filesystem::path( dirname ) / "lv.dat";
@@ -40,11 +44,11 @@ main( int argc, char* argv[] )
     using state_t = std::valarray<double>;
 
     double x0 = 1.0; // default x0
-    if ( argc > 1 )
-    {
-        filename = argv[1];
-        x0       = std::stod( argv[2] );
-    }
+
+    app.add_option( "filename", filename, "name of output file" );
+    app.add_option( "x0", x0, "initial condition (x,y)(t=0) = (x0,x0)" );
+    CLI11_PARSE( app, argc, argv );
+
     observer::file_observer fobs( filename );
 
     // parameters

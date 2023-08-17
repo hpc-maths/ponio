@@ -16,6 +16,8 @@
 #include <solver/runge_kutta.hpp>
 #include <solver/solver.hpp>
 
+#include <CLI/CLI.hpp>
+
 struct C_random_device
 {
     using result_type = unsigned int;
@@ -48,13 +50,13 @@ struct C_random_device
 int
 main( int argc, char* argv[] )
 {
+    CLI::App app{ "Launch N brownian motion process solved by a RK(3,3) method" };
+
     std::string const dirname = "brownian_data";
 
     std::size_t n = 10;
-    if ( argc > 1 )
-    {
-        n = std::stoul( argv[1] );
-    }
+    app.add_option( "N", n, "Number of brownian motion" );
+    CLI11_PARSE( app, argc, argv );
 
     using state_t = std::valarray<double>;
 
