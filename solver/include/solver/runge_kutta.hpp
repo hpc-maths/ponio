@@ -25,3 +25,4 @@ namespace ponio::runge_kutta
 } // namespace ponio::runge_kutta
 
 #include "runge_kutta/butcher_methods.hpp"
+#include "runge_kutta/rock.hpp"
