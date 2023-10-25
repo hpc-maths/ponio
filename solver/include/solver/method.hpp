@@ -214,9 +214,9 @@ namespace ponio
         {
             kis.clear();
 
-            alg( f, tn, un, kis, dt );
+            return alg( f, tn, un, kis, dt );
 
-            return { tn, kis.back(), dt };
+            // return { tn, kis.back(), dt };
         }
     };
 
