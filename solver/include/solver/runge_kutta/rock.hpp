@@ -186,9 +186,19 @@ namespace ponio::runge_kutta::rock
                 mr = mr + ms( iter ) * 2 - 1;
                 ++iter;
             }
-
             mdeg = ms( iter );
             mz   = iter;
+
+            // for ( std::size_t iter = 1; iter < rock2_coeff<value_t>::ms.size() + 1; ++iter )
+            // {
+            //     if ( ms( iter ) / mdeg > 1 )
+            //     {
+            //         mdeg = ms( iter );
+            //         mz   = iter;
+            //         break;
+            //     }
+            //     mr = mr + ms( iter ) * 2 - 1;
+            // }
 
             return { mz, mr };
         }
@@ -198,7 +208,7 @@ namespace ponio::runge_kutta::rock
         compute_n_stages( problem_t& f, value_t tn, state_t const& un, value_t& dt )
         {
             double eigmax    = rocktrho( f, tn, un );
-            std::size_t mdeg = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) ) + 1;
+            std::size_t mdeg = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
             if ( mdeg > 200 )
             {
                 mdeg = 200;
@@ -212,14 +222,14 @@ namespace ponio::runge_kutta::rock
         std::tuple<std::size_t, std::size_t, std::size_t>
         compute_n_stages_optimal_degree( problem_t& f, value_t tn, state_t const& un, value_t& dt )
         {
-            std::size_t mdeg = compute_n_stages( f, tn, un, dt );
+            std::size_t mdeg = 8; // compute_n_stages( f, tn, un, dt );
             auto [mz, mr]    = optimal_degree( mdeg );
 
             return { mdeg, mz, mr };
         }
 
         template <typename problem_t, typename state_t, typename array_ki_t>
-        inline void
+        inline std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t const& un, array_ki_t& G, value_t& dt )
         {
             // std::size_t mdeg = compute_n_stages( f, tn, un, dt );
@@ -236,7 +246,7 @@ namespace ponio::runge_kutta::rock
 
             // std::cout << "rock2::op() " << mdeg << " " << tn << " " << dt << " " << mr << " . " << mz << "\n";
 
-            if ( mdeg > 2 )
+            if ( mdeg >= 2 )
             {
                 temp1 = dt * recf( mr + 1 );
                 temp3 = -recf( mr + 2 );
@@ -265,15 +275,21 @@ namespace ponio::runge_kutta::rock
 
                 ci1 = ci1 + temp1;
 
-                // temp3       = temp2 * ( f( ci1, G[mdeg + 1] ) - ( G[mdeg + 1] - G[mdeg] ) / temp1 );
+                // G[mdeg + 2] = G[mdeg + 1] + temp1 * f( ci1, G[mdeg + 1] ) + temp2 * ( f( ci1, G[mdeg + 1] ) - f( ci1 - temp1, G[mdeg] )
+                // );
+
                 G[mdeg + 2] = G[mdeg + 1] + ( temp1 + temp2 ) * f( ci1, G[mdeg + 1] ) - temp2 / temp1 * ( G[mdeg + 1] - G[mdeg] );
+
+                return { tn + dt, G[mdeg + 2], dt };
             }
             else
             {
                 G.resize( 1 );
+
+                return { tn + dt, G[0], dt };
             }
 
-            tn += dt;
+            // tn += dt;
         }
 
         // template <typename problem_t, typename state_t, typename array_ki_t>
