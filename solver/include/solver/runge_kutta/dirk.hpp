@@ -118,7 +118,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, std::size_t I>
         inline state_t
-        stage( Stage<I>, problem_t& pb, value_t tn, state_t const& un, array_ki_t const& Ki, value_t dt )
+        stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
         {
             using matrix_t = decltype( pb.df( tn, un ) );
 
@@ -182,7 +182,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t>
         inline state_t
-        stage( Stage<N_stages>, problem_t&, value_t, state_t const& un, array_ki_t const& Ki, value_t dt )
+        stage( Stage<N_stages>, problem_t&, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
         {
             // last stage is always explicit and just equals to:
             // $$
@@ -194,7 +194,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, typename tab_t = tableau_t>
             requires std::same_as<tab_t, tableau_t> && is_embedded
         inline state_t
-        stage( Stage<N_stages + 1>, problem_t&, value_t, state_t const& un, array_ki_t const& Ki, value_t dt )
+        stage( Stage<N_stages + 1>, problem_t&, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
         {
             return ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
         }
