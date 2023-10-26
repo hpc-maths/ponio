@@ -24,10 +24,11 @@ namespace fs = std::filesystem;
 
 template <class Field>
 void
-save( fs::path const& path, std::string const& filename, Field const& u, std::string const& suffix = "" )
+save( fs::path const& path, std::string const& filename, Field& u, std::string const& suffix = "" )
 {
     auto mesh   = u.mesh();
     auto level_ = samurai::make_field<std::size_t, 1>( "level", mesh );
+    u.m_name    = "u";
 
     if ( !fs::exists( path ) )
     {
@@ -73,60 +74,61 @@ main()
     using Config              = samurai::MRConfig<dim>;
 
     // Simulation parameters
-    double left_box  = -2;
-    double right_box = 2;
+    double left_box  = -5;
+    double right_box = 5;
     bool is_periodic = false;
-    double a         = 1.;
-    double Tf        = 1.;
-    double cfl       = 0.95;
+    double Tf        = 0.5;
+    double cfl       = 0.5;
 
     // Multiresolution parameters
-    std::size_t min_level = 4;
-    std::size_t max_level = 10;
+    std::size_t min_level = 5;
+    std::size_t max_level = 5;
     double mr_epsilon     = 2.e-4; // Threshold used by multiresolution
     double mr_regularity  = 1.;    // Regularity guess for multiresolution
-    bool correction       = false;
 
     // Output parameters
-    fs::path path        = fs::current_path();
-    std::string filename = "FV_advection_1d";
-    std::size_t nfiles   = 1;
+    std::string const dirname = "heat_samurai_data";
+    fs::path path             = std::filesystem::path( dirname );
+    std::string filename      = "sol_1d";
 
     samurai::Box<double, dim> const box( { left_box }, { right_box } );
     samurai::MRMesh<Config> mesh( box, min_level, max_level, { is_periodic } );
 
-    double dt            = cfl * samurai::cell_length( max_level );
-    double const dt_save = Tf / static_cast<double>( nfiles );
-    double t             = 0.;
+    double dt = cfl * samurai::cell_length( max_level ) * samurai::cell_length( max_level );
 
     auto un = init( mesh );
-
-    auto MRadaptation = samurai::make_MRAdapt( un );
-    samurai::make_bc<samurai::Neumann>( un, 0. );
-    MRadaptation( mr_epsilon, mr_regularity );
-    samurai::update_ghost_mr( un );
-
-    std::size_t n_save = 0, nt = 0;
-    save( path, filename, un, fmt::format( "_ite_{}", n_save++ ) );
 
     samurai::DiffCoeff<dim> K;
     K.fill( 1.0 );
     auto diff = samurai::make_diffusion<decltype( un )>( K );
 
-    auto pb = [&]( double t, auto ui )
+    auto f = [&]( [[maybe_unused]] double t, auto&& u )
     {
-        return diff( ui );
+        samurai::make_bc<samurai::Neumann>( u, 0. );
+        return -diff( u );
     };
 
-    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::rkc_202(), un, { 0., Tf }, dt );
+    auto sol_range = ponio::make_solver_range( f, ponio::runge_kutta::rkc_202(), un, { 0., Tf }, dt );
+    auto it_sol    = sol_range.begin();
 
-    for ( auto ui : sol_range )
+    auto MRadaptation = samurai::make_MRAdapt( it_sol->state );
+    samurai::make_bc<samurai::Neumann>( it_sol->state, 0. );
+    MRadaptation( mr_epsilon, mr_regularity );
+    samurai::update_ghost_mr( it_sol->state );
+
+    std::size_t n_save = 0;
+    save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save++ ) );
+
+    while ( it_sol->time < Tf )
     {
-        MRadaptation( mr_epsilon, mr_regularity );
-        samurai::update_ghost_mr( un );
-    }
+        ++it_sol;
 
-    save( path, filename, un, fmt::format( "_ite_{}", n_save++ ) );
+        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ")\r";
+        MRadaptation( mr_epsilon, mr_regularity );
+        samurai::update_ghost_mr( it_sol->state );
+        // std::cout << it_sol->state << "\n";
+        save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save++ ) );
+    }
 
     return 0;
 }
