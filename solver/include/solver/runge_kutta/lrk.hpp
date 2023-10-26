@@ -46,7 +46,7 @@ namespace ponio::runge_kutta::lawson_runge_kutta
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, std::size_t i>
         inline state_t
-        stage( Stage<i>, problem_t& pb, value_t tn, state_t const& un, array_ki_t const& Ki, value_t dt )
+        stage( Stage<i>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
         {
             return m_exp( -butcher.c[i] * dt * pb.l )
                  * pb.n( tn + butcher.c[i] * dt,
@@ -55,7 +55,7 @@ namespace ponio::runge_kutta::lawson_runge_kutta
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t>
         inline state_t
-        stage( Stage<N_stages>, problem_t& pb, value_t, state_t const& un, array_ki_t const& Ki, value_t dt )
+        stage( Stage<N_stages>, problem_t& pb, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
         {
             return m_exp( dt * pb.l ) * ::detail::tpl_inner_product<N_stages>( butcher.b, Ki, un, dt );
         }
@@ -63,7 +63,7 @@ namespace ponio::runge_kutta::lawson_runge_kutta
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, typename tab_t = tableau_t>
             requires std::same_as<tab_t, tableau_t> && is_embedded
         inline state_t
-        stage( Stage<N_stages + 1>, problem_t& pb, value_t, state_t const& un, array_ki_t const& Ki, value_t dt )
+        stage( Stage<N_stages + 1>, problem_t& pb, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
         {
             return m_exp( dt * pb.l ) * ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
         }

@@ -29,7 +29,7 @@ namespace ponio::runge_kutta::chebyshev
      */
     template <std::size_t N, typename value_t>
     value_t
-    T( const value_t x )
+    T( value_t const x )
     {
         if constexpr ( N == 0 )
         {
@@ -55,7 +55,7 @@ namespace ponio::runge_kutta::chebyshev
      */
     template <std::size_t N, typename value_t>
     value_t
-    U( const value_t x )
+    U( value_t const x )
     {
         if constexpr ( N == 0 )
         {
@@ -80,7 +80,7 @@ namespace ponio::runge_kutta::chebyshev
      */
     template <std::size_t N, typename value_t>
     value_t
-    dT( const value_t x )
+    dT( value_t const x )
     {
         if constexpr ( N == 0 )
         {
@@ -102,7 +102,7 @@ namespace ponio::runge_kutta::chebyshev
      */
     template <std::size_t N, typename value_t>
     value_t
-    ddT( const value_t x )
+    ddT( value_t const x )
     {
         if constexpr ( N == 0 )
         {
@@ -131,7 +131,7 @@ namespace ponio::runge_kutta::chebyshev
 
         template <std::size_t J>
         static constexpr value_t
-        b( const value_t x )
+        b( value_t const x )
         {
             if constexpr ( J == 0 || J == 1 )
             {
@@ -151,7 +151,7 @@ namespace ponio::runge_kutta::chebyshev
 
         template <typename problem_t, typename state_t, typename array_ki_t, std::size_t j>
         inline state_t
-        stage( Stage<j>, problem_t& f, value_t tn, state_t const& un, array_ki_t const& Yi, value_t dt )
+        stage( Stage<j>, problem_t& f, value_t tn, state_t& un, array_ki_t const& Yi, value_t dt )
         {
             value_t mj   = 2. * b<j>( w0 ) / b<j - 1>( w0 ) * w0;
             value_t nj   = -b<j>( w0 ) / b<j - 2>( w0 );
@@ -164,14 +164,14 @@ namespace ponio::runge_kutta::chebyshev
 
         template <typename problem_t, typename state_t, typename array_ki_t>
         inline state_t
-        stage( Stage<0>, problem_t& f, value_t tn, state_t const& un, array_ki_t const&, value_t )
+        stage( Stage<0>, problem_t& f, value_t tn, state_t& un, array_ki_t const&, value_t )
         {
             return f( tn, un ); // be careful Yi[0] stores f(tn,un) not un!!!
         }
 
         template <typename problem_t, typename state_t, typename array_ki_t>
         inline state_t
-        stage( Stage<1>, problem_t&, value_t, state_t const& un, array_ki_t const& Yi, value_t dt )
+        stage( Stage<1>, problem_t&, value_t, state_t& un, array_ki_t const& Yi, value_t dt )
         {
             value_t m1t = b<1>( w0 ) * w1;
             return un + dt * m1t * Yi[0];
@@ -179,7 +179,7 @@ namespace ponio::runge_kutta::chebyshev
 
         template <typename problem_t, typename state_t, typename array_ki_t>
         inline state_t
-        stage( Stage<2>, problem_t& f, value_t tn, state_t const& un, array_ki_t const& Yi, value_t dt )
+        stage( Stage<2>, problem_t& f, value_t tn, state_t& un, array_ki_t const& Yi, value_t dt )
         {
             value_t m2  = 2. * w0;
             value_t n2  = -1.;
