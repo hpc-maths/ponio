@@ -41,12 +41,12 @@ class heat_model
 
         std::valarray<double> ydot( nx );
 
-        ydot[0] = oneoverdxdx * ( -2. * y[0] + 2. * y[1] );
+        ydot[0] = oneoverdxdx * ( -2. * y[0] + 1. * y[1] );
         for ( std::size_t i = 1; i < nx - 1; ++i )
         {
             ydot[i] = oneoverdxdx * ( y[i - 1] - 2. * y[i] + y[i + 1] );
         }
-        ydot[nx - 1] = oneoverdxdx * ( 2. * y[nx - 2] - 2. * y[nx - 1] );
+        ydot[nx - 1] = oneoverdxdx * ( 1. * y[nx - 2] - 2. * y[nx - 1] );
 
         return ydot;
     }
@@ -54,7 +54,7 @@ class heat_model
     std::valarray<double>
     fundamental_sol( double t, std::valarray<double> const& x )
     {
-        double const xmid = 0.; // 0.5 * ( m_xmax + m_xmin );
+        double const xmid = 0.5; // 0.5 * ( m_xmax + m_xmin );
         double const pi   = std::numbers::pi;
         return ( 1. / ( 2. * std::sqrt( pi * t ) ) ) * ( std::exp( -( ( x - xmid ) * ( x - xmid ) ) / ( 4. * t ) ) );
     }
@@ -81,10 +81,10 @@ main()
     std::string const dirname = "heat_rock_data";
     std::filesystem::create_directories( dirname );
 
-    std::size_t const nx = 1001;
+    std::size_t const nx = 101;
 
-    double const xmax = 5.0;
-    double const xmin = -5.0;
+    double const xmin = 0.0;
+    double const xmax = 1.0;
 
     double const dx = ( xmax - xmin ) / static_cast<double>( nx - 1 );
 
@@ -99,7 +99,7 @@ main()
     auto pb_heat = heat_model( dx, xmin, xmax );
 
     double const t_ini = 0.01;
-    double const t_end = 0.11;
+    double const t_end = 0.011; // + 1e-5;
 
     std::valarray<double> const y_ini = pb_heat.fundamental_sol( t_ini, x );
     std::valarray<double> y_end( 0., nx );
@@ -119,9 +119,10 @@ main()
     for ( std::size_t N = 1; N < 100; N += 1 )
     {
         double dt = ( t_end - t_ini ) / static_cast<double>( N );
-        // double dt = 1e-2;
+        // double dt = 1e-5;
 
         y_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock2(), y_ini, tspan, dt, observer::null_observer() );
+        // y_end = ponio::solve( pb_heat, ponio::runge_kutta::rkc_202(), y_ini, tspan, dt, observer::null_observer() );
 
         std::valarray<double> diff = std::abs( y_qexa - y_end );
 
