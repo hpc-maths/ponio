@@ -222,7 +222,7 @@ namespace ponio::runge_kutta::rock
         std::tuple<std::size_t, std::size_t, std::size_t>
         compute_n_stages_optimal_degree( problem_t& f, value_t tn, state_t const& un, value_t& dt )
         {
-            std::size_t mdeg = 8; // compute_n_stages( f, tn, un, dt );
+            std::size_t mdeg = compute_n_stages( f, tn, un, dt );
             auto [mz, mr]    = optimal_degree( mdeg );
 
             return { mdeg, mz, mr };
@@ -235,6 +235,7 @@ namespace ponio::runge_kutta::rock
             // std::size_t mdeg = compute_n_stages( f, tn, un, dt );
             // auto [mz, mr]    = optimal_degree( mdeg );
             auto [mdeg, mz, mr] = compute_n_stages_optimal_degree( f, tn, un, dt );
+            // mdeg                = 4;
             G.resize( mdeg + 3 );
 
             temp1 = dt * recf( mr );
