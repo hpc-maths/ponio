@@ -67,6 +67,37 @@ init( Mesh& mesh )
     return u;
 }
 
+template <typename vector_type>
+struct lin_alg_samurai
+{
+    static constexpr auto
+    identity( vector_type const& )
+    {
+        return samurai::make_identity<vector_type>();
+    }
+
+    template <typename operator_type>
+    static vector_type
+    solver( operator_type const& A, vector_type const& rhs )
+    {
+        vector_type x;
+        samurai::make_bc<samurai::Neumann>( x, 0. );
+        samurai::petsc::solve( A, x, rhs );
+
+        return x;
+    }
+
+    static vector_type
+    newton( auto g, auto dg, auto&& un )
+    {
+        vector_type x;
+        samurai::make_bc<samurai::Neumann>( x, 0. );
+        samurai::petsc::solve( dg( un ), x, g( un ) );
+
+        return x;
+    }
+};
+
 int
 main()
 {
@@ -81,7 +112,7 @@ main()
     double cfl       = 0.5;
 
     // Multiresolution parameters
-    std::size_t min_level = 5;
+    std::size_t min_level = 2;
     std::size_t max_level = 5;
     double mr_epsilon     = 2.e-4; // Threshold used by multiresolution
     double mr_regularity  = 1.;    // Regularity guess for multiresolution
@@ -91,26 +122,34 @@ main()
     fs::path path             = std::filesystem::path( dirname );
     std::string filename      = "sol_1d";
 
+    // Define mesh
     samurai::Box<double, dim> const box( { left_box }, { right_box } );
     samurai::MRMesh<Config> mesh( box, min_level, max_level, { is_periodic } );
 
-    double dt = cfl * samurai::cell_length( max_level ) * samurai::cell_length( max_level );
-
-    auto un = init( mesh );
-
-    samurai::DiffCoeff<dim> K;
-    K.fill( 1.0 );
-    auto diff = samurai::make_diffusion<decltype( un )>( K );
+    // Define problem (diffusion), solve : d_t u = - d_xx u
+    samurai::DiffCoeff<dim> diff_coeff;
+    diff_coeff.fill( 1.0 );
+    auto diff = samurai::make_diffusion<decltype( un )>( diff_coeff );
 
     auto f = [&]( [[maybe_unused]] double t, auto&& u )
     {
         samurai::make_bc<samurai::Neumann>( u, 0. );
+        samurai::update_ghost_mr( u );
+
         return -diff( u );
     };
 
+    // Initial condition
+    auto un = init( mesh );
+
+    // Time step
+    double dt = cfl * samurai::cell_length( max_level ) * samurai::cell_length( max_level );
+
+    // Range to iterate over solution
     auto sol_range = ponio::make_solver_range( f, ponio::runge_kutta::rkc_202(), un, { 0., Tf }, dt );
     auto it_sol    = sol_range.begin();
 
+    // Prepare MR for solution
     auto MRadaptation = samurai::make_MRAdapt( it_sol->state );
     samurai::make_bc<samurai::Neumann>( it_sol->state, 0. );
     MRadaptation( mr_epsilon, mr_regularity );
@@ -121,14 +160,22 @@ main()
 
     while ( it_sol->time < Tf )
     {
+        for ( auto& ki : it_sol.meth.kis )
+        {
+            ki.resize();
+            ki.fill( 0. );
+        }
+
         ++it_sol;
 
         std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ")\r";
+
         MRadaptation( mr_epsilon, mr_regularity );
         samurai::update_ghost_mr( it_sol->state );
-        // std::cout << it_sol->state << "\n";
+
         save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save++ ) );
     }
+    std::cout << std::endl;
 
     return 0;
 }
