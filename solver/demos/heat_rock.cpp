@@ -54,7 +54,7 @@ class heat_model
     std::valarray<double>
     fundamental_sol( double t, std::valarray<double> const& x )
     {
-        double const xmid = 0.5; // 0.5 * ( m_xmax + m_xmin );
+        double const xmid = 0.5 * ( m_xmax + m_xmin );
         double const pi   = std::numbers::pi;
         return ( 1. / ( 2. * std::sqrt( pi * t ) ) ) * ( std::exp( -( ( x - xmid ) * ( x - xmid ) ) / ( 4. * t ) ) );
     }
@@ -83,8 +83,8 @@ main()
 
     std::size_t const nx = 101;
 
-    double const xmin = 0.0;
-    double const xmax = 1.0;
+    double const xmin = -5.0;
+    double const xmax = 5.0;
 
     double const dx = ( xmax - xmin ) / static_cast<double>( nx - 1 );
 
@@ -107,16 +107,17 @@ main()
 
     save( x, y_ini, std::filesystem::path( dirname ) / "heat_ini.dat" );
 
-    std::valarray<double> y_qexa( nx );
-    std::ifstream is( std::filesystem::path( dirname ) / "sol_qexa.txt" );
-    std::istream_iterator<double> start( is ), end;
-    std::copy( start, end, std::begin( y_qexa ) );
-    save( x, y_qexa, std::filesystem::path( dirname ) / "heat_qexa.dat" );
+    std::valarray<double> y_qexa = ponio::solve( pb_heat, ponio::runge_kutta::rkc_202(), y_ini, tspan, 1e-6, observer::null_observer() );
+    ;
+    // std::ifstream is( std::filesystem::path( dirname ) / "sol_qexa.txt" );
+    // std::istream_iterator<double> start( is ), end;
+    // std::copy( start, end, std::begin( y_qexa ) );
+    // save( x, y_qexa, std::filesystem::path( dirname ) / "heat_qexa.dat" );
 
-    std::valarray<double> const y_exa = pb_heat.fundamental_sol( t_end, x );
-    save( x, y_exa, std::filesystem::path( dirname ) / "heat_exa.dat" );
+    // std::valarray<double> const y_exa = pb_heat.fundamental_sol( t_end, x );
+    // save( x, y_exa, std::filesystem::path( dirname ) / "heat_exa.dat" );
 
-    for ( std::size_t N = 1; N < 100; N += 1 )
+    for ( std::size_t N = 1; N < 600; N *= 2 )
     {
         double dt = ( t_end - t_ini ) / static_cast<double>( N );
         // double dt = 1e-5;
