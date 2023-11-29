@@ -236,61 +236,114 @@ namespace ponio::runge_kutta::rock
             // auto [mz, mr]    = optimal_degree( mdeg );
             auto [mdeg, mz, mr] = compute_n_stages_optimal_degree( f, tn, un, dt );
             // mdeg                = 4;
-            G.resize( mdeg + 3 );
+            G.resize( 3 );
+
+            auto& ujm2 = G[0];
+            auto& ujm1 = G[1];
+            auto& uj   = G[2];
+
+            uj   = un;
+            ujm2 = un;
 
             temp1 = dt * recf( mr );
             ci1   = tn + temp1;
             ci2   = tn + temp1;
             ci3   = tn;
 
-            G[0] = un + temp1 * f( tn, un );
+            ujm1 = un + temp1 * f( tn, un );
 
             // std::cout << "rock2::op() " << mdeg << " " << tn << " " << dt << " " << mr << " . " << mz << "\n";
 
-            if ( mdeg >= 2 )
+            if ( mdeg < 2 )
             {
-                temp1 = dt * recf( mr + 1 );
-                temp3 = -recf( mr + 2 );
+                uj = ujm1;
+            }
+
+            for ( std::size_t j = 2; j < mdeg + 1; ++j )
+            {
+                temp1 = dt * recf( mr + 2 * ( j - 2 ) + 1 );
+                temp3 = -recf( mr + 2 * ( j - 2 ) + 2 );
                 temp2 = 1.0 - temp3;
 
-                G[1] = temp1 * f( ci1, G[0] ) + temp2 * G[0] + temp3 * un;
-                ci1  = temp1 + temp2 * ci2 + temp3 * ci3;
-                ci3  = ci2;
-                ci2  = ci1;
-                for ( std::size_t j = 2; j < mdeg + 1; ++j )
-                {
-                    temp1 = dt * recf( mr + 2 * ( j - 2 ) + 1 );
-                    temp3 = -recf( mr + 2 * ( j - 2 ) + 2 );
-                    temp2 = 1.0 - temp3;
+                uj = temp1 * f( ci1, ujm1 ) + temp2 * ujm1 + temp3 * ujm2;
 
-                    G[j] = temp1 * f( ci1, G[j - 1] ) + temp2 * G[j - 1] + temp3 * G[j - 2];
-                    ci1  = temp1 + temp2 * ci2 + temp3 * ci3;
-                    ci3  = ci2;
-                    ci2  = ci1;
+                ci1 = temp1 + temp2 * ci2 + temp3 * ci3;
+
+                if ( j < mdeg )
+                {
+                    ujm2 = std::move( ujm1 );
+                    ujm1 = std::move( uj );
                 }
 
-                temp1 = dt * fp1( mz );
-                temp2 = dt * fp2( mz );
-
-                G[mdeg + 1] = G[mdeg] + temp1 * f( ci1, G[mdeg] );
-
-                ci1 = ci1 + temp1;
-
-                // G[mdeg + 2] = G[mdeg + 1] + temp1 * f( ci1, G[mdeg + 1] ) + temp2 * ( f( ci1, G[mdeg + 1] ) - f( ci1 - temp1, G[mdeg] )
-                // );
-
-                G[mdeg + 2] = G[mdeg + 1] + ( temp1 + temp2 ) * f( ci1, G[mdeg + 1] ) - temp2 / temp1 * ( G[mdeg + 1] - G[mdeg] );
-
-                return { tn + dt, G[mdeg + 2], dt };
-            }
-            else
-            {
-                G.resize( 1 );
-
-                return { tn + dt, G[0], dt };
+                ci3 = ci2;
+                ci2 = ci1;
             }
 
-            // tn += dt;
+            temp1 = dt * fp1( mz );
+            temp2 = dt * fp2( mz );
+
+            ujm2 = f( ci1, uj );
+            ujm1 = uj + temp1 * ujm2;
+
+            ci1 = ci1 + temp1;
+
+            uj = f( ci1, ujm1 );
+            uj = ujm1 + temp1 * uj + temp2 * ( uj - ujm2 );
+
+            return { tn + dt, uj, dt };
+
+            // if ( mdeg >= 2 )
+            // {
+            //     // j = 2
+            //     temp1 = dt * recf( mr + 1 );
+            //     temp3 = -recf( mr + 2 );
+            //     temp2 = 1.0 - temp3;
+
+            //     uj = temp1 * f( ci1, ujm1 ) + temp2 * ujm1 + temp3 * un;
+
+            //     ci1 = temp1 + temp2 * ci2 + temp3 * ci3;
+
+            //     ujm2 = std::move( ujm1 );
+            //     ujm1 = std::move( uj );
+
+            //     if ( mdeg == 2 )
+            //     {
+            //         uj = ujm1;
+            //     }
+
+            //     for ( std::size_t j = 3; j < mdeg + 1; ++j )
+            //     {
+            //         temp1 = dt * recf( mr + 2 * ( j - 2 ) + 1 );
+            //         temp3 = -recf( mr + 2 * ( j - 2 ) + 2 );
+            //         temp2 = 1.0 - temp3;
+
+            //         uj = temp1 * f( ci1, ujm1 ) + temp2 * ujm1 + temp3 * ujm2;
+
+            //         ci1 = temp1 + temp2 * ci2 + temp3 * ci3;
+
+            //         if ( j < mdeg )
+            //         {
+            //             ujm2 = std::move( ujm1 );
+            //             ujm1 = std::move( uj );
+            //         }
+
+            //         ci3 = ci2;
+            //         ci2 = ci1;
+            //     }
+            // }
+
+            // temp1 = dt * fp1( mz );
+            // temp2 = dt * fp2( mz );
+
+            // ujm2 = f( ci1, uj );
+            // ujm1 = uj + temp1 * ujm2;
+
+            // ci1 = ci1 + temp1;
+
+            // uj = f( ci1, ujm1 );
+            // uj = ujm1 + temp1 * uj + temp2 * ( uj = ujm2 );
+
+            // return { tn + dt, uj, dt };
         }
 
         // template <typename problem_t, typename state_t, typename array_ki_t>
