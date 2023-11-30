@@ -287,8 +287,9 @@ namespace ponio::runge_kutta::rock
 
             ci1 = ci1 + temp1;
 
-            uj = f( ci1, ujm1 );
-            uj = ujm1 + temp1 * uj + temp2 * ( uj - ujm2 );
+            // uj = f( ci1, ujm1 );
+            // uj = ujm1 + temp1 * uj + temp2 * ( uj - ujm2 );
+            uj = ujm1 + ( temp1 + temp2 ) * f( ci1, ujm1 ) - temp2 * ujm2;
 
             return { tn + dt, uj, dt };
 
