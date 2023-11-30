@@ -23,8 +23,9 @@ process.wait()
 data = np.loadtxt(os.path.join(data_dir, "heat_sol.dat"))
 plt.plot(data[:, 0], data[:, 1], "-", label="solution with ROCK")
 
-data = np.loadtxt(os.path.join(data_dir, "heat_exa.dat"))
-plt.plot(data[:, 0], data[:, 1], ":", label="exact solution")
+data = np.loadtxt(os.path.join(data_dir, "heat_qexa.dat"))
+plt.plot(data[:, 0], data[:, 1], ":",
+         label="quasi-exact solution with RKC(20, 2)")
 
 data = np.loadtxt(os.path.join(data_dir, "heat_ini.dat"))
 plt.plot(data[:, 0], data[:, 1], ":", label="initial solution")
@@ -32,4 +33,14 @@ plt.plot(data[:, 0], data[:, 1], ":", label="initial solution")
 plt.title("Heat equation")
 plt.legend()
 # plt.ylim(top=0.8)
+plt.show()
+
+data = np.loadtxt(os.path.join(data_dir, "errors.dat"))
+plt.plot(data[:, 0], data[:, 1], "-", label="errors in $\|\cdot\|_2$")
+plt.plot(data[:, 0], data[:, 0]**2, "--", label="slope order 2")
+
+plt.xscale('log')
+plt.yscale('log')
+plt.grid(True)
+plt.legend()
 plt.show()

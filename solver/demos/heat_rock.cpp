@@ -63,7 +63,7 @@ class heat_model
 void
 save( std::valarray<double> const& x, std::valarray<double> const& y, std::filesystem::path const& filename )
 {
-    auto printer_xy = []( double a, double b )
+    static auto printer_xy = []( double a, double b )
     {
         std::stringstream ss;
         ss << a << " " << b;
@@ -73,6 +73,20 @@ save( std::valarray<double> const& x, std::valarray<double> const& y, std::files
     std::ofstream of( filename );
     std::transform( std::begin( x ), std::end( x ), std::begin( y ), std::ostream_iterator<std::string>( of, "\n" ), printer_xy );
     of.close();
+}
+
+double
+error_l2( std::valarray<double> const& a, std::valarray<double> const& b, double dx )
+{
+    std::valarray<double> diff = a - b;
+
+    return std::sqrt( std::accumulate( std::begin( diff ),
+        std::end( diff ),
+        0.,
+        [dx]( double partial_sum, double val )
+        {
+            return partial_sum + val * val * dx;
+        } ) );
 }
 
 int
@@ -98,8 +112,8 @@ main()
 
     auto pb_heat = heat_model( dx, xmin, xmax );
 
-    double const t_ini = 0.01;
-    double const t_end = 0.011; // + 1e-5;
+    double const t_ini = 0.1;
+    double const t_end = 0.11; // + 1e-5;
 
     std::valarray<double> const y_ini = pb_heat.fundamental_sol( t_ini, x );
     std::valarray<double> y_end( 0., nx );
@@ -107,35 +121,23 @@ main()
 
     save( x, y_ini, std::filesystem::path( dirname ) / "heat_ini.dat" );
 
+    // make quasi-exact solution from RKC(20, 2) with a small time step
     std::valarray<double> y_qexa = ponio::solve( pb_heat, ponio::runge_kutta::rkc_202(), y_ini, tspan, 1e-6, observer::null_observer() );
     ;
-    // std::ifstream is( std::filesystem::path( dirname ) / "sol_qexa.txt" );
-    // std::istream_iterator<double> start( is ), end;
-    // std::copy( start, end, std::begin( y_qexa ) );
-    // save( x, y_qexa, std::filesystem::path( dirname ) / "heat_qexa.dat" );
+    save( x, y_qexa, std::filesystem::path( dirname ) / "heat_qexa.dat" );
 
-    // std::valarray<double> const y_exa = pb_heat.fundamental_sol( t_end, x );
-    // save( x, y_exa, std::filesystem::path( dirname ) / "heat_exa.dat" );
+    std::ofstream errors_file( std::filesystem::path( dirname ) / "errors.dat" );
 
-    for ( std::size_t N = 1; N < 600; N *= 2 )
+    for ( std::size_t N = 1; N < 513; N *= 2 )
     {
         double dt = ( t_end - t_ini ) / static_cast<double>( N );
-        // double dt = 1e-5;
 
         y_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock2(), y_ini, tspan, dt, observer::null_observer() );
-        // y_end = ponio::solve( pb_heat, ponio::runge_kutta::rkc_202(), y_ini, tspan, dt, observer::null_observer() );
 
-        std::valarray<double> diff = std::abs( y_qexa - y_end );
-
-        auto err = std::sqrt( std::accumulate( std::begin( diff ),
-            std::end( diff ),
-            0.0,
-            [dx]( double partial_sum, double val )
-            {
-                return partial_sum + val * val * dx;
-            } ) );
-        std::cout << dt << " " << std::setprecision( 20 ) << err << std::endl;
+        errors_file << dt << " " << std::setprecision( 20 ) << error_l2( y_qexa, y_end, dx ) << "\n";
     }
+
+    errors_file.close();
 
     save( x, y_end, std::filesystem::path( dirname ) / "heat_sol.dat" );
 
