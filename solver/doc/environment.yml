@@ -9,7 +9,6 @@ dependencies:
   - graphviz
   - doxygen
   - sphinx
-  - sphinx_rtd_theme
   - breathe
   - pip:
     - -r ../../analysis/requirements.txt
