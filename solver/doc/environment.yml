@@ -4,11 +4,12 @@ channels:
   - conda-forge
 
 dependencies:
+  - sympy
+  - numpy
+  - jinja2
   - cmake
   - ninja
   - graphviz
   - doxygen
   - sphinx
   - breathe
-  - pip:
-    - -r ../../analysis/requirements.txt
