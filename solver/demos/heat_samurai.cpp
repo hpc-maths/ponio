@@ -28,7 +28,7 @@ save( fs::path const& path, std::string const& filename, Field& u, std::string c
 {
     auto mesh   = u.mesh();
     auto level_ = samurai::make_field<std::size_t, 1>( "level", mesh );
-    u.m_name    = "u";
+    u.name()    = "u";
 
     if ( !fs::exists( path ) )
     {
@@ -66,37 +66,6 @@ init( Mesh& mesh )
 
     return u;
 }
-
-template <typename vector_type>
-struct lin_alg_samurai
-{
-    static constexpr auto
-    identity( vector_type const& )
-    {
-        return samurai::make_identity<vector_type>();
-    }
-
-    template <typename operator_type>
-    static vector_type
-    solver( operator_type const& A, vector_type const& rhs )
-    {
-        vector_type x;
-        samurai::make_bc<samurai::Neumann>( x, 0. );
-        samurai::petsc::solve( A, x, rhs );
-
-        return x;
-    }
-
-    static vector_type
-    newton( auto g, auto dg, auto&& un )
-    {
-        vector_type x;
-        samurai::make_bc<samurai::Neumann>( x, 0. );
-        samurai::petsc::solve( dg( un ), x, g( un ) );
-
-        return x;
-    }
-};
 
 int
 main()
