@@ -24,10 +24,12 @@ foreach(demo IN LISTS demos)
         if(PETSC_FOUND)
             find_package(MPI)
 
-            find_package(samurai)
-            find_package(fmt)
-            target_link_libraries(${demo} samurai::samurai fmt::fmt ${PETSC_LIBRARIES} ${MPI_LIBRARIES})
+            target_link_libraries(${demo} ${PETSC_LIBRARIES} ${MPI_LIBRARIES})
         endif()
+
+        find_package(samurai)
+        find_package(fmt)
+        target_link_libraries(${demo} samurai::samurai fmt::fmt)
     endif()
 
     target_link_libraries(${demo} ponio)
