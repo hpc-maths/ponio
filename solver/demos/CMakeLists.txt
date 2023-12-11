@@ -18,18 +18,17 @@ foreach(demo IN LISTS demos)
     endif()
     if(${demo} IN_LIST demos_samurai)
         message(STATUS "-> SAMURAI")
+        find_package(samurai)
+        find_package(fmt)
+        target_link_libraries(${demo} samurai::samurai fmt::fmt)
+
         find_package(PkgConfig)
         pkg_check_modules(PETSC PETSc)
 
         if(PETSC_FOUND)
             find_package(MPI)
-
             target_link_libraries(${demo} ${PETSC_LIBRARIES} ${MPI_LIBRARIES})
         endif()
-
-        find_package(samurai)
-        find_package(fmt)
-        target_link_libraries(${demo} samurai::samurai fmt::fmt)
     endif()
 
     target_link_libraries(${demo} ponio)
