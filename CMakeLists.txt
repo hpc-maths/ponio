@@ -98,7 +98,6 @@ target_include_directories(
 )
 target_link_libraries(ponio INTERFACE project_options project_warnings)
 target_compile_features(ponio INTERFACE cxx_std_20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -std=c++20")
 
 target_include_directories(ponio INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${INCLUDE_DIR}>"
   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
