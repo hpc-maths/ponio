@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <samurai/algorithm.hpp>
-#include <samurai/bc.hpp>
 #include <samurai/field.hpp>
 #include <samurai/hdf5.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
-#include <samurai/petsc.hpp>
-#include <samurai/stencil_field.hpp>
-#include <samurai/subset/subset_op.hpp>
+#include <samurai/schemes/fv.hpp>
 
 #include <solver/observer.hpp>
 #include <solver/problem.hpp>
