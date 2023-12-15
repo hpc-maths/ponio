@@ -37,6 +37,18 @@ jobs:
             package: "clang-14"
             cc: "clang-14"
             cxx: "clang++-14"
+          - cpp-version: clang-15
+            package: "clang-15"
+            cc: "clang-15"
+            cxx: "clang++-15"
+          - cpp-version: clang-16
+            package: "clang-16"
+            cc: "clang-16"
+            cxx: "clang++-16"
+          - cpp-version: clang-17
+            package: "clang-17"
+            cc: "clang-17"
+            cxx: "clang++-17"
 
     steps:
       - uses: actions/checkout@v3
