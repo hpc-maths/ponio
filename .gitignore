@@ -277,3 +277,5 @@ _deps
 # End of https://www.toptal.com/developers/gitignore/api/python,macos,linux,vim,visualstudiocode,cmake
 
 butcher_methods.hpp
+# pixi environments
+.pixi
