@@ -99,7 +99,7 @@ target_include_directories(
                   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 target_link_libraries(ponio INTERFACE project_options project_warnings)
-set_target_properties(samurai
+set_target_properties(ponio
     PROPERTIES
         CXX_STANDARD 20
         CXX_STANDARD_REQUIRED YES
