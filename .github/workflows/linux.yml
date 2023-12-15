@@ -41,17 +41,17 @@ jobs:
             package: "clang-15"
             cc: "clang-15"
             cxx: "clang++-15"
-          - cpp-version: clang-16
-            package: "clang-16"
-            cc: "clang-16"
-            cxx: "clang++-16"
-          - cpp-version: clang-17
-            package: "clang-17"
-            cc: "clang-17"
-            cxx: "clang++-17"
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Remove GCC 13 from runner image
+        shell: bash
+        run: |
+            sudo rm -f /etc/apt/sources.list.d/ubuntu-toolchain-r-ubuntu-test-jammy.list
+            sudo apt-get update
+            sudo apt-get install -y --allow-downgrades libc6=2.35-0ubuntu3.5 libc6-dev=2.35-0ubuntu3.5 libstdc++6=12.3.0-1ubuntu1~22.04 libgcc-s1=12.3.0-1ubuntu1~22.04
+
       - name: install compiler
         run: |
           sudo apt update
