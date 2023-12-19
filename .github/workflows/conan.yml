@@ -70,6 +70,7 @@ jobs:
           pip3 install -r environment/requirements.txt
       - name: Configure CMake
         run: |
+          conan profile detect
           conan install .
           cmake . -B ./build -G "${{matrix.CMAKE_GENERATOR}}" -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DBUILD_TESTS=ON
       - name: Build
