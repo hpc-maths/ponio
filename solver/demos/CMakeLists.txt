@@ -1,22 +1,30 @@
-set(demos arenstorf brownian brusselator brusselator_dirk exp heat heat_rock heat_samurai pendulum lorenz lotka_volterra curtiss_hirschfelder)
+set(demos arenstorf brownian brusselator brusselator_dirk exp heat heat_rock pendulum lorenz lotka_volterra curtiss_hirschfelder)
 set(demos_eigen brusselator_dirk)
 set(demos_cli11 brownian lotka_volterra)
+
 set(demos_samurai heat_samurai)
+
+if(BUILD_SAMURAI_DEMOS)
+    list(APPEND demos ${demos_samurai})
+endif()
 
 message(STATUS "list of demos:")
 foreach(demo IN LISTS demos)
     message(STATUS "+ ${demo}")
     add_executable(${demo} ${demo}.cpp)
+
     if(${demo} IN_LIST demos_eigen)
         message(STATUS "    - eigen")
         find_package (Eigen3 3.4 REQUIRED NO_MODULE)
         target_link_libraries(${demo} Eigen3::Eigen)
     endif()
+
     if(${demo} IN_LIST demos_cli11)
         message(STATUS "    - cli11")
         find_package(CLI11)
         target_link_libraries(${demo} CLI11::CLI11)
     endif()
+
     if(${demo} IN_LIST demos_samurai)
         message(STATUS "    - samurai")
         find_package(samurai)
