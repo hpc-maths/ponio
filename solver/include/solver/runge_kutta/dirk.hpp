@@ -120,6 +120,30 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         inline state_t
         stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
         {
+            auto ui = un;
+            if ( !samurai ) // définir une interface "classique" où l'utilisateur donne f:(t,u)->f(t,u) et sa jacobienne, et éventuellement
+                            // un Newton etc.
+            {
+                auto op_i = [&]( auto&& u )
+                {
+                    return u - ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt )
+                         + dt * butcher.A[I][I] * pb.f( tn + butcher.c[I] * dt, u );
+                };
+                auto J_op_i = [&]( auto&& u )
+                {
+                    return identity - dt * butcher.A[I][I] * pb.df( tn + butcher.c[I] * dt, u );
+                };
+            }
+            if ( samurai ) // définir une interface où l'utilisateur donne des opérateurs f:(t,u)->f_t(t)(u) et f_t:t->(f:u->f(t,u)) et un
+                           // solver
+            {
+                auto op_i = samurai::make_identity<decltype( un )>() - dt * butcher.A[I][I] * pb.f_t( tn + butcher.c[I] * dt );
+                auto rhs  = ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt );
+
+                samurai::petsc::solve( op_i, ui, rhs );
+            }
+            return f( tn + butcher.c[I] * dt, ui );
+
             using matrix_t = decltype( pb.df( tn, un ) );
 
             auto identity = [&]( state_t const& u )
