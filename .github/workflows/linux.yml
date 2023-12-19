@@ -20,10 +20,6 @@ jobs:
             package: "gcc-12 g++-12"
             cc: "gcc-12"
             cxx: "g++-12"
-          - cpp-version: clang-11
-            package: "clang-11"
-            cc: "clang-11"
-            cxx: "clang++-11"
           - cpp-version: clang-12
             package: "clang-12"
             cc: "clang-12"
