@@ -16,7 +16,7 @@ jobs:
           - llvm
           - gcc
         CMAKE_GENERATOR:
-          - "Ninja Multi-Config"
+          - "Ninja"
         include:
           - os: windows-2022
             compiler: msvc
