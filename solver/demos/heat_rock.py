@@ -20,8 +20,11 @@ args = [os.path.join(".", name)]
 process = subprocess.Popen(args)
 process.wait()
 
-data = np.loadtxt(os.path.join(data_dir, "heat_sol.dat"))
-plt.plot(data[:, 0], data[:, 1], "-", label="solution with ROCK")
+data = np.loadtxt(os.path.join(data_dir, "heat_sol_rock2.dat"))
+plt.plot(data[:, 0], data[:, 1], "-", label="solution with ROCK2")
+
+data = np.loadtxt(os.path.join(data_dir, "heat_sol_rock4.dat"))
+plt.plot(data[:, 0], data[:, 1], "-", label="solution with ROCK4")
 
 data = np.loadtxt(os.path.join(data_dir, "heat_qexa.dat"))
 plt.plot(data[:, 0], data[:, 1], ":",
@@ -31,13 +34,15 @@ data = np.loadtxt(os.path.join(data_dir, "heat_ini.dat"))
 plt.plot(data[:, 0], data[:, 1], ":", label="initial solution")
 
 plt.title("Heat equation")
-plt.legend()
-# plt.ylim(top=0.8)
+plt.legend(loc="lower left")
+plt.ylim(bottom=-0.4)
 plt.show()
 
 data = np.loadtxt(os.path.join(data_dir, "errors.dat"))
-plt.plot(data[:, 0], data[:, 1], "-", label="errors in $\|\cdot\|_2$")
+plt.plot(data[:, 0], data[:, 1], "+-", label="ROCK2 errors in $\|\cdot\|_2$")
+plt.plot(data[:, 0], data[:, 2], "+-", label="ROCK4 errors in $\|\cdot\|_2$")
 plt.plot(data[:, 0], data[:, 0]**2, "--", label="slope order 2")
+plt.plot(data[:, 0], (2.25*data[:, 0])**4, "--", label="slope order 4")
 
 plt.xscale('log')
 plt.yscale('log')
