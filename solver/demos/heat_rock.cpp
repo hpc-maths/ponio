@@ -113,16 +113,17 @@ main()
     auto pb_heat = heat_model( dx, xmin, xmax );
 
     double const t_ini = 0.1;
-    double const t_end = 0.11; // + 1e-5;
+    double const t_end = 0.2;
 
     std::valarray<double> const y_ini = pb_heat.fundamental_sol( t_ini, x );
-    std::valarray<double> y_end( 0., nx );
+    std::valarray<double> y2_end( 0., nx );
+    std::valarray<double> y4_end( 0., nx );
     ponio::time_span<double> const tspan = { t_ini, t_end };
 
     save( x, y_ini, std::filesystem::path( dirname ) / "heat_ini.dat" );
 
     // make quasi-exact solution from RKC(20, 2) with a small time step
-    std::valarray<double> y_qexa = ponio::solve( pb_heat, ponio::runge_kutta::rkc_202(), y_ini, tspan, 1e-6, observer::null_observer() );
+    std::valarray<double> const y_qexa = ponio::solve( pb_heat, ponio::runge_kutta::rkc_202(), y_ini, tspan, 1e-6, observer::null_observer() );
     ;
     save( x, y_qexa, std::filesystem::path( dirname ) / "heat_qexa.dat" );
 
@@ -132,14 +133,17 @@ main()
     {
         double dt = ( t_end - t_ini ) / static_cast<double>( N );
 
-        y_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock2(), y_ini, tspan, dt, observer::null_observer() );
+        y2_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock2(), y_ini, tspan, dt, observer::null_observer() );
+        y4_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock4(), y_ini, tspan, dt, observer::null_observer() );
 
-        errors_file << dt << " " << std::setprecision( 20 ) << error_l2( y_qexa, y_end, dx ) << "\n";
+        errors_file << dt << " " << std::setprecision( 20 ) << error_l2( y_qexa, y2_end, dx ) << " " << error_l2( y_qexa, y4_end, dx )
+                    << "\n";
     }
 
     errors_file.close();
 
-    save( x, y_end, std::filesystem::path( dirname ) / "heat_sol.dat" );
+    save( x, y2_end, std::filesystem::path( dirname ) / "heat_sol_rock2.dat" );
+    save( x, y4_end, std::filesystem::path( dirname ) / "heat_sol_rock4.dat" );
 
     return 0;
 }
