@@ -53,7 +53,7 @@ namespace ponio::runge_kutta::rock
 
             template <typename problem_t, typename state_t>
             static value_t
-            rocktrho( problem_t& f, value_t tn, state_t const& un )
+            rocktrho( problem_t& f, value_t tn, state_t& un )
             {
                 value_t eigmax  = 0.;
                 value_t eigmaxo = 0.;
@@ -144,7 +144,7 @@ namespace ponio::runge_kutta::rock
 
             template <typename problem_t, typename state_t>
             static std::size_t
-            compute_n_stages( problem_t& f, value_t tn, state_t const& un, value_t& dt )
+            compute_n_stages( problem_t& f, value_t tn, state_t& un, value_t& dt )
             {
                 double eigmax    = rocktrho( f, tn, un );
                 std::size_t mdeg = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
@@ -159,7 +159,7 @@ namespace ponio::runge_kutta::rock
 
             template <typename problem_t, typename state_t>
             static std::tuple<std::size_t, std::size_t, std::size_t>
-            compute_n_stages_optimal_degree( problem_t& f, value_t tn, state_t const& un, value_t& dt )
+            compute_n_stages_optimal_degree( problem_t& f, value_t tn, state_t& un, value_t& dt )
             {
                 std::size_t mdeg = compute_n_stages( f, tn, un, dt );
                 auto [mz, mr]    = optimal_degree( mdeg );
@@ -202,7 +202,7 @@ namespace ponio::runge_kutta::rock
 
         template <typename problem_t, typename state_t, typename array_ki_t>
         inline std::tuple<value_t, state_t, value_t>
-        operator()( problem_t& f, value_t& tn, state_t const& un, array_ki_t& G, value_t& dt )
+        operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
             auto [mdeg, mz, mr] = degree_computer::compute_n_stages_optimal_degree( f, tn, un, dt );
             G.resize( 3 );
@@ -299,7 +299,7 @@ namespace ponio::runge_kutta::rock
 
         template <typename problem_t, typename state_t, typename array_ki_t>
         inline std::tuple<value_t, state_t, value_t>
-        operator()( problem_t& f, value_t& tn, state_t const& un, array_ki_t& G, value_t& dt )
+        operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
             auto [mdeg, mz, mr] = degree_computer::compute_n_stages_optimal_degree( f, tn, un, dt );
             G.resize( 5 );
