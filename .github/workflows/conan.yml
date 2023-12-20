@@ -35,17 +35,11 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ~/vcpkg
-            ./build/vcpkg_installed
-            ${{ env.CONAN_USER_HOME }}
-            ~/.cache/pip
-            ${{ env.HOME }}/.cache/vcpkg/archives
-            ${{ env.XDG_CACHE_HOME }}/vcpkg/archives
-            ${{ env.LOCALAPPDATA }}\vcpkg\archives
-            ${{ env.APPDATA }}\vcpkg\archives
-          key: ${{ runner.os }}-${{ matrix.compiler }}-${{ hashFiles('./vcpkg.json')}}-${{ matrix.CMAKE_GENERATOR }}-${{ hashFiles('**/CMakeLists.txt') }}
+            ~/.conan2
+          key: ${{ runner.os }}-${{ matrix.compiler }}-${{ hashFiles('./conanfile.py')}}-${{ matrix.CMAKE_GENERATOR }}-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.compiler }}-${{ hashFiles('./vcpkg.json') }}-
+            ${{ runner.os }}-${{ matrix.compiler }}-${{ hashFiles('./conanfile.py') }}-
+
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
@@ -68,18 +62,22 @@ jobs:
       - name: Install dependencies
         run: |
           pip3 install -r environment/requirements.txt
+
       - name: Configure CMake
         run: |
-          conan profile detect
-          conan install .
-          cmake . -B ./build -G "${{matrix.CMAKE_GENERATOR}}" -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DBUILD_TESTS=ON
+          conan profile detect --force
+          conan install . --output-folder=build --build=missing -s compiler.cppstd=20
+          cmake . -B build -G "${{matrix.CMAKE_GENERATOR}}" -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DBUILD_TESTS=ON
+
       - name: Build
         run: |
-          cmake --build ./build --config Release
+          cmake --build build --config Release
+
       - name: Unix test
         if: runner.os != 'Windows'
         run: |
           ./build/solver/test/Release/ponio_tests
+
       - name: Windows test
         if: runner.os == 'Windows'
         run: |
