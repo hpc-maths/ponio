@@ -32,13 +32,30 @@ namespace ponio::splitting::lie
 
         lie( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts );
 
+        // _call_inc can not be outside the class definition due to llvm bug
+        // (see https://github.com/llvm/llvm-project/issues/56482)
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I == sizeof...( Methods_t ) )
-        inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt );
+        inline void _call_inc( Problem_t&, value_t, state_t&, value_t )
+        {
+        }
 
+        /**
+         * incremental call of each method of each subproblem
+         * @tparam I solving step
+         * @param f          \ref problem to solve
+         * @param tn         current time \f$t^n\f$
+         * @param[in,out] ui \f$\texttt{ui}=\phi_{\Delta t}^{[f_1]}\circ\cdots\circ\phi_{\Delta t}^{[f_{i-1}]}(t^n,u^n)\f$
+         * @param dt         time step \f$\Delta t\f$
+         * @details The parameter @p ui is update to \f$\phi_{\Delta t}^{[f_i]}(t^n,\texttt{ui})\f$
+         */
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I < sizeof...( Methods_t ) )
-        inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt );
+        inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+        {
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
+            _call_inc<I + 1>( f, tn, ui, dt );
+        }
 
         template <typename Problem_t, typename state_t>
         auto
@@ -53,31 +70,6 @@ namespace ponio::splitting::lie
         : methods( meths )
         , time_steps( dts )
     {
-    }
-
-    template <typename value_t, typename... Methods_t>
-    template <std::size_t I, typename Problem_t, typename state_t>
-        requires( I == sizeof...( Methods_t ) )
-    inline void lie<value_t, Methods_t...>::_call_inc( Problem_t&, value_t, state_t&, value_t )
-    {
-    }
-
-    /**
-     * incremental call of each method of each subproblem
-     * @tparam I solving step
-     * @param f          \ref problem to solve
-     * @param tn         current time \f$t^n\f$
-     * @param[in,out] ui \f$\texttt{ui}=\phi_{\Delta t}^{[f_1]}\circ\cdots\circ\phi_{\Delta t}^{[f_{i-1}]}(t^n,u^n)\f$
-     * @param dt         time step \f$\Delta t\f$
-     * @details The parameter @p ui is update to \f$\phi_{\Delta t}^{[f_i]}(t^n,\texttt{ui})\f$
-     */
-    template <typename value_t, typename... Methods_t>
-    template <std::size_t I, typename Problem_t, typename state_t>
-        requires( I < sizeof...( Methods_t ) )
-    inline void lie<value_t, Methods_t...>::_call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
-    {
-        ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
-        _call_inc<I + 1>( f, tn, ui, dt );
     }
 
     /**
