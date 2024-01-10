@@ -99,6 +99,7 @@ namespace ponio::runge_kutta::rock
                 std::size_t iter                      = 0;
                 static constexpr std::size_t max_iter = 50;
                 static constexpr value_t safe         = 1.2;
+
                 // start power method
                 while ( necessary )
                 {
@@ -183,20 +184,7 @@ namespace ponio::runge_kutta::rock
         using rock_coeff      = rock2_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
 
-        value_t ci1;
-        value_t ci2;
-        value_t ci3;
-        value_t temp1;
-        value_t temp2;
-        value_t temp3;
-
         rock2()
-            : ci1( 0. )
-            , ci2( 0. )
-            , ci3( 0. )
-            , temp1( 0. )
-            , temp2( 0. )
-            , temp3( 0. )
         {
         }
 
@@ -204,7 +192,7 @@ namespace ponio::runge_kutta::rock
         inline std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
-            auto [mdeg, mz, mr] = degree_computer::compute_n_stages_optimal_degree( f, tn, un, dt );
+            auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( f, tn, un, dt );
             G.resize( 3 );
 
             auto& ujm2 = G[0];
@@ -214,14 +202,12 @@ namespace ponio::runge_kutta::rock
             uj   = un;
             ujm2 = un;
 
-            temp1 = dt * rock_coeff::recf[mr - 1];
-            ci1   = tn + temp1;
-            ci2   = tn + temp1;
-            ci3   = tn;
+            value_t const mu1 = rock_coeff::recf[start_index - 1];
+            value_t t_jm1     = tn + dt * mu1;
+            value_t t_jm2     = tn + dt * mu1;
+            value_t t_jm3     = tn;
 
-            ujm1 = un + temp1 * f( tn, un );
-
-            // std::cout << "rock2::op() " << mdeg << " " << tn << " " << dt << " " << mr << " . " << mz << "\n";
+            ujm1 = un + dt * mu1 * f( tn, un );
 
             if ( mdeg < 2 )
             {
@@ -230,13 +216,13 @@ namespace ponio::runge_kutta::rock
 
             for ( std::size_t j = 2; j < mdeg + 1; ++j )
             {
-                temp1 = dt * rock_coeff::recf[mr + 2 * ( j - 2 ) + 1 - 1];
-                temp3 = -rock_coeff::recf[mr + 2 * ( j - 2 ) + 2 - 1];
-                temp2 = 1.0 - temp3;
+                value_t const mu    = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 1 - 1];
+                value_t const kappa = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 2 - 1];
+                value_t const nu    = -1.0 - kappa;
 
-                uj = temp1 * f( ci1, ujm1 ) + temp2 * ujm1 + temp3 * ujm2;
+                uj = dt * mu * f( t_jm1, ujm1 ) - nu * ujm1 - kappa * ujm2;
 
-                ci1 = temp1 + temp2 * ci2 + temp3 * ci3;
+                t_jm1 = dt * mu - nu * t_jm2 - kappa * t_jm3;
 
                 if ( j < mdeg )
                 {
@@ -244,21 +230,19 @@ namespace ponio::runge_kutta::rock
                     ujm1 = std::move( uj );
                 }
 
-                ci3 = ci2;
-                ci2 = ci1;
+                t_jm3 = t_jm2;
+                t_jm2 = t_jm1;
             }
 
-            temp1 = dt * rock_coeff::fp1[mz - 1];
-            temp2 = dt * rock_coeff::fp2[mz - 1];
+            value_t const delta_t_1 = dt * rock_coeff::fp1[deg_index - 1]; // equals to $\Delta t \sigma$
+            value_t const delta_t_2 = dt * rock_coeff::fp2[deg_index - 1]; // equals to $-\Delta t \sigma(1 - \frac{\tau}{\sigma^2})$
 
-            ujm2 = f( ci1, uj );
-            ujm1 = uj + temp1 * ujm2;
+            ujm2 = f( t_jm1, uj );
+            ujm1 = uj + delta_t_1 * ujm2;
 
-            ci1 = ci1 + temp1;
+            t_jm1 = t_jm1 + delta_t_1;
 
-            // uj = f( ci1, ujm1 );
-            // uj = ujm1 + temp1 * uj + temp2 * ( uj - ujm2 );
-            uj = ujm1 + ( temp1 + temp2 ) * f( ci1, ujm1 ) - temp2 * ujm2;
+            uj = ujm1 + ( delta_t_1 + delta_t_2 ) * f( t_jm1, ujm1 ) - delta_t_2 * ujm2;
 
             return { tn + dt, uj, dt };
         }
@@ -278,22 +262,7 @@ namespace ponio::runge_kutta::rock
         using rock_coeff      = rock4_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
 
-        value_t ci1;
-        value_t ci2;
-        value_t ci3;
-        value_t temp1;
-        value_t temp2;
-        value_t temp3;
-        value_t temp4;
-
         rock4()
-            : ci1( 0. )
-            , ci2( 0. )
-            , ci3( 0. )
-            , temp1( 0. )
-            , temp2( 0. )
-            , temp3( 0. )
-            , temp4( 0. )
         {
         }
 
@@ -301,7 +270,7 @@ namespace ponio::runge_kutta::rock
         inline std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
-            auto [mdeg, mz, mr] = degree_computer::compute_n_stages_optimal_degree( f, tn, un, dt );
+            auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( f, tn, un, dt );
             G.resize( 5 );
 
             auto& ujm4 = G[0];
@@ -313,14 +282,14 @@ namespace ponio::runge_kutta::rock
             uj   = un;
             ujm2 = un;
 
-            temp1 = dt * rock_coeff::recf[mr - 1];
-            ci1   = tn + temp1;
-            ci2   = tn + temp1;
-            ci3   = tn;
+            value_t const mu1 = dt * rock_coeff::recf[start_index - 1];
+            value_t t_jm1     = tn + mu1;
+            value_t t_jm2     = tn + mu1;
+            value_t t_jm3     = tn;
 
-            ujm1 = un + temp1 * f( tn, un );
+            ujm1 = un + mu1 * f( tn, un );
 
-            // std::cout << "rock2::op() " << mdeg << " " << tn << " " << dt << " " << mr << " . " << mz << "\n";
+            // std::cout << "rock2::op() " << mdeg << " " << tn << " " << dt << " " << start_index << " . " << deg_index << "\n";
 
             if ( mdeg < 2 )
             {
@@ -329,13 +298,13 @@ namespace ponio::runge_kutta::rock
 
             for ( std::size_t j = 2; j < mdeg + 1; ++j )
             {
-                temp1 = dt * rock_coeff::recf[mr + 2 * ( j - 2 ) + 1 - 1];
-                temp3 = -rock_coeff::recf[mr + 2 * ( j - 2 ) + 2 - 1];
-                temp2 = 1.0 - temp3;
+                value_t const mu    = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 1 - 1];
+                value_t const kappa = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 2 - 1];
+                value_t const nu    = -1.0 - kappa;
 
-                uj = temp1 * f( ci1, ujm1 ) + temp2 * ujm1 + temp3 * ujm2;
+                uj = dt * mu * f( t_jm1, ujm1 ) - nu * ujm1 - kappa * ujm2;
 
-                ci1 = temp1 + temp2 * ci2 + temp3 * ci3;
+                t_jm1 = dt * mu + nu * t_jm2 - kappa * t_jm3;
 
                 if ( j < mdeg )
                 {
@@ -343,39 +312,40 @@ namespace ponio::runge_kutta::rock
                     ujm1 = std::move( uj );
                 }
 
-                ci3 = ci2;
-                ci2 = ci1;
+                t_jm3 = t_jm2;
+                t_jm2 = t_jm1;
             }
 
             // the fourth-stage finish procedure
 
+            value_t const a_21 = dt * rock_coeff::fpa[deg_index - 1][0];
+            value_t const a_31 = dt * rock_coeff::fpa[deg_index - 1][1];
+            value_t const a_32 = dt * rock_coeff::fpa[deg_index - 1][2];
+            value_t const a_41 = dt * rock_coeff::fpa[deg_index - 1][3];
+            value_t const a_42 = dt * rock_coeff::fpa[deg_index - 1][4];
+            value_t const a_43 = dt * rock_coeff::fpa[deg_index - 1][5];
+            value_t const b_1  = dt * rock_coeff::fpb[deg_index - 1][0];
+            value_t const b_2  = dt * rock_coeff::fpb[deg_index - 1][1];
+            value_t const b_3  = dt * rock_coeff::fpb[deg_index - 1][2];
+            value_t const b_4  = dt * rock_coeff::fpb[deg_index - 1][3];
+
             // stage 1.
-            ujm1  = f( ci1, uj );
-            temp1 = dt * rock_coeff::fpa[mz - 1][0];
-            ujm3  = uj + temp1 * ujm1;
+            ujm1 = f( t_jm1, uj );
+            ujm3 = uj + a_21 * ujm1;
 
             // stage 2.
-            ci2   = ci1 + temp1;
-            temp1 = dt * rock_coeff::fpa[mz - 1][1];
-            temp2 = dt * rock_coeff::fpa[mz - 1][2];
-            ujm2  = f( ci2, ujm3 );
-            ujm4  = uj + temp1 * ujm1 + temp2 * ujm2;
+            t_jm2 = t_jm1 + a_21;
+            ujm2  = f( t_jm2, ujm3 );
+            ujm4  = uj + a_31 * ujm1 + a_32 * ujm2;
 
             // stage 3.
-            ci2   = ci1 + temp1 + temp2;
-            temp1 = dt * rock_coeff::fpa[mz - 1][3];
-            temp2 = dt * rock_coeff::fpa[mz - 1][4];
-            temp3 = dt * rock_coeff::fpa[mz - 1][5];
-            ujm3  = f( ci2, ujm4 );
-            ujm4  = uj + temp1 * ujm1 + temp2 * ujm2 + temp3 * ujm3;
+            t_jm2 = t_jm1 + a_31 + a_32;
+            ujm3  = f( t_jm2, ujm4 );
+            ujm4  = uj + a_41 * ujm1 + a_42 * ujm2 + a_43 * ujm3;
 
             // stage 4.
-            ci2   = ci1 + temp1 + temp2 + temp3;
-            temp1 = dt * rock_coeff::fpb[mz - 1][0];
-            temp2 = dt * rock_coeff::fpb[mz - 1][1];
-            temp3 = dt * rock_coeff::fpb[mz - 1][2];
-            temp4 = dt * rock_coeff::fpb[mz - 1][3];
-            uj    = uj + temp1 * ujm1 + temp2 * ujm2 + temp3 * ujm3 + temp4 * f( ci2, ujm4 );
+            t_jm2 = t_jm1 + a_41 + a_42 + a_43;
+            uj    = uj + b_1 * ujm1 + b_2 * ujm2 + b_3 * ujm3 + b_4 * f( t_jm2, ujm4 );
 
             return { tn + dt, uj, dt };
         }
