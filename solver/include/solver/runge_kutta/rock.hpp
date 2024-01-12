@@ -42,7 +42,7 @@ namespace ponio::runge_kutta::rock
                 0.,
                 []( auto sum, auto x )
                 {
-                    return sum + std::abs( x ) * std::abs( x );
+                    return sum + ::detail::power<2>( std::abs( x ) );
                 } ) );
         }
 
@@ -175,17 +175,47 @@ namespace ponio::runge_kutta::rock
      *
      *  @tparam value_t type of coefficients
      */
-    template <typename value_t = double>
+    template <bool _is_embedded = false, typename value_t = double>
     struct rock2
     {
-        static constexpr bool is_embedded     = false;
+        static constexpr bool is_embedded     = _is_embedded;
         static constexpr std::size_t N_stages = stages::dynamic;
 
         using rock_coeff      = rock2_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
 
-        rock2()
+        value_t a_tol; // absolute tolerance
+        value_t r_tol; // relative tolerance
+
+        rock2( value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
+            : a_tol( _a_tol )
+            , r_tol( _r_tol )
         {
+        }
+
+        template <typename state_t>
+        auto
+        error( state_t&& unp1, state_t&& un, state_t&& tmp )
+        {
+            return std::abs( tmp / ( a_tol + r_tol * std::max( std::abs( unp1 ), std::abs( un ) ) ) );
+        }
+
+        template <typename state_t>
+            requires std::ranges::range<state_t>
+        auto
+        error( state_t&& unp1, state_t&& un, state_t&& tmp )
+        {
+            auto it_un  = std::ranges::begin( un );
+            auto it_tmp = std::ranges::begin( tmp );
+
+            return std::sqrt( std::accumulate( std::ranges::begin( unp1 ),
+                                  std::ranges::end( unp1 ),
+                                  0.,
+                                  [&]( auto sum, auto unp1_i )
+                                  {
+                                      return sum + ::detail::power<2>( error( unp1_i, *it_un++, *it_tmp++ ) );
+                                  } )
+                              / static_cast<value_t>( std::size( unp1 ) ) );
         }
 
         template <typename problem_t, typename state_t, typename array_ki_t>
@@ -203,9 +233,10 @@ namespace ponio::runge_kutta::rock
             ujm2 = un;
 
             value_t const mu1 = rock_coeff::recf[start_index - 1];
-            value_t t_jm1     = tn + dt * mu1;
-            value_t t_jm2     = tn + dt * mu1;
-            value_t t_jm3     = tn;
+
+            value_t t_jm1 = tn + dt * mu1;
+            value_t t_jm2 = tn + dt * mu1;
+            value_t t_jm3 = tn;
 
             ujm1 = un + dt * mu1 * f( tn, un );
 
@@ -234,6 +265,8 @@ namespace ponio::runge_kutta::rock
                 t_jm2 = t_jm1;
             }
 
+            // the two-stages finish procedure
+
             value_t const delta_t_1 = dt * rock_coeff::fp1[deg_index - 1]; // equals to $\Delta t \sigma$
             value_t const delta_t_2 = dt * rock_coeff::fp2[deg_index - 1]; // equals to $-\Delta t \sigma(1 - \frac{\tau}{\sigma^2})$
 
@@ -242,9 +275,32 @@ namespace ponio::runge_kutta::rock
 
             t_jm1 = t_jm1 + delta_t_1;
 
-            uj = ujm1 + ( delta_t_1 + delta_t_2 ) * f( t_jm1, ujm1 ) - delta_t_2 * ujm2;
+            if constexpr ( is_embedded )
+            {
+                uj          = f( t_jm1, ujm1 );
+                state_t tmp = delta_t_2 * ( uj - ujm2 );
 
-            return { tn + dt, uj, dt };
+                uj = ujm1 + delta_t_1 * uj + tmp;
+
+                value_t err = error( uj, un, tmp );
+
+                value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / err ) ) );
+                value_t new_dt = 0.8 * fac * dt;
+
+                // accepted step
+                if ( err < 1.0 )
+                {
+                    return { tn + dt, uj, new_dt };
+                }
+
+                return { tn, un, new_dt };
+            }
+            else
+            {
+                uj = ujm1 + ( delta_t_1 + delta_t_2 ) * f( t_jm1, ujm1 ) - delta_t_2 * ujm2;
+
+                return { tn + dt, uj, dt };
+            }
         }
     };
 
@@ -253,17 +309,46 @@ namespace ponio::runge_kutta::rock
      *
      *  @tparam value_t type of coefficients
      */
-    template <typename value_t = double>
+    template <bool _is_embedded = false, typename value_t = double>
     struct rock4
     {
-        static constexpr bool is_embedded     = false;
+        static constexpr bool is_embedded     = _is_embedded;
         static constexpr std::size_t N_stages = stages::dynamic;
 
         using rock_coeff      = rock4_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
 
-        rock4()
+        value_t a_tol; // absolute tolerance
+        value_t r_tol; // relative tolerance
+
+        rock4( value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
+            : a_tol( _a_tol )
+            , r_tol( _r_tol )
         {
+        }
+
+        template <typename state_t>
+        auto
+        error( state_t const& unp1, state_t const& tmp )
+        {
+            return std::abs( tmp / ( a_tol + r_tol * std::abs( unp1 ) ) );
+        }
+
+        template <typename state_t>
+            requires std::ranges::range<state_t>
+        auto
+        error( state_t const& unp1, state_t const& tmp )
+        {
+            auto it_tmp = std::ranges::begin( tmp );
+
+            return std::sqrt( std::accumulate( std::ranges::begin( unp1 ),
+                                  std::ranges::end( unp1 ),
+                                  0.,
+                                  [&]( auto sum, auto unp1_i )
+                                  {
+                                      return sum + ::detail::power<2>( error( unp1_i, *it_tmp++ ) );
+                                  } )
+                              / static_cast<value_t>( std::size( unp1 ) ) );
         }
 
         template <typename problem_t, typename state_t, typename array_ki_t>
@@ -271,13 +356,14 @@ namespace ponio::runge_kutta::rock
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
             auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( f, tn, un, dt );
-            G.resize( 5 );
+            G.resize( 6 );
 
-            auto& ujm4 = G[0];
-            auto& ujm3 = G[1];
-            auto& ujm2 = G[2];
-            auto& ujm1 = G[3];
-            auto& uj   = G[4];
+            auto& tmp  = G[0];
+            auto& ujm4 = G[1];
+            auto& ujm3 = G[2];
+            auto& ujm2 = G[3];
+            auto& ujm1 = G[4];
+            auto& uj   = G[5];
 
             uj   = un;
             ujm2 = un;
@@ -316,7 +402,7 @@ namespace ponio::runge_kutta::rock
                 t_jm2 = t_jm1;
             }
 
-            // the fourth-stage finish procedure
+            // the fourth-stages finish procedure
 
             value_t const a_21 = dt * rock_coeff::fpa[deg_index - 1][0];
             value_t const a_31 = dt * rock_coeff::fpa[deg_index - 1][1];
@@ -345,9 +431,40 @@ namespace ponio::runge_kutta::rock
 
             // stage 4.
             t_jm2 = t_jm1 + a_41 + a_42 + a_43;
-            uj    = uj + b_1 * ujm1 + b_2 * ujm2 + b_3 * ujm3 + b_4 * f( t_jm2, ujm4 );
 
-            return { tn + dt, uj, dt };
+            if constexpr ( is_embedded )
+            {
+                // for embedded method for error estimation
+                value_t const bh_1 = dt * ( rock_coeff::fpbe[deg_index - 1][0] - rock_coeff::fpb[deg_index - 1][0] );
+                value_t const bh_2 = dt * ( rock_coeff::fpbe[deg_index - 1][1] - rock_coeff::fpb[deg_index - 1][1] );
+                value_t const bh_3 = dt * ( rock_coeff::fpbe[deg_index - 1][2] - rock_coeff::fpb[deg_index - 1][2] );
+                value_t const bh_4 = dt * ( rock_coeff::fpbe[deg_index - 1][3] - rock_coeff::fpb[deg_index - 1][3] );
+                value_t const bh_5 = dt * rock_coeff::fpbe[deg_index - 1][4];
+
+                tmp = f( t_jm2, ujm4 );
+                uj  = uj + b_1 * ujm1 + b_2 * ujm2 + b_3 * ujm3 + b_4 * tmp;
+
+                tmp = bh_1 * ujm1 + bh_2 * ujm2 + bh_3 * ujm3 + bh_4 * tmp + bh_5 * ujm4;
+
+                value_t err = error( uj, tmp );
+
+                value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / err ) ) );
+                value_t new_dt = 0.8 * fac * dt;
+
+                // accepted step
+                if ( err < 1.0 )
+                {
+                    return { tn + dt, uj, new_dt };
+                }
+
+                return { tn, un, new_dt };
+            }
+            else
+            {
+                uj = uj + b_1 * ujm1 + b_2 * ujm2 + b_3 * ujm3 + b_4 * f( t_jm2, ujm4 );
+
+                return { tn + dt, uj, dt };
+            }
         }
     };
 
