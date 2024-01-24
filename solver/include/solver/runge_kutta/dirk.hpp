@@ -30,6 +30,12 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
 
         template <typename T, typename... Args>
         concept has_newton_method = std::is_member_function_pointer_v<decltype( &T::template newton<Args...> )>;
+
+        template <typename Problem_t, typename value_t>
+        concept problem_operator = requires( Problem_t pb ) { std::invocable<decltype( pb.f_t ), value_t>; };
+
+        template <typename Problem_t, typename value_t, typename state_t>
+        concept problem_jacobian = requires( Problem_t pb ) { std::invocable<decltype( pb.df ), value_t, state_t>; };
     } // namespace detail
 
     template <typename state_t>
@@ -117,53 +123,30 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         }
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, std::size_t I>
-        // TODO: mettre ici un requires sur `problem_t` pour tester si le problème est défini par sa jacobienne ou par opérateurs
+            requires detail::problem_operator<problem_t, value_t>
         inline state_t
         stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
         {
-            // PSEUDO-CODE DE CE QU'IL FAUDRAIT FAIRE:
+            std::cerr << "> stage " << I << std::endl;
+            std::cerr << "copy un in ui" << std::endl;
+            state_t ui = un;
+            std::cerr << "make op_i" << std::endl;
+            auto op_i = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un )
+                      - dt * butcher.A[I][I] * pb.f_t( tn + butcher.c[I] * dt );
+            std::cerr << "make rhs" << std::endl;
+            auto rhs = ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt );
 
-            // auto ui      = un;
-            // bool samurai = false;
-            // if ( !samurai ) // définir une interface "classique" où l'utilisateur donne f:(t,u)->f(t,u) et sa jacobienne, et
-            // éventuellement
-            //                 // un Newton etc.
-            // {
-            //     using matrix_t = decltype( pb.df( tn, un ) );
+            std::cerr << "solve" << std::endl;
+            ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_i, ui, rhs );
 
-            //     auto identity = [&]( state_t const& u )
-            //     {
-            //         if constexpr ( detail::has_identity_method<lin_alg_t> )
-            //         {
-            //             return linalg.identity( u );
-            //         }
-            //         else
-            //         {
-            //             return ::ponio::linear_algebra::linear_algebra<matrix_t>::identity( u );
-            //         }
-            //     }( un );
+            return pb.f( tn + butcher.c[I] * dt, ui );
+        }
 
-            //     auto op_i = [&]( auto&& u )
-            //     {
-            //         return u - ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt )
-            //              + dt * butcher.A[I][I] * pb.f( tn + butcher.c[I] * dt, u );
-            //     };
-            //     auto J_op_i = [&]( auto&& u )
-            //     {
-            //         return identity - dt * butcher.A[I][I] * pb.df( tn + butcher.c[I] * dt, u );
-            //     };
-            // }
-            // if ( samurai ) // définir une interface où l'utilisateur donne des opérateurs f:(t,u)->f_t(t)(u) et f_t:t->(f:u->f(t,u)) et
-            // un
-            //                // solver
-            // {
-            //     auto op_i = samurai::make_identity<decltype( un )>() - dt * butcher.A[I][I] * pb.f_t( tn + butcher.c[I] * dt );
-            //     auto rhs  = ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt );
-
-            //     samurai::petsc::solve( op_i, ui, rhs );
-            // }
-            // return f( tn + butcher.c[I] * dt, ui );
-
+        template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, std::size_t I>
+            requires detail::problem_jacobian<problem_t, value_t, state_t>
+        inline state_t
+        stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
+        {
             using matrix_t = decltype( pb.df( tn, un ) );
 
             auto identity = [&]( state_t const& u )

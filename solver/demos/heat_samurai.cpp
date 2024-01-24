@@ -11,6 +11,7 @@
 #include <solver/observer.hpp>
 #include <solver/problem.hpp>
 #include <solver/runge_kutta.hpp>
+#include <solver/samurai_linear_algebra.hpp>
 #include <solver/solver.hpp>
 
 #include <filesystem>
@@ -90,26 +91,32 @@ main()
     samurai::MRMesh<Config> mesh( box, min_level, max_level, { is_periodic } );
 
     // Initial condition
-    auto un = init( mesh );
+    auto un_ini = init( mesh );
 
     // Define problem (diffusion), solve : d_t u = - d_xx u
     samurai::DiffCoeff<dim> diff_coeff;
     diff_coeff.fill( 1.0 );
-    auto diff = samurai::make_diffusion<decltype( un )>( diff_coeff );
+    auto diff = samurai::make_diffusion<decltype( un_ini )>( diff_coeff );
+
+    auto f_t = [&]( [[maybe_unused]] double t )
+    {
+        return -diff;
+    };
 
     auto f = [&]( [[maybe_unused]] double t, auto&& u )
     {
         samurai::make_bc<samurai::Neumann>( u, 0. );
         samurai::update_ghost_mr( u );
-
-        return -diff( u );
+        return f_t( t )( u );
     };
+    auto pb = ponio::make_implicit_operator_problem( f, f_t );
 
     // Time step
     double dt = cfl * samurai::cell_length( max_level ) * samurai::cell_length( max_level );
 
     // Range to iterate over solution
-    auto sol_range = ponio::make_solver_range( f, ponio::runge_kutta::rkc_202(), un, { 0., Tf }, dt );
+    // auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::rkc_202(), un_ini, { 0., Tf }, dt );
+    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::dirk23(), un_ini, { 0., Tf }, dt );
     auto it_sol    = sol_range.begin();
 
     // Prepare MR for solution on iterator
