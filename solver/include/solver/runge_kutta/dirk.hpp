@@ -127,16 +127,11 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         inline state_t
         stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
         {
-            std::cerr << "> stage " << I << std::endl;
-            std::cerr << "copy un in ui" << std::endl;
             state_t ui = un;
-            std::cerr << "make op_i" << std::endl;
-            auto op_i = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un )
+            auto op_i  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un )
                       - dt * butcher.A[I][I] * pb.f_t( tn + butcher.c[I] * dt );
-            std::cerr << "make rhs" << std::endl;
             auto rhs = ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt );
 
-            std::cerr << "solve" << std::endl;
             ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_i, ui, rhs );
 
             return pb.f( tn + butcher.c[I] * dt, ui );
