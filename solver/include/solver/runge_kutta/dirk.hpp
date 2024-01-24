@@ -32,10 +32,12 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         concept has_newton_method = std::is_member_function_pointer_v<decltype( &T::template newton<Args...> )>;
 
         template <typename Problem_t, typename value_t>
-        concept problem_operator = requires( Problem_t pb ) { std::invocable<decltype( pb.f_t ), value_t>; };
+        concept problem_operator = std::invocable<decltype( &Problem_t::f_t ), Problem_t, value_t>
+                                || std::invocable<decltype( Problem_t::f_t ), value_t>;
 
         template <typename Problem_t, typename value_t, typename state_t>
-        concept problem_jacobian = requires( Problem_t pb ) { std::invocable<decltype( pb.df ), value_t, state_t>; };
+        concept problem_jacobian = std::invocable<decltype( &Problem_t::df ), Problem_t, value_t, state_t>
+                                || std::invocable<decltype( Problem_t::df ), value_t, state_t>;
     } // namespace detail
 
     template <typename state_t>
