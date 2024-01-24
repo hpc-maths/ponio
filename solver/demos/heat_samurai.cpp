@@ -63,8 +63,10 @@ init( Mesh& mesh )
 }
 
 int
-main()
+main( int argc, char** argv )
 {
+    PetscInitialize( &argc, &argv, 0, nullptr );
+
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
     using Config              = samurai::MRConfig<dim>;
 
@@ -102,7 +104,6 @@ main()
     {
         return -diff;
     };
-
     auto f = [&]( [[maybe_unused]] double t, auto&& u )
     {
         samurai::make_bc<samurai::Neumann>( u, 0. );
@@ -130,6 +131,7 @@ main()
 
     while ( it_sol->time < Tf )
     {
+        samurai::make_bc<samurai::Neumann>( it_sol->state, 0. );
         // TODO: add a callback function to make this before each iteration
         for ( auto& ki : it_sol.meth.kis )
         {
@@ -147,6 +149,8 @@ main()
         save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save++ ) );
     }
     std::cout << std::endl;
+
+    PetscFinalize();
 
     return 0;
 }
