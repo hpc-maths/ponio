@@ -10,86 +10,6 @@
 namespace ponio
 {
 
-    // --- PARENT_PROBLEM ----------------------------------------------------------
-    /** @class parent_problem
-     *  parent class of each sub-problem, simple propose of store hint about problen
-     *  @details The main goal of this class is propose uniform hints on each problem
-     *  to select the best method. In particular it propose the minimum order of
-     *  time integrator (if solving method is choosen automaticaly) and indicator
-     *  if problem is sitff. All hints are stored in a `std::bitset` for the state
-     *  of computer science.
-     */
-    struct parent_problem
-    {
-        // std::bitset<3 + 1> property;
-        // 3 bits for minimal order and 1 bit for stiffness
-
-        // parent_problem( std::size_t order = 3, bool is_stiff = false );
-
-        // void
-        // set_order( std::size_t o );
-
-        // unsigned long
-        // order();
-
-        // void
-        // set_stiffness( bool s );
-
-        // bool
-        // stiffness();
-    };
-
-    /**
-     * constructor of \ref parent_problem from hint of minimal order and stiffness
-     * of problem
-     * @param order    minimum order for solving the probleme
-     * @param is_stiff hint on stiffness of considering problem
-     */
-    // inline parent_problem::parent_problem( std::size_t order, bool is_stiff )
-    //     : property( ( order << 1 ) | is_stiff )
-    // {
-    // }
-
-    /**
-     * change the hint of order
-     * @param o new minimum order of solving method
-     */
-    // inline void
-    // parent_problem::set_order( std::size_t o )
-    // {
-    //     property = ( o << 1 ) | property[0];
-    // }
-
-    /**
-     * get the hint on order
-     * @return minimum order of time integrator choosen for solving the method
-     */
-    // inline unsigned long
-    // parent_problem::order()
-    // {
-    //     return ( property >> 1 ).to_ulong();
-    // }
-
-    /**
-     * set the stiffness hint on a specific value
-     * @param s hint is problem is stiff
-     */
-    // inline void
-    // parent_problem::set_stiffness( bool s )
-    // {
-    //     property[0] = s;
-    // }
-
-    /**
-     * get the hint on stifness
-     * @return Returns `true` if problem is indicate as stiff
-     */
-    // inline bool
-    // parent_problem::stiffness()
-    // {
-    //     return static_cast<bool>( property[0] );
-    // }
-
     // --- SIMPLE_PROBLEM ----------------------------------------------------------
     /** @class simple_problem
      *  define a problem with a unique function
@@ -98,9 +18,8 @@ namespace ponio
      *  This class represent a problem of the form \f( \dot{u}=f(t,u) \f)
      */
     template <typename Callable_t>
-    struct simple_problem : public parent_problem
+    struct simple_problem
     {
-        // using parent_problem::parent_problem;
         Callable_t f;
 
         simple_problem( Callable_t& f_ );
@@ -185,6 +104,45 @@ namespace ponio
         return implicit_problem<Callable_t, Jacobian_t>( f, df );
     }
 
+    // --- IMPLICIT_OPERATOR_PROBLEM -----------------------------------------------
+    /** @class implicit_operator_problem
+     *  define a problem with its operator to use implicit Runge-Kutta method with Samurai
+     *  @tparam Callable1_t type of callable object (or function) stored in problem
+     *  @tparam Callable2_t type of callable object (or function) that represents the \f$f:\mapsto f(t,\cdot)\f$
+     */
+    template <typename Callable1_t, typename Callable2_t>
+    struct implicit_operator_problem : public simple_problem<Callable1_t>
+    {
+        using simple_problem<Callable1_t>::simple_problem;
+
+        Callable2_t f_t;
+
+        implicit_operator_problem( Callable1_t& f_, Callable2_t& f_t_ );
+    };
+
+    /**
+     * constructor of \ref implicit_operator_problem from a callable and hints
+     * @param f_       callable object
+     */
+    template <typename Callable1_t, typename Callable2_t>
+    inline implicit_operator_problem<Callable1_t, Callable2_t>::implicit_operator_problem( Callable1_t& f_, Callable2_t& f_t_ )
+        : simple_problem<Callable1_t>( f_ )
+        , f_t( f_t_ )
+    {
+    }
+
+    /**
+     * factory of \ref implicit_operator_problem
+     * @param f        callable object (function or functor) which represent the function of the problem
+     * @param f_t      callable of \f$f:t\mapsto f(t,\cdot)\f$ function
+     */
+    template <typename Callable1_t, typename Callable2_t>
+    implicit_operator_problem<Callable1_t, Callable2_t>
+    make_implicit_operator_problem( Callable1_t f, Callable2_t f_t )
+    {
+        return implicit_operator_problem<Callable1_t, Callable2_t>( f, f_t );
+    }
+
     // --- LAWSON_PROBLEM ----------------------------------------------------------
     /** @class lawson_problem
      *  define a problem with a linear part and non-linear part
@@ -194,9 +152,8 @@ namespace ponio
      *  This class represent a problem of the form \f( \dot{u}=Lu + N(t,u) \f)
      */
     template <typename Linear_t, typename Nonlinear_t>
-    struct lawson_problem : public parent_problem
+    struct lawson_problem
     {
-        // using parent_problem::parent_problem;
         Linear_t l;
         Nonlinear_t n;
 
@@ -254,9 +211,8 @@ namespace ponio
      *  This class represent a problem of the form \f( \dot{u}=I(t,u) + E(t,u) \f)
      */
     template <typename Implicit_t, typename Explicit_t>
-    struct imex_problem : public parent_problem
+    struct imex_problem
     {
-        using parent_problem::parent_problem;
         Implicit_t i;
         Explicit_t e;
 
@@ -308,9 +264,6 @@ namespace ponio
     // --- PROBLEM -----------------------------------------------------------------
     /** @class problem
      *  main problem that could contains multiple sub-problem
-     *  @todo this class has no inheristence from \ref parent_problem so it has no
-     *  hints (because of variadic template... can't have default value parameter
-     *  also)
      *  @details Main goal of this class is to represent a problem of the form
      *  \f( \dot{u} = \sum_i f_i(t,u) \f)
      */
