@@ -110,7 +110,11 @@ main()
             return xmin + dx * ( count++ );
         } );
 
-    auto pb_heat = heat_model( dx, xmin, xmax );
+    auto pb_heat         = heat_model( dx, xmin, xmax );
+    auto eigmax_computer = [=]( heat_model&, double, std::valarray<double>&, double )
+    {
+        return 4. / ( dx * dx );
+    };
 
     double const t_ini = 0.1;
     double const t_end = 0.2;
@@ -133,7 +137,7 @@ main()
     {
         double dt = ( t_end - t_ini ) / static_cast<double>( N );
 
-        y2_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock2(), y_ini, tspan, dt, observer::null_observer() );
+        y2_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock2( eigmax_computer ), y_ini, tspan, dt, observer::null_observer() );
         y4_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock4(), y_ini, tspan, dt, observer::null_observer() );
 
         errors_file << dt << " " << std::setprecision( 20 ) << error_l2( y_qexa, y2_end, dx ) << " " << error_l2( y_qexa, y4_end, dx )
