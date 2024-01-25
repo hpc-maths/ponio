@@ -46,14 +46,11 @@ namespace ponio::runge_kutta::rock
                 } ) );
         }
 
-        template <typename value_t, typename rock_coeff_>
-        struct degree_computer
+        struct power_method
         {
-            using rock_coeff = rock_coeff_;
-
-            template <typename problem_t, typename state_t>
-            static value_t
-            rocktrho( problem_t& f, value_t tn, state_t& un )
+            template <typename problem_t, typename value_t, typename state_t>
+            value_t
+            operator()( problem_t&& f, value_t tn, state_t& un, [[maybe_unused]] value_t dt )
             {
                 value_t eigmax  = 0.;
                 value_t eigmaxo = 0.;
@@ -95,10 +92,11 @@ namespace ponio::runge_kutta::rock
                     z    = dzyn; // TODO: change this line to iterate over z if needed (same trick as norm_2 I think)
                 }
 
-                bool necessary                        = true;
-                std::size_t iter                      = 0;
-                static constexpr std::size_t max_iter = 50;
-                static constexpr value_t safe         = 1.2;
+                bool necessary   = true;
+                std::size_t iter = 0;
+
+                static constexpr std::size_t max_iter  = 50;
+                static constexpr value_t safety_factor = 1.2;
 
                 // start power method
                 while ( necessary )
@@ -106,7 +104,7 @@ namespace ponio::runge_kutta::rock
                     eigmaxo = eigmax;
                     fz      = f( tn, z );
                     dfzfn   = detail::norm_2( static_cast<state_t>( fz - fn ) );
-                    eigmax  = safe * dfzfn / dzyn;
+                    eigmax  = safety_factor * dfzfn / dzyn;
 
                     if ( dfzfn != 0.0 )
                     {
@@ -125,6 +123,12 @@ namespace ponio::runge_kutta::rock
 
                 return eigmax;
             }
+        };
+
+        template <typename value_t, typename rock_coeff_>
+        struct degree_computer
+        {
+            using rock_coeff = rock_coeff_;
 
             static std::pair<std::size_t, std::size_t>
             optimal_degree( std::size_t& mdeg )
@@ -143,11 +147,11 @@ namespace ponio::runge_kutta::rock
                 return { mz, mr };
             }
 
-            template <typename problem_t, typename state_t>
+            template <typename eig_computer_t, typename problem_t, typename state_t>
             static std::size_t
-            compute_n_stages( problem_t& f, value_t tn, state_t& un, value_t& dt )
+            compute_n_stages( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt )
             {
-                double eigmax    = rocktrho( f, tn, un );
+                double eigmax    = eig_computer( f, tn, un, dt );
                 std::size_t mdeg = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
                 if ( mdeg > 200 )
                 {
@@ -158,11 +162,11 @@ namespace ponio::runge_kutta::rock
                 return mdeg;
             }
 
-            template <typename problem_t, typename state_t>
+            template <typename eig_computer_t, typename problem_t, typename state_t>
             static std::tuple<std::size_t, std::size_t, std::size_t>
-            compute_n_stages_optimal_degree( problem_t& f, value_t tn, state_t& un, value_t& dt )
+            compute_n_stages_optimal_degree( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt )
             {
-                std::size_t mdeg = compute_n_stages( f, tn, un, dt );
+                std::size_t mdeg = compute_n_stages( std::forward<eig_computer_t>( eig_computer ), f, tn, un, dt );
                 auto [mz, mr]    = optimal_degree( mdeg );
 
                 return { mdeg, mz, mr };
@@ -170,13 +174,15 @@ namespace ponio::runge_kutta::rock
         };
     } // namespace detail
 
-    /** @class rock2
-     *  @brief define ROCK2
+    /** @class rock2_impl
+     *  @brief define ROCK2 method
      *
-     *  @tparam value_t type of coefficients
+     *  @tparam eig_computer_t type of computer of maximal eigenvalue
+     *  @tparam _is_embedded   define if method is used as adaptive or constant time step method [default is false]
+     *  @tparam value_t        type of coefficients
      */
-    template <bool _is_embedded = false, typename value_t = double>
-    struct rock2
+    template <typename eig_computer_t, bool _is_embedded = false, typename value_t = double>
+    struct rock2_impl
     {
         static constexpr bool is_embedded     = _is_embedded;
         static constexpr std::size_t N_stages = stages::dynamic;
@@ -187,9 +193,12 @@ namespace ponio::runge_kutta::rock
         value_t a_tol; // absolute tolerance
         value_t r_tol; // relative tolerance
 
-        rock2( value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
+        eig_computer_t eig_computer;
+
+        rock2_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
             , r_tol( _r_tol )
+            , eig_computer( _eig_computer )
         {
         }
 
@@ -222,7 +231,7 @@ namespace ponio::runge_kutta::rock
         inline std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
-            auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( f, tn, un, dt );
+            auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
             G.resize( 3 );
 
             auto& ujm2 = G[0];
@@ -304,13 +313,43 @@ namespace ponio::runge_kutta::rock
         }
     };
 
-    /** @class rock4
-     *  @brief define ROCK4
+    /**
+     * @brief helper to build a `rock2_impl` object
      *
-     *  @tparam value_t type of coefficients
+     * @tparam is_embedded    define if method is used as adaptive or constant time step method [default is false]
+     * @tparam value_t        type of coefficients
+     * @tparam eig_computer_t type of computer of maximal eigenvalue
+     * @param eig_computer    computer of maximal eigenvalues
      */
-    template <bool _is_embedded = false, typename value_t = double>
-    struct rock4
+    template <bool is_embedded = false, typename value_t = double, typename eig_computer_t>
+    auto
+    rock2( eig_computer_t&& eig_computer )
+    {
+        return rock2_impl<eig_computer_t, is_embedded, value_t>( std::forward<eig_computer_t>( eig_computer ) );
+    }
+
+    /**
+     * @brief helper to build a `rock2_impl` object with power method to compute maximal eigen value
+     *
+     * @tparam is_embedded    define if method is used as adaptive or constant time step method [default is false]
+     * @tparam value_t        type of coefficients
+     */
+    template <bool is_embedded = false, typename value_t = double>
+    auto
+    rock2()
+    {
+        return rock2<is_embedded, value_t>( detail::power_method() );
+    }
+
+    /** @class rock4_impl
+     *  @brief define ROCK4 method
+     *
+     *  @tparam eig_computer_t type of computer of maximal eigenvalue
+     *  @tparam _is_embedded   define if method is used as adaptive or constant time step method [default is false]
+     *  @tparam value_t        type of coefficients
+     */
+    template <typename eig_computer_t, bool _is_embedded = false, typename value_t = double>
+    struct rock4_impl
     {
         static constexpr bool is_embedded     = _is_embedded;
         static constexpr std::size_t N_stages = stages::dynamic;
@@ -321,9 +360,12 @@ namespace ponio::runge_kutta::rock
         value_t a_tol; // absolute tolerance
         value_t r_tol; // relative tolerance
 
-        rock4( value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
+        eig_computer_t eig_computer;
+
+        rock4_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
             , r_tol( _r_tol )
+            , eig_computer( _eig_computer )
         {
         }
 
@@ -355,7 +397,7 @@ namespace ponio::runge_kutta::rock
         inline std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
-            auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( f, tn, un, dt );
+            auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
             G.resize( 6 );
 
             auto& tmp  = G[0];
@@ -467,5 +509,33 @@ namespace ponio::runge_kutta::rock
             }
         }
     };
+
+    /**
+     * @brief helper to build a `rock4_impl` object
+     *
+     * @tparam is_embedded    define if method is used as adaptive or constant time step method [default is false]
+     * @tparam value_t        type of coefficients
+     * @tparam eig_computer_t type of computer of maximal eigenvalue
+     * @param eig_computer    computer of maximal eigenvalues
+     */
+    template <bool is_embedded = false, typename value_t = double, typename eig_computer_t>
+    auto
+    rock4( eig_computer_t&& eig_computer )
+    {
+        return rock4_impl<eig_computer_t, is_embedded, value_t>( std::forward<eig_computer_t>( eig_computer ) );
+    }
+
+    /**
+     * @brief helper to build a `rock4_impl` object with power method to compute maximal eigen value
+     *
+     * @tparam is_embedded    define if method is used as adaptive or constant time step method [default is false]
+     * @tparam value_t        type of coefficients
+     */
+    template <bool is_embedded = false, typename value_t = double>
+    auto
+    rock4()
+    {
+        return rock4<is_embedded, value_t>( detail::power_method() );
+    }
 
 } // namespace ponio::runge_kutta::rock
