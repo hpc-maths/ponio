@@ -212,8 +212,10 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
      *
      * @tparam tableau_t type of Butcher tableau
      * @tparam lin_alg_t type of linear algebra
-     * @param tol tolenrence of Newton's method
+     * @tparam args_t    optional and variadic types of arguments
+     * @param tol      tolenrence of Newton's method
      * @param max_iter maximum iteration of Newton's method
+     * @param args     optional arguments to initialize an instance of type lin_alg_t
      */
     template <typename tableau_t, typename lin_alg_t, typename... args_t>
     auto

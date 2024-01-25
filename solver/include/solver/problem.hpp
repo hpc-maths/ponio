@@ -163,7 +163,8 @@ namespace ponio
 
     /**
      * constructor of \ref implicit_problem from a callable and hints
-     * @param f_       callable object
+     * @param f_       callable object that represents problem
+     * @param df_      callable object that represents Jacobian of problem
      */
     template <typename Callable_t, typename Jacobian_t>
     inline implicit_problem<Callable_t, Jacobian_t>::implicit_problem( Callable_t& f_, Jacobian_t& df_ )
@@ -316,7 +317,7 @@ namespace ponio
     template <typename... Callables_t>
     struct problem
     {
-        static const std::size_t size = sizeof...( Callables_t );
+        static std::size_t const size = sizeof...( Callables_t );
         std::tuple<Callables_t...> system;
 
         problem( Callables_t... args );

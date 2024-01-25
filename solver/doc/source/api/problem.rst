@@ -22,9 +22,6 @@ Problems
   ]
 
   // classes
-  parent_problem [
-    label = "{parent_problem}"
-  ]
   simple_problem [
     label = "{simple_problem}"
   ]
@@ -52,43 +49,34 @@ Problems
 Parent problem
 --------------
 
-.. doxygenclass:: ode::parent_problem
+.. doxygenclass:: ponio::parent_problem
    :project: solver
    :members:
 
 Simple problem
 --------------
 
-.. doxygenclass:: ode::_simple_problem
-   :project: solver
-
-.. doxygenclass:: ode::simple_problem
+.. doxygenclass:: ponio::simple_problem
    :project: solver
    :members:
 
-.. doxygenfunction:: ode::make_simple_problem
+.. doxygenfunction:: ponio::make_simple_problem
    :project: solver
 
 Lawson problem
 --------------
 
-.. doxygenclass:: ode::_lawson_problem
-   :project: solver
-
-.. doxygenclass:: ode::lawson_problem
+.. doxygenclass:: ponio::lawson_problem
    :project: solver
    :members:
 
-.. doxygenfunction:: ode::make_lawson_problem
+.. doxygenfunction:: ponio::make_lawson_problem
    :project: solver
 
 IMEX problem
 ------------
 
-.. doxygenclass:: ode::_imex_problem
-   :project: solver
-
-.. doxygenclass:: ode::imex_problem
+.. doxygenclass:: ponio::imex_problem
    :project: solver
    :members:
 
@@ -97,6 +85,6 @@ Problem
 
 A problem is a collection of sub-problems defined by previous problems.
 
-.. doxygenclass:: ode::problem
+.. doxygenclass:: ponio::problem
    :project: solver
    :members:

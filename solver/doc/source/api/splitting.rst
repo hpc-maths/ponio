@@ -18,21 +18,21 @@ In Lie splitting method, the solution is computed as:
 
    u^{n+1} = \phi_{\Delta t}^{[f_1]}\circ \cdots \circ \phi_{\Delta t}^{[f_n]} (t^n,u^n)
 
-.. doxygenclass:: ode::splitting::lie
+.. doxygenclass:: ponio::splitting::lie::lie
    :project: solver
    :members:
 
 Helper functions and classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygenfunction:: ode::splitting::make_lie_from_tuple
+.. doxygenfunction:: ponio::splitting::lie::make_lie_from_tuple
    :project: solver
 
-.. doxygenclass:: ode::splitting::lie_tuple
+.. doxygenclass:: ponio::splitting::lie::lie_tuple
    :project: solver
    :members:
 
-.. doxygenfunction:: ode::splitting::make_lie_tuple
+.. doxygenfunction:: ponio::splitting::lie::make_lie_tuple
    :project: solver
 
 Strang splitting method
@@ -47,19 +47,19 @@ In Strang splitting method, the solution is computed as:
               \circ \phi_{\frac{\Delta t}{2}}^{[f_{n-1}]}\circ\cdots\circ \phi_{\frac{\Delta t}{2}}^{[f_1]}
               (t^n,u^n)
 
-.. doxygenclass:: ode::splitting::strang
+.. doxygenclass:: ponio::splitting::strang::strang
    :project: solver
    :members:
 
 Helper functions and classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygenfunction:: ode::splitting::make_strang_from_tuple
+.. doxygenfunction:: ponio::splitting::strang::make_strang_from_tuple
    :project: solver
 
-.. doxygenclass:: ode::splitting::strang_tuple
+.. doxygenclass:: ponio::splitting::strang::strang_tuple
    :project: solver
    :members:
 
-.. doxygenfunction:: ode::splitting::make_strang_tuple
+.. doxygenfunction:: ponio::splitting::strang::make_strang_tuple
    :project: solver
