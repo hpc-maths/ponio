@@ -12,6 +12,7 @@ dependencies:
   - notebook
   - jinja2
   - eigen
+  - pkg-config
   - samurai
   - petsc
   - cli11
