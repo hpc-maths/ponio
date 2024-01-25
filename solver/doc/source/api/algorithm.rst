@@ -9,115 +9,115 @@ Runge-Kutta methods
 Explicit methods
 ~~~~~~~~~~~~~~~~
 
-.. doxygentypedef:: ode::butcher::euler
+.. doxygentypedef:: ponio::runge_kutta::euler_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::explicit_euler_sub4
+.. doxygentypedef:: ponio::runge_kutta::explicit_euler_sub4_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk6es
+.. doxygentypedef:: ponio::runge_kutta::rk6es_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_118
+.. doxygentypedef:: ponio::runge_kutta::rk_118_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_21
+.. doxygentypedef:: ponio::runge_kutta::rk_21_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_22_midpoint
+.. doxygentypedef:: ponio::runge_kutta::rk_22_midpoint_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_22_ralston
+.. doxygentypedef:: ponio::runge_kutta::rk_22_ralston_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_32_best
+.. doxygentypedef:: ponio::runge_kutta::rk_32_best_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_33
+.. doxygentypedef:: ponio::runge_kutta::rk_33_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_33_233e
+.. doxygentypedef:: ponio::runge_kutta::rk_33_233e_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_33_bogackishampine
+.. doxygentypedef:: ponio::runge_kutta::rk_33_bogackishampine_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_33_heun
+.. doxygentypedef:: ponio::runge_kutta::rk_33_heun_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_33_ralston
+.. doxygentypedef:: ponio::runge_kutta::rk_33_ralston_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_33_van_der_houwen
+.. doxygentypedef:: ponio::runge_kutta::rk_33_van_der_houwen_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_44
+.. doxygentypedef:: ponio::runge_kutta::rk_44_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_44_235j
+.. doxygentypedef:: ponio::runge_kutta::rk_44_235j_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_44_38
+.. doxygentypedef:: ponio::runge_kutta::rk_44_38_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_44_ralston
+.. doxygentypedef:: ponio::runge_kutta::rk_44_ralston_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_65
+.. doxygentypedef:: ponio::runge_kutta::rk_65_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_65_236a
+.. doxygentypedef:: ponio::runge_kutta::rk_65_236a_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_76
+.. doxygentypedef:: ponio::runge_kutta::rk_76_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_86
+.. doxygentypedef:: ponio::runge_kutta::rk_86_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_nssp_21
+.. doxygentypedef:: ponio::runge_kutta::rk_nssp_21_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_nssp_32
+.. doxygentypedef:: ponio::runge_kutta::rk_nssp_32_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_nssp_33
+.. doxygentypedef:: ponio::runge_kutta::rk_nssp_33_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_nssp_53
+.. doxygentypedef:: ponio::runge_kutta::rk_nssp_53_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_spp_43
+.. doxygentypedef:: ponio::runge_kutta::rk_spp_43_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_ssp_22_heun
+.. doxygentypedef:: ponio::runge_kutta::rk_ssp_22_heun_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_ssp_32
+.. doxygentypedef:: ponio::runge_kutta::rk_ssp_32_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_ssp_33
+.. doxygentypedef:: ponio::runge_kutta::rk_ssp_33_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_ssp_42
+.. doxygentypedef:: ponio::runge_kutta::rk_ssp_42_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_ssp_53
+.. doxygentypedef:: ponio::runge_kutta::rk_ssp_53_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk_ssp_54
+.. doxygentypedef:: ponio::runge_kutta::rk_ssp_54_t
    :project: solver
 
 Embedded methods
 ~~~~~~~~~~~~~~~~
 
-.. doxygentypedef:: ode::butcher::rk54_6m
+.. doxygentypedef:: ponio::runge_kutta::rk54_6m_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk54_7m
+.. doxygentypedef:: ponio::runge_kutta::rk54_7m_t
    :project: solver
 
-.. doxygentypedef:: ode::butcher::rk54_7s
+.. doxygentypedef:: ponio::runge_kutta::rk54_7s_t
    :project: solver
 
 
@@ -162,121 +162,121 @@ We solve this equation with a classical Runge-Kutta method RK(:math:`s`,:math:`n
 Explicit methods
 ~~~~~~~~~~~~~~~~
 
-.. doxygenfunction:: ode::butcher::leuler
+.. doxygenfunction:: ponio::runge_kutta::leuler
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lexplicit_euler_sub4
+.. doxygenfunction:: ponio::runge_kutta::lexplicit_euler_sub4
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk6es
+.. doxygenfunction:: ponio::runge_kutta::lrk6es
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_118
+.. doxygenfunction:: ponio::runge_kutta::lrk_118
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_21
+.. doxygenfunction:: ponio::runge_kutta::lrk_21
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_22_midpoint
+.. doxygenfunction:: ponio::runge_kutta::lrk_22_midpoint
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_22_ralston
+.. doxygenfunction:: ponio::runge_kutta::lrk_22_ralston
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_32_best
+.. doxygenfunction:: ponio::runge_kutta::lrk_32_best
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_33
+.. doxygenfunction:: ponio::runge_kutta::lrk_33
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_33_233e
+.. doxygenfunction:: ponio::runge_kutta::lrk_33_233e
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_33_bogackishampine
+.. doxygenfunction:: ponio::runge_kutta::lrk_33_bogackishampine
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_33_heun
+.. doxygenfunction:: ponio::runge_kutta::lrk_33_heun
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_33_ralston
+.. doxygenfunction:: ponio::runge_kutta::lrk_33_ralston
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_33_van_der_houwen
+.. doxygenfunction:: ponio::runge_kutta::lrk_33_van_der_houwen
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_44
+.. doxygenfunction:: ponio::runge_kutta::lrk_44
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_44_235j
+.. doxygenfunction:: ponio::runge_kutta::lrk_44_235j
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_44_38
+.. doxygenfunction:: ponio::runge_kutta::lrk_44_38
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_44_ralston
+.. doxygenfunction:: ponio::runge_kutta::lrk_44_ralston
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_65
+.. doxygenfunction:: ponio::runge_kutta::lrk_65
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_65_236a
+.. doxygenfunction:: ponio::runge_kutta::lrk_65_236a
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_76
+.. doxygenfunction:: ponio::runge_kutta::lrk_76
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_86
+.. doxygenfunction:: ponio::runge_kutta::lrk_86
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_nssp_21
+.. doxygenfunction:: ponio::runge_kutta::lrk_nssp_21
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_nssp_32
+.. doxygenfunction:: ponio::runge_kutta::lrk_nssp_32
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_nssp_33
+.. doxygenfunction:: ponio::runge_kutta::lrk_nssp_33
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_nssp_53
+.. doxygenfunction:: ponio::runge_kutta::lrk_nssp_53
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_spp_43
+.. doxygenfunction:: ponio::runge_kutta::lrk_spp_43
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_ssp_22_heun
+.. doxygenfunction:: ponio::runge_kutta::lrk_ssp_22_heun
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_ssp_32
+.. doxygenfunction:: ponio::runge_kutta::lrk_ssp_32
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_ssp_33
+.. doxygenfunction:: ponio::runge_kutta::lrk_ssp_33
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_ssp_42
+.. doxygenfunction:: ponio::runge_kutta::lrk_ssp_42
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_ssp_53
+.. doxygenfunction:: ponio::runge_kutta::lrk_ssp_53
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk_ssp_54
+.. doxygenfunction:: ponio::runge_kutta::lrk_ssp_54
    :project: solver
 
 
 Embedded methods
 ~~~~~~~~~~~~~~~~
 
-.. doxygenfunction:: ode::butcher::lrk54_6m
+.. doxygenfunction:: ponio::runge_kutta::lrk54_6m
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk54_7m
+.. doxygenfunction:: ponio::runge_kutta::lrk54_7m
    :project: solver
 
-.. doxygenfunction:: ode::butcher::lrk54_7s
+.. doxygenfunction:: ponio::runge_kutta::lrk54_7s
    :project: solver
 
 Runge-Kutta Chebyshev methods
 -----------------------------
 
-.. doxygenclass:: ode::butcher::chebyshev::explicit_rkc2
+.. doxygenclass:: ponio::runge_kutta::chebyshev::explicit_rkc2
    :project: solver
    :members:

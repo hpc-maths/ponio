@@ -18,6 +18,8 @@
 
 # -- Project information -----------------------------------------------------
 
+import os
+import subprocess
 project = 'solver'
 author = 'Josselin'
 
@@ -44,7 +46,7 @@ extensions = [
     'sphinx.ext.viewcode',
 ]
 
-breathe_projects = { 'solver': '../xml' }
+breathe_projects = {'solver': '../xml'}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -94,7 +96,6 @@ html_theme = 'haiku'
 # documentation.
 #
 html_theme_options = {
-    'collapse_navigation': False,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -202,7 +203,6 @@ todo_include_todos = True
 
 # -- Breathe configuration for readthedocs -----------------------------------
 
-import subprocess, os
 
 read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
 

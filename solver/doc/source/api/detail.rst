@@ -9,12 +9,3 @@ Details
 
 .. doxygenfunction:: detail::power
    :project: solver
-
-Some concepts
--------------
-
-.. doxygenconcept:: detail::is_iterable
-   :project: solver
-
-.. doxygenconcept:: detail::is_const_iterable
-   :project: solver

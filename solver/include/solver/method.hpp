@@ -94,7 +94,7 @@ namespace ponio
         /**
          * constructor of \ref method from its stages and a \f$u_0\f$ (only for preallocation)
          * of temporary substeps
-         * @param algo         a `Algorithm_t` objet with predifined stages of the method
+         * @param alg_         a `Algorithm_t` objet with predifined stages of the method
          * @param shadow_of_u0 an object with the same size of computed value for allocation
          */
         method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
@@ -167,7 +167,7 @@ namespace ponio
          */
         template <typename value_t, typename Algo_t = Algorithm_t>
         std::tuple<value_t, state_t, value_t>
-        _return( value_t tn, state_t const&, value_t dt )
+        _return( value_t tn, [[maybe_unused]] state_t const& un, value_t dt )
         {
             return std::make_tuple( tn + dt, kis.back(), dt );
         }

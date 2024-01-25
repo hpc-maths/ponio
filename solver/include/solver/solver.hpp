@@ -243,9 +243,8 @@ namespace ponio
      * state_t const& un)`
      * @param meth         choosen method to solve the problem `pb`
      * @param u0           initial condition \f$u_0 = u(t=0)\f$
-     * @param t_init       initial time to start the range
+     * @param t_span       vector of initial time and final time with optional intermediate time
      * @param dt           time step value \f$\Delta t\f$
-     * @param t_final      final time to stop the range
      * @return auto
      */
     template <typename value_t, typename state_t, typename method_t, typename problem_t>

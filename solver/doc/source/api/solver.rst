@@ -1,5 +1,5 @@
 Solver
 ======
 
-.. doxygenfunction:: ode::solve
+.. doxygenfunction:: ponio::solve
    :project: solver

@@ -93,7 +93,11 @@ namespace ponio::splitting::lie
 
     /**
      * a helper factory for \ref lie functor from a tuple of methods
-     * @param t tuple of \ref method
+     *
+     * @tparam value_t   type of coefficients
+     * @tparam Methods_t variadic list of types of methods
+     * @param meths      list of methods
+     * @param dts        associated time step foreach method
      * @return a \ref lie object build from the tuple of methods
      */
     template <typename value_t, typename... Methods_t>
@@ -106,7 +110,7 @@ namespace ponio::splitting::lie
     // ---- class lie_tuple -----------------------------------------
 
     /** @class lie_tuple
-     *  a helper to deduce method for ::ponio::make_method(splitting::lie_tuple<Algorithms_t...> const &, state_t const &)
+     *  a helper to deduce method for ::ponio::make_method(splitting::lie::lie_tuple<Algorithms_t...> const &, state_t const &)
      *  @tparam value_t      type of time steps
      *  @tparam Algorithms_t variadic template of algorithms to solve each subproblem
      *  @details This is a dummy class to select correct \ref method to solve the problem
@@ -138,7 +142,10 @@ namespace ponio::splitting::lie
 
     /**
      * a helper factory for \ref lie_tuple from a tuple of algorithms
-     * @param a tuple of \ref method
+     *
+     * @tparam value_t      type of coefficients
+     * @tparam Algorithms_t variadic list of types of algorithms
+     * @param args          variadic list of pairs of algorithm and time step
      * @return a \ref lie_tuple object build from the tuple of methods
      */
     template <typename value_t, typename... Algorithms_t>
