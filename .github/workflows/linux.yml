@@ -76,7 +76,7 @@ jobs:
       - name: Test
         shell: bash -l {0}
         run: |
-          export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib" ./build/solver/test/Release/ponio_tests
+          export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH" ./build/solver/test/Release/ponio_tests
       - name: NotebookTest
         shell: bash -l {0}
         # should fix lotka_volterra_tuto.ipynb and three_body_choregraphy.ipynb to run this command on all solver/notebooks folder
