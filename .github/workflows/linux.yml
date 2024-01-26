@@ -62,7 +62,13 @@ jobs:
       - name: Configure
         shell: bash -l {0}
         run: |
-          CC=${{ matrix.cc }} CXX=${{ matrix.cxx }} cmake . -B ./build -G "Ninja Multi-Config" -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON
+          export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"
+          CC=${{ matrix.cc }} CXX=${{ matrix.cxx }} cmake \
+          . \
+          -B ./build \
+          -G "Ninja Multi-Config" \
+          -DBUILD_TESTS=ON \
+          -DBUILD_SAMURAI_DEMOS=ON
       - name: Build
         shell: bash -l {0}
         run: |
@@ -70,7 +76,7 @@ jobs:
       - name: Test
         shell: bash -l {0}
         run: |
-          ./build/solver/test/Release/ponio_tests
+          export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib" ./build/solver/test/Release/ponio_tests
       - name: NotebookTest
         shell: bash -l {0}
         # should fix lotka_volterra_tuto.ipynb and three_body_choregraphy.ipynb to run this command on all solver/notebooks folder
