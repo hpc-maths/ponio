@@ -36,9 +36,11 @@ jobs:
             package: "clang-15"
             cc: "clang-15"
             cxx: "clang++-15"
-
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Remove GCC 13 from runner image
         shell: bash
         run: |
@@ -49,37 +51,17 @@ jobs:
         run: |
           sudo apt update
           sudo apt install ${{ matrix.package }}
-      - name: install mamba
-        uses: mamba-org/provision-with-micromamba@main
+      - uses: prefix-dev/setup-pixi@v0.5.1
         with:
-          environment-file: environment/conda-environment-test.yml
-          environment-name: ponio-test
-      - name: Conda informations
-        shell: bash -l {0}
-        run: |
-          conda info
-          conda list
-      - name: Configure
-        shell: bash -l {0}
+          pixi-version: v0.13.0
+          cache: true
+      - name: Build
         run: |
           export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"
-          CC=${{ matrix.cc }} CXX=${{ matrix.cxx }} cmake \
-          . \
-          -B ./build \
-          -G "Ninja Multi-Config" \
-          -DBUILD_TESTS=ON \
-          -DBUILD_SAMURAI_DEMOS=ON
-      - name: Build
-        shell: bash -l {0}
-        run: |
-          cmake --build ./build --config Release
-      - name: Test
-        shell: bash -l {0}
+          pixi build_test_samurai
+      - name: Run tests
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-          ./build/solver/test/Release/ponio_tests
-      - name: NotebookTest
-        shell: bash -l {0}
-        # should fix lotka_volterra_tuto.ipynb and three_body_choregraphy.ipynb to run this command on all solver/notebooks folder
-        run: |
-          cd solver/notebooks; CXX=${{ matrix.cxx }} pytest --nbval --current-env -p no:warnings
+          pixi tests
+      - name: Execute notebooks
+        run: pixi run nbval
