@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Add a short description here"
 authors = ["Josselin Massot <josselin.massot@polytechnique.edu>"]
 channels = ["conda-forge"]
-platforms = ["osx-arm64"]
+platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
 
 [tasks]
 configure = { cmd = [
