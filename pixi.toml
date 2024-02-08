@@ -1,5 +1,5 @@
 [project]
-name = "ponio-1"
+name = "ponio"
 version = "0.1.0"
 description = "Add a short description here"
 authors = ["Josselin Massot <josselin.massot@polytechnique.edu>"]
@@ -43,5 +43,16 @@ doctest = ">=2.4.11,<2.5"
 sympy = ">=1.12,<2"
 eigen = ">=3.4.0,<3.5"
 numpy = ">=1.26.3,<1.27"
-petsc = ">=3.20.4,<3.21"
 samurai = ">=0.9.0,<0.10"
+
+[target.linux-64.dependencies]
+petsc = "3.20.*"
+pkg-config = ">=0.29.2,<0.30"
+
+[target.osx-64.dependencies]
+petsc = "3.20.*"
+pkg-config = ">=0.29.2,<0.30"
+
+[target.osx-arm64.dependencies]
+petsc = "3.20.*"
+pkg-config = ">=0.29.2,<0.30"
