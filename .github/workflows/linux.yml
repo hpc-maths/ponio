@@ -58,10 +58,10 @@ jobs:
       - name: Build
         run: |
           export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"
-          pixi build_test_samurai
+          pixi run build_test_samurai
       - name: Run tests
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-          pixi tests
+          pixi run tests
       - name: Execute notebooks
         run: pixi run nbval
