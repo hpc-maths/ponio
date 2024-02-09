@@ -19,7 +19,7 @@ configure = { cmd = [
   "./build",
 ] }
 configure_test = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON" }
-configure_test_samurai = { cmd = "export LDFLAGS='${LDFLAGS} -L$CONDA_PREFIX/lib'; cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
+configure_test_samurai = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
 
 build_ninja = { cmd = "ninja -C ./build" } # don't call this rule alone
 
