@@ -12,12 +12,14 @@ configure = { cmd = [
   # source
   ".",
   # generator
-  "-G", "'Ninja Multi-Config'",
+  "-G",
+  "'Ninja Multi-Config'",
   # build directory
-  "-B", "./build"
+  "-B",
+  "./build",
 ] }
 configure_test = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON" }
-configure_test_samurai = { cmd = "export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"; cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
+configure_test_samurai = { cmd = "export LDFLAGS=\"${LDFLAGS} -L$CONDA_PREFIX/lib\"; cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
 
 build_ninja = { cmd = "ninja -C ./build" } # don't call this rule alone
 
@@ -25,8 +27,12 @@ build = { depends_on = ["configure", "build_ninja"] }
 build_test = { depends_on = ["configure_test", "build_ninja"] }
 build_test_samurai = { depends_on = ["configure_test_samurai", "build_ninja"] }
 
-test = { cmd = "./ponio_tests", cwd="./build/solver/test" , depends_on = ["build_test"] }
-nbval = { cmd = "pytest --nbval --current-env -p no:warnings", cwd="./solver/notebooks", depends_on = ["build"] }
+test = { cmd = "./ponio_tests", cwd = "./build/solver/test", depends_on = [
+  "build_test",
+] }
+nbval = { cmd = "pytest --nbval --current-env -p no:warnings", cwd = "./solver/notebooks", depends_on = [
+  "build",
+] }
 
 [dependencies]
 notebook = ">=7.0.7,<7.1"
