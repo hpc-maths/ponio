@@ -1,4 +1,4 @@
-name: Linux CI - compiler tests
+name: ponio CI - [linux] compiler tests
 
 on: [pull_request]
 
