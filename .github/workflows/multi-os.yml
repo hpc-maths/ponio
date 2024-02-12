@@ -32,29 +32,8 @@ jobs:
         with:
           pixi-version: v0.13.0
           cache: true
-      - name: Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.conan2
-          key: ${{ runner.os }}-${{ matrix.compiler }}-${{ hashFiles('./conanfile.py')}}-${{ matrix.CMAKE_GENERATOR }}-${{ hashFiles('**/CMakeLists.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.compiler }}-${{ hashFiles('./conanfile.py') }}-
-      - name: Setup Cpp
-        uses: aminya/setup-cpp@v1
-        with:
-          compiler: ${{ matrix.compiler }}
-          vcvarsall: ${{ contains(matrix.os, 'windows' )}}
-          cmake: true
-          ninja: true
-          vcpkg: false
-          ccache: false
-          conan: 2.0.14
-          clangtidy: false
-          task: false
-          cppcheck: false
-          gcovr: false
-          opencppcoverage: false
+      - name: Install compiler
+        run: pixi add cxx-compiler
       - name: Build
         run: pixi run build_test
       - name: Run tests
