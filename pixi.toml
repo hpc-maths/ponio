@@ -30,7 +30,7 @@ build_test_samurai = { depends_on = ["configure_test_samurai", "build_ninja"] }
 test = { cmd = "./ponio_tests", cwd = "build/solver/test/Release", depends_on = [
   "build_test",
 ] }
-nbval = { cmd = "pytest --nbval --current-env -p no:warnings", cwd = "./solver/notebooks", depends_on = [
+nbval = { cmd = "pytest --nbval --nbval-current-env -p no:warnings", cwd = "./solver/notebooks", depends_on = [
   "build",
 ] }
 
