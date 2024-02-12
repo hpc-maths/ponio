@@ -12,9 +12,6 @@ jobs:
           - windows-2022
           - ubuntu-22.04
           - macos-12
-        compiler:
-          - llvm
-          - gcc
         CMAKE_GENERATOR:
           - "Ninja Multi-Config"
         include:
@@ -32,9 +29,9 @@ jobs:
         with:
           pixi-version: v0.13.0
           cache: true
+      - name: Install compiler
+        run: pixi add cxx-compiler
       - name: Build
-        shell: pixi run bash {0}
         run: pixi run build_test
       - name: Run tests
-        shell: pixi run bash {0}
         run: pixi run test
