@@ -64,6 +64,6 @@ jobs:
         shell: pixi run bash {0}
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-          pixi run tests
+          pixi run test
       - name: Execute notebooks
         run: pixi run nbval
