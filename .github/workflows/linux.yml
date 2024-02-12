@@ -39,7 +39,6 @@ jobs:
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
-      LDFLAGS: ${LDFLAGS} -L$CONDA_PREFIX/lib
     steps:
       - uses: actions/checkout@v4
       - name: Remove GCC 13 from runner image
