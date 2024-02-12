@@ -77,7 +77,7 @@ project_options(
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/solver/include)
 
 # generate butcher_methods.hpp
-find_package(Python COMPONENTS Interpreter REQUIRED)
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
 set(BUTCHER_METHODS "${INCLUDE_DIR}/solver/runge_kutta/butcher_methods.hpp")
 
 set(Ndigit 36)
