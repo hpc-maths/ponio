@@ -36,7 +36,6 @@ foreach(demo IN LISTS demos)
         if(PETSC_FOUND)
             find_package(MPI)
             target_link_libraries(${demo} ${PETSC_LIBRARIES} ${MPI_LIBRARIES})
-            set(LINK_FLAGS "${LINK_FLAGS} ${PETSC_LDFLAGS}")
         endif()
     endif()
 

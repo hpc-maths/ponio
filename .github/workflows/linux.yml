@@ -56,8 +56,12 @@ jobs:
           pixi-version: v0.13.0
           cache: true
       - name: Build
-        run: pixi run build_test_samurai
+        shell: pixi run bash {0}
+        run: |
+          export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"
+          pixi run build_test_samurai
       - name: Run tests
+        shell: pixi run bash {0}
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
           pixi run tests
