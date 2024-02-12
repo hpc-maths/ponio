@@ -18,8 +18,8 @@ jobs:
         with:
           pixi-version: v0.13.0
           cache: true
-      - name: Install compiler
-        run: pixi add cxx-compiler
+      - name: Install compiler and python
+        run: pixi add cxx-compiler python
       - name: Build
         run: pixi run build_test
       - name: Run tests
