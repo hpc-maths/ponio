@@ -1,4 +1,4 @@
-set(demos arenstorf brownian brusselator brusselator_dirk exp heat heat_rock pendulum lorenz lotka_volterra curtiss_hirschfelder systemU)
+set(demos arenstorf brownian brusselator brusselator_dirk exp heat heat_rock pendulum lorenz lotka_volterra curtiss_hirschfelder)
 set(demos_eigen brusselator_dirk)
 set(demos_cli11 brownian lotka_volterra)
 
@@ -34,9 +34,9 @@ foreach(demo IN LISTS demos)
         pkg_check_modules(PETSC PETSc)
 
         if(PETSC_FOUND)
-            message(STATUS "    - find PETSc")
             find_package(MPI)
             target_link_libraries(${demo} ${PETSC_LIBRARIES} ${MPI_LIBRARIES})
+            set(LINK_FLAGS "${LINK_FLAGS} ${PETSC_LDFLAGS}")
         endif()
     endif()
 
