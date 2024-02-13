@@ -62,6 +62,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip3 install -r environment/requirements.txt
+          which python3
 
       - name: Configure CMake
         run: |
