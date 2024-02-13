@@ -59,15 +59,15 @@ jobs:
           gcovr: false
           opencppcoverage: false
 
-      - name: Install dependencies
-        run: |
-          pip3 install -r environment/requirements.txt
-          which python3
 
-      - name: Configure CMake
+      - name: Install dependencies
         run: |
           conan profile detect --force
           conan install . --output-folder=build --build=missing -s compiler.cppstd=20
+          pip3 install -r environment/requirements.txt
+          which python3
+      - name: Configure CMake
+        run: |
           cmake . -B build -G "${{matrix.CMAKE_GENERATOR}}" -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DBUILD_TESTS=ON
 
       - name: Build
