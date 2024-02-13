@@ -87,7 +87,7 @@ file(GLOB json_files
 
 add_custom_command(
     OUTPUT ${BUTCHER_METHODS}
-    COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/solver/code_generator.py ${json_files}
+    COMMAND which ${Python_EXECUTABLE} && ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/solver/code_generator.py ${json_files}
                 -o ${BUTCHER_METHODS}
                 --Ndigit=${Ndigit}
     VERBATIM
