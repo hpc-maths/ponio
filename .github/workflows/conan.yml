@@ -64,8 +64,7 @@ jobs:
         run: |
           conan profile detect --force
           conan install . --output-folder=build --build=missing -s compiler.cppstd=20
-          pip3 install -r environment/requirements.txt
-          which python3
+          python3 -m pip install -r environment/requirements.txt
       - name: Configure CMake
         run: |
           cmake . -B build -G "${{matrix.CMAKE_GENERATOR}}" -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DBUILD_TESTS=ON
