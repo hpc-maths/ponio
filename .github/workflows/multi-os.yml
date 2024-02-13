@@ -18,9 +18,23 @@ jobs:
         with:
           pixi-version: v0.13.0
           cache: true
-      - name: Setup Cpp
+      - name: Windows - Setup C++
+        if: runner.os == 'Windows'
         uses: aminya/setup-cpp@v1
-      - name: Install compiler and python
+        with:
+          compiler: msvc
+          vcvarsall: true
+          cmake: true
+          ninja: true
+          vcpkg: false
+          ccache: false
+          conan: 2.0.17
+          clangtidy: false
+          task: false
+          cppcheck: false
+          gcovr: false
+          opencppcoverage: false
+      - name: Install compiler and Python
         run: pixi add cxx-compiler python
       - name: Build
         run: pixi run build_test
