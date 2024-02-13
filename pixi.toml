@@ -34,6 +34,21 @@ nbval = { cmd = "pytest --nbval --nbval-current-env -p no:warnings", cwd = "./so
   "build",
 ] }
 
+[target.win-64.tasks]
+configure = { cmd = [
+  "cmake",
+  # source
+  ".",
+  # generator
+  "-G",
+  "Visual Studio 17 2022",
+  # build directory
+  "-B",
+  "./build",
+] }
+configure_test = { cmd = "cmake . -G 'Visual Studio 17 2022' -B ./build -DBUILD_TESTS=ON" }
+configure_test_samurai = { cmd = "cmake . -G 'Visual Studio 17 2022' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
+
 [dependencies]
 notebook = ">=7.0.7,<7.1"
 cmake = ">=3.28.2,<3.29"
