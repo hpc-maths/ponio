@@ -77,7 +77,7 @@ project_options(
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/solver/include)
 
 # generate butcher_methods.hpp
-# find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
 set(BUTCHER_METHODS "${INCLUDE_DIR}/solver/runge_kutta/butcher_methods.hpp")
 
 set(Ndigit 36)
@@ -87,9 +87,10 @@ file(GLOB json_files
 
 add_custom_command(
     OUTPUT ${BUTCHER_METHODS}
-    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/solver/code_generator.py ${json_files}
+    COMMAND ${PYTHON3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/solver/code_generator.py ${json_files}
                 -o ${BUTCHER_METHODS}
                 --Ndigit=${Ndigit}
+    COMMENT "Generating code..."
     VERBATIM
 )
 
