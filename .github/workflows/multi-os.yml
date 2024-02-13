@@ -18,6 +18,8 @@ jobs:
         with:
           pixi-version: v0.13.0
           cache: true
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
       - name: Install compiler and python
         run: pixi add cxx-compiler python
       - name: Build
