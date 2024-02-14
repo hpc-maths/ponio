@@ -1,9 +1,9 @@
 name: Midnight CI - clang-tidy check
 
-on: [pull_request]
-  #workflow_dispatch: # allows manual triggering
-  #schedule:
-  #  - cron: "0 0 * * *" # runs daily at 00:00
+on:
+  workflow_dispatch: # allows manual triggering
+  schedule:
+    - cron: "0 0 * * *" # runs daily at 00:00
 
 jobs:
   check_new_commit:
@@ -16,7 +16,8 @@ jobs:
         run: echo "nb_commits=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_OUTPUT
   clang-tidy-check:
     needs: check_new_commit
-    # if: needs.check_new_commit.outputs.nb_commits > 0
+    # if new commit or manual triggering (not at midnight)
+    if: needs.check_new_commit.outputs.nb_commits > 0 || github.event.schedule != '* 0 * * *'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
