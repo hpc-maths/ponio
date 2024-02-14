@@ -28,10 +28,10 @@ jobs:
       - name: Install Cppcheck
         run: pixi add cppcheck cxx-compiler
       - name: Configure
-        run: pixi run build_cppcheck
+        run: pixi run build_debug
       - name: Run Cppcheck on ponio
         run: pixi run cppcheck
-      - name: Build
+      - name: Print result
         shell: pixi run bash {0}
         run: |
           if [[ -s cppcheck_err.txt ]]; then

@@ -41,7 +41,7 @@ jobs:
       - name: Configure
         shell: pixi run bash {0}
         run: |
-          pixi run build_compdb
+          pixi run build_debug
           compdb -p build list > compile_commands.json
       - name: Run clang-tidy on ponio
         shell: pixi run bash {0}

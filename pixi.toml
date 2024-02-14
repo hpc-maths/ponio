@@ -24,10 +24,7 @@ build_ninja = { cmd = "cmake --build ./build --config Release" } # don't call th
 build = { depends_on = ["configure", "build_ninja"] }
 build_test = { depends_on = ["configure_test", "build_ninja"] }
 build_test_samurai = { depends_on = ["configure_test_samurai", "build_ninja"] }
-build_compdb = { cmd = "ninja -C build ponio", depends_on = [
-  "configure_debug",
-] }
-build_cppcheck = { depends_on = ["configure_debug"] }
+build_debug = { cmd = "ninja -C build ponio", depends_on = ["configure_debug"] }
 test = { cmd = "./build/solver/test/Release/ponio_tests", depends_on = [
   "build_test",
 ] }
