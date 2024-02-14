@@ -2,3 +2,5 @@ noExplicitConstructor
 duplInheritedMember
 missingIncludeSystem
 knownConditionTrueFalse
+# suppress unusedFunction in butcher_methods.hpp
+unusedFunction:solver/include/solver/runge_kutta/butcher_methods.hpp
