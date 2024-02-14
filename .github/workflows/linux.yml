@@ -1,9 +1,46 @@
-name: ponio CI - [linux] compiler tests
+name: ponio CI - [linux]
 
 on: [pull_request]
 
 jobs:
-  build:
+  # run hooks
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - uses: pre-commit/action@v3.0.0
+  # run cppcheck
+  cppcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ccache
+          key: cppcheck
+      - uses: prefix-dev/setup-pixi@v0.5.1
+        with:
+          pixi-version: v0.13.0
+          cache: true
+      - name: Install Cppcheck
+        run: pixi add cppcheck=2.12.1 cxx-compiler
+      - name: Configure
+        run: pixi run build_cppcheck
+      - name: Run Cppcheck on ponio
+        run: pixi run cppcheck
+      - name: Build
+        shell: pixi run bash {0}
+        run: |
+          if [[ -s cppcheck_err.txt ]]; then
+            cat cppcheck_err.txt
+            exit -1
+          fi
+  # check compilation on gcc and clang compiler
+  compiler-check:
+    needs: [pre-commit, cppcheck]
     runs-on: ubuntu-latest
     strategy:
       matrix:
