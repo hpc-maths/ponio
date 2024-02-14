@@ -184,8 +184,9 @@ namespace ponio::runge_kutta::rock
     template <typename eig_computer_t, bool _is_embedded = false, typename value_t = double>
     struct rock2_impl
     {
-        static constexpr bool is_embedded     = _is_embedded;
-        static constexpr std::size_t N_stages = stages::dynamic;
+        static constexpr bool is_embedded      = _is_embedded;
+        static constexpr std::size_t N_stages  = stages::dynamic;
+        static constexpr std::size_t N_storage = 3;
 
         using rock_coeff      = rock2_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
@@ -232,11 +233,10 @@ namespace ponio::runge_kutta::rock
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
             auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
-            G.resize( 3 );
 
-            auto& ujm2 = G[0];
+            auto& uj   = G[0];
             auto& ujm1 = G[1];
-            auto& uj   = G[2];
+            auto& ujm2 = G[2];
 
             uj   = un;
             ujm2 = un;
@@ -351,8 +351,9 @@ namespace ponio::runge_kutta::rock
     template <typename eig_computer_t, bool _is_embedded = false, typename value_t = double>
     struct rock4_impl
     {
-        static constexpr bool is_embedded     = _is_embedded;
-        static constexpr std::size_t N_stages = stages::dynamic;
+        static constexpr bool is_embedded      = _is_embedded;
+        static constexpr std::size_t N_stages  = stages::dynamic;
+        static constexpr std::size_t N_storage = 6;
 
         using rock_coeff      = rock4_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
@@ -398,14 +399,12 @@ namespace ponio::runge_kutta::rock
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
             auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
-            G.resize( 6 );
 
-            auto& tmp  = G[0];
-            auto& ujm4 = G[1];
-            auto& ujm3 = G[2];
-            auto& ujm2 = G[3];
-            auto& ujm1 = G[4];
-            auto& uj   = G[5];
+            auto& uj   = G[0];
+            auto& ujm1 = G[1];
+            auto& ujm2 = G[2];
+            auto& ujm3 = G[3];
+            auto& ujm4 = G[4];
 
             uj   = un;
             ujm2 = un;
@@ -476,6 +475,8 @@ namespace ponio::runge_kutta::rock
 
             if constexpr ( is_embedded )
             {
+                auto& tmp = G[5];
+
                 // for embedded method for error estimation
                 value_t const bh_1 = dt * ( rock_coeff::fpbe[deg_index - 1][0] - rock_coeff::fpb[deg_index - 1][0] );
                 value_t const bh_2 = dt * ( rock_coeff::fpbe[deg_index - 1][1] - rock_coeff::fpb[deg_index - 1][1] );
