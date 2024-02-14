@@ -1,7 +1,6 @@
 [project]
 name = "ponio"
-version = "0.1.0"
-description = "Add a short description here"
+version = "0.0.1"
 authors = ["Josselin Massot <josselin.massot@polytechnique.edu>"]
 channels = ["conda-forge"]
 platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
@@ -20,19 +19,21 @@ configure = { cmd = [
 ] }
 configure_test = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON" }
 configure_test_samurai = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
-
+configure_compdb = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug" }
 build_ninja = { cmd = "cmake --build ./build --config Release" } # don't call this rule alone
-
 build = { depends_on = ["configure", "build_ninja"] }
 build_test = { depends_on = ["configure_test", "build_ninja"] }
 build_test_samurai = { depends_on = ["configure_test_samurai", "build_ninja"] }
-
+build_compdb = { cmd = "ninja -C build ponio", depends_on = [
+  "configure_compdb",
+] }
 test = { cmd = "./build/solver/test/Release/ponio_tests", depends_on = [
   "build_test",
 ] }
 nbval = { cmd = "pytest --nbval --nbval-current-env -p no:warnings", cwd = "./solver/notebooks", depends_on = [
   "build",
 ] }
+
 
 [target.win-64.tasks]
 configure = { cmd = "cmake . -G 'Visual Studio 17 2022' -B ./build" }
