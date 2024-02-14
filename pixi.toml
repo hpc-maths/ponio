@@ -32,7 +32,7 @@ nbval = { cmd = "pytest --nbval --nbval-current-env -p no:warnings", cwd = "./so
   "build",
 ] }
 cppcheck = { cmd = "cppcheck --enable=all -q --project=./build/compile_commands.json --suppressions-list=.cppcheck --inline-suppr 2> cppcheck_err.txt", depends_on = [
-  "build_cppcheck",
+  "build_debug",
 ] }
 
 [target.win-64.tasks]
