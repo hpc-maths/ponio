@@ -33,12 +33,12 @@ namespace ponio
     linspace( value_t start, value_t stop, std::size_t num = 50, bool endpoint = true )
     {
         auto N  = ( endpoint ) ? num - 1 : num;
-        auto dt = ( stop - start ) / N;
+        auto dt = ( stop - start ) / static_cast<value_t>( N );
         time_span<value_t> t( num );
 
         for ( std::size_t i = 0; auto& ti : t )
         {
-            ti = ( i++ ) * dt + start;
+            ti = static_cast<value_t>( i++ ) * dt + start;
         }
 
         return t;
