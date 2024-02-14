@@ -1,9 +1,9 @@
 name: Midnight CI - clang-tidy check
 
-on:
-  workflow_dispatch: # allows manual triggering
-  schedule:
-    - cron: "0 0 * * *" # runs daily at 00:00
+on: [pull_request]
+  #workflow_dispatch: # allows manual triggering
+  #schedule:
+  #  - cron: "0 0 * * *" # runs daily at 00:00
 
 jobs:
   check_new_commit:
