@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <iostream>
-
 #include <concepts>
 #include <numeric>
 #include <ranges>
