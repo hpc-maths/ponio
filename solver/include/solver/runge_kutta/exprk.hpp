@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <iostream>
+
 #include <concepts>
 #include <numeric>
 #include <ranges>
@@ -23,7 +25,7 @@ namespace ponio::runge_kutta::exponential_runge_kutta
     {
         template <typename func_t, typename linear_t>
             requires std::invocable<func_t, linear_t>
-        auto
+        [[maybe_unused]] auto
         coefficient_eval( func_t&& f, linear_t&& l )
         {
             return f( std::forward<linear_t>( l ) );
@@ -31,7 +33,7 @@ namespace ponio::runge_kutta::exponential_runge_kutta
 
         template <typename value_t, typename linear_t>
             requires std::is_arithmetic_v<std::remove_cvref_t<value_t>>
-        auto
+        [[maybe_unused]] auto
         coefficient_eval( value_t&& val, linear_t&& )
         {
             return val;
