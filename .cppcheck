@@ -5,3 +5,10 @@ knownConditionTrueFalse
 preprocessorErrorDirective
 # suppress unusedFunction in butcher_methods.hpp
 unusedFunction:solver/include/solver/runge_kutta/butcher_methods.hpp
+# possible false positive
+unusedFunction:solver/include/solver/detail.hpp:82
+unusedFunction:solver/include/solver/detail.hpp:91
+unusedFunction:solver/include/solver/problem.hpp:114
+unusedFunction:solver/include/solver/problem.hpp:153
+unusedFunction:solver/include/solver/runge_kutta/exprk.hpp:27
+unusedFunction:solver/include/solver/runge_kutta/exprk.hpp:42
