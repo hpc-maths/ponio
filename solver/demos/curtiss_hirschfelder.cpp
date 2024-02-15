@@ -28,7 +28,7 @@ $y_0 = 2$
 int
 main()
 {
-    const std::string dirname = "ch_data";
+    std::string const dirname = "ch_data";
 
     using state_t = double;
 
