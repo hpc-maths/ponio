@@ -22,7 +22,7 @@ namespace ponio
     {
         Callable_t f;
 
-        simple_problem( Callable_t& f_ );
+        simple_problem( Callable_t&& f_ );
 
         template <typename state_t, typename value_t>
         state_t
@@ -38,7 +38,7 @@ namespace ponio
      * @param f_       callable object
      */
     template <typename Callable_t>
-    inline simple_problem<Callable_t>::simple_problem( Callable_t& f_ )
+    inline simple_problem<Callable_t>::simple_problem( Callable_t&& f_ )
         : f( f_ )
     {
     }
@@ -71,9 +71,9 @@ namespace ponio
      */
     template <typename Callable_t>
     simple_problem<Callable_t>
-    make_simple_problem( Callable_t c )
+    make_simple_problem( Callable_t&& c )
     {
-        return simple_problem<Callable_t>( c );
+        return simple_problem<Callable_t>( std::forward<Callable_t>( c ) );
     }
 
     // --- IMPLICIT_PROBLEM --------------------------------------------------------
@@ -89,7 +89,7 @@ namespace ponio
 
         Jacobian_t df;
 
-        implicit_problem( Callable_t& f_, Jacobian_t& df_ );
+        implicit_problem( Callable_t&& f_, Jacobian_t&& df_ );
     };
 
     /**
@@ -98,8 +98,8 @@ namespace ponio
      * @param df_      callable object that represents Jacobian of problem
      */
     template <typename Callable_t, typename Jacobian_t>
-    inline implicit_problem<Callable_t, Jacobian_t>::implicit_problem( Callable_t& f_, Jacobian_t& df_ )
-        : simple_problem<Callable_t>( f_ )
+    inline implicit_problem<Callable_t, Jacobian_t>::implicit_problem( Callable_t&& f_, Jacobian_t&& df_ )
+        : simple_problem<Callable_t>( std::forward<Callable_t>( f_ ) )
         , df( df_ )
     {
     }
@@ -111,9 +111,9 @@ namespace ponio
      */
     template <typename Callable_t, typename Jacobian_t>
     implicit_problem<Callable_t, Jacobian_t>
-    make_implicit_problem( Callable_t f, Jacobian_t df )
+    make_implicit_problem( Callable_t&& f, Jacobian_t&& df )
     {
-        return implicit_problem<Callable_t, Jacobian_t>( f, df );
+        return implicit_problem<Callable_t, Jacobian_t>( std::forward<Callable_t>( f ), std::forward<Jacobian_t>( df ) );
     }
 
     // --- IMPLICIT_OPERATOR_PROBLEM -----------------------------------------------
@@ -129,7 +129,7 @@ namespace ponio
 
         Callable2_t f_t;
 
-        implicit_operator_problem( Callable1_t& f_, Callable2_t& f_t_ );
+        implicit_operator_problem( Callable1_t&& f_, Callable2_t&& f_t_ );
     };
 
     /**
@@ -137,8 +137,8 @@ namespace ponio
      * @param f_       callable object
      */
     template <typename Callable1_t, typename Callable2_t>
-    inline implicit_operator_problem<Callable1_t, Callable2_t>::implicit_operator_problem( Callable1_t& f_, Callable2_t& f_t_ )
-        : simple_problem<Callable1_t>( f_ )
+    inline implicit_operator_problem<Callable1_t, Callable2_t>::implicit_operator_problem( Callable1_t&& f_, Callable2_t&& f_t_ )
+        : simple_problem<Callable1_t>( std::forward<Callable1_t>( f_ ) )
         , f_t( f_t_ )
     {
     }
@@ -150,9 +150,9 @@ namespace ponio
      */
     template <typename Callable1_t, typename Callable2_t>
     implicit_operator_problem<Callable1_t, Callable2_t>
-    make_implicit_operator_problem( Callable1_t f, Callable2_t f_t )
+    make_implicit_operator_problem( Callable1_t&& f, Callable2_t&& f_t )
     {
-        return implicit_operator_problem<Callable1_t, Callable2_t>( f, f_t );
+        return implicit_operator_problem<Callable1_t, Callable2_t>( std::forward<Callable1_t>( f ), std::forward<Callable2_t>( f_t ) );
     }
 
     // --- LAWSON_PROBLEM ----------------------------------------------------------
