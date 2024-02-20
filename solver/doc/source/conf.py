@@ -42,8 +42,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinx.ext.graphviz',
-    'breathe',
-    'sphinx.ext.viewcode',
+    'breathe'
 ]
 
 breathe_projects = {'solver': '../xml'}
@@ -89,13 +88,21 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'haiku'
+html_theme = 'pydata_sphinx_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {
+html_theme_options = {"icon_links": [
+    {
+        "name": "GitHub",
+        "url": "https://github.com/hpc-maths/ponio",
+        "icon": "fa-brands fa-square-github",
+        "type": "fontawesome",
+    },
+],
+    "primary_sidebar_end": ["sidebar-ethical-ads.html"],
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -120,7 +127,7 @@ html_css_files = [
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Samuraidoc'
+htmlhelp_basename = 'poniodoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -170,8 +177,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Samurai', 'Samurai Documentation',
-     author, 'Samurai developers', 'One line description of project.',
+    (master_doc, 'Ponio', 'Ponio Documentation',
+     author, 'Ponio developers', 'One line description of project.',
      'Miscellaneous'),
 ]
 
@@ -203,9 +210,7 @@ todo_include_todos = True
 
 # -- Breathe configuration for readthedocs -----------------------------------
 
-
 read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
 
 if read_the_docs_build:
-
     subprocess.call('cd ..; doxygen', shell=True)
