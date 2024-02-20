@@ -9,6 +9,9 @@ dependencies:
   - jinja2
   - cmake
   - ninja
+  - pkg-config
+  - eigen
+  - cli11
   - graphviz
   - breathe
   - doxygen

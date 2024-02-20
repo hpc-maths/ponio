@@ -1,8 +1,8 @@
 version: 2
 build:
-    os: ubuntu-22.04
+    os: ubuntu-lts-latest
     tools:
-        python: "mambaforge-22.9"
+        python: "mambaforge-latest"
     jobs:
         pre_install:
             - bash ./solver/doc/scripts/pre_install.sh
