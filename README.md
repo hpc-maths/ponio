@@ -2,13 +2,33 @@
 
 > Presentation Overview of Numerical Integrator for ODE
 
-La bibliothèque ponio est une collection d'intégrateurs en temps pour la résolution d'ODE et de PDE écrit en C++. ponio a vocation à être le plus simple d'utilisation sans fair de compromis sur les performances.
+The library ponio is a collection of time integrators for solving ODE and PDE written in C++. This library aims to be the easiest to use without compromising on performance.
+
+## Installation
+
+### From conda
+
+>  **SOON**
+
+```
+  conda install ponio
+```
+
+### From source
+
+```
+  git clone https://github.com/hpc-maths/ponio.git
+  cd ponio
+  pixi install
+  pixi build
+```
+
 
 ## Get started
 
 ### Lorenz equations
 
-Intéressons nous à la résolution des équations de Lorenz :
+In this section, we will present how to solve the Lorenz equations, defined:
 
 $$
   \begin{cases}
@@ -18,128 +38,80 @@ $$
   \end{cases}
 $$
 
-ponio a été écrit pour résoudre des problèmes de la forme :
+The ponio library solve a problem written of the form:
 
-$$˜
+$$
   \dot{u} = f(t, u)
 $$
 
-The following steps describe how to solve this problem with samurai. It is important to note that these steps are generally the same whatever the equations we want to solve.
+> The following steps describe how to solve this problem with ponio. It is important to note that these steps are generally the same whatever the equations we want to solve.
 
-* Define the type of your state, generally named `state_t`. For the sake of simplicity, we will use a `std::valarray` container from the STL
+First of all, you have to specify the data type that represents a state $u$ of your ODE (generally named `state_t`). This type needs to support arithmetic operations (addition and multiplication by a scalar), that why we use a `std::valarray<double>` in this example.
 
 ```cpp
   using state_t = std::valarray<double>;
 ```
 
-> **Becareful:** type `state_t` needs to support arithmetic operations. That why we don't use a `std:vector` in this example.
-
-* Define a function, a lambda or a functor that represent the problem
+To integrate a differential equation numerically, one also has to define the rhs of the equation $\dot{u} = f(t, u)$. In ponio you supply this function in terms of functor (an object that implements the `()` operator), a function or a lambda function with a certain parameter structure (time and a state). Hence, the straightforward way would be to just define a lambda function, e.g:
 
 ```cpp
-    const double sigma = 10.;
-    const double rho   = 28.;
-    const double beta  = 8./3.;
+  const double sigma = 10.;
+  const double rho   = 28.;
+  const double beta  = 8./3.;
 
-    auto lorenz = [=]( double t, state_t const& u ) -> state_t
-    {
-      return {
-        sigma * ( u[1] - u[0] ),
-        rho * u[0] - u[1] - u[0] * u[2],
-        u[0] * u[1] - beta * u[2]
-      };
-    };
-```
-
-* Define $\Delta t$ and `t_span`
-
-Quelque soit le problème, la première chose à faire sera d'écrire une fonction prenant le temps et un état (de type `state_t`), et renvoyant un état.
-
-> **Attention :** Le type `state_t` doit pouvoir supporter des opérations arithmétiques.
-
-For the sake of simplicity, nous prendrons ici le type `std::valarray<double>` pour le type de notre état. Pour les équations de Lorenz, la fonction $f:t,u \mapsto f(t,u)$ s'écrit :
-
-```cpp
-  std::valarray<double> lorenz( double t, std::valarray<double> const& u )
+  auto lorenz_rhs = [=]( double /* t */, state_t&& u ) -> state_t
   {
-    const double sigma = 10.;
-    const double rho   = 28.;
-    const double beta  = 8./3.;
-
     return {
-        sigma * ( u[1] - u[0] ),
-        rho * u[0] - u[1] - u[0] * u[2],
-        u[0] * u[1] - beta * u[2]
+      sigma * ( u[1] - u[0] ),
+      rho * u[0] - u[1] - u[0] * u[2],
+      u[0] * u[1] - beta * u[2]
     };
-  }
+  };
 ```
 
-
-You first need to define
+Numerical integration works iteratively, that means you start at a state $u(t^n)$ and perform a time-step of length $\Delta t$ to obtain the approximate state $u(t^n+\Delta t) = u(t^{n+1})$. The library ponio calls for you iteratively the method between the initial time $t^0$ the final time $t^N$, which are defined in a time span. You should also define your initial condition $u(t^0)$.
 
 ```cpp
-  #include <valarray>
+  state_t u_ini = {1., 1., 1.};
 
-  #include <solver/observer.hpp>
-  #include <solver/runge_kutta.hpp>
-  #include <solver/solver.hpp>
-  #include <solver/time_span.hpp>
-
-  int
-  main()
-  {
-    using namespace observer;
-    using state_t = std::valarray<double>;
-    const double sigma = 10.;
-    const double rho   = 28.;
-    const double beta  = 8./3.;
-
-    auto lorenz = [=]( double t, state_t const& u ) -> state_t
-    {
-      return {
-        sigma * ( u[1] - u[0] ),
-        rho * u[0] - u[1] - u[0] * u[2],
-        u[0] * u[1] - beta * u[2]
-      };
-    };
-
-    state_t u_ini = {1., 1., 1.};
-
-    ponio::time_span<double> const t_span = {0., 20.};
-
-    double const dt = 0.01;
-
-    ponio::solve( lorenz, ponio::runge_kutta::rk_44(), u_ini, t_span, dt, "lorenz_sol.txt"_fobs );
-  }
+  double dt = 0.01;
+  ponio::time_span<double> t_span = { 0., 20. };
 ```
 
-## Installation
+> Even if you will use an adaptive time step method to solve the ODE, in ponio you should define an initial time step `dt`.
 
-### From conda
+> The time span can contains intermediate value where the time stepper should pass.
 
+The function `ponio::solve`, which be used to solve the ODE, returns the state at final time, but maybe you want some information on state at each iteration. To do this, ponio library offers some *observers*. For the sake of simplicity we will prestent the file observer which write data in columns, the first one is the current time, the following columns are state (3 columns for the state of Lorenz equation), and the last one is the time step. The ponio library offers literal operators to create a file observer from a string which contains the filename of output file.
 
+```cpp
+  using namespace observer;
+
+  auto obs = "sol.txt"_fobs
 ```
-  conda install ponio
-```
 
-### From source
+Now you are ready to solve your problem with an explicit Runge-Kutta method, see [algorithm overview](https://ponio.readthedocs.io/en/latest/api/algorithm.html). In this example we will use the classical Runge-Kutta scheme of 4th order.
 
-```
-  git clone https://...
-  cd ponio
-  ...
+```cpp
+  ponio::solver( lorenz_rhs, ponio::runge_kutta::rk_44(), u_ini, t_span, dt, obs);
 ```
 
 ## For more information
 
-* [Documentation](#)
-* [Github repository](#)
-* [Demos](#)
-* [Notebooks examples](#)
-* [List of methods and their analysis](#)
+* [Documentation](https://ponio.readthedocs.io/en/latest/index.html)
+* [Github repository](https://github.com/hpc-maths/ponio)
+* [Demos](https://github.com/hpc-maths/ponio/tree/main/solver/demos)
+* [Notebooks examples](https://github.com/hpc-maths/ponio/tree/main/solver/notebooks)
+* [List of methods and their analysis](http://jmassot.perso.math.cnrs.fr/ponio/) (personal webpage of main developer)
 
 ## How to contribute
 
 ## Roadmap
 
 ## How to cite
+
+## License
+
+This project is licensed under the **BSD license**.
+
+See [LICENSE](https://github.com/hpc-maths/ponio/blob/main/LICENSE) for more information.
