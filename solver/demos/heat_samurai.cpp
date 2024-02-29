@@ -115,10 +115,18 @@ main( int argc, char** argv )
     // Time step
     double dt = cfl * samurai::cell_length( max_level ) * samurai::cell_length( max_level );
 
+    auto eigmax_computer = [=]( auto&, double, auto&, double )
+    {
+        double dx = samurai::cell_length( max_level );
+        return 4. / ( dx * dx );
+    };
+
     // Range to iterate over solution
     // auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::rkc_202(), un_ini, { 0., Tf }, dt );
-    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::dirk23(), un_ini, { 0., Tf }, dt );
-    auto it_sol    = sol_range.begin();
+    // auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::dirk23(), un_ini, { 0., Tf }, dt );
+    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::rock::rock4<false>( eigmax_computer ), un_ini, { 0., Tf }, dt );
+
+    auto it_sol = sol_range.begin();
 
     // Prepare MR for solution on iterator
     auto MRadaptation = samurai::make_MRAdapt( it_sol->state );
@@ -129,10 +137,11 @@ main( int argc, char** argv )
     std::size_t n_save = 0;
     save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save++ ) );
 
+    std::cerr << "> time loop" << std::endl;
     while ( it_sol->time < Tf )
     {
-        samurai::make_bc<samurai::Neumann>( it_sol->state, 0. );
-        // TODO: add a callback function to make this before each iteration
+        // samurai::make_bc<samurai::Neumann>( it_sol->state, 0. );
+        //  TODO: add a callback function to make this before each iteration
         for ( auto& ki : it_sol.meth.kis )
         {
             ki.resize();

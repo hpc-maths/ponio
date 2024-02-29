@@ -28,7 +28,7 @@ struct arenstorf_model
     }
 
     state_t
-    operator()( double, state_t const& y ) const
+    operator()( double, state_t&& y ) const
     {
         double const y1 = y[0];
         double const y2 = y[1];
@@ -60,7 +60,7 @@ main( int, char** )
 
     double const mu = 0.012277471;
 
-    auto arenstorf_pb = ponio::make_problem( arenstorf_model( mu ) );
+    auto arenstorf_pb = arenstorf_model( mu ); // ponio::make_problem( arenstorf_model( mu ) );
 
     state_t const yini = { 0.994, 0., 0., -2.00158510637908252240537862224 };
 

@@ -35,7 +35,7 @@ struct C_random_device
     }
 
     static double
-    entropy() noexcept
+    entropy() noexcept // cppcheck-suppress unusedFunction
     {
         return 42.0;
     }

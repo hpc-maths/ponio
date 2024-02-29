@@ -22,11 +22,15 @@ namespace ponio
     {
         Callable_t f;
 
-        simple_problem( Callable_t& f_ );
+        simple_problem( Callable_t&& f_ );
 
         template <typename state_t, typename value_t>
         state_t
-        operator()( value_t t, state_t const& u );
+        operator()( value_t t, state_t&& u );
+
+        template <typename state_t, typename value_t>
+        state_t
+        operator()( value_t t, state_t& u );
     };
 
     /**
@@ -34,7 +38,7 @@ namespace ponio
      * @param f_       callable object
      */
     template <typename Callable_t>
-    inline simple_problem<Callable_t>::simple_problem( Callable_t& f_ )
+    inline simple_problem<Callable_t>::simple_problem( Callable_t&& f_ )
         : f( f_ )
     {
     }
@@ -48,7 +52,15 @@ namespace ponio
     template <typename Callable_t>
     template <typename state_t, typename value_t>
     inline state_t
-    simple_problem<Callable_t>::operator()( value_t t, state_t const& u )
+    simple_problem<Callable_t>::operator()( value_t t, state_t&& u )
+    {
+        return f( t, std::forward<state_t>( u ) );
+    }
+
+    template <typename Callable_t>
+    template <typename state_t, typename value_t>
+    inline state_t
+    simple_problem<Callable_t>::operator()( value_t t, state_t& u )
     {
         return f( t, u );
     }
@@ -59,9 +71,9 @@ namespace ponio
      */
     template <typename Callable_t>
     simple_problem<Callable_t>
-    make_simple_problem( Callable_t c )
+    make_simple_problem( Callable_t&& c )
     {
-        return simple_problem<Callable_t>( c );
+        return simple_problem<Callable_t>( std::forward<Callable_t>( c ) );
     }
 
     // --- IMPLICIT_PROBLEM --------------------------------------------------------
@@ -77,7 +89,7 @@ namespace ponio
 
         Jacobian_t df;
 
-        implicit_problem( Callable_t& f_, Jacobian_t& df_ );
+        implicit_problem( Callable_t&& f_, Jacobian_t&& df_ );
     };
 
     /**
@@ -86,8 +98,8 @@ namespace ponio
      * @param df_      callable object that represents Jacobian of problem
      */
     template <typename Callable_t, typename Jacobian_t>
-    inline implicit_problem<Callable_t, Jacobian_t>::implicit_problem( Callable_t& f_, Jacobian_t& df_ )
-        : simple_problem<Callable_t>( f_ )
+    inline implicit_problem<Callable_t, Jacobian_t>::implicit_problem( Callable_t&& f_, Jacobian_t&& df_ )
+        : simple_problem<Callable_t>( std::forward<Callable_t>( f_ ) )
         , df( df_ )
     {
     }
@@ -99,9 +111,9 @@ namespace ponio
      */
     template <typename Callable_t, typename Jacobian_t>
     implicit_problem<Callable_t, Jacobian_t>
-    make_implicit_problem( Callable_t f, Jacobian_t df )
+    make_implicit_problem( Callable_t&& f, Jacobian_t&& df )
     {
-        return implicit_problem<Callable_t, Jacobian_t>( f, df );
+        return implicit_problem<Callable_t, Jacobian_t>( std::forward<Callable_t>( f ), std::forward<Jacobian_t>( df ) );
     }
 
     // --- IMPLICIT_OPERATOR_PROBLEM -----------------------------------------------
@@ -117,7 +129,7 @@ namespace ponio
 
         Callable2_t f_t;
 
-        implicit_operator_problem( Callable1_t& f_, Callable2_t& f_t_ );
+        implicit_operator_problem( Callable1_t&& f_, Callable2_t&& f_t_ );
     };
 
     /**
@@ -125,8 +137,8 @@ namespace ponio
      * @param f_       callable object
      */
     template <typename Callable1_t, typename Callable2_t>
-    inline implicit_operator_problem<Callable1_t, Callable2_t>::implicit_operator_problem( Callable1_t& f_, Callable2_t& f_t_ )
-        : simple_problem<Callable1_t>( f_ )
+    inline implicit_operator_problem<Callable1_t, Callable2_t>::implicit_operator_problem( Callable1_t&& f_, Callable2_t&& f_t_ )
+        : simple_problem<Callable1_t>( std::forward<Callable1_t>( f_ ) )
         , f_t( f_t_ )
     {
     }
@@ -138,9 +150,9 @@ namespace ponio
      */
     template <typename Callable1_t, typename Callable2_t>
     implicit_operator_problem<Callable1_t, Callable2_t>
-    make_implicit_operator_problem( Callable1_t f, Callable2_t f_t )
+    make_implicit_operator_problem( Callable1_t&& f, Callable2_t&& f_t )
     {
-        return implicit_operator_problem<Callable1_t, Callable2_t>( f, f_t );
+        return implicit_operator_problem<Callable1_t, Callable2_t>( std::forward<Callable1_t>( f ), std::forward<Callable2_t>( f_t ) );
     }
 
     // --- LAWSON_PROBLEM ----------------------------------------------------------
@@ -157,11 +169,11 @@ namespace ponio
         Linear_t l;
         Nonlinear_t n;
 
-        lawson_problem( Linear_t& l_, Nonlinear_t& n_ );
+        lawson_problem( Linear_t&& l_, Nonlinear_t&& n_ );
 
         template <typename state_t, typename value_t>
         state_t
-        operator()( value_t t, state_t const& u );
+        operator()( value_t t, state_t&& u );
     };
 
     /**
@@ -170,7 +182,7 @@ namespace ponio
      * @param n_       nonlinerar part \f$N(t,u)\f$ of Lawson problem
      */
     template <typename Linear_t, typename Nonlinear_t>
-    lawson_problem<Linear_t, Nonlinear_t>::lawson_problem( Linear_t& l_, Nonlinear_t& n_ )
+    lawson_problem<Linear_t, Nonlinear_t>::lawson_problem( Linear_t&& l_, Nonlinear_t&& n_ )
         : l( l_ )
         , n( n_ )
     {
@@ -185,7 +197,7 @@ namespace ponio
     template <typename Linear_t, typename Nonlinear_t>
     template <typename state_t, typename value_t>
     state_t
-    lawson_problem<Linear_t, Nonlinear_t>::operator()( value_t t, state_t const& u )
+    lawson_problem<Linear_t, Nonlinear_t>::operator()( value_t t, state_t&& u )
     {
         return l * u + n( t, u );
     }
@@ -197,68 +209,9 @@ namespace ponio
      */
     template <typename Linear_t, typename Nonlinear_t>
     lawson_problem<Linear_t, Nonlinear_t>
-    make_lawson_problem( Linear_t l, Nonlinear_t n )
+    make_lawson_problem( Linear_t&& l, Nonlinear_t&& n )
     {
-        return lawson_problem<Linear_t, Nonlinear_t>( l, n );
-    }
-
-    // --- IMEX_PROBLEM ------------------------------------------------------------
-    /** @class imex_problem
-     *  define a problem with a easy to implicit part and part which will be solve explicitly
-     *  @tparam Implicit_t  type of the easy to implicit part
-     *  @tparam Explicit_t  type of callable of the explicit part (function or functor)
-     *
-     *  This class represent a problem of the form \f( \dot{u}=I(t,u) + E(t,u) \f)
-     */
-    template <typename Implicit_t, typename Explicit_t>
-    struct imex_problem
-    {
-        Implicit_t i;
-        Explicit_t e;
-
-        imex_problem( Implicit_t& i_, Explicit_t& e_ );
-
-        template <typename state_t, typename value_t>
-        state_t
-        operator()( value_t t, state_t const& u );
-    };
-
-    /**
-     * constructor of \ref imex_problem
-     * @param i_       easy to implicit part \f$I(t,u)\f$ of IMEX problem
-     * @param e_       explicit part \f$E(t,u)\f$ of IMEX problem
-     */
-    template <typename Implicit_t, typename Explicit_t>
-    imex_problem<Implicit_t, Explicit_t>::imex_problem( Implicit_t& i_, Explicit_t& e_ )
-        : i( i_ )
-        , e( e_ )
-    {
-    }
-
-    /**
-     * call operator to evaluate \f$f(t,u)\f$
-     * @param t time value \f$t\f$
-     * @param u variable of the problem value \f$u\f$
-     * @return Returns \f$I(t,u) + E(t,u)\f$
-     */
-    template <typename Implicit_t, typename Explicit_t>
-    template <typename state_t, typename value_t>
-    state_t
-    imex_problem<Implicit_t, Explicit_t>::operator()( value_t t, state_t const& u )
-    {
-        return i * u + e( t, u );
-    }
-
-    /**
-     * factory of \ref imex_problem
-     * @param i        easy to implicit part \f$I(t,u)\f$ of IMEX problem
-     * @param e        explicit part \f$E(t,u)\f$ of IMEX problem
-     */
-    template <typename Implicit_t, typename Explicit_t>
-    imex_problem<Implicit_t, Explicit_t>
-    make_imex_problem( Implicit_t i, Explicit_t e )
-    {
-        return imex_problem<Implicit_t, Explicit_t>( i, e );
+        return lawson_problem<Linear_t, Nonlinear_t>( std::forward<Linear_t>( l ), std::forward<Nonlinear_t>( n ) );
     }
 
     // --- PROBLEM -----------------------------------------------------------------
@@ -277,15 +230,15 @@ namespace ponio
 
         template <typename value_t, typename state_t, std::size_t... Is>
         state_t
-        _sum_components_impl( value_t t, state_t const& u, std::index_sequence<Is...> );
+        _sum_components_impl( value_t t, state_t&& u, std::index_sequence<Is...> );
 
         template <typename value_t, typename state_t>
         state_t
-        operator()( value_t t, state_t const& u );
+        operator()( value_t t, state_t&& u );
 
         template <std::size_t Index, typename value_t, typename state_t>
         state_t
-        call( value_t t, state_t const& u );
+        call( value_t t, state_t&& u );
     };
 
     /**
@@ -308,9 +261,9 @@ namespace ponio
     template <typename... Callables_t>
     template <typename value_t, typename state_t, std::size_t... Is>
     inline state_t
-    problem<Callables_t...>::_sum_components_impl( value_t t, state_t const& u, std::index_sequence<Is...> )
+    problem<Callables_t...>::_sum_components_impl( value_t t, state_t&& u, std::index_sequence<Is...> )
     {
-        return ( call<Is>( t, u ) + ... );
+        return ( call<Is>( t, std::forward<state_t>( u ) ) + ... );
     }
 
     /**
@@ -322,7 +275,7 @@ namespace ponio
     template <typename... Callables_t>
     template <typename value_t, typename state_t>
     inline state_t
-    problem<Callables_t...>::operator()( value_t t, state_t const& u )
+    problem<Callables_t...>::operator()( value_t t, state_t&& u )
     {
         return _sum_components_impl( t, u, std::make_index_sequence<size>{} );
     }
@@ -337,9 +290,9 @@ namespace ponio
     template <typename... Callables_t>
     template <std::size_t Index, typename value_t, typename state_t>
     inline state_t
-    problem<Callables_t...>::call( value_t t, state_t const& u )
+    problem<Callables_t...>::call( value_t t, state_t&& u )
     {
-        return std::get<Index>( system )( t, u );
+        return std::get<Index>( system )( t, std::forward<state_t>( u ) );
     }
 
     /**

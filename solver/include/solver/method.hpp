@@ -198,13 +198,14 @@ namespace ponio
     struct method<Algorithm_t, state_t>
     {
         static constexpr bool is_embedded = Algorithm_t::is_embedded;
-        using step_storage_t              = std::vector<state_t>;
+        using step_storage_t              = std::array<state_t, Algorithm_t::N_storage>;
 
         Algorithm_t alg;
         step_storage_t kis;
 
-        method( Algorithm_t const& alg_, state_t const& )
+        method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
             : alg( alg_ )
+            , kis( ::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
         {
         }
 
@@ -212,8 +213,6 @@ namespace ponio
         inline std::tuple<value_t, state_t, value_t>
         operator()( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
-            kis.clear();
-
             return alg( f, tn, un, kis, dt );
         }
     };
