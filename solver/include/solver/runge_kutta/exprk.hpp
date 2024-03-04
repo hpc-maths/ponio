@@ -49,8 +49,8 @@ namespace ponio::runge_kutta::exponential_runge_kutta
         tpl_inner_product_impl( tuple_t const& a,
             array_t const& k,
             state_t const& init,
-            linear_t const& linear_part,
-            value_t mul_coeff,
+            [[maybe_unused]] linear_t const& linear_part,
+            [[maybe_unused]] value_t mul_coeff,
             std::index_sequence<Is...> )
         {
             return (

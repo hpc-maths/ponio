@@ -52,7 +52,7 @@ class heat_model
     }
 
     std::valarray<double>
-    fundamental_sol( double t, std::valarray<double> const& x )
+    fundamental_sol( double t, std::valarray<double> const& x ) const
     {
         double const xmid = 0.5 * ( m_xmax + m_xmin );
         double const pi   = std::numbers::pi;
@@ -135,7 +135,7 @@ main()
 
     for ( std::size_t N = 1; N < 513; N *= 2 )
     {
-        double dt = ( t_end - t_ini ) / static_cast<double>( N );
+        double const dt = ( t_end - t_ini ) / static_cast<double>( N );
 
         y2_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock2( eigmax_computer ), y_ini, tspan, dt, observer::null_observer() );
         y4_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock4(), y_ini, tspan, dt, observer::null_observer() );

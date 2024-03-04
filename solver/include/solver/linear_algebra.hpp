@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <concepts>
 
 namespace ponio::linear_algebra
@@ -68,7 +69,7 @@ namespace ponio::linear_algebra
             auto op_xn   = op( xn );
             auto op_xnm1 = op( xnm1 );
 
-            scalar_t residual = std::abs( op_xn - rhs );
+            scalar_t residual = abs( op_xn - rhs );
 
             std::size_t iter = 0;
             while ( iter < max_iter && residual > tol )
@@ -82,7 +83,7 @@ namespace ponio::linear_algebra
                 xn      = xnp1;
                 op_xn   = op( xn );
 
-                residual = std::abs( op_xn - rhs );
+                residual = abs( op_xn - rhs );
                 iter += 1;
             }
         }

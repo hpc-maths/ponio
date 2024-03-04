@@ -15,19 +15,18 @@
 #include <solver/solver.hpp>
 
 #include <filesystem>
-namespace fs = std::filesystem;
 
 template <class Field>
 void
-save( fs::path const& path, std::string const& filename, Field& u, std::string const& suffix = "" )
+save( std::filesystem::path const& path, std::string const& filename, Field& u, std::string const& suffix = "" )
 {
     auto mesh   = u.mesh();
     auto level_ = samurai::make_field<std::size_t, 1>( "level", mesh );
     u.name()    = "u";
 
-    if ( !fs::exists( path ) )
+    if ( !std::filesystem::exists( path ) )
     {
-        fs::create_directory( path );
+        std::filesystem::create_directory( path );
     }
 
     samurai::for_each_cell( mesh,
@@ -71,22 +70,22 @@ main( int argc, char** argv )
     using Config              = samurai::MRConfig<dim>;
 
     // Simulation parameters
-    double left_box  = -5;
-    double right_box = 5;
-    bool is_periodic = false;
-    double Tf        = 0.5;
-    double cfl       = 0.5;
+    double const left_box  = -5;
+    double const right_box = 5;
+    bool const is_periodic = false;
+    double const Tf        = 0.5;
+    double const cfl       = 0.5;
 
     // Multiresolution parameters
-    std::size_t min_level = 2;
-    std::size_t max_level = 5;
-    double mr_epsilon     = 2.e-4; // Threshold used by multiresolution
-    double mr_regularity  = 1.;    // Regularity guess for multiresolution
+    std::size_t const min_level = 2;
+    std::size_t const max_level = 5;
+    double const mr_epsilon     = 2.e-4; // Threshold used by multiresolution
+    double const mr_regularity  = 1.;    // Regularity guess for multiresolution
 
     // Output parameters
-    std::string const dirname = "heat_samurai_data";
-    fs::path path             = std::filesystem::path( dirname );
-    std::string filename      = "sol_1d";
+    std::string const dirname  = "heat_samurai_data";
+    std::filesystem::path path = std::filesystem::path( dirname );
+    std::string filename       = "sol_1d";
 
     // Define mesh
     samurai::Box<double, dim> const box( { left_box }, { right_box } );
