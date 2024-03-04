@@ -133,7 +133,8 @@ namespace ponio::runge_kutta::rock
             static std::pair<std::size_t, std::size_t>
             optimal_degree( std::size_t& mdeg )
             {
-                std::size_t mz = 1, mr = 1;
+                std::size_t mz = 1;
+                std::size_t mr = 1;
 
                 std::size_t iter = 1;
                 while ( iter < rock_coeff::ms.size() + 1 && rock_coeff::ms[iter - 1] / mdeg <= 1 )
@@ -151,8 +152,8 @@ namespace ponio::runge_kutta::rock
             static std::size_t
             compute_n_stages( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt )
             {
-                double eigmax    = eig_computer( f, tn, un, dt );
-                std::size_t mdeg = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
+                double eigmax = eig_computer( f, tn, un, dt );
+                auto mdeg     = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
                 if ( mdeg > 200 )
                 {
                     mdeg = 200;
