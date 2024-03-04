@@ -10,11 +10,11 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
 endif()
 
 # set version
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/version.txt")
-  file(READ "${CMAKE_CURRENT_SOURCE_DIR}/version.txt" PONIO_VERSION)
-  string(STRIP "${PONIO_VERSION}" PONIO_VERSION)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.release-please-manifest.json")
+  file(READ "${CMAKE_CURRENT_SOURCE_DIR}/.release-please-manifest.json" PONIO_VERSION_JSON)
+  string(JSON PONIO_VERSION GET "${PONIO_VERSION_JSON}" ".")
 else()
-  message(FATAL_ERROR "File ${CMAKE_CURRENT_SOURCE_DIR}/version.txt not found")
+  message(FATAL_ERROR "File ${CMAKE_CURRENT_SOURCE_DIR}/.release-please-manifest.json not found")
 endif()
 
 # add project_options v0.33.0
