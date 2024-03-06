@@ -32,7 +32,7 @@ struct test_order
         if constexpr ( type == class_method::explicit_method )
         {
             INFO( "test order of ", rk_t::id );
-            WARN( check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( explicit_method::check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
         }
         else if constexpr ( type == class_method::diagonal_implicit_method )
         {
@@ -46,8 +46,8 @@ struct test_order
         }
         else if constexpr ( type == class_method::additive_method )
         {
-            INFO( "not implemented test for additive method" );
-            WARN( false );
+            INFO( "test order of ", rk_t::id );
+            WARN( additive_method::check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
         }
         else
         {

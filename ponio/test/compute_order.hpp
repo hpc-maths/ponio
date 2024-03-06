@@ -63,138 +63,209 @@ relative_error( T u, T v )
     return std::abs( ( u - v ) / u );
 }
 
-template <typename Algorithm_t, typename T = double>
-auto
-solve_exp( Algorithm_t& algo, T dt, T Tf )
+namespace explicit_method
 {
-    using state_t = T;
-
-    auto pb = []( T, state_t y ) -> state_t
+    template <typename Algorithm_t, typename T = double>
+    auto
+    solve_exp( Algorithm_t& algo, T dt, T Tf )
     {
-        return y;
-    };
+        using state_t = T;
 
-    state_t y0            = 1.0;
-    std::vector<T> t_span = { 0., Tf };
+        auto pb = []( T, state_t y ) -> state_t
+        {
+            return y;
+        };
+
+        state_t y0                 = 1.0;
+        ponio::time_span<T> t_span = { 0., Tf };
 
 #ifdef DEBUG
-    std::stringstream ss;
-    ss << "debug_info/" << std::string( Algorithm_t::id ) << "/dt_" << dt << ".dat";
-    std::string filename = ss.str();
-    auto obs             = observer::file_observer( filename );
+        std::stringstream ss;
+        ss << "debug_info/" << std::string( Algorithm_t::id ) << "/dt_" << dt << ".dat";
+        std::string filename = ss.str();
+        auto obs             = observer::file_observer( filename );
 #else
-    auto obs = []( T, state_t, T ) {};
+        auto obs = []( T, state_t, T ) {};
 #endif
-    return ponio::solve( pb, algo, y0, { 0., Tf }, dt, obs );
-}
+        return ponio::solve( pb, algo, y0, t_span, dt, obs );
+    }
 
-template <typename Algorithm_t, typename T = double>
-T
-short_time_check_order( Algorithm_t algo = Algorithm_t() )
-{
-    using state_t = T;
+    template <typename Algorithm_t, typename T = double>
+    T
+    short_time_check_order( Algorithm_t algo = Algorithm_t() )
+    {
+        using state_t = T;
 
-    std::vector<T> errors;
-    std::vector<T> dts;
+        std::vector<T> errors;
+        std::vector<T> dts;
 
-    T Tf = 1.0;
+        T Tf = 1.0;
 
-    state_t u_exa = std::exp( Tf ); // solution of Brusselator at time 1.0
+        state_t u_exa = std::exp( Tf );
 
 #ifdef DEBUG
-    fs::create_directories( "debug_info/" + std::string( Algorithm_t::id ) );
-    std::ofstream f( "debug_info/" + std::string( Algorithm_t::id ) + "/errors.dat"s );
+        fs::create_directories( "debug_info/" + std::string( Algorithm_t::id ) );
+        std::ofstream f( "debug_info/" + std::string( Algorithm_t::id ) + "/errors.dat"s );
 #endif
 
-    for ( auto n_iter : { 50, 25, 20, 15, 10 } )
-    {
-        T dt          = Tf / n_iter;
-        state_t u_sol = solve_exp( algo, dt, Tf );
-        auto e        = error( u_exa, u_sol );
-        errors.push_back( std::log( e ) );
-        dts.push_back( std::log( dt ) );
+        for ( auto n_iter : { 50, 25, 20, 15, 10 } )
+        {
+            T dt          = Tf / n_iter;
+            state_t u_sol = solve_exp( algo, dt, Tf );
+            auto e        = error( u_exa, u_sol );
+            errors.push_back( std::log( e ) );
+            dts.push_back( std::log( dt ) );
 
 #ifdef DEBUG
-        f << dt << " " << e << "\n";
+            f << dt << " " << e << "\n";
 #endif
-    }
+        }
 
 #ifdef DEBUG
-    f.close();
+        f.close();
 #endif
 
-    auto [a, b] = mayor_method( dts, errors );
+        auto [a, b] = mayor_method( dts, errors );
 
-    return a;
-}
+        return a;
+    }
 
-template <typename Algorithm_t, typename T = double>
-T
-long_time_check_order( Algorithm_t& algo )
+    template <typename Algorithm_t, typename T = double>
+    T
+    long_time_check_order( Algorithm_t& algo )
+    {
+        using state_t = std::valarray<T>;
+
+        T alpha = 2. / 3.;
+        T beta  = 4. / 3.;
+        T gamma = 1.;
+        T delta = 1.;
+
+        // make a problem that can be use also for splitting (in 3 parts) methods
+        auto pb = ponio::make_problem(
+            [=]( T, state_t&& u ) -> state_t
+            {
+                return { alpha * u[0] - beta * u[0] * u[1], 0. };
+            },
+            [=]( T, state_t&& u ) -> state_t
+            {
+                return { 0., delta * u[0] * u[1] };
+            },
+            [=]( T, state_t&& u ) -> state_t
+            {
+                return { 0., -gamma * u[1] };
+            } );
+
+        // invariant calculator
+        auto V = [=]( state_t const& u ) -> T
+        {
+            return delta * u[0] - gamma * std::log( u[0] ) + beta * u[1] - alpha * std::log( u[1] );
+        };
+
+        T x0          = 1.9;
+        state_t u_ini = { x0, x0 };
+        T V_ini       = V( u_ini );
+
+        ponio::time_span<T> t_span = { 0., 1000. };
+        std::vector<T> dts         = { 0.25, 0.125, 0.1, 0.075, 0.05 }; // find a way to adapt this range to the method
+        std::vector<T> relative_errors;
+        std::vector<T> log_dts;
+
+        for ( auto dt : dts )
+        {
+            state_t u_end = ::ponio::solve( pb, algo, u_ini, t_span, dt, []( T, state_t const&, T ) {} );
+            relative_errors.push_back( std::log10( relative_error( V_ini, V( u_end ) ) ) );
+            log_dts.push_back( std::log10( dt ) );
+        }
+
+        auto [a, b] = mayor_method( log_dts, relative_errors );
+
+        return a;
+    }
+
+    template <typename Algorithm_t, typename T = double>
+    T
+    check_order( Algorithm_t algo = Algorithm_t() )
+    {
+        if constexpr ( ponio::runge_kutta::butcher::is_embedded<Algorithm_t> )
+        {
+            return Algorithm_t::order;
+        }
+        else if constexpr ( Algorithm_t::order >= 8 || ponio::splitting::is_splitting_method<Algorithm_t> )
+        {
+            return long_time_check_order( algo );
+        }
+        else
+        {
+            return short_time_check_order( algo );
+        }
+    }
+
+} // namespace explicit_method
+
+namespace additive_method
 {
-    using state_t = std::valarray<T>;
 
-    T alpha = 2. / 3.;
-    T beta  = 4. / 3.;
-    T gamma = 1.;
-    T delta = 1.;
-
-    // make a problem that can be use also for splitting (in 3 parts) methods
-    auto pb = ponio::make_problem(
-        [=]( T, state_t&& u ) -> state_t
-        {
-            return { alpha * u[0] - beta * u[0] * u[1], 0. };
-        },
-        [=]( T, state_t&& u ) -> state_t
-        {
-            return { 0., delta * u[0] * u[1] };
-        },
-        [=]( T, state_t&& u ) -> state_t
-        {
-            return { 0., -gamma * u[1] };
-        } );
-
-    // invariant calculator
-    auto V = [=]( state_t const& u ) -> T
+    template <typename Algorithm_t, typename T = double>
+    auto
+    solve_exp( Algorithm_t& algo, T dt, T Tf )
     {
-        return delta * u[0] - gamma * std::log( u[0] ) + beta * u[1] - alpha * std::log( u[1] );
-    };
+        using state_t = T;
+        T lambda      = 1. / 3.;
 
-    T x0          = 1.9;
-    state_t u_ini = { x0, x0 };
-    T V_ini       = V( u_ini );
+        auto pb = ponio::make_imex_jacobian_problem(
+            []( T, state_t y ) -> state_t
+            {
+                return lambda * y;
+            },
+            []( T, state_t y ) -> state_t
+            {
+                return ( 1. - lambda ) * y;
+            },
+            []( T, state_t ) -> state_t
+            {
+                return 1. - lambda;
+            } );
 
-    ponio::time_span<T> t_span = { 0., 1000. };
-    std::vector<T> dts         = { 0.25, 0.125, 0.1, 0.075, 0.05 }; // find a way to adapt this range to the method
-    std::vector<T> relative_errors;
-    std::vector<T> log_dts;
+        state_t y0                 = 1.0;
+        ponio::time_span<T> t_span = { 0., Tf };
 
-    for ( auto dt : dts )
-    {
-        state_t u_end = ponio::solve( pb, algo, u_ini, t_span, dt, []( T, state_t const&, T ) {} );
-        relative_errors.push_back( std::log10( relative_error( V_ini, V( u_end ) ) ) );
-        log_dts.push_back( std::log10( dt ) );
+        auto obs = []( T, state_t, T ) {};
+        return ::ponio::solve( pb, algo, y0, t_span, dt, obs );
     }
 
-    auto [a, b] = mayor_method( log_dts, relative_errors );
-
-    return a;
-}
-
-template <typename Algorithm_t, typename T = double>
-T
-check_order( Algorithm_t algo = Algorithm_t() )
-{
-    if constexpr ( ponio::runge_kutta::butcher::is_embedded<Algorithm_t> )
+    template <typename Algorithm_t, typename T = double>
+    T
+    short_time_check_order( Algorithm_t algo = Algorithm_t() )
     {
-        return Algorithm_t::order;
+        using state_t = T;
+
+        std::vector<T> errors;
+        std::vector<T> dts;
+
+        T Tf = 1.0;
+
+        state_t u_exa = std::exp( Tf );
+
+        for ( auto n_iter : { 50, 25, 20, 15, 10 } )
+        {
+            T dt          = Tf / n_iter;
+            state_t u_sol = solve_exp( algo, dt, Tf );
+            auto e        = error( u_exa, u_sol );
+            errors.push_back( std::log( e ) );
+            dts.push_back( std::log( dt ) );
+        }
+
+        auto [a, b] = mayor_method( dts, errors );
+
+        return a;
     }
-    else if constexpr ( Algorithm_t::order >= 8 || ponio::splitting::is_splitting_method<Algorithm_t> )
-    {
-        return long_time_check_order( algo );
-    }
-    else
+
+    template <typename Algorithm_t, typename T = double>
+    T
+    check_order( Algorithm_t algo = Algorithm_t() )
     {
         return short_time_check_order( algo );
     }
-}
+
+} // namespace additive_method
