@@ -186,6 +186,8 @@ namespace ponio
     {
     }
 
+    // cppcheck-suppress-begin unusedFunction
+
     /**
      * @brief factory of imex_problem from an explicit part and a implicit part which is a implicit_operator_problem
      *
@@ -196,7 +198,6 @@ namespace ponio
      * @param g implicit part
      * @param g_t operator on the implicit part
      */
-    // cppcheck-suppress unusedFunction
     template <typename Callable_explicit_t, typename Callable_implicit_t, typename Callable_implicit_op_t>
     auto
     make_imex_operator_problem( Callable_explicit_t&& f, Callable_implicit_t&& g, Callable_implicit_op_t&& g_t )
@@ -205,7 +206,6 @@ namespace ponio
             make_implicit_operator_problem( g, g_t ) );
     }
 
-    // cppcheck-suppress unusedFunction
     template <typename Callable_explicit_t, typename Callable_implicit_t, typename Callable_implicit_jac_t>
     auto
     make_imex_jacobian_problem( Callable_explicit_t&& f, Callable_implicit_t&& g, Callable_implicit_jac_t&& dg )
@@ -213,6 +213,8 @@ namespace ponio
         return imex_problem<Callable_explicit_t, implicit_problem<Callable_implicit_t, Callable_implicit_jac_t>>( f,
             make_implicit_problem( g, dg ) );
     }
+
+    // cppcheck-suppress-end unusedFunction
 
     // --- LAWSON_PROBLEM ----------------------------------------------------------
     /** @class lawson_problem
