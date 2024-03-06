@@ -124,8 +124,11 @@ namespace ponio::runge_kutta::chebyshev
     struct explicit_rkc2
     {
         static_assert( N_stages_ > 1, "Number of stages should be at least 2 in eRKC2" );
-        static constexpr bool is_embedded     = false;
         static constexpr std::size_t N_stages = N_stages_;
+        static constexpr std::size_t order    = 2;
+        static constexpr std::string_view id  = "RKC2";
+        static constexpr bool is_embedded     = false;
+
         value_t w0;
         value_t w1;
 

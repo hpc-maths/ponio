@@ -14,29 +14,86 @@
 
 #include "compute_order.hpp"
 
-template <typename rk_t>
-void
-test_order()
+enum struct class_method
 {
-    INFO( "test order of ", rk_t::id );
-    WARN( check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
-}
+    explicit_method,
+    diagonal_implicit_method,
+    exponential_method,
+    additive_method
+};
 
-template <typename rk_tuple, std::size_t... Is>
-void
-test_order_impl( std::index_sequence<Is...> )
+template <class_method type>
+struct test_order
 {
-    ( ( test_order<typename std::tuple_element<Is, rk_tuple>::type>() ), ... );
-}
+    template <typename rk_t>
+    static void
+    method_order()
+    {
+        if constexpr ( type == class_method::explicit_method )
+        {
+            INFO( "test order of ", rk_t::id );
+            WARN( check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+        }
+        else if constexpr ( type == class_method::diagonal_implicit_method )
+        {
+            INFO( "not implemented test for DIRK method" );
+            WARN( false );
+        }
+        else if constexpr ( type == class_method::exponential_method )
+        {
+            INFO( "not implemented test for exponential method" );
+            WARN( false );
+        }
+        else if constexpr ( type == class_method::additive_method )
+        {
+            INFO( "not implemented test for additive method" );
+            WARN( false );
+        }
+        else
+        {
+            INFO( "not implemented test for unknown method" );
+            WARN( false );
+        }
+    }
 
-template <typename rk_tuple>
-void
-test_order_on()
-{
-    test_order_impl<rk_tuple>( std::make_index_sequence<std::tuple_size<rk_tuple>::value>() );
-}
+    template <typename rk_tuple, std::size_t... Is>
+    static void
+    on_impl( std::index_sequence<Is...> )
+    {
+        ( ( method_order<typename std::tuple_element<Is, rk_tuple>::type>() ), ... );
+    }
+
+    template <typename rk_tuple>
+    static void
+    on()
+    {
+        on_impl<rk_tuple>( std::make_index_sequence<std::tuple_size<rk_tuple>::value>() );
+    }
+};
 
 TEST_CASE( "order::explict_runge_kutta" )
 {
-    test_order_on<ponio::runge_kutta::erk_tuple<double>>();
+    test_order<class_method::explicit_method>::on<ponio::runge_kutta::erk_tuple<double>>();
 }
+
+TEST_CASE( "order::chebychev_runge_kutta" )
+{
+    auto rkc_methods = std::make_tuple( ponio::runge_kutta::chebyshev::explicit_rkc2<10>(),
+        ponio::runge_kutta::rock::rock2<false>(),
+        ponio::runge_kutta::rock::rock4<false>() );
+
+    test_order<class_method::explicit_method>::on<decltype( rkc_methods )>();
+}
+
+// TEST_CASE( "order::pirock" )
+// {
+//     auto pirock_methods = std::make_tuple( ponio::runge_kutta::pirock::pirock<5>(), ponio::runge_kutta::pirock::pirock<13>() );
+
+//     test_order<class_method::explicit_method>::on<decltype( pirock_methods )>();
+// }
+
+// TEST_CASE( "order::lawson_runge_kutta" )
+// {
+//     auto exp = [](double x){ return std::exp(x); };
+//     test_order<class_method::exponential_method>::on<ponio::runge_kutta::lrk_tuple<double, decltype(exp)>>();
+// }

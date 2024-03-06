@@ -141,15 +141,15 @@ long_time_check_order( Algorithm_t& algo )
 
     // make a problem that can be use also for splitting (in 3 parts) methods
     auto pb = ponio::make_problem(
-        [=]( T, state_t const& u ) -> state_t
+        [=]( T, state_t&& u ) -> state_t
         {
             return { alpha * u[0] - beta * u[0] * u[1], 0. };
         },
-        [=]( T, state_t const& u ) -> state_t
+        [=]( T, state_t&& u ) -> state_t
         {
             return { 0., delta * u[0] * u[1] };
         },
-        [=]( T, state_t const& u ) -> state_t
+        [=]( T, state_t&& u ) -> state_t
         {
             return { 0., -gamma * u[1] };
         } );
