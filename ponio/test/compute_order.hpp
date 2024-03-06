@@ -214,15 +214,15 @@ namespace additive_method
         T lambda      = 1. / 3.;
 
         auto pb = ponio::make_imex_jacobian_problem(
-            []( T, state_t y ) -> state_t
+            [=]( T, state_t y ) -> state_t
             {
                 return lambda * y;
             },
-            []( T, state_t y ) -> state_t
+            [=]( T, state_t y ) -> state_t
             {
                 return ( 1. - lambda ) * y;
             },
-            []( T, state_t ) -> state_t
+            [=]( T, state_t ) -> state_t
             {
                 return 1. - lambda;
             } );
