@@ -281,6 +281,8 @@ namespace ponio::runge_kutta::pirock
                     }
                 }
             }
+
+            return os;
         }
 
         template <std::size_t s, typename rock_coeff>
@@ -300,8 +302,8 @@ namespace ponio::runge_kutta::pirock
             {
                 if ( ms_i / mdeg >= 1 )
                 {
-                    mdeg = rock_coeff::ms[i - 1];
-                    mz   = i;
+                    // mdeg = rock_coeff::ms[i - 1];
+                    mz = i;
                     break;
                 }
                 mr = mr + rock_coeff::ms[i - 1] * 2 - 1;
