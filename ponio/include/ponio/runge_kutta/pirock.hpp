@@ -14,6 +14,7 @@
 #include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
+#include "dirk.hpp"
 #include "rock.hpp"
 
 namespace ponio::runge_kutta::pirock
@@ -476,16 +477,58 @@ namespace ponio::runge_kutta::pirock
             auto& u_sp1 = U[6];
             u_sp1       = u_sm2pl;
 
-            auto op_sp1  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.implicit_part.f_t( tn );
-            auto rhs_sp1 = u_sm2pl;
-            ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp1, u_sp1, rhs_sp1 );
+            auto& u_sp2 = U[7];
+            u_sp2       = u_sm2pl;
 
-            auto& u_sp2  = U[7];
-            u_sp2        = u_sm2pl;
-            auto op_sp2  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.implicit_part.f_t( tn );
-            auto rhs_sp2 = static_cast<state_t>(
-                u_sm2pl + beta * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
-            ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2 );
+            if constexpr ( detail::problem_operator<decltype( pb.implicit_part ), value_t> )
+            {
+                auto op_sp1  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.implicit_part.f_t( tn );
+                auto rhs_sp1 = u_sm2pl;
+                ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp1, u_sp1, rhs_sp1 );
+
+                auto op_sp2  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.implicit_part.f_t( tn );
+                auto rhs_sp2 = static_cast<state_t>(
+                    u_sm2pl + beta * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
+                ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2 );
+            }
+            else if constexpr ( detail::problem_jacobian<decltype( pb.implicit_part ), value_t, state_t> )
+            {
+                using matrix_t = decltype( pb.implicit_part.df( tn, un ) );
+
+                auto identity = ::ponio::linear_algebra::linear_algebra<matrix_t>::identity( un );
+                auto g_sp1    = [&]( state_t const& u ) -> state_t
+                {
+                    return u - gamma * dt * pb.implicit_part.f( tn, u ) - u_sm2pl;
+                };
+                auto dg = [&]( state_t const& u ) -> matrix_t
+                {
+                    return identity - gamma * dt * pb.implicit_part.df( tn, u );
+                };
+                u_sp1 = diagonal_implicit_runge_kutta::newton<value_t>( g_sp1,
+                    dg,
+                    u_sm2pl,
+                    ::ponio::linear_algebra::linear_algebra<matrix_t>::solver,
+                    ponio::default_config::newton_tolerance,
+                    ponio::default_config::newton_max_iterations );
+
+                auto g_sp2 = [&]( state_t const& u ) -> state_t
+                {
+                    return u - gamma * dt * pb.implicit_part.f( tn, u )
+                         - ( u_sm2pl + beta * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
+                };
+                u_sp2 = diagonal_implicit_runge_kutta::newton<value_t>( g_sp2,
+                    dg,
+                    u_sm2pl,
+                    ::ponio::linear_algebra::linear_algebra<matrix_t>::solver,
+                    ponio::default_config::newton_tolerance,
+                    ponio::default_config::newton_max_iterations );
+            }
+            else
+            {
+                static_assert( detail::problem_operator<decltype( pb.implicit_part ), value_t>
+                                   || detail::problem_jacobian<decltype( pb.implicit_part ), value_t, state_t>,
+                    "This kind of problem is not inversible in ponio" );
+            }
 
             auto& u_sp3 = U[8];
             u_sp3       = u_sm2pl + ( 1. - gamma ) * dt * pb.implicit_part( tn, u_sp1 );
