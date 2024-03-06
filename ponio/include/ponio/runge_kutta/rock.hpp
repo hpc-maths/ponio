@@ -188,6 +188,8 @@ namespace ponio::runge_kutta::rock
         static constexpr bool is_embedded      = _is_embedded;
         static constexpr std::size_t N_stages  = stages::dynamic;
         static constexpr std::size_t N_storage = 3;
+        static constexpr std::size_t order     = 2;
+        static constexpr std::string_view id   = "ROCK2";
 
         using rock_coeff      = rock2_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
@@ -196,6 +198,13 @@ namespace ponio::runge_kutta::rock
         value_t r_tol; // relative tolerance
 
         eig_computer_t eig_computer;
+
+        rock2_impl()
+            : a_tol( 1e-4 )
+            , r_tol( 1e-4 )
+            , eig_computer( eig_computer_t() )
+        {
+        }
 
         rock2_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
@@ -355,6 +364,8 @@ namespace ponio::runge_kutta::rock
         static constexpr bool is_embedded      = _is_embedded;
         static constexpr std::size_t N_stages  = stages::dynamic;
         static constexpr std::size_t N_storage = 6;
+        static constexpr std::size_t order     = 4;
+        static constexpr std::string_view id   = "ROCK4";
 
         using rock_coeff      = rock4_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
@@ -363,6 +374,13 @@ namespace ponio::runge_kutta::rock
         value_t r_tol; // relative tolerance
 
         eig_computer_t eig_computer;
+
+        rock4_impl()
+            : a_tol( 1e-4 )
+            , r_tol( 1e-4 )
+            , eig_computer( eig_computer_t() )
+        {
+        }
 
         rock4_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
