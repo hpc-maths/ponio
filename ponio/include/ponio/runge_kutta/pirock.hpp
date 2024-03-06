@@ -326,7 +326,7 @@ namespace ponio::runge_kutta::pirock
                 return z * u;
             };
 
-            std::size_t mdeg = s - 2;
+            // std::size_t mdeg = s - 2;
             auto [mz, mr] = optimal_degree<s, rock_coeff>(); // rock::detail::degree_computer<value_t, rock_coeff>::optimal_degree( mdeg );
 
             polynomial<s - 2 + l, value_t> u;
@@ -379,6 +379,8 @@ namespace ponio::runge_kutta::pirock
         static constexpr bool is_embedded      = false;
         static constexpr std::size_t N_stages  = stages::dynamic;
         static constexpr std::size_t N_storage = 10;
+        static constexpr std::size_t order     = 2;
+        static constexpr std::string_view id   = "PIROCK";
 
         static constexpr std::size_t s = _s;
         static constexpr std::size_t l = 1;
@@ -389,6 +391,11 @@ namespace ponio::runge_kutta::pirock
         // eig_computer_t eig_computer_t;
         value_t alpha;
 
+        pirock()
+            : alpha( 1. / ( 2. * polynomial::Pp_sm2pl_0<s, l, value_t>() ) )
+        {
+        }
+
         pirock( value_t alpha_ )
             : alpha( alpha_ )
         {
@@ -398,7 +405,7 @@ namespace ponio::runge_kutta::pirock
         inline std::tuple<value_t, state_t, value_t>
         operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt )
         {
-            // TODO: change here s and mdeg computation to compute this from pb.f_explicit
+            // TODO: change here s and mdeg computation to compute this from pb.explicit_part
             std::size_t mdeg              = s - 2;
             auto [deg_index, start_index] = polynomial::optimal_degree<s, rock_coeff>();
 
@@ -420,7 +427,7 @@ namespace ponio::runge_kutta::pirock
             value_t t_jm2 = tn + dt * alpha * mu_1;
             value_t t_jm3 = tn;
 
-            u_jm1 = un + alpha * dt * mu_1 * pb.f_explicit( tn, un );
+            u_jm1 = un + alpha * dt * mu_1 * pb.explicit_part( tn, un );
 
             if ( mdeg < 2 )
             {
@@ -433,7 +440,7 @@ namespace ponio::runge_kutta::pirock
                 value_t const kappa_j = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 2 - 1];
                 value_t const nu_j    = -1.0 - kappa_j;
 
-                u_j = alpha * dt * mu_j * pb.f_explicit( t_jm1, u_jm1 ) - nu_j * u_jm1 - kappa_j * u_jm2;
+                u_j = alpha * dt * mu_j * pb.explicit_part( t_jm1, u_jm1 ) - nu_j * u_jm1 - kappa_j * u_jm2;
 
                 t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
 
@@ -457,38 +464,38 @@ namespace ponio::runge_kutta::pirock
             value_t sigma   = rock_coeff::fp1[deg_index - 1];
             value_t sigma_a = 0.5 * ( 1.0 - alpha ) + alpha * sigma;
             auto& us_sm1    = U[4];
-            us_sm1          = u_sm2 + sigma_a * dt * pb.f_explicit( t_jm1, u_sm2 );
+            us_sm1          = u_sm2 + sigma_a * dt * pb.explicit_part( t_jm1, u_sm2 );
 
             auto& us_s = U[5];
-            us_s       = us_sm1 + sigma_a * dt * pb.f_explicit( t_jm1, us_sm1 );
+            us_s       = us_sm1 + sigma_a * dt * pb.explicit_part( t_jm1, us_sm1 );
 
             auto& u_sm2pl = u_j;
 
             auto& u_sp1 = U[6];
             u_sp1       = u_sm2pl;
 
-            auto op_sp1  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.f_implicit_t( tn );
+            auto op_sp1  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.implicit_part.f_t( tn );
             auto rhs_sp1 = u_sm2pl;
             ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp1, u_sp1, rhs_sp1 );
 
             auto& u_sp2  = U[7];
             u_sp2        = u_sm2pl;
-            auto op_sp2  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.f_implicit_t( tn );
+            auto op_sp2  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.implicit_part.f_t( tn );
             auto rhs_sp2 = static_cast<state_t>(
-                u_sm2pl + beta * pb.f_explicit( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.f_implicit( tn, u_sp1 ) );
+                u_sm2pl + beta * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
             ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2 );
 
             auto& u_sp3 = U[8];
-            u_sp3       = u_sm2pl + ( 1. - gamma ) * dt * pb.f_implicit( tn, u_sp1 );
+            u_sp3       = u_sm2pl + ( 1. - gamma ) * dt * pb.implicit_part( tn, u_sp1 );
 
             value_t tau   = sigma * rock_coeff::fp2[deg_index - 1] + sigma * sigma;
             value_t tau_a = 0.5 * detail::power<2>( alpha - 1. ) + 2. * alpha * ( 1. - alpha ) * sigma + alpha * alpha * tau;
 
             auto& u_np1 = U[9];
             u_np1       = us_s
-                  - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( pb.f_explicit( tn, us_sm1 ) - pb.f_explicit( tn, u_sm2 ) )
-                  + 0.5 * dt * pb.f_implicit( tn, u_sp1 ) + 0.5 * dt * pb.f_implicit( tn, u_sp2 )
-                  + 1. / ( 2. - 4. * gamma ) * dt * ( pb.f_explicit( tn, u_sp3 ) - pb.f_explicit( tn, u_sp1 ) );
+                  - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( pb.explicit_part( tn, us_sm1 ) - pb.explicit_part( tn, u_sm2 ) )
+                  + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
+                  + 1. / ( 2. - 4. * gamma ) * dt * ( pb.explicit_part( tn, u_sp3 ) - pb.explicit_part( tn, u_sp1 ) );
 
             return { tn + dt, u_np1, dt };
         }

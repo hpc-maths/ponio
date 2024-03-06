@@ -174,7 +174,7 @@ main( int argc, char** argv )
         return fr_t( t )( u );
     };
 
-    auto pb = make_pirock_pb( fd, fr, fr_t );
+    auto pb = ponio::make_imex_operator_problem( fd, fr, fr_t );
 
     ponio::time_span<double> const tspan = { t_ini, t_end };
     double dt                            = ( t_end - t_ini ) / 2000;
