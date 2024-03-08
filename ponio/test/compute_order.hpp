@@ -208,10 +208,9 @@ namespace additive_method
 
     template <typename Algorithm_t, typename T = double>
     auto
-    solve_exp( Algorithm_t& algo, T dt, T Tf )
+    solve_exp( Algorithm_t& algo, T dt, T Tf, T lambda )
     {
         using state_t = T;
-        T lambda      = 1. / 3.;
 
         auto pb = ponio::make_imex_jacobian_problem(
             [=]( T, state_t y ) -> state_t
@@ -236,7 +235,7 @@ namespace additive_method
 
     template <typename Algorithm_t, typename T = double>
     T
-    short_time_check_order( Algorithm_t algo = Algorithm_t() )
+    short_time_check_order( Algorithm_t algo = Algorithm_t(), T lambda = 0.33 )
     {
         using state_t = T;
 
@@ -250,7 +249,7 @@ namespace additive_method
         for ( auto n_iter : { 50, 25, 20, 15, 10 } )
         {
             T dt          = Tf / n_iter;
-            state_t u_sol = solve_exp( algo, dt, Tf );
+            state_t u_sol = solve_exp( algo, dt, Tf, lambda );
             auto e        = error( u_exa, u_sol );
             errors.push_back( std::log( e ) );
             dts.push_back( std::log( dt ) );
@@ -263,9 +262,9 @@ namespace additive_method
 
     template <typename Algorithm_t, typename T = double>
     T
-    check_order( Algorithm_t algo = Algorithm_t() )
+    check_order( Algorithm_t algo = Algorithm_t(), T lambda = 0.33 )
     {
-        return short_time_check_order( algo );
+        return short_time_check_order( algo, lambda );
     }
 
 } // namespace additive_method

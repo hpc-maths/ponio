@@ -47,7 +47,11 @@ struct test_order
         else if constexpr ( type == class_method::additive_method )
         {
             INFO( "test order of ", rk_t::id );
-            WARN( additive_method::check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( additive_method::check_order( rk_t(), 0.5 ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( additive_method::check_order( rk_t(), 1. / 3. ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( additive_method::check_order( rk_t(), 2. / 3. ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( additive_method::check_order( rk_t(), 1. ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( additive_method::check_order( rk_t(), 0. ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
         }
         else
         {

@@ -19,8 +19,6 @@
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
 
-#include <cassert>
-
 #include <samurai/field.hpp>
 #include <samurai/hdf5.hpp>
 #include <samurai/mr/adapt.hpp>
