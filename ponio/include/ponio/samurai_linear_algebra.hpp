@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cassert>
+
 #include "linear_algebra.hpp"
 
 #if __has_include( <samurai/petsc.hpp>)
@@ -27,7 +29,7 @@ namespace ponio::linear_algebra
 
         template <typename operator_t, typename state_t, typename rhs_t>
         static void
-        solve( operator_t const& op, state_t& u, rhs_t const& rhs )
+        solve( operator_t const& op, state_t& u, rhs_t& rhs )
         {
             ::samurai::petsc::solve( op, u, rhs );
         }
