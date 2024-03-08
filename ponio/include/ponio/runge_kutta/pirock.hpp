@@ -8,6 +8,7 @@
 #include <ranges>
 #include <string_view>
 #include <type_traits>
+#include <valarray>
 
 #include "../butcher_tableau.hpp"
 #include "../detail.hpp"
@@ -275,10 +276,10 @@ namespace ponio::runge_kutta::pirock
             {
                 for ( std::size_t i = 0; i < P.coeff.size(); ++i )
                 {
-                    std::cout << " + " << P[i] << "*X";
+                    os << " + " << P[i] << "*X";
                     if ( i > 1 )
                     {
-                        std::cout << "**" << i;
+                        os << "**" << i;
                     }
                 }
             }
@@ -329,8 +330,8 @@ namespace ponio::runge_kutta::pirock
                 return z * u;
             };
 
-            // std::size_t mdeg = s - 2;
-            auto [mz, mr] = optimal_degree<s, rock_coeff>(); // rock::detail::degree_computer<value_t, rock_coeff>::optimal_degree( mdeg );
+            std::size_t mdeg = s - 2;
+            auto [mz, mr]    = rock::detail::degree_computer<value_t, rock_coeff>::optimal_degree( mdeg );
 
             polynomial<s - 2 + l, value_t> u;
             polynomial<s - 2 + l, value_t> ujm1;
@@ -367,6 +368,53 @@ namespace ponio::runge_kutta::pirock
         Pp_sm2pl_0()
         {
             return deriv( P_sm2pl<s, l, value_t>() )( 0. );
+        }
+
+        template <typename value_t = double>
+        value_t
+        Pp_sm2pl_0( std::size_t s, std::size_t l )
+        {
+            using rock_coeff        = rock::rock2_coeff<value_t>;
+            std::size_t const sm2pl = s - 2 + l;
+
+            std::valarray<value_t> u( 0., sm2pl + 1 );
+            std::valarray<value_t> ujm1( 0., sm2pl + 1 );
+            std::valarray<value_t> ujm2( 0., sm2pl + 1 );
+
+            std::size_t mdeg = s - 2;
+            auto [mz, mr]    = rock::detail::degree_computer<value_t, rock_coeff>::optimal_degree( mdeg );
+
+            u[0]    = 1.0;
+            ujm2[0] = 1.0;
+
+            auto mu_1 = rock_coeff::recf[mr - 1];
+
+            // in our case f is function that multiply by monome X
+            // f only shift degree of its argument
+            ujm1[0] = 1.0;  // u_jm1 = un = 1
+            ujm1[1] = mu_1; // u_jm1 += mu_1 * f( un )
+
+            if ( mdeg <= 2 )
+            {
+                u = ujm1;
+            }
+
+            for ( std::size_t j = 2; j < sm2pl + 1; ++j )
+            {
+                double const mu    = rock_coeff::recf[mr + 2 * ( j - 2 ) + 1 - 1];
+                double const kappa = rock_coeff::recf[mr + 2 * ( j - 2 ) + 2 - 1];
+                double const nu    = -1.0 - kappa;
+
+                u = -nu * ujm1 - kappa * ujm2; // u_j = -nu * u_jm1 - kappa * u_jm2
+
+                std::valarray<value_t> slice = ujm1[std::slice( 0, sm2pl, 1 )];
+                u[std::slice( 1, sm2pl + 1, 1 )] += mu * slice; // u_j += mu * f( u_jm1 )
+
+                ujm2 = ujm1;
+                ujm1 = u;
+            }
+
+            return u[1];
         }
 
     } // namespace polynomial
@@ -413,7 +461,8 @@ namespace ponio::runge_kutta::pirock
             auto [deg_index, start_index] = polynomial::optimal_degree<s, rock_coeff>();
 
             // TODO: change this polynomial into a runtime computation
-            value_t const beta  = 1. - 2. * alpha * polynomial::Pp_sm2pl_0<s, l, value_t>();
+            // value_t const beta  = 1. - 2. * alpha * polynomial::Pp_sm2pl_0<s, l, value_t>();
+            value_t const beta  = 1. - 2. * alpha * polynomial::Pp_sm2pl_0<value_t>( s, l );
             value_t const gamma = 1. - 0.5 * std::sqrt( 2. );
 
             auto& u_j   = U[0];
