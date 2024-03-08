@@ -136,14 +136,24 @@ namespace ponio::runge_kutta::rock
                 std::size_t mz = 1;
                 std::size_t mr = 1;
 
-                std::size_t iter = 1;
-                while ( iter < rock_coeff::ms.size() + 1 && rock_coeff::ms[iter - 1] / mdeg <= 1 )
+                if ( mdeg < 2 )
                 {
-                    mr = mr + rock_coeff::ms[iter - 1] * 2 - 1;
-                    ++iter;
+                    return { mz, mr };
                 }
-                mdeg = rock_coeff::ms[iter - 1];
-                mz   = iter;
+
+                std::size_t i = 1;
+                for ( auto ms_i : rock_coeff::ms )
+                {
+                    if ( ms_i / mdeg >= 1 )
+                    {
+                        mdeg = rock_coeff::ms[i - 1];
+                        mz   = i;
+                        break;
+                    }
+                    mr = mr + rock_coeff::ms[i - 1] * 2 - 1;
+
+                    ++i;
+                }
 
                 return { mz, mr };
             }
