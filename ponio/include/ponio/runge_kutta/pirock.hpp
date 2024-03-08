@@ -3,12 +3,12 @@
 // license that can be found in the LICENSE file.
 
 #pragma once
+#include <array>
 #include <concepts>
 #include <numeric>
 #include <ranges>
 #include <string_view>
 #include <type_traits>
-#include <valarray>
 
 #include "../butcher_tableau.hpp"
 #include "../detail.hpp"
@@ -112,264 +112,6 @@ namespace ponio::runge_kutta::pirock
 
     namespace polynomial
     {
-        template <std::size_t N, typename value_t = double>
-        struct polynomial
-        {
-            static constexpr std::size_t degree = N;
-
-            std::array<value_t, degree + 1> coeff;
-
-            constexpr double
-            operator[]( std::size_t idx ) const
-            {
-                if ( idx < coeff.size() )
-                {
-                    return coeff[idx];
-                }
-                else
-                {
-                    return static_cast<value_t>( 0. );
-                }
-            }
-
-            template <std::size_t M>
-            polynomial<N, value_t>&
-            operator=( polynomial<M, value_t> const& rhs )
-            {
-                for ( std::size_t i = 0; i < coeff.size(); ++i )
-                {
-                    coeff[i] = rhs[i];
-                }
-
-                return *this;
-            }
-
-            template <std::size_t... Is>
-            constexpr value_t
-            eval_impl( value_t&& x, std::index_sequence<Is...> ) const
-            {
-                return ( 0. + ... + ( coeff[Is] * detail::power<Is>( std::forward<value_t>( x ) ) ) );
-            }
-
-            constexpr value_t
-            operator()( value_t&& x ) const
-            {
-                return eval_impl( std::forward<value_t>( x ), std::make_index_sequence<degree + 1>{} );
-            }
-        };
-
-        template <std::size_t N, std::size_t M, typename value_t>
-        constexpr polynomial<std::max( N, M ), value_t> const&
-        max_degree( polynomial<N, value_t> const& P, polynomial<M, value_t> const& Q )
-        {
-            if constexpr ( N >= M )
-            {
-                return P;
-            }
-            else
-            {
-                return Q;
-            }
-        }
-
-        template <std::size_t N, std::size_t M, typename value_t>
-        constexpr polynomial<std::min( N, M ), value_t> const&
-        min_degree( polynomial<N, value_t> const& P, polynomial<M, value_t> const& Q )
-        {
-            if constexpr ( N >= M )
-            {
-                return Q;
-            }
-            else
-            {
-                return P;
-            }
-        }
-
-        /* operator + (polynomial, polynomial) */
-        template <std::size_t N, std::size_t M, typename value_t, std::size_t... Is, std::size_t... Js>
-        constexpr polynomial<N, value_t>
-        add_poly_poly( polynomial<N, value_t> const& P, polynomial<M, value_t> const& Q, std::index_sequence<Is...>, std::index_sequence<Js...> )
-        {
-            return {
-                {( P[Is] + Q[Is] )..., P[Js + M]...}
-            };
-        }
-
-        template <std::size_t N, std::size_t M, typename value_t>
-        polynomial<std::max( N, M ), value_t>
-        operator+( polynomial<N, value_t> const& P, polynomial<M, value_t> const& Q )
-        {
-            return add_poly_poly( max_degree( P, Q ),
-                min_degree( P, Q ),
-                std::make_index_sequence<std::min( N, M ) + 1>{},
-                std::make_index_sequence<std::max( N, M ) - std::min( N, M )>{} );
-        }
-
-        /* operator - (polynomial, polynomial) */
-        template <std::size_t N, std::size_t M, typename value_t>
-        polynomial<std::max( N, M ), value_t>
-        operator-( polynomial<N, value_t> const& P, polynomial<M, value_t> const& Q )
-        {
-            return P + ( -1. ) * Q;
-        }
-
-        /* operator * (value_t, polynomial) */
-        template <std::size_t N, typename value_t, std::size_t... Is>
-        constexpr polynomial<N, value_t>
-        mul_scalar_poly( value_t a, polynomial<N, value_t> const& P, std::index_sequence<Is...> )
-        {
-            return polynomial<N, value_t>( { { ( a * P[Is] )... } } );
-        }
-
-        template <std::size_t N, typename value_t>
-        polynomial<N, value_t>
-        operator*( value_t a, polynomial<N, value_t> const& P )
-        {
-            return mul_scalar_poly( a, P, std::make_index_sequence<N + 1>{} );
-        }
-
-        /* operator * (polynomial, polynomial) */
-        template <std::size_t K, std::size_t N, std::size_t M, typename value_t, std::size_t... Is>
-        constexpr value_t
-        mul_poly_poly_coeff( polynomial<N, value_t> const& P, polynomial<M, value_t> const& Q, std::index_sequence<Is...> )
-        {
-            return ( static_cast<value_t>( 0. ) + ... + ( P[Is] * Q[K - Is] ) );
-        }
-
-        template <std::size_t N, std::size_t M, typename value_t, std::size_t... Is>
-        constexpr polynomial<N + M, value_t>
-        mul_poly_poly( polynomial<N, value_t> const& P, polynomial<M, value_t> const& Q, std::index_sequence<Is...> )
-        {
-            return { { mul_poly_poly_coeff<Is>( P, Q, std::make_index_sequence<N + M>{} )... } };
-        }
-
-        template <std::size_t N, std::size_t M, typename value_t>
-        constexpr polynomial<N + M, value_t>
-        operator*( polynomial<N, value_t> const& P, polynomial<M, value_t> const& Q )
-        {
-            return mul_poly_poly( max_degree( P, Q ), min_degree( P, Q ), std::make_index_sequence<N + M + 1>{} );
-        }
-
-        /* derivation */
-        template <std::size_t N, typename value_t, std::size_t... Is>
-        constexpr polynomial<std::max( 0ul, N - 1 ), value_t>
-        deriv_impl( polynomial<N, value_t> const& P, std::index_sequence<Is...> )
-        {
-            return { { ( ( Is + 1 ) * P[Is + 1] )... } };
-        }
-
-        template <std::size_t N, typename value_t>
-        constexpr polynomial<std::max( 0ul, N - 1 ), value_t>
-        deriv( polynomial<N, value_t> const& P )
-        {
-            return deriv_impl( P, std::make_index_sequence<N>{} );
-        }
-
-        /* display */
-        template <std::size_t N, typename value_t>
-        std::ostream&
-        operator<<( std::ostream& os, polynomial<N, value_t> const& P )
-        {
-            os << P[0];
-            if constexpr ( N > 0 )
-            {
-                for ( std::size_t i = 0; i < P.coeff.size(); ++i )
-                {
-                    os << " + " << P[i] << "*X";
-                    if ( i > 1 )
-                    {
-                        os << "**" << i;
-                    }
-                }
-            }
-
-            return os;
-        }
-
-        template <std::size_t s, typename rock_coeff>
-        std::pair<std::size_t, std::size_t>
-        optimal_degree()
-        {
-            std::size_t mdeg = s - 2;
-            std::size_t mz = 1, mr = 1;
-
-            if ( mdeg < 2 )
-            {
-                return { mz, mr };
-            }
-
-            std::size_t i = 1;
-            for ( auto ms_i : rock_coeff::ms )
-            {
-                if ( ms_i / mdeg >= 1 )
-                {
-                    // mdeg = rock_coeff::ms[i - 1];
-                    mz = i;
-                    break;
-                }
-                mr = mr + rock_coeff::ms[i - 1] * 2 - 1;
-
-                ++i;
-            }
-
-            return { mz, mr };
-        }
-
-        template <std::size_t s, std::size_t l, typename value_t>
-        polynomial<s - 2 + l>
-        P_sm2pl()
-        {
-            using rock_coeff = rock::rock2_coeff<value_t>;
-
-            polynomial<1, value_t> z   = { 0., 1. };
-            polynomial<0, value_t> one = { 1. };
-
-            auto f = [=]( auto u )
-            {
-                return z * u;
-            };
-
-            std::size_t mdeg = s - 2;
-            auto [mz, mr]    = rock::detail::degree_computer<value_t, rock_coeff>::optimal_degree( mdeg );
-
-            polynomial<s - 2 + l, value_t> u;
-            polynomial<s - 2 + l, value_t> ujm1;
-            polynomial<s - 2 + l, value_t> ujm2;
-
-            u    = one;
-            ujm2 = one;
-
-            auto mu_1 = rock_coeff::recf[mr - 1];
-            ujm1      = u + mu_1 * f( u );
-
-            if constexpr ( s <= 2 )
-            {
-                u = ujm1;
-            }
-
-            for ( std::size_t j = 2; j < s - 2 + l + 1; ++j )
-            {
-                double const mu    = rock_coeff::recf[mr + 2 * ( j - 2 ) + 1 - 1];
-                double const kappa = rock_coeff::recf[mr + 2 * ( j - 2 ) + 2 - 1];
-                double const nu    = -1.0 - kappa;
-
-                u = mu * f( ujm1 ) - nu * ujm1 - kappa * ujm2;
-
-                ujm2 = ujm1;
-                ujm1 = u;
-            }
-
-            return u;
-        }
-
-        template <std::size_t s, std::size_t l, typename value_t = double>
-        value_t
-        Pp_sm2pl_0()
-        {
-            return deriv( P_sm2pl<s, l, value_t>() )( 0. );
-        }
-
         template <typename value_t = double>
         value_t
         Pp_sm2pl_0( std::size_t s, std::size_t l )
@@ -377,9 +119,9 @@ namespace ponio::runge_kutta::pirock
             using rock_coeff        = rock::rock2_coeff<value_t>;
             std::size_t const sm2pl = s - 2 + l;
 
-            std::valarray<value_t> u( 0., sm2pl + 1 );
-            std::valarray<value_t> ujm1( 0., sm2pl + 1 );
-            std::valarray<value_t> ujm2( 0., sm2pl + 1 );
+            std::array<value_t, 2> u    = { 0., 0. };
+            std::array<value_t, 2> ujm1 = { 0., 0. };
+            std::array<value_t, 2> ujm2 = { 0., 0. };
 
             std::size_t mdeg = s - 2;
             auto [mz, mr]    = rock::detail::degree_computer<value_t, rock_coeff>::optimal_degree( mdeg );
@@ -405,15 +147,15 @@ namespace ponio::runge_kutta::pirock
                 double const kappa = rock_coeff::recf[mr + 2 * ( j - 2 ) + 2 - 1];
                 double const nu    = -1.0 - kappa;
 
-                u = -nu * ujm1 - kappa * ujm2; // u_j = -nu * u_jm1 - kappa * u_jm2
-
-                std::valarray<value_t> slice = ujm1[std::slice( 0, sm2pl, 1 )];
-                u[std::slice( 1, sm2pl + 1, 1 )] += mu * slice; // u_j += mu * f( u_jm1 )
+                // u_j = mu * f(u_jm1) - nu * u_jm1 - kappa * u_jm2
+                u[0] = -nu * ujm1[0] - kappa * ujm2[0];
+                u[1] = mu * ujm1[0] - nu * ujm1[1] - kappa * ujm2[1];
 
                 ujm2 = ujm1;
                 ujm1 = u;
             }
 
+            // we only want the derivative of the polynomial and evaluate it in 0
             return u[1];
         }
 
@@ -443,7 +185,7 @@ namespace ponio::runge_kutta::pirock
         value_t alpha;
 
         pirock()
-            : alpha( 1. / ( 2. * polynomial::Pp_sm2pl_0<s, l, value_t>() ) )
+            : alpha( 1. / ( 2. * polynomial::Pp_sm2pl_0<value_t>( s, l ) ) )
         {
         }
 
@@ -457,8 +199,9 @@ namespace ponio::runge_kutta::pirock
         operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt )
         {
             // TODO: change here s and mdeg computation to compute this from pb.explicit_part
+            // auto [deg_index, start_index] = polynomial::optimal_degree<s, rock_coeff>();
             std::size_t mdeg              = s - 2;
-            auto [deg_index, start_index] = polynomial::optimal_degree<s, rock_coeff>();
+            auto [deg_index, start_index] = rock::detail::degree_computer<value_t, rock_coeff>::optimal_degree( mdeg );
 
             // TODO: change this polynomial into a runtime computation
             // value_t const beta  = 1. - 2. * alpha * polynomial::Pp_sm2pl_0<s, l, value_t>();
