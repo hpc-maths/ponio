@@ -161,13 +161,52 @@ namespace ponio::runge_kutta::pirock
 
     } // namespace polynomial
 
+    template <typename value_t = double>
+    struct alpha_fixed
+    {
+        value_t _alpha;
+
+        alpha_fixed( value_t a = static_cast<value_t>( 1. ) )
+            : _alpha( a )
+        {
+        }
+
+        inline value_t
+        alpha( std::size_t, std::size_t ) const
+        {
+            return _alpha;
+        }
+
+        inline value_t
+        beta( std::size_t s, std::size_t l ) const
+        {
+            return 1. - 2. * alpha( s, l ) * polynomial::Pp_sm2pl_0<value_t>( s, l );
+        }
+    };
+
+    template <typename value_t = double>
+    struct beta_0
+    {
+        inline value_t
+        alpha( std::size_t s, std::size_t l ) const
+        {
+            return 1. / ( 2. * polynomial::Pp_sm2pl_0<value_t>( s, l ) );
+        }
+
+        inline value_t
+        beta( std::size_t, std::size_t ) const
+        {
+            return 0.;
+        }
+    };
+
     /** @class pirock_impl
      *  @brief define PIROCK method
      *
      *  @warning the implementation is only with l=1 and beta=0 with a fixed number of stages
      */
-    template <std::size_t _s, typename value_t = double>
-    struct pirock
+    template <std::size_t _s, typename alpha_beta_computer_t, typename value_t = double>
+    struct pirock_impl
     {
         static constexpr bool is_embedded      = false;
         static constexpr std::size_t N_stages  = stages::dynamic;
@@ -182,15 +221,14 @@ namespace ponio::runge_kutta::pirock
         using degree_computer = rock::detail::degree_computer<value_t, rock_coeff>;
 
         // eig_computer_t eig_computer_t;
-        value_t alpha;
+        alpha_beta_computer_t alpha_beta_computer;
 
-        pirock()
-            : alpha( 1. / ( 2. * polynomial::Pp_sm2pl_0<value_t>( s, l ) ) )
+        pirock_impl()
         {
         }
 
-        pirock( value_t alpha_ )
-            : alpha( alpha_ )
+        pirock_impl( alpha_beta_computer_t computer )
+            : alpha_beta_computer( computer )
         {
         }
 
@@ -198,14 +236,16 @@ namespace ponio::runge_kutta::pirock
         inline std::tuple<value_t, state_t, value_t>
         operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt )
         {
+            static_assert( detail::problem_operator<decltype( pb.implicit_part ), value_t>
+                               || detail::problem_jacobian<decltype( pb.implicit_part ), value_t, state_t>,
+                "This kind of problem is not inversible in ponio" );
+
             // TODO: change here s and mdeg computation to compute this from pb.explicit_part
-            // auto [deg_index, start_index] = polynomial::optimal_degree<s, rock_coeff>();
             std::size_t mdeg              = s - 2;
             auto [deg_index, start_index] = rock::detail::degree_computer<value_t, rock_coeff>::optimal_degree( mdeg );
 
-            // TODO: change this polynomial into a runtime computation
-            // value_t const beta  = 1. - 2. * alpha * polynomial::Pp_sm2pl_0<s, l, value_t>();
-            value_t const beta  = 1. - 2. * alpha * polynomial::Pp_sm2pl_0<value_t>( s, l );
+            value_t const alpha = alpha_beta_computer.alpha( s, l );
+            value_t const beta  = alpha_beta_computer.beta( s, l );
             value_t const gamma = 1. - 0.5 * std::sqrt( 2. );
 
             auto& u_j   = U[0];
@@ -283,7 +323,7 @@ namespace ponio::runge_kutta::pirock
                     u_sm2pl + beta * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
                 ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2 );
             }
-            else if constexpr ( detail::problem_jacobian<decltype( pb.implicit_part ), value_t, state_t> )
+            else
             {
                 using matrix_t = decltype( pb.implicit_part.df( tn, un ) );
 
@@ -315,12 +355,6 @@ namespace ponio::runge_kutta::pirock
                     ponio::default_config::newton_tolerance,
                     ponio::default_config::newton_max_iterations );
             }
-            else
-            {
-                static_assert( detail::problem_operator<decltype( pb.implicit_part ), value_t>
-                                   || detail::problem_jacobian<decltype( pb.implicit_part ), value_t, state_t>,
-                    "This kind of problem is not inversible in ponio" );
-            }
 
             auto& u_sp3 = U[8];
             u_sp3       = u_sm2pl + ( 1. - gamma ) * dt * pb.implicit_part( tn, u_sp1 );
@@ -337,5 +371,33 @@ namespace ponio::runge_kutta::pirock
             return { tn + dt, u_np1, dt };
         }
     };
+
+    template <std::size_t s, typename value_t = double, typename alpha_beta_computer_t>
+    auto
+    pirock( alpha_beta_computer_t alpha_beta_computer )
+    {
+        return pirock_impl<s, alpha_beta_computer_t, value_t>( alpha_beta_computer );
+    }
+
+    template <std::size_t s, typename value_t = double>
+    auto
+    pirock()
+    {
+        return pirock<s>( beta_0<value_t>() );
+    }
+
+    template <std::size_t s, typename value_t = double>
+    auto
+    pirock_a1()
+    {
+        return pirock<s>( alpha_fixed<value_t>( 1.0 ) );
+    }
+
+    template <std::size_t s, typename value_t = double>
+    auto
+    pirock_b0()
+    {
+        return pirock<s>( beta_0<value_t>() );
+    }
 
 } // namespace ponio::runge_kutta::pirock
