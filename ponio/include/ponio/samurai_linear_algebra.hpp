@@ -9,6 +9,8 @@
 #include "linear_algebra.hpp"
 
 #if __has_include( <samurai/petsc.hpp>)
+#include <xtensor/xfixed.hpp>
+
 #include <samurai/petsc.hpp>
 #else
 #error "Samurai should be included"
