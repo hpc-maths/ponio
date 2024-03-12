@@ -205,7 +205,7 @@ namespace ponio::runge_kutta::pirock
      *
      *  @warning the implementation is only with l=1 and beta=0 with a fixed number of stages
      */
-    template <std::size_t _s, typename alpha_beta_computer_t, typename value_t = double>
+    template <std::size_t _s, std::size_t _l, typename alpha_beta_computer_t, typename value_t = double>
     struct pirock_impl
     {
         static constexpr bool is_embedded      = false;
@@ -215,7 +215,7 @@ namespace ponio::runge_kutta::pirock
         static constexpr std::string_view id   = "PIROCK";
 
         static constexpr std::size_t s = _s;
-        static constexpr std::size_t l = 1;
+        static constexpr std::size_t l = _l;
 
         using rock_coeff      = rock::rock2_coeff<value_t>;
         using degree_computer = rock::detail::degree_computer<value_t, rock_coeff>;
@@ -262,6 +262,7 @@ namespace ponio::runge_kutta::pirock
             value_t t_jm2 = tn + dt * alpha * mu_1;
             value_t t_jm3 = tn;
 
+            // u_1 =u^n + \alpha \mu_1 \Delta F_D( u^n )
             u_jm1 = un + alpha * dt * mu_1 * pb.explicit_part( tn, un );
 
             if ( mdeg < 2 )
@@ -275,7 +276,8 @@ namespace ponio::runge_kutta::pirock
                 value_t const kappa_j = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 2 - 1];
                 value_t const nu_j    = -1.0 - kappa_j;
 
-                u_j = alpha * dt * mu_j * pb.explicit_part( t_jm1, u_jm1 ) - nu_j * u_jm1 - kappa_j * u_jm2;
+                // u_{j} = \alpha \mu_j \Delta t F_D( u_{j-2} ) - \nu_j u_{j-1} - \kappa_j u_{j-2}
+                u_j = alpha * mu_j * dt * pb.explicit_part( t_jm1, u_jm1 ) - nu_j * u_jm1 - kappa_j * u_jm2;
 
                 t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
 
@@ -292,18 +294,28 @@ namespace ponio::runge_kutta::pirock
                 t_jm3 = t_jm2;
                 t_jm2 = t_jm1;
             }
+            // if l == 1
             // u_j -> u_{s-2+l} = u_{s-1}
             // u_jm1 -> u_{s-2+l-1} = u_{s-2}
             // u_jm2 -> u_{s-2+l-2} = u_{s-3}
 
+            // if l == 2
+            // u_j -> u_{s-2+l} = u_{s}
+            // u_jm1 -> u_{s-2+l-1} = u_{s-1}
+            // u_jm2 -> u_{s-2+l-2} = u_{s-2}
+
             value_t sigma   = rock_coeff::fp1[deg_index - 1];
             value_t sigma_a = 0.5 * ( 1.0 - alpha ) + alpha * sigma;
-            auto& us_sm1    = U[4];
-            us_sm1          = u_sm2 + sigma_a * dt * pb.explicit_part( t_jm1, u_sm2 );
 
+            // u_{*s-1} = u_{s-2} + \sigma_\alpha \Delta t  F_D( u_{s-2} )
+            auto& us_sm1 = U[4];
+            us_sm1       = u_sm2 + sigma_a * dt * pb.explicit_part( t_jm1, u_sm2 );
+
+            // u_{*s} = u_{*s-1} + \sigma_\alpha \Delta t  F_D( u_{*s-1} )
             auto& us_s = U[5];
             us_s       = us_sm1 + sigma_a * dt * pb.explicit_part( t_jm1, us_sm1 );
 
+            // u_{s-2+l} = u_j
             auto& u_sm2pl = u_j;
 
             auto& u_sp1 = U[6];
@@ -320,7 +332,7 @@ namespace ponio::runge_kutta::pirock
 
                 auto op_sp2  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.implicit_part.f_t( tn );
                 auto rhs_sp2 = static_cast<state_t>(
-                    u_sm2pl + beta * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
+                    u_sm2pl + beta * dt * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
                 ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2 );
             }
             else
@@ -346,7 +358,7 @@ namespace ponio::runge_kutta::pirock
                 auto g_sp2 = [&]( state_t const& u ) -> state_t
                 {
                     return u - gamma * dt * pb.implicit_part.f( tn, u )
-                         - ( u_sm2pl + beta * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
+                         - ( u_sm2pl + beta * dt * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
                 };
                 u_sp2 = diagonal_implicit_runge_kutta::newton<value_t>( g_sp2,
                     dg,
@@ -372,32 +384,32 @@ namespace ponio::runge_kutta::pirock
         }
     };
 
-    template <std::size_t s, typename value_t = double, typename alpha_beta_computer_t>
+    template <std::size_t s, std::size_t l, typename value_t = double, typename alpha_beta_computer_t>
     auto
     pirock( alpha_beta_computer_t alpha_beta_computer )
     {
-        return pirock_impl<s, alpha_beta_computer_t, value_t>( alpha_beta_computer );
+        return pirock_impl<s, l, alpha_beta_computer_t, value_t>( alpha_beta_computer );
     }
 
-    template <std::size_t s, typename value_t = double>
+    template <typename value_t = double>
     auto
     pirock()
     {
-        return pirock<s>( beta_0<value_t>() );
+        return pirock<13, 1, value_t>( beta_0<value_t>() );
     }
 
     template <std::size_t s, typename value_t = double>
     auto
     pirock_a1()
     {
-        return pirock<s>( alpha_fixed<value_t>( 1.0 ) );
+        return pirock<s, 2, value_t>( alpha_fixed<value_t>( 1.0 ) );
     }
 
     template <std::size_t s, typename value_t = double>
     auto
     pirock_b0()
     {
-        return pirock<s>( beta_0<value_t>() );
+        return pirock<s, 1>( beta_0<value_t>() );
     }
 
 } // namespace ponio::runge_kutta::pirock
