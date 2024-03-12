@@ -180,7 +180,7 @@ main( int argc, char** argv )
     double dt                            = ( t_end - t_ini ) / 2000;
 
     // time loop  -------------------------------------------------------------
-    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::pirock::pirock<13>(), u_ini, tspan, dt );
+    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::pirock::pirock_b0(), u_ini, tspan, dt );
 
     auto it_sol = sol_range.begin();
 

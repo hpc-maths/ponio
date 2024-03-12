@@ -398,6 +398,8 @@ namespace ponio::runge_kutta::pirock
         return pirock<13, 1, value_t>( beta_0<value_t>() );
     }
 
+    // cppcheck-suppress-begin unusedFunction
+
     template <std::size_t s, typename value_t = double>
     auto
     pirock_a1()
@@ -411,5 +413,7 @@ namespace ponio::runge_kutta::pirock
     {
         return pirock<s, 1>( beta_0<value_t>() );
     }
+
+    // cppcheck-suppress-end unusedFunction
 
 } // namespace ponio::runge_kutta::pirock
