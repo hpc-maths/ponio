@@ -168,6 +168,20 @@ namespace ponio
         Implicit_problem_t implicit_part;
 
         imex_problem( Callable_explicit_t&& f_explicit, Implicit_problem_t&& pb_implicit );
+
+        template <typename state_t, typename value_t>
+        state_t
+        operator()( value_t t, state_t&& u )
+        {
+            return explicit_part( t, std::forward<state_t>( u ) ) + implicit_part( t, std::forward<state_t>( u ) );
+        }
+
+        template <typename state_t, typename value_t>
+        state_t
+        operator()( value_t t, state_t& u )
+        {
+            return explicit_part( t, u ) + implicit_part( t, u );
+        }
     };
 
     /**
