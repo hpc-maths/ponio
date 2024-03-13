@@ -180,8 +180,14 @@ main( int argc, char** argv )
     ponio::time_span<double> const tspan = { t_ini, t_end };
     double dt                            = ( t_end - t_ini ) / 2000;
 
+    auto eigmax_computer = [=]( auto&, double, auto&, double )
+    {
+        double dx = samurai::cell_length( max_level );
+        return 4. / ( dx * dx );
+    };
+
     // time loop  -------------------------------------------------------------
-    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::pirock::pirock(), u_ini, tspan, dt );
+    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::pirock::pirock( eigmax_computer ), u_ini, tspan, dt );
 
     auto it_sol = sol_range.begin();
 
