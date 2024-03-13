@@ -160,7 +160,7 @@ namespace ponio::runge_kutta::rock
 
             template <typename eig_computer_t, typename problem_t, typename state_t>
             static std::size_t
-            compute_n_stages( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt )
+            compute_n_stages( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt, std::size_t s_min )
             {
                 double eigmax = eig_computer( f, tn, un, dt );
                 auto mdeg     = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
@@ -169,15 +169,20 @@ namespace ponio::runge_kutta::rock
                     mdeg = 200;
                     dt   = 0.8 * ( static_cast<double>( mdeg * mdeg ) * 0.811 - 1.5 ) / eigmax;
                 }
-                mdeg = std::max( mdeg, static_cast<std::size_t>( 3 ) ) - 2;
+                mdeg = std::max( mdeg, s_min ) - 2;
                 return mdeg;
             }
 
             template <typename eig_computer_t, typename problem_t, typename state_t>
             static std::tuple<std::size_t, std::size_t, std::size_t>
-            compute_n_stages_optimal_degree( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt )
+            compute_n_stages_optimal_degree( eig_computer_t&& eig_computer,
+                problem_t& f,
+                value_t tn,
+                state_t& un,
+                value_t& dt,
+                std::size_t s_min = 3 )
             {
-                std::size_t mdeg = compute_n_stages( std::forward<eig_computer_t>( eig_computer ), f, tn, un, dt );
+                std::size_t mdeg = compute_n_stages( std::forward<eig_computer_t>( eig_computer ), f, tn, un, dt, s_min );
                 auto [mz, mr]    = optimal_degree( mdeg );
 
                 return { mdeg, mz, mr };

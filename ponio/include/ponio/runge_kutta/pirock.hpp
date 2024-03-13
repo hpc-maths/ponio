@@ -158,7 +158,6 @@ namespace ponio::runge_kutta::pirock
             // we only want the derivative of the polynomial and evaluate it in 0
             return u[1];
         }
-
     } // namespace polynomial
 
     template <typename value_t = double>
@@ -205,7 +204,7 @@ namespace ponio::runge_kutta::pirock
      *
      *  @warning the implementation is only with l=1 and beta=0 with a fixed number of stages
      */
-    template <std::size_t _s, std::size_t _l, typename alpha_beta_computer_t, typename value_t = double>
+    template <std::size_t _l, typename alpha_beta_computer_t, typename eig_computer_t, typename value_t = double>
     struct pirock_impl
     {
         static constexpr bool is_embedded      = false;
@@ -214,21 +213,21 @@ namespace ponio::runge_kutta::pirock
         static constexpr std::size_t order     = 2;
         static constexpr std::string_view id   = "PIROCK";
 
-        static constexpr std::size_t s = _s;
         static constexpr std::size_t l = _l;
 
         using rock_coeff      = rock::rock2_coeff<value_t>;
         using degree_computer = rock::detail::degree_computer<value_t, rock_coeff>;
 
-        // eig_computer_t eig_computer_t;
         alpha_beta_computer_t alpha_beta_computer;
+        eig_computer_t eig_computer;
 
         pirock_impl()
         {
         }
 
-        pirock_impl( alpha_beta_computer_t computer )
-            : alpha_beta_computer( computer )
+        pirock_impl( alpha_beta_computer_t&& _alpha_beta_computer, eig_computer_t&& _eig_computer )
+            : alpha_beta_computer( _alpha_beta_computer )
+            , eig_computer( _eig_computer )
         {
         }
 
@@ -240,9 +239,8 @@ namespace ponio::runge_kutta::pirock
                                || detail::problem_jacobian<decltype( pb.implicit_part ), value_t, state_t>,
                 "This kind of problem is not inversible in ponio" );
 
-            // TODO: change here s and mdeg computation to compute this from pb.explicit_part
-            std::size_t mdeg              = s - 2;
-            auto [deg_index, start_index] = rock::detail::degree_computer<value_t, rock_coeff>::optimal_degree( mdeg );
+            auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( eig_computer, pb, tn, un, dt, 4 );
+            std::size_t s                       = mdeg + 2;
 
             value_t const alpha = alpha_beta_computer.alpha( s, l );
             value_t const beta  = alpha_beta_computer.beta( s, l );
@@ -384,34 +382,56 @@ namespace ponio::runge_kutta::pirock
         }
     };
 
-    template <std::size_t s, std::size_t l, typename value_t = double, typename alpha_beta_computer_t>
+    // cppcheck-suppress-begin unusedFunction
+
+    template <std::size_t l = 1, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t>
     auto
-    pirock( alpha_beta_computer_t alpha_beta_computer )
+    pirock( alpha_beta_computer_t&& alpha_beta_computer, eig_computer_t&& eig_computer )
     {
-        return pirock_impl<s, l, alpha_beta_computer_t, value_t>( alpha_beta_computer );
+        return pirock_impl<l, alpha_beta_computer_t, eig_computer_t, value_t>( std::forward<alpha_beta_computer_t>( alpha_beta_computer ),
+            std::forward<eig_computer_t>( eig_computer ) );
+    }
+
+    template <std::size_t l = 1, typename value_t = double, typename eig_computer_t>
+    auto
+    pirock( eig_computer_t&& eig_computer )
+    {
+        return pirock<l, value_t>( beta_0<value_t>(), std::forward<eig_computer_t>( eig_computer ) );
+    }
+
+    template <std::size_t l = 1, typename value_t = double>
+    auto
+    pirock()
+    {
+        return pirock<l, value_t>( rock::detail::power_method() );
+    }
+
+    template <typename value_t = double, typename eig_computer_t>
+    auto
+    pirock_a1( eig_computer_t&& eig_computer )
+    {
+        return pirock<2, value_t>( alpha_fixed<value_t>( 1.0 ), std::forward<eig_computer_t>( eig_computer ) );
     }
 
     template <typename value_t = double>
     auto
-    pirock()
-    {
-        return pirock<13, 1, value_t>( beta_0<value_t>() );
-    }
-
-    // cppcheck-suppress-begin unusedFunction
-
-    template <std::size_t s, typename value_t = double>
-    auto
     pirock_a1()
     {
-        return pirock<s, 2, value_t>( alpha_fixed<value_t>( 1.0 ) );
+        return pirock_a1<value_t>( rock::detail::power_method() );
     }
 
-    template <std::size_t s, typename value_t = double>
+    template <typename value_t = double, typename eig_computer_t>
+    auto
+    pirock_b0( eig_computer_t&& eig_computer )
+    {
+        return pirock<1, value_t>( beta_0<value_t>(), std::forward<eig_computer_t>( eig_computer ) );
+    }
+
+    template <typename value_t = double>
     auto
     pirock_b0()
     {
-        return pirock<s, 1>( beta_0<value_t>() );
+        return pirock_b0<value_t>( rock::detail::power_method() );
     }
 
     // cppcheck-suppress-end unusedFunction

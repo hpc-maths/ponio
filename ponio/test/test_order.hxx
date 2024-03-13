@@ -92,10 +92,8 @@ TEST_CASE( "order::chebychev_runge_kutta" )
 TEST_CASE( "order::pirock" )
 {
     auto pirock_methods = std::make_tuple( ponio::runge_kutta::pirock::pirock(),
-        ponio::runge_kutta::pirock::pirock_a1<5>(),
-        ponio::runge_kutta::pirock::pirock_a1<13>(),
-        ponio::runge_kutta::pirock::pirock_b0<5>(),
-        ponio::runge_kutta::pirock::pirock_b0<13>() );
+        ponio::runge_kutta::pirock::pirock_a1(),
+        ponio::runge_kutta::pirock::pirock_b0() );
 
     test_order<class_method::additive_method>::on<decltype( pirock_methods )>();
 }
