@@ -5,8 +5,8 @@ build:
         python: "mambaforge-latest"
     jobs:
         pre_install:
-            - bash ./solver/doc/scripts/pre_install.sh
+            - bash ./ponio/doc/scripts/pre_install.sh
 sphinx:
-    configuration: solver/doc/source/conf.py
+    configuration: ponio/doc/source/conf.py
 conda:
-    environment: solver/doc/environment.yml
+    environment: ponio/doc/environment.yml

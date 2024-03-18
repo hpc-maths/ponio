@@ -23,4 +23,4 @@ repos:
     rev: v15.0.7
     hooks:
       - id: clang-format
-        files: solver/.*\.[hc]pp$
+        files: ponio/.*\.[hc]pp$

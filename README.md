@@ -100,8 +100,8 @@ Now you are ready to solve your problem with an explicit Runge-Kutta method, see
 
 * [Documentation](https://ponio.readthedocs.io/en/latest/index.html)
 * [Github repository](https://github.com/hpc-maths/ponio)
-* [Demos](https://github.com/hpc-maths/ponio/tree/main/solver/demos)
-* [Notebooks examples](https://github.com/hpc-maths/ponio/tree/main/solver/notebooks)
+* [Demos](https://github.com/hpc-maths/ponio/tree/main/ponio/demos)
+* [Notebooks examples](https://github.com/hpc-maths/ponio/tree/main/ponio/notebooks)
 * [List of methods and their analysis](http://jmassot.perso.math.cnrs.fr/ponio/) (personal webpage of main developer)
 
 ## How to contribute

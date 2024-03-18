@@ -25,10 +25,10 @@ build = { depends_on = ["configure", "build_ninja"] }
 build_test = { depends_on = ["configure_test", "build_ninja"] }
 build_test_samurai = { depends_on = ["configure_test_samurai", "build_ninja"] }
 build_debug = { cmd = "ninja -C build ponio", depends_on = ["configure_debug"] }
-test = { cmd = "./build/solver/test/Release/ponio_tests", depends_on = [
+test = { cmd = "./build/ponio/test/Release/ponio_tests", depends_on = [
   "build_test",
 ] }
-nbval = { cmd = "pytest --nbval --nbval-current-env -p no:warnings", cwd = "./solver/notebooks", depends_on = [
+nbval = { cmd = "pytest --nbval --nbval-current-env -p no:warnings", cwd = "./ponio/notebooks", depends_on = [
   "build",
 ] }
 cppcheck = { cmd = "cppcheck --enable=all -q --project=./build/compile_commands.json --suppressions-list=.cppcheck --inline-suppr 2> cppcheck_err.txt", depends_on = [
