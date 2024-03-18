@@ -102,6 +102,7 @@ target_include_directories(
 )
 target_link_libraries(ponio INTERFACE project_options project_warnings)
 set_target_properties(ponio PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED YES CXX_EXTENSIONS NO)
+target_compile_features(ponio INTERFACE cxx_std_20)
 
 target_include_directories(ponio INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${INCLUDE_DIR}>"
   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
@@ -121,13 +122,16 @@ set(PONIO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/solver/include)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 option(BUILD_TESTS "build the tests" OFF)
+option(BUILD_DEMOS "build the demos" OFF)
 option(BUILD_SAMURAI_DEMOS "build demos working with samurai" OFF)
 
 if (BUILD_TESTS)
     add_subdirectory(solver/test)
 endif()
 
-add_subdirectory(solver/demos)
+if (BUILD_DEMOS)
+  add_subdirectory(solver/demos)
+endif()
 
 # package the project
 package_project(
