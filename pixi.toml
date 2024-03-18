@@ -19,7 +19,7 @@ configure = { cmd = [
 ] }
 configure_test = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON" }
 configure_test_samurai = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
-configure_debug = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug" }
+configure_debug = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_DEMOS=ON" }
 build_ninja = { cmd = "cmake --build ./build --config Release" } # don't call this rule alone
 build = { depends_on = ["configure", "build_ninja"] }
 build_test = { depends_on = ["configure_test", "build_ninja"] }
