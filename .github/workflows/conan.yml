@@ -54,7 +54,7 @@ jobs:
       - name: Unix test
         if: runner.os != 'Windows'
         run: |
-          ./build/solver/test/Release/ponio_tests
+          ./build/ponio/test/Release/ponio_tests
       - name: Windows test
         if: runner.os == 'Windows'
         run: |

@@ -74,11 +74,11 @@ project_options(
 )
 
 # includes
-set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/solver/include)
+set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ponio/include)
 
 # generate butcher_methods.hpp
 find_package(Python COMPONENTS Interpreter REQUIRED)
-set(BUTCHER_METHODS "${INCLUDE_DIR}/solver/runge_kutta/butcher_methods.hpp")
+set(BUTCHER_METHODS "${INCLUDE_DIR}/ponio/runge_kutta/butcher_methods.hpp")
 
 set(Ndigit 36)
 
@@ -87,7 +87,7 @@ file(GLOB json_files
 
 add_custom_command(
     OUTPUT ${BUTCHER_METHODS}
-    COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/solver/code_generator.py ${json_files}
+    COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/ponio/code_generator.py ${json_files}
                 -o ${BUTCHER_METHODS}
                 --Ndigit=${Ndigit}
     COMMENT "Generating code..."
@@ -118,7 +118,7 @@ foreach(DEPENDENCY ${DEPENDENCIES_CONFIGURED})
   find_package(${DEPENDENCY} CONFIG REQUIRED)
 endforeach()
 
-set(PONIO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/solver/include)
+set(PONIO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/ponio/include)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 option(BUILD_TESTS "build the tests" OFF)
@@ -126,11 +126,11 @@ option(BUILD_DEMOS "build the demos" OFF)
 option(BUILD_SAMURAI_DEMOS "build demos working with samurai" OFF)
 
 if (BUILD_TESTS)
-    add_subdirectory(solver/test)
+    add_subdirectory(ponio/test)
 endif()
 
 if (BUILD_DEMOS)
-  add_subdirectory(solver/demos)
+  add_subdirectory(ponio/demos)
 endif()
 
 # package the project

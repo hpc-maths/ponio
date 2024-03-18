@@ -4,11 +4,11 @@ missingIncludeSystem
 preprocessorErrorDirective
 checkersReport
 # suppress unusedFunction in butcher_methods.hpp
-unusedFunction:solver/include/solver/runge_kutta/butcher_methods.hpp
+unusedFunction:ponio/include/ponio/runge_kutta/butcher_methods.hpp
 # possible false positive
-unusedFunction:solver/include/solver/detail.hpp:82
-unusedFunction:solver/include/solver/detail.hpp:91
-unusedFunction:solver/include/solver/problem.hpp:114
-unusedFunction:solver/include/solver/problem.hpp:153
-unusedFunction:solver/include/solver/runge_kutta/exprk.hpp:27
-unusedFunction:solver/include/solver/runge_kutta/exprk.hpp:42
+unusedFunction:ponio/include/ponio/detail.hpp:82
+unusedFunction:ponio/include/ponio/detail.hpp:91
+unusedFunction:ponio/include/ponio/problem.hpp:114
+unusedFunction:ponio/include/ponio/problem.hpp:153
+unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:27
+unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:42

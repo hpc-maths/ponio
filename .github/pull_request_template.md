@@ -18,5 +18,5 @@
 <!-- Give the list of files used to test this new implementation. -->
 
 ## Code of Conduct
-By submitting this PR, you agree to follow our [Code of Conduct](https://github.com/hpc-maths/ponio/blob/master/solver/doc/CODE_OF_CONDUCT.md)
+By submitting this PR, you agree to follow our [Code of Conduct](https://github.com/hpc-maths/ponio/blob/master/ponio/doc/CODE_OF_CONDUCT.md)
 - [ ] I agree to follow this project's Code of Conduct
