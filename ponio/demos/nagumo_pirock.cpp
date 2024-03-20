@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include <ponio/observer.hpp>
+#include <ponio/problem.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/runge_kutta/pirock.hpp>
 #include <ponio/samurai_linear_algebra.hpp>
@@ -187,7 +188,13 @@ main( int argc, char** argv )
     };
 
     // time loop  -------------------------------------------------------------
-    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::pirock::pirock( eigmax_computer ), u_ini, tspan, dt );
+    auto sol_range = ponio::make_solver_range( pb,
+        ponio::runge_kutta::pirock::pirock<2>( ponio::runge_kutta::pirock::alpha_fixed<double>( 1.0 ),
+            eigmax_computer,
+            ponio::shampine_trick::shampine_trick<decltype( u_ini )>() ),
+        u_ini,
+        tspan,
+        dt );
 
     auto it_sol = sol_range.begin();
 

@@ -204,22 +204,26 @@ namespace ponio::runge_kutta::pirock
      *
      *  @warning the implementation is only with l=1 and beta=0 with a fixed number of stages
      */
-    template <std::size_t _l, typename alpha_beta_computer_t, typename eig_computer_t, typename value_t = double>
+    template <std::size_t _l, typename alpha_beta_computer_t, typename eig_computer_t, typename _shampine_trick_caller_t = void, typename value_t = double>
     struct pirock_impl
     {
-        static constexpr bool is_embedded      = false;
+        static constexpr bool is_embedded           = false;
+        static constexpr bool shampine_trick_enable = !std::is_void<_shampine_trick_caller_t>::value;
+
+        static constexpr std::size_t l         = _l;
         static constexpr std::size_t N_stages  = stages::dynamic;
-        static constexpr std::size_t N_storage = 10;
-        static constexpr std::size_t order     = 2;
-        static constexpr std::string_view id   = "PIROCK";
+        static constexpr std::size_t N_storage = std::
+            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 13>, std::integral_constant<std::size_t, 10>>::value;
+        static constexpr std::size_t order   = 2;
+        static constexpr std::string_view id = "PIROCK";
 
-        static constexpr std::size_t l = _l;
-
-        using rock_coeff      = rock::rock2_coeff<value_t>;
-        using degree_computer = rock::detail::degree_computer<value_t, rock_coeff>;
+        using rock_coeff              = rock::rock2_coeff<value_t>;
+        using degree_computer         = rock::detail::degree_computer<value_t, rock_coeff>;
+        using shampine_trick_caller_t = typename std::conditional<shampine_trick_enable, _shampine_trick_caller_t, bool>::type;
 
         alpha_beta_computer_t alpha_beta_computer;
         eig_computer_t eig_computer;
+        shampine_trick_caller_t shampine_trick_caller;
 
         pirock_impl()
         {
@@ -228,6 +232,18 @@ namespace ponio::runge_kutta::pirock
         pirock_impl( alpha_beta_computer_t&& _alpha_beta_computer, eig_computer_t&& _eig_computer )
             : alpha_beta_computer( _alpha_beta_computer )
             , eig_computer( _eig_computer )
+        {
+        }
+
+        template <typename _shampine_trick_caller_t_>
+            requires std::same_as<_shampine_trick_caller_t_, shampine_trick_caller_t>
+                      && std::same_as<std::bool_constant<shampine_trick_enable>, std::true_type>
+        pirock_impl( alpha_beta_computer_t&& _alpha_beta_computer,
+            eig_computer_t&& _eig_computer,
+            _shampine_trick_caller_t_&& _shampine_trick_caller )
+            : alpha_beta_computer( _alpha_beta_computer )
+            , eig_computer( _eig_computer )
+            , shampine_trick_caller( _shampine_trick_caller )
         {
         }
 
@@ -373,10 +389,31 @@ namespace ponio::runge_kutta::pirock
             value_t tau_a = 0.5 * detail::power<2>( alpha - 1. ) + 2. * alpha * ( 1. - alpha ) * sigma + alpha * alpha * tau;
 
             auto& u_np1 = U[9];
-            u_np1       = us_s
-                  - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( pb.explicit_part( tn, us_sm1 ) - pb.explicit_part( tn, u_sm2 ) )
-                  + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
-                  + 1. / ( 2. - 4. * gamma ) * dt * ( pb.explicit_part( tn, u_sp3 ) - pb.explicit_part( tn, u_sp1 ) );
+
+            if constexpr ( shampine_trick_enable && detail::problem_operator<decltype( pb.implicit_part ), value_t> )
+            {
+                auto& shampine_element = U[10];
+                auto& f_D_u            = U[11];
+                auto& u_tmp            = U[12];
+
+                f_D_u = pb.explicit_part( tn, u_sp3 ) - pb.explicit_part( tn, u_sp1 );
+
+                shampine_trick_caller.template operator()<l>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, f_D_u, u_tmp, shampine_element );
+
+                u_np1 = us_s
+                      - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
+                            * ( pb.explicit_part( tn, us_sm1 ) - pb.explicit_part( tn, u_sm2 ) )
+                      + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
+                      + dt / ( 2. - 4. * gamma ) * shampine_element;
+            }
+            else
+            {
+                u_np1 = us_s
+                      - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
+                            * ( pb.explicit_part( tn, us_sm1 ) - pb.explicit_part( tn, u_sm2 ) )
+                      + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
+                      + dt / ( 2. - 4. * gamma ) * ( pb.explicit_part( tn, u_sp3 ) - pb.explicit_part( tn, u_sp1 ) );
+            }
 
             return { tn + dt, u_np1, dt };
         }
@@ -384,11 +421,22 @@ namespace ponio::runge_kutta::pirock
 
     // cppcheck-suppress-begin unusedFunction
 
+    template <std::size_t l = 1, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t, typename shampine_trick_caller_t>
+    auto
+    pirock( alpha_beta_computer_t&& alpha_beta_computer, eig_computer_t&& eig_computer, shampine_trick_caller_t&& shampine_trick_caller )
+    {
+        return pirock_impl<l, alpha_beta_computer_t, eig_computer_t, shampine_trick_caller_t, value_t>(
+            std::forward<alpha_beta_computer_t>( alpha_beta_computer ),
+            std::forward<eig_computer_t>( eig_computer ),
+            std::forward<shampine_trick_caller_t>( shampine_trick_caller ) );
+    }
+
     template <std::size_t l = 1, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t>
     auto
     pirock( alpha_beta_computer_t&& alpha_beta_computer, eig_computer_t&& eig_computer )
     {
-        return pirock_impl<l, alpha_beta_computer_t, eig_computer_t, value_t>( std::forward<alpha_beta_computer_t>( alpha_beta_computer ),
+        return pirock_impl<l, alpha_beta_computer_t, eig_computer_t, void, value_t>(
+            std::forward<alpha_beta_computer_t>( alpha_beta_computer ),
             std::forward<eig_computer_t>( eig_computer ) );
     }
 
