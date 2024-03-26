@@ -109,11 +109,11 @@ More examples can be found in [notebooks](https://github.com/hpc-maths/ponio/tre
 
 ## Features
 
-* [x] Explicite Runge-Kutta methods from their Butcher tableau
-* [x] Diagonal implicit Runge-Kutta methods from their Butcher tableau
+* [x] Explicit Runge-Kutta methods from their Butcher tableau
+* [x] Diagonal-implicit Runge-Kutta methods from their Butcher tableau
 * [x] Lawson methods from all explicit Runge-Kutta methods
 * [x] exponential Runge-Kutta methods from their Butcher tableau
-* [x] Runge-Kutta Chebyschev method of order 2
+* [x] Runge-Kutta Chebyshev method of order 2
 * [x] ROCK 2 and ROCK 4 methods
 * [x] Splitting methods : Lie splitting method and Strang splitting method
 * [x] PIROCK method
