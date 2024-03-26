@@ -30,6 +30,62 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
+namespace samurai
+{
+    template <std::size_t dim, std::size_t field_size>
+    using DiffCoeff_composantes = xt::xtensor_fixed<double, xt::xshape<dim, field_size>>;
+
+    template <class Field, DirichletEnforcement dirichlet_enfcmt = Equation>
+    auto
+    make_diffusion_order2( DiffCoeff_composantes<Field::dim, Field::size> const& K )
+    {
+        static constexpr std::size_t dim               = Field::dim;
+        static constexpr std::size_t field_size        = Field::size;
+        static constexpr std::size_t output_field_size = field_size;
+        static constexpr std::size_t stencil_size      = 2;
+
+        using cfg = FluxConfig<SchemeType::LinearHomogeneous, output_field_size, stencil_size, Field>;
+
+        FluxDefinition<cfg> K_grad;
+
+        static_for<0, dim>::apply( // for (int d=0; d<dim; d++)
+            [&]( auto integral_constant_d )
+            : q {
+                static constexpr std::size_t d = integral_constant_d();
+
+                K_grad[d].cons_flux_function = [K]( double h )
+                {
+                    static constexpr std::size_t left  = 0;
+                    static constexpr std::size_t right = 1;
+
+                    // Return value: 2 matrices (left, right) of size output_field_size x field_size.
+                    // In this case, of size field_size x field_size.
+                    FluxStencilCoeffs<cfg> coeffs;
+                    if constexpr ( field_size == 1 )
+                    {
+                        coeffs[left]  = -1 / h;
+                        coeffs[right] = 1 / h;
+                    }
+                    else
+                    {
+                        coeffs[left].fill( 0 );
+                        coeffs[right].fill( 0 );
+                        for ( std::size_t i = 0; i < field_size; ++i )
+                        {
+                            coeffs[left]( i, i )  = -1 / h;
+                            coeffs[right]( i, i ) = 1 / h;
+                        }
+                    }
+                    // Minus sign because we want -Laplacian
+                    coeffs[left] *= -K( d );
+                    coeffs[right] *= -K( d );
+                    return coeffs;
+                };
+            } );
+        return make_diffusion__<cfg, dirichlet_enfcmt>( K_grad );
+    }
+}
+
 template <class field_t>
 void
 save( fs::path const& path, std::string const& filename, field_t& u, std::string const& suffix = "" )
@@ -63,13 +119,19 @@ main( int argc, char** argv )
     using point_t             = typename box_t::point_t;
 
     // simulation parameters --------------------------------------------------
-    constexpr double d = .1;
-    constexpr double k = 1. / d;
+    constexpr double Da = 1. / 400.;
+    constexpr double Db = 1. / 400.;
+    constexpr double Dc = 0.6 / 400.;
 
-    constexpr double left_box  = -40;
-    constexpr double right_box = 10;
+    constexpr double epsilon = 1e-2;
+    constexpr double mu      = 1e-5;
+    constexpr double f       = 3.0;
+    constexpr double q       = 2e-4;
+
+    constexpr double left_box  = 0.;
+    constexpr double right_box = 1.;
     constexpr double t_ini     = 0.;
-    constexpr double t_end     = 35.;
+    constexpr double t_end     = 1.;
 
     // multiresolution parameters
     std::size_t min_level = 0;
@@ -78,7 +140,7 @@ main( int argc, char** argv )
     double mr_regularity  = 1.;   // Regularity guess for multiresolution
 
     // output parameters
-    std::string const dirname = "nagumo_pirock_data";
+    std::string const dirname = "belousov_zhabotinsky_pirock_data";
     fs::path path             = std::filesystem::path( dirname );
     std::string filename      = "u";
     fs::create_directories( path );
@@ -91,16 +153,7 @@ main( int argc, char** argv )
     samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
 
     // init solution ----------------------------------------------------------
-    auto u_ini = samurai::make_field<1>( "u", mesh );
-
-    auto exact_solution = [&]( double x, double t )
-    {
-        double x0  = -25.;
-        double v   = ( 1. / std::sqrt( 2. ) ) * std::sqrt( k * d );
-        double cst = -( 1. / std::sqrt( 2. ) ) * std::sqrt( k / d );
-        double e   = std::exp( cst * ( x - x0 - v * t ) );
-        return e / ( 1. + e );
-    };
+    auto u_ini = samurai::make_field<3>( "u", mesh );
 
     samurai::for_each_cell( mesh,
         [&]( auto& cell )
@@ -121,20 +174,32 @@ main( int argc, char** argv )
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, 1, decltype( u_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::size, decltype( u_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
         [&]( auto const& cell, auto const& field )
         {
-            auto u = field[cell];
-            return k * u * u * ( 1 - u );
+            auto& u = field[cell];
+            auto& a = u[0];
+            auto& b = u[1];
+            auto& c = u[2];
+
+            return { 1. / mu * ( -q * a - a * b + f * c ), 1. / epsilon * ( q * a - a * b + b * ( 1. - b ) ), b - c };
         } );
     react.set_jacobian_function(
         [&]( auto const& cell, auto const& field )
         {
-            auto u = field[cell];
-            return k * ( 2 * u * ( 1 - u ) - u * u );
+            auto& u = field[cell];
+            auto& a = u[0];
+            auto& b = u[1];
+            auto& c = u[2];
+
+            return {
+                {-q * b / mu,          -a / mu,                         f / mu},
+                { ( q - b ) / epsilon, 1. / epsilon * ( -a - 2 * b_1 ), 0.    },
+                { 0.,                  1.,                              -1.   }
+            };
         } );
     auto fr_t = [&]( double /* t */ )
     {
