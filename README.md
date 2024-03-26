@@ -13,7 +13,7 @@ The library ponio is a collection of time integrators for solving differential e
 
 This library aims to be the easiest to use without compromising on performance.
 
-<detail>
+<details>
 <summary>Table of Contents</summary>
 
 - [Get started](#get-started)
@@ -25,7 +25,7 @@ This library aims to be the easiest to use without compromising on performance.
 - [How to contribute](#how-to-contribute)
 - [License](#license)
 
-</detail>
+</details>
 
 ## Get started
 
