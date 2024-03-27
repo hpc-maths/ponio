@@ -22,12 +22,58 @@ The following table gives an overview over all examples.
 
 ## 1. Arenstorf orbit
 
+The system of differential equations for the Arenstorf orbit are:
+
 $$
   \begin{cases}
     \ddot{x} &= x + 2\dot{y} - \frac{1-\mu}{r_1^3}(x+\mu) - \frac{\mu}{r_2^3}(x-1+\mu) \\
     \ddot{y} &= y - 2\dot{x} - \frac{1-\mu}{r_1^3}y - \frac{\mu}{r_2^3}y
   \end{cases}
 $$
+
+where
+
+$$
+  r_1 = \sqrt{(x+\mu)^2 + y^2},\quad r_2 = \sqrt{(x-1+\mu)^2 + y^2}
+$$
+
+parameter $\mu=0.012277471$ and the initial condition gives by:
+
+$$
+  x(0) = 0.994,\quad \dot{x}(0) = 0,\quad y(0) = 0,\quad \dot{y}(0) = -2.00158510637908252240537862224
+$$
+
+To solve this kind of problem with ponio, first of all you should rewrite it as the form: $\dot{u} = f(t, u)$, here
+
+$$
+  u = \begin{pmatrix}
+    x \\
+    y \\
+    \dot{x} \\
+    \dot{y}
+  \end{pmatrix}
+$$
+
+So we have:
+
+$$
+  \dot{u} = \begin{pmatrix}
+    \dot{x} \\
+    \dot{y} \\
+    \ddot{x} \\
+    \ddot{y}
+  \end{pmatrix}
+  =
+  \begin{pmatrix}
+    \dot{x} \\
+    \dot{y} \\
+    x + 2\dot{y} - \frac{1-\mu}{r_1^3}(x+\mu) - \frac{\mu}{r_2^3}(x-1+\mu) \\
+    y - 2\dot{x} - \frac{1-\mu}{r_1^3}y - \frac{\mu}{r_2^3}y
+  \end{pmatrix}
+  =
+  f(t, u)
+$$
+
 
 ## 2. Brownian movement
 
@@ -77,19 +123,19 @@ $$
 ## 8. Heat model
 
 $$
-  \dot{u} = \partial_{xx} u
+  \dot{u} = -\partial_{xx} u
 $$
 
 ## 9. ROCK method
 
 $$
-  \dot{u} = \partial_{xx} u
+  \dot{u} = -\partial_{xx} u
 $$
 
 ## 10. Samurai is hot
 
 $$
-  \dot{u} = \partial_{xx} u
+  \dot{u} = -\partial_{xx} u
 $$
 
 ## 11. Lorenz equations
