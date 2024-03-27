@@ -43,7 +43,7 @@ $$
   x(0) = 0.994,\quad \dot{x}(0) = 0,\quad y(0) = 0,\quad \dot{y}(0) = -2.00158510637908252240537862224
 $$
 
-To solve this kind of problem with ponio, first of all you should rewrite it as the form: $\dot{u} = f(t, u)$, here
+To solve this kind of problem with ponio, first of all you should rewrite it as the form: $\dot{u} = f(t, u)$, here we classically take
 
 $$
   u = \begin{pmatrix}
@@ -70,6 +70,10 @@ $$
   \end{pmatrix} = f(t, u)
 $$
 
+In this example we solve this system with some explicit adaptive time step methods from [Dormand, J.R., Prince, P.J., A family of embedded Runge-Kutta formulae (1980) *Journal of Computational and Applied Mathematics*](http://dx.doi.org/10.1016/0771-050x(80)90013-3)
+
+![Arenstorf orbit](img/1-arenstorf-orbit_01.png)
+![Time step history](img/1-arenstorf-orbit_02.png)
 
 ## 2. Brownian movement
 
