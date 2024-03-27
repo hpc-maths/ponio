@@ -38,6 +38,49 @@ jobs:
             cat cppcheck_err.txt
             exit -1
           fi
+  # check includes
+  iwyu:
+    needs: [pre-commit]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - cpp-version: clang-15
+            packages: "clang-15 llvm-15-dev libclang-15-dev"
+            cc: "clang-15"
+            cxx: "clang++-15"
+            iwyu_branch: "clang_15"
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove GCC 13 from runner image
+        shell: bash
+        run: |
+            sudo rm -f /etc/apt/sources.list.d/ubuntu-toolchain-r-ubuntu-test-jammy.list
+            sudo apt-get update
+            sudo apt-get install -y --allow-downgrades libc6=2.35-0ubuntu3.6 libc6-dev=2.35-0ubuntu3.6 libstdc++6=12.3.0-1ubuntu1~22.04 libgcc-s1=12.3.0-1ubuntu1~22.04
+      - name: install compiler
+        run: |
+          sudo apt update
+          sudo apt install ${{ matrix.packages }}
+      - uses: prefix-dev/setup-pixi@v0.5.1
+        with:
+          pixi-version: v0.13.0
+          cache: true
+      - name: instal iwyu
+        run: |
+          git clone https://github.com/include-what-you-use/include-what-you-use.git
+          cd include-what-you-use
+          git checkout ${{ matrix.iwyu_branch }}
+          cd ..
+          cmake include-what-you-use -G 'Ninja Multi-Config' -B ./build -DCMAKE_PREFIX_PATH=$(${{ matrix.cc }} -print-resource-dir)
+      - name: Build
+        shell: pixi run bash {0}
+        run: |
+          export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"
+          CXX=include-what-you-use pixi run build_test
   # check compilation on gcc and clang compiler
   compiler-check:
     needs: [pre-commit, cppcheck]
