@@ -15,9 +15,9 @@ The following table gives an overview over all examples.
 | [`heat_rock.cpp`](heat_rock.cpp)                                   | This example shows how to use ROCK2 and ROCK4 methods              | [9. ROCK method](#9-rock-method)                                                                          |
 | [`heat_samurai.cpp`](heat_samurai.cpp)                             | This example shows how to coupling ponio and samurai               | [10. Samurai is hot](#10-samurai-is-hot)                                                                  |
 | [`lorenz.cpp`](lorenz.cpp)                                         | The chaotic system example of Lorenz equations                     | [11. Lorenz equations](#11-lorenz-equations)                                                              |
-| [`lorenz_tuto.cpp`](lorenz_tuto.cpp)                               | This example shows how to use splitting methods and Lawson methods | [12. Lorenz equations with multiple methods](#12-lorenz-equations-whith-multiple-methods)                 |
-| [`lotka_volterra.cpp`](lotka_volterra.cpp)                         | The classical predator–prey model of Lotka-Volterra                | [13. Lotka-Volterra model](#13-lotka-voleterra-model)                                                     |
-| [`nagumo.cpp`](nagumo.cpp)                                         | This example shows how to use ponio to mesure order of a method    | [14. Nagumo equation](#14-nagumo-model)                                                                   |
+| [`lorenz_tuto.cpp`](lorenz_tuto.cpp)                               | This example shows how to use splitting methods and Lawson methods | [12. Lorenz equations with multiple methods](#12-lorenz-equations-with-multiple-methods)                  |
+| [`lotka_volterra.cpp`](lotka_volterra.cpp)                         | The classical predator–prey model of Lotka-Volterra                | [13. Lotka-Volterra model](#13-lotka-volterra-model)                                                      |
+| [`nagumo.cpp`](nagumo.cpp)                                         | This example shows how to use ponio to mesure order of a method    | [14. Nagumo equation](#14-nagumo-equation)                                                                |
 | [`pendulum.cpp`](pendulum.cpp)                                     | The classical pendulum equation                                    | [15. Pendulum equation](#15-pendulum-equation)                                                            |
 
 ## 1. Arenstorf orbit
