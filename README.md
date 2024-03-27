@@ -105,7 +105,7 @@ The whole example can be found in [here](https://github.com/hpc-maths/ponio/blob
 
 ### More examples
 
-More examples can be found in [notebooks](https://github.com/hpc-maths/ponio/tree/main/ponio/notebooks) directory.
+More examples can be found in [notebooks](https://github.com/hpc-maths/ponio/tree/main/ponio/notebooks) or [demos](https://github.com/hpc-maths/ponio/tree/main/ponio/demos) directories.
 
 ## Features
 
