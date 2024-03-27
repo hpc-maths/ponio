@@ -62,16 +62,12 @@ $$
     \dot{y} \\
     \ddot{x} \\
     \ddot{y}
-  \end{pmatrix}
-  =
-  \begin{pmatrix}
+  \end{pmatrix} = \begin{pmatrix}
     \dot{x} \\
     \dot{y} \\
     x + 2\dot{y} - \frac{1-\mu}{r_1^3}(x+\mu) - \frac{\mu}{r_2^3}(x-1+\mu) \\
     y - 2\dot{x} - \frac{1-\mu}{r_1^3}y - \frac{\mu}{r_2^3}y
-  \end{pmatrix}
-  =
-  f(t, u)
+  \end{pmatrix} = f(t, u)
 $$
 
 
