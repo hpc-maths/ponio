@@ -72,8 +72,9 @@ $$
 
 In this example we solve this system with some explicit adaptive time step methods from [Dormand, J.R., Prince, P.J., A family of embedded Runge-Kutta formulae (1980) *Journal of Computational and Applied Mathematics*](http://dx.doi.org/10.1016/0771-050x(80)90013-3)
 
-![Arenstorf orbit](img/1-arenstorf-orbit_01.png)
-![Time step history](img/1-arenstorf-orbit_02.png)
+| Arenstorf orbit                                  | Arenstorf velocity                                  |
+|--------------------------------------------------|-----------------------------------------------------|
+| ![Arenstorf orbit](img/1-arenstorf-orbit_01.png) | ![Arenstorf velocity](img/1-arenstorf-orbit_02.png) |
 
 ## 2. Brownian movement
 
