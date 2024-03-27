@@ -130,5 +130,5 @@ $$
 ## 15. Pendulum equation
 
 $$
-  \ddot{\theta} + b\dot{theta} + c\sin(\theta) = 0
+  \ddot{\theta} + b\dot{\theta} + c\sin(\theta) = 0
 $$
