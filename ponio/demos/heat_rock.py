@@ -33,9 +33,12 @@ plt.plot(data[:, 0], data[:, 1], ":",
 data = np.loadtxt(os.path.join(data_dir, "heat_ini.dat"))
 plt.plot(data[:, 0], data[:, 1], ":", label="initial solution")
 
-plt.title("Heat equation")
 plt.legend(loc="lower left")
 plt.ylim(bottom=-0.4)
+
+plt.savefig("9-rock-method_01.png", dpi=200)
+
+plt.title("Heat equation")
 plt.show()
 
 data = np.loadtxt(os.path.join(data_dir, "errors.dat"))
@@ -48,4 +51,7 @@ plt.xscale('log')
 plt.yscale('log')
 plt.grid(True)
 plt.legend()
+
+plt.savefig("9-rock-method_02.png", dpi=200)
+
 plt.show()

@@ -296,6 +296,12 @@ $$
   \partial_t u = -\partial_{xx} u
 $$
 
+with the initial condition gives by the fundamental solution of head equation at time $t=0.001$ given by:
+
+$$
+  u(t, x) = \frac{1}{2\sqrt{\pi t}} e^{-\frac{x^2}{4t}}
+$$
+
 In ponio, the `state_t` should propose arithmetic operations as addition and multiplication by a scalar (of type `value_t`). For the sake of simplicity, we use in the example a `std::valarray<double>`.
 
 The heat equation is quite complicated to solve with an explicit Runge-Kutta method but we do it with a extended stability method with the Runge-Kutta Chebyshev of order 2. In ponio you could choose the number of stages of this method : `ponio::runge_kutta::explicit_rkc2<15>()` (for 15 stages).
@@ -312,11 +318,25 @@ All example in [`heat.cpp`](heat.cpp), and run
 
 ## 9. ROCK method
 
+In this example we propose to solve a PDE, the heat equation in 1D
+
 $$
   \partial_t u = -\partial_{xx} u
 $$
 
-![...](img/9-rock-method_01.png)
+with the initial condition gives by the fundamental solution of head equation at time $t=0.001$ given by:
+
+$$
+  u(t, x) = \frac{1}{2\sqrt{\pi t}} e^{-\frac{x^2}{4t}}
+$$
+
+In ponio, the `state_t` should propose arithmetic operations as addition and multiplication by a scalar (of type `value_t`). For the sake of simplicity, we use in the example a `std::valarray<double>`.
+
+An optimization of RKC2 is the ROCK2 method from [Abdulle, A., Medovikov, A. Second order Chebyshev methods based on orthogonal polynomials. *Numer. Math* (2001)](https://doi.org/10.1007/s002110100292), and its extension to order 4, ROCK4 method presented in [Abdulle, A. Fourth Order Chebyshev Methods with Recurrence Relation. *SIAM Journal on Scientific Computing* (2002)](https://doi.org/10.1137/S106482750037954).
+
+| Solution of heat equation                              | Mesure of order of ROCK2 and ROCK4           |
+|--------------------------------------------------------|----------------------------------------------|
+| ![Solution of heat equation](img/9-rock-method_01.png) | ![Mesure of order](img/9-rock-method_02.png) |
 
 All example in [`heat_rock.cpp`](heat_rock.cpp), and run
 
@@ -326,8 +346,16 @@ All example in [`heat_rock.cpp`](heat_rock.cpp), and run
 
 ## 10. Samurai is hot
 
+In this example we propose to solve a PDE, the heat equation in 1D
+
 $$
   \partial_t u = -\partial_{xx} u
+$$
+
+with the initial condition gives by the fundamental solution of head equation at time $t=0.001$ given by:
+
+$$
+  u(t, x) = \frac{1}{2\sqrt{\pi t}} e^{-\frac{x^2}{4t}}
 $$
 
 ![...](img/10-samurai-is-hot_01.png)
