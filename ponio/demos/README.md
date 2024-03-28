@@ -216,12 +216,12 @@ In this example we present how to control time loop with a `ponio::solver_range`
 and iterate over this range with a classical iterator with:
 
 ```cpp
-  auto it = sol_range.begin();
-  auto end = sol_range.end();
-
-  for ( auto it = sol_range.begin(); it < sol_range.end(); ++it)
+  for ( auto it = sol_range.begin(); it < sol_range.end(); ++it )
   {
     // ...
+    // current time : it->time
+    // current state : it->state
+    // current time step : it->time_step
   }
 ```
 
