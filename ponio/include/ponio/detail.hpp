@@ -163,4 +163,22 @@ namespace detail
         return power_impl( std::forward<Arithmetic_t>( value ), std::make_index_sequence<Iexp>() );
     }
 
+    // some concepts
+    template <typename T>
+    concept has_identity_method = std::is_member_function_pointer_v<decltype( &T::identity )>;
+
+    template <typename T, typename... Args>
+    concept has_solver_method = std::is_member_function_pointer_v<decltype( &T::template solver<Args...> )>;
+
+    template <typename T, typename... Args>
+    concept has_newton_method = std::is_member_function_pointer_v<decltype( &T::template newton<Args...> )>;
+
+    template <typename Problem_t, typename value_t>
+    concept problem_operator = std::invocable<decltype( &Problem_t::f_t ), Problem_t, value_t>
+                            || std::invocable<decltype( Problem_t::f_t ), value_t>;
+
+    template <typename Problem_t, typename value_t, typename state_t>
+    concept problem_jacobian = std::invocable<decltype( &Problem_t::df ), Problem_t, value_t, state_t>
+                            || std::invocable<decltype( Problem_t::df ), value_t, state_t>;
+
 } // namespace detail

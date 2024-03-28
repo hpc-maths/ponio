@@ -30,6 +30,7 @@ namespace ponio::splitting::strang
 
         static constexpr std::size_t order        = 2;
         static constexpr bool is_splitting_method = true;
+        static constexpr std::string_view id      = "Strang";
 
         // end of incremental recursion, start of decremental recursion
         // _call_inc can not be outside the class definition due to llvm bug
@@ -147,6 +148,7 @@ namespace ponio::splitting::strang
     {
         static constexpr std::size_t order        = 2;
         static constexpr bool is_splitting_method = true;
+        static constexpr std::string_view id      = "Strang";
 
         std::tuple<Algorithms_t...> algos;
         std::array<value_t, sizeof...( Algorithms_t )> time_steps;

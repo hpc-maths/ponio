@@ -59,6 +59,10 @@ namespace ponio::runge_kutta::butcher
     concept is_embedded_tableau = requires( Tableau t ) { t.b2; };
 
     template <typename Algorithm_t>
-    concept is_embedded = requires { Algorithm_t::is_embedded; };
+    concept is_embedded = requires( Algorithm_t algo ) {
+                              {
+                                  std::bool_constant<Algorithm_t::is_embedded>()
+                                  } -> std::same_as<std::true_type>;
+                          };
 
 } // namespace ponio::butcher

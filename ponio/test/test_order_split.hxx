@@ -25,6 +25,6 @@ TEST_CASE( "detail::power" )
         std::make_pair( ponio::runge_kutta::rk_44(), .1 ),
         std::make_pair( ponio::runge_kutta::rk_44(), .1 ) );
 
-    WARN( check_order( lie_splitting ) == doctest::Approx( lie_splitting.order ).epsilon( 0.125 ) );
-    WARN( check_order( strang_splitting ) == doctest::Approx( strang_splitting.order ).epsilon( 0.125 ) );
+    WARN( explicit_method::check_order( lie_splitting ) == doctest::Approx( lie_splitting.order ).epsilon( 0.125 ) );
+    WARN( explicit_method::check_order( strang_splitting ) == doctest::Approx( strang_splitting.order ).epsilon( 0.125 ) );
 }
