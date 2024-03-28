@@ -111,12 +111,20 @@ All example in [`brownian.cpp`](brownian.cpp), and run
 
 ## 3. Brusselator equations
 
+The Brusselator is a model of periodic chemical reaction. We present the version ODE with two species
+
 $$
   \begin{cases}
     \dot{x} &= m_a - (m_b + 1)x + x^2y \\
     \dot{y} &= m_b x - x^2y
   \end{cases}
 $$
+
+We solve this model with a hight order explicit Runge-Kutta method: RK(8, 6).
+
+| Brusselator concentration                                        | Brusselator concentration in phase space                                        |
+|------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| ![Brusselator concentration](img/3-brusselator-equations_01.png) | ![Brusselator concentration in phase space](img/3-brusselator-equations_02.png) |
 
 All example in [`brusselator.cpp`](brusselator.cpp), and run
 
@@ -126,12 +134,26 @@ All example in [`brusselator.cpp`](brusselator.cpp), and run
 
 ## 4. Brusselator equations with DIRK method
 
+The Brusselator is a model of periodic chemical reaction. We present the version ODE with two species
+
 $$
   \begin{cases}
     \dot{x} &= m_a - (m_b + 1)x + x^2y \\
     \dot{y} &= m_b x - x^2y
   \end{cases}
 $$
+
+In this example we choose to solve the model with a diagonal-implicit Runge-Kutta method. The problem object has to be an `ponio::implicit_problem` and we need to compute the Jacobian matrix and proposes some linear algebra routines. For that we use [Eigen library](http://eigen.tuxfamily.org/).
+
+If `state_t` is floating point, a Eigen vector or a samurai field, ponio provides functions to solve implicit problems. In all cases, you can specify your own linear algebra object that contains a `solver` method, that takes a matrix $A$ (same type as the returns type of jacobian gives to `ponio::implicit_problem`) and a vector $b$ (same type as `state_t`) and return the solution of the linear problem
+
+$$
+  Ax = b
+$$
+
+| Brusselator concentration                                                         | Brusselator concentration in phase space                                                         |
+|-----------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| ![Brusselator concentration](img/4-brusselator-equations-with-dirk-method_01.png) | ![Brusselator concentration in phase space](img/4-brusselator-equations-with-dirk-method_02.png) |
 
 All example in [`brusselator_dirk.cpp`](brusselator_dirk.cpp), and run
 
@@ -145,6 +167,8 @@ $$
   \dot{y} = k(\cos(t) - y)
 $$
 
+![...](img/5-curtiss-hirschfelder-equation_01.png)
+
 All example in [`curtiss_hirschfelder.cpp`](curtiss_hirschfelder.cpp), and run
 
 ```
@@ -156,6 +180,9 @@ All example in [`curtiss_hirschfelder.cpp`](curtiss_hirschfelder.cpp), and run
 $$
   \dot{y} = k(\cos(t) - y)
 $$
+
+
+![...](img/6-curtiss-hirschfelder-equation-with-exprk-method_01.png)
 
 All example in [`curtiss_hirschfelder_exprk.cpp`](curtiss_hirschfelder_exprk.cpp), and run
 
@@ -169,6 +196,9 @@ $$
   \dot{y} = y
 $$
 
+
+![...](img/7-exponential-function_01.png)
+
 All example in [`exp.cpp`](exp.cpp), and run
 
 ```
@@ -180,6 +210,9 @@ All example in [`exp.cpp`](exp.cpp), and run
 $$
   \dot{u} = -\partial_{xx} u
 $$
+
+
+![...](img/8-heat-model_01.png)
 
 All example in [`heat.cpp`](heat.cpp), and run
 
@@ -193,6 +226,8 @@ $$
   \dot{u} = -\partial_{xx} u
 $$
 
+![...](img/9-rock-method_01.png)
+
 All example in [`heat_rock.cpp`](heat_rock.cpp), and run
 
 ```
@@ -204,6 +239,8 @@ All example in [`heat_rock.cpp`](heat_rock.cpp), and run
 $$
   \dot{u} = -\partial_{xx} u
 $$
+
+![...](img/10-samurai-is-hot_01.png)
 
 All example in [`heat_samurai.cpp`](heat_samurai.cpp), and run
 
@@ -221,6 +258,8 @@ $$
   \end{cases}
 $$
 
+![...](img/11-lorenz-equations_01.png)
+
 All example in [`lorenz.cpp`](lorenz.cpp), and run
 
 ```
@@ -237,6 +276,8 @@ $$
   \end{cases}
 $$
 
+![...](img/12-lorenz-equations-with-multiple-methods_01.png)
+
 All example in [`lorenz_tuto.cpp`](lorenz_tuto.cpp), and run
 
 ```
@@ -252,6 +293,8 @@ $$
   \end{cases}
 $$
 
+![...](img/13-lotka-volterra-model_01.png)
+
 All example in [`lotka_volterra.cpp`](lotka_volterra.cpp), and run
 
 ```
@@ -264,6 +307,8 @@ $$
   \partial_t u = d \partial_{xx}u + ku^2(1-u)
 $$
 
+![...](img/14-nagumo-equation_01.png)
+
 All example in [`nagumo.cpp`](nagumo.cpp), and run
 
 ```
@@ -275,6 +320,8 @@ All example in [`nagumo.cpp`](nagumo.cpp), and run
 $$
   \ddot{\theta} + b\dot{\theta} + c\sin(\theta) = 0
 $$
+
+![...](img/15-pendulum-equation_01.png)
 
 All example in [`pendulum.cpp`](pendulum.cpp), and run
 

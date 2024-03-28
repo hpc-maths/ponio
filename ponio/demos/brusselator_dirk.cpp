@@ -20,11 +20,11 @@ struct lin_alg_2_2
     using matrix_type = Eigen::Matrix<double, 2, 2>;
 
     static vector_type
-    solver( matrix_type const& dfx, vector_type const& fx )
+    solver( matrix_type const& A, vector_type const& b )
     {
-        double const det = dfx( 0, 0 ) * dfx( 1, 1 ) - dfx( 1, 0 ) * dfx( 0, 1 );
+        double const det = A( 0, 0 ) * A( 1, 1 ) - A( 1, 0 ) * A( 0, 1 );
 
-        return vector_type{ -dfx( 0, 1 ) / det * fx[1] + dfx( 1, 1 ) / det * fx[0], dfx( 0, 0 ) / det * fx[1] - dfx( 1, 0 ) / det * fx[0] };
+        return vector_type{ -A( 0, 1 ) / det * b[1] + A( 1, 1 ) / det * b[0], A( 0, 0 ) / det * b[1] - A( 1, 0 ) / det * b[0] };
     }
 };
 

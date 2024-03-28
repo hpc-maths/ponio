@@ -21,19 +21,28 @@ process = subprocess.Popen(args)
 process.wait()
 
 data = np.loadtxt(os.path.join(data_dir, "brusselator.dat"))
-t  = data[:,0]
-u1 = data[:,1]
-u2 = data[:,2]
-plt.plot(t, u1,"-+", label="$u_1$")
-plt.plot(t, u2,"-+", label="$u_2$")
+t = data[:, 0]
+x = data[:, 1]
+y = data[:, 2]
 
-plt.title("Solution of Brusselator system with RK (8,6) method")
+# concentration plot
+plt.plot(t, x, "-", label="$x$")
+plt.plot(t, y, "-", label="$y$")
+
 plt.xlabel('time')
 plt.legend()
+
+plt.savefig("3-brusselator-equations_01.png", dpi=200)
+
+plt.title("Solution of Brusselator system with RK (8,6) method")
 plt.show()
 
+# concentration plot in phase space
+plt.plot(x, y, "-")
+plt.xlabel('x')
+plt.ylabel('y')
+
+plt.savefig("3-brusselator-equations_02.png", dpi=200)
+
 plt.title("Phase plane")
-plt.plot(u1, u2,"-+")
-plt.xlabel('u1')
-plt.ylabel('u2')
 plt.show()
