@@ -6,6 +6,7 @@
 #include <valarray>
 
 #include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -32,12 +33,9 @@ namespace fs = std::filesystem;
 
 namespace samurai
 {
-    template <std::size_t dim, std::size_t field_size>
-    using DiffCoeff_composantes = xt::xtensor_fixed<double, xt::xshape<dim, field_size>>;
-
     template <class Field, DirichletEnforcement dirichlet_enfcmt = Equation>
     auto
-    make_diffusion_order2( DiffCoeff_composantes<Field::dim, Field::size> const& K )
+    make_multi_diffusion_order2( DiffCoeff<Field::size> const& K )
     {
         static constexpr std::size_t dim               = Field::dim;
         static constexpr std::size_t field_size        = Field::size;
@@ -50,7 +48,7 @@ namespace samurai
 
         static_for<0, dim>::apply( // for (int d=0; d<dim; d++)
             [&]( auto integral_constant_d )
-            : q {
+            {
                 static constexpr std::size_t d = integral_constant_d();
 
                 K_grad[d].cons_flux_function = [K]( double h )
@@ -77,8 +75,19 @@ namespace samurai
                         }
                     }
                     // Minus sign because we want -Laplacian
-                    coeffs[left] *= -K( d );
-                    coeffs[right] *= -K( d );
+                    if constexpr ( field_size == 1 )
+                    {
+                        coeffs[left] *= -K( 0 );
+                        coeffs[right] *= -K( 0 );
+                    }
+                    else
+                    {
+                        for ( std::size_t i = 0; i < field_size; ++i )
+                        {
+                            coeffs[left]( i ) *= -K( i );
+                            coeffs[right]( i ) *= -K( i );
+                        }
+                    }
                     return coeffs;
                 };
             } );
@@ -155,20 +164,55 @@ main( int argc, char** argv )
     // init solution ----------------------------------------------------------
     auto u_ini = samurai::make_field<3>( "u", mesh );
 
+    double a = 0.2;
+    double b = 0.2;
+    double c = 0.2;
+    u_ini.fill( 0 );
     samurai::for_each_cell( mesh,
-        [&]( auto& cell )
+        [&]( auto& cell ) mutable
         {
-            u_ini[cell] = exact_solution( cell.center( 0 ), 0 );
+            if ( cell.center()[0] < ( right_box - left_box ) / 20. )
+            {
+                double y_lim  = 0.05;
+                double x_coor = 0.5;
+                double y_coor = cell.center()[0] - y_lim;
+
+                if ( y_coor >= 0. && y_coor <= 0.3 * x_coor )
+                {
+                    b = 0.8;
+                }
+                else
+                {
+                    b = q * ( f + 1. ) / ( f - 1. );
+                }
+
+                if ( y_coor >= 0. )
+                {
+                    c = q * ( f + 1. ) / ( f - 1. ) + std::atan( y_coor / x_coor ) / ( 8. * std::numbers::pi * f );
+                }
+                else
+                {
+                    c = q * ( f + 1. ) / ( f - 1. )
+                      + ( std::atan( y_coor / x_coor ) + 2. * std::numbers::pi ) / ( 8. * std::numbers::pi * f );
+                }
+            }
+
+            a = ( f * c ) / ( q + b );
+
+            u_ini[cell]( 0 ) = a;
+            u_ini[cell]( 1 ) = b;
+            u_ini[cell]( 2 ) = c;
         } );
-    samurai::make_bc<samurai::Neumann>( u_ini, 0. );
+    samurai::make_bc<samurai::Neumann>( u_ini, 0., 0., 0. );
 
     // define problem ---------------------------------------------------------
 
     // diffusion terme
-    auto diff = samurai::make_diffusion_order2<decltype( u_ini )>( d );
+    auto d    = samurai::DiffCoeff<3>( { Da, Db, Dc } );
+    auto diff = samurai::make_multi_diffusion_order2<decltype( u_ini )>( d );
     auto fd   = [&]( double /* t */, auto&& u )
     {
-        samurai::make_bc<samurai::Neumann>( u, 0. );
+        samurai::make_bc<samurai::Neumann>( u, 0., 0., 0. );
         samurai::update_ghost_mr( u );
         return -diff( u );
     };
@@ -178,9 +222,9 @@ main( int argc, char** argv )
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
-        [&]( auto const& cell, auto const& field )
+        [&]( auto const& cell, auto const& field ) -> samurai::SchemeValue<cfg>
         {
-            auto& u = field[cell];
+            auto u  = field[cell];
             auto& a = u[0];
             auto& b = u[1];
             auto& c = u[2];
@@ -188,17 +232,17 @@ main( int argc, char** argv )
             return { 1. / mu * ( -q * a - a * b + f * c ), 1. / epsilon * ( q * a - a * b + b * ( 1. - b ) ), b - c };
         } );
     react.set_jacobian_function(
-        [&]( auto const& cell, auto const& field )
+        [&]( auto const& cell, auto const& field ) -> samurai::JacobianMatrix<cfg>
         {
-            auto& u = field[cell];
+            auto u  = field[cell];
             auto& a = u[0];
             auto& b = u[1];
-            auto& c = u[2];
+            // auto& c = u[2];
 
             return {
-                {-q * b / mu,          -a / mu,                         f / mu},
-                { ( q - b ) / epsilon, 1. / epsilon * ( -a - 2 * b_1 ), 0.    },
-                { 0.,                  1.,                              -1.   }
+                {-q * b / mu,          -a / mu,                           f / mu},
+                { ( q - b ) / epsilon, 1. / epsilon * ( -a - 2 * b - 1 ), 0.    },
+                { 0.,                  1.,                                -1.   }
             };
         } );
     auto fr_t = [&]( double /* t */ )
@@ -207,7 +251,7 @@ main( int argc, char** argv )
     };
     auto fr = [&]( double t, auto&& u )
     {
-        samurai::make_bc<samurai::Neumann>( u, 0. );
+        samurai::make_bc<samurai::Neumann>( u, 0., 0., 0. );
         samurai::update_ghost_mr( u );
         return fr_t( t )( u );
     };
@@ -236,7 +280,7 @@ main( int argc, char** argv )
 
     // preapre MR for solution on iterator
     auto mr_adaptation = samurai::make_MRAdapt( it_sol->state );
-    samurai::make_bc<samurai::Neumann>( it_sol->state, 0. );
+    samurai::make_bc<samurai::Neumann>( it_sol->state, 0., 0., 0. );
     mr_adaptation( mr_epsilon, mr_regularity );
     samurai::update_ghost_mr( it_sol->state );
 
