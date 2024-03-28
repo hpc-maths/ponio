@@ -80,7 +80,15 @@ In this example we solve this system with some explicit adaptive time step metho
 |----------------------------------------------------|
 | ![Time step history](img/1-arenstorf-orbit_03.png) |
 
+All example in [`arenstorf.cpp`](arenstorf.cpp), and run
+
+```
+  make arenstorf_visu
+```
+
 ## 2. Brownian movement
+
+We write a simple Brownian movement
 
 $$
   \begin{cases}
@@ -88,6 +96,18 @@ $$
     \dot{y} = Y(t)
   \end{cases}
 $$
+
+where $X(t)$ and $Y(t)$ are random variable (juste a `std::rand` at each iteration).
+
+| Some Brownian movement in 2D                         |
+|------------------------------------------------------|
+| ![brownian movement](img/2-brownian-movement_01.png) |
+
+All example in [`brownian.cpp`](brownian.cpp), and run
+
+```
+  make brownian_visu
+```
 
 ## 3. Brusselator equations
 
@@ -98,6 +118,12 @@ $$
   \end{cases}
 $$
 
+All example in [`brusselator.cpp`](brusselator.cpp), and run
+
+```
+  make brusselator_visu
+```
+
 ## 4. Brusselator equations with DIRK method
 
 $$
@@ -107,11 +133,23 @@ $$
   \end{cases}
 $$
 
+All example in [`brusselator_dirk.cpp`](brusselator_dirk.cpp), and run
+
+```
+  make brusselator_dirk_visu
+```
+
 ## 5. Curtiss-Hirschfelder equation
 
 $$
   \dot{y} = k(\cos(t) - y)
 $$
+
+All example in [`curtiss_hirschfelder.cpp`](curtiss_hirschfelder.cpp), and run
+
+```
+  make curtiss_hirschfelder_visu
+```
 
 ## 6. Curtiss-Hirschfelder equation with expRK method
 
@@ -119,11 +157,23 @@ $$
   \dot{y} = k(\cos(t) - y)
 $$
 
+All example in [`curtiss_hirschfelder_exprk.cpp`](curtiss_hirschfelder_exprk.cpp), and run
+
+```
+  make curtiss_hirschfelder_exprk_visu
+```
+
 ## 7. Exponential function
 
 $$
   \dot{y} = y
 $$
+
+All example in [`exp.cpp`](exp.cpp), and run
+
+```
+  make exp_visu
+```
 
 ## 8. Heat model
 
@@ -131,17 +181,35 @@ $$
   \dot{u} = -\partial_{xx} u
 $$
 
+All example in [`heat.cpp`](heat.cpp), and run
+
+```
+  make heat_visu
+```
+
 ## 9. ROCK method
 
 $$
   \dot{u} = -\partial_{xx} u
 $$
 
+All example in [`heat_rock.cpp`](heat_rock.cpp), and run
+
+```
+  make heat_rock_visu
+```
+
 ## 10. Samurai is hot
 
 $$
   \dot{u} = -\partial_{xx} u
 $$
+
+All example in [`heat_samurai.cpp`](heat_samurai.cpp), and run
+
+```
+  make heat_samurai_visu
+```
 
 ## 11. Lorenz equations
 
@@ -153,6 +221,12 @@ $$
   \end{cases}
 $$
 
+All example in [`lorenz.cpp`](lorenz.cpp), and run
+
+```
+  make lorenz_visu
+```
+
 ## 12. Lorenz equations with multiple methods
 
 $$
@@ -163,6 +237,12 @@ $$
   \end{cases}
 $$
 
+All example in [`lorenz_tuto.cpp`](lorenz_tuto.cpp), and run
+
+```
+  make lorenz_tuto_visu
+```
+
 ## 13. Lotka-Volterra model
 
 $$
@@ -172,14 +252,32 @@ $$
   \end{cases}
 $$
 
+All example in [`lotka_volterra.cpp`](lotka_volterra.cpp), and run
+
+```
+  make lotka_volterra_visu
+```
+
 ## 14. Nagumo equation
 
 $$
   \partial_t u = d \partial_{xx}u + ku^2(1-u)
 $$
 
+All example in [`nagumo.cpp`](nagumo.cpp), and run
+
+```
+  make nagumo_visu
+```
+
 ## 15. Pendulum equation
 
 $$
   \ddot{\theta} + b\dot{\theta} + c\sin(\theta) = 0
 $$
+
+All example in [`pendulum.cpp`](pendulum.cpp), and run
+
+```
+  make pendulum_visu
+```

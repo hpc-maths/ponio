@@ -13,19 +13,26 @@ import numpy as np
 name = "brownian"
 data_dir = name+"_data"
 
-make = subprocess.Popen(["make",name])
+make = subprocess.Popen(["make", name])
 make.wait()
 
 n = 10
 
-args = [os.path.join(".", name),str(n)]
+args = [os.path.join(".", name), str(n)]
 process = subprocess.Popen(args)
 process.wait()
 
+plt.rcParams["figure.figsize"] = (6, 6)
+plt.axes().set_aspect('equal', 'box')
+
 for i in range(n):
     data = np.loadtxt(os.path.join(data_dir, "brownian_{}.dat".format(i)))
-    plt.plot(data[:,1],data[:,2],"-",linewidth=1)
+    plt.plot(data[:, 1], data[:, 2], "-", linewidth=1)
 
-plt.axis('equal')
+plt.xlim(-.5, .5)
+plt.ylim(-.5, .5)
+
+plt.savefig("2-brownian-movement_01.png", dpi=200)
+
 plt.title("Brownian motion")
 plt.show()
