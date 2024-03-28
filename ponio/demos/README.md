@@ -270,12 +270,17 @@ All example in [`curtiss_hirschfelder_exprk.cpp`](curtiss_hirschfelder_exprk.cpp
 
 ## 7. Exponential function
 
+In this example we solve the simplest differential equation:
+
 $$
   \dot{y} = y
 $$
 
+with $y(0) = 1$. After a lot of calculus we can find the exact solution $y(t) = e^t$, or we can approximate it with RK NSSP (2, 1) method.
 
-![...](img/7-exponential-function_01.png)
+| Exponential function                                       |
+|------------------------------------------------------------|
+| ![Exponential function](img/7-exponential-function_01.png) |
 
 All example in [`exp.cpp`](exp.cpp), and run
 
