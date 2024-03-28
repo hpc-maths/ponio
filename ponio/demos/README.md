@@ -213,7 +213,28 @@ In this example we present how to control time loop with a `ponio::solver_range`
   auto sol_range = ponio::make_solver_range( ... );
 ```
 
-and iterate over this range with a classical iterator with `sol_range.begin()` and `sol_range.end()`, or with a range-based for loop `for ( auto ui : sol_range )`. Only in the first case you can control time step before increment (with your adaptive time step heuristic) with modification of `it->time_step` data member.
+and iterate over this range with a classical iterator with:
+
+```cpp
+  auto it = sol_range.begin();
+  auto end = sol_range.end();
+
+  for ( auto it = sol_range.begin(); it < sol_range.end(); ++it)
+  {
+    // ...
+  }
+```
+
+or with a range-based for loop:
+
+```cpp
+  for ( auto ui : sol_range )
+  {
+    // ...
+  }
+```
+
+Only in the first case you can control time step before increment (with your adaptive time step heuristic) with modification of `it->time_step` data member.
 
 | Curtiss-Hirschfelder solution                                                |
 |------------------------------------------------------------------------------|
