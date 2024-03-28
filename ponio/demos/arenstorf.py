@@ -132,7 +132,7 @@ plt.xlabel(r"$t$")
 plt.ylabel(r"$\Delta t$")
 plt.legend()
 
-plt.savefig("1-arenstorf-orbit_03.png", dpi=200)
+plt.savefig("1-arenstorf-orbit_03.png")
 
 plt.title("Arenstorf orbit, time step size")
 plt.show()
