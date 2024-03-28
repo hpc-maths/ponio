@@ -22,22 +22,21 @@ process = subprocess.Popen(args)
 process.wait()
 
 methods = {
-    "rk_33_ralston" : "RK(3,3) Ralston",
-    "rk54_6m" : "RK5(4) 6m"
+    "rk_33_ralston": "RK(3,3) Ralston",
+    "rk54_6m": "RK5(4) 6m"
 }
 
 fig, axs = plt.subplots(2)
-fig.suptitle("Solution of Curtiss Hirschfelder problem")
-#axs[0].axvline(0.464, linewidth=1, linestyle="--", color="grey")
-#axs[1].axvline(0.464, linewidth=1, linestyle="--", color="grey")
+# axs[0].axvline(0.464, linewidth=1, linestyle="--", color="grey")
+# axs[1].axvline(0.464, linewidth=1, linestyle="--", color="grey")
 
 line_style = "+-"
-for tag, meth in methods.items() :
-    data = np.loadtxt( os.path.join( data_dir, f"sol_{tag}.dat" ) )
-    t, y, dt = data[:,0], data[:,1], data[:, 2]
+for tag, meth in methods.items():
+    data = np.loadtxt(os.path.join(data_dir, f"sol_{tag}.dat"))
+    t, y, dt = data[:, 0], data[:, 1], data[:, 2]
 
-    axs[0].plot( t, y, line_style, label=f"{meth}" )
-    axs[1].plot( t, dt, line_style, label=f"{meth}" )
+    axs[0].plot(t, y, line_style, label=f"{meth}")
+    axs[1].plot(t, dt, line_style, label=f"{meth}")
     line_style = "x-"
 
 axs[0].set_ylabel("$y$")
@@ -45,4 +44,8 @@ axs[1].set_ylabel("$\\Delta t$")
 axs[1].set_xlabel('time')
 
 plt.legend()
+
+plt.savefig("5-curtiss-hirschfelder-equation_01.png", dpi=200)
+
+fig.suptitle("Solution of Curtiss Hirschfelder problem")
 plt.show()

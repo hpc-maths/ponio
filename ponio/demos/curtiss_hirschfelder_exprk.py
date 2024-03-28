@@ -27,7 +27,7 @@ methods = {
     "lrk44": "LRK(4, 4)"
 }
 
-plt.title("Solution of Curtiss Hirschfelder problem")
+plt.rcParams["figure.figsize"] = (8, 4)
 
 line_style = "-"
 for tag, meth in methods.items():
@@ -41,4 +41,8 @@ plt.ylabel("$y$")
 plt.xlabel('time')
 
 plt.legend()
+
+plt.savefig("6-curtiss-hirschfelder-equation-with-exprk-method_01.png", dpi=200)
+
+plt.title("Solution of Curtiss Hirschfelder problem")
 plt.show()

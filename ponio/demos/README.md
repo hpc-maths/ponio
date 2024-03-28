@@ -1,4 +1,4 @@
-# demos
+# Examples
 
 The following table gives an overview over all examples.
 
@@ -19,6 +19,42 @@ The following table gives an overview over all examples.
 | [13. Lotka-Volterra model](#13-lotka-volterra-model)                                                      | The classical predator–prey model of Lotka-Volterra                | [`lotka_volterra.cpp`](lotka_volterra.cpp)                         |
 | [14. Nagumo equation](#14-nagumo-equation)                                                                | This example shows how to use ponio to mesure order of a method    | [`nagumo.cpp`](nagumo.cpp)                                         |
 | [15. Pendulum equation](#15-pendulum-equation)                                                            | The classical pendulum equation                                    | [`pendulum.cpp`](pendulum.cpp)                                     |
+
+To lunch examples, in the main directory of ponio run:
+
+```
+  cmake . -B build -DBUILD_DEMOS=ON
+```
+
+Eventually to get examples with samurai run:
+
+```
+  cmake . -B build -DBUILD_DEMOS=ON -DBUILD_SAMURAI_DEMOS=ON
+```
+
+and
+
+```
+  cd build
+```
+
+next you can compile an example with
+
+```
+  make AN_EXAMPLE
+```
+
+you could also launch the Python script which launch the example and display results
+
+```
+  make AN_EXAMPLE_visu
+```
+
+or
+
+```
+  make visu_AN_EXAMPLE
+```
 
 ## 1. Arenstorf orbit
 
@@ -145,10 +181,10 @@ $$
 
 In this example we choose to solve the model with a diagonal-implicit Runge-Kutta method. The problem object has to be an `ponio::implicit_problem` and we need to compute the Jacobian matrix and proposes some linear algebra routines. For that we use [Eigen library](http://eigen.tuxfamily.org/).
 
-If `state_t` is floating point, a Eigen vector or a samurai field, ponio provides functions to solve implicit problems. In all cases, you can specify your own linear algebra object that contains a `solver` method, that takes a matrix $A$ (same type as the returns type of jacobian gives to `ponio::implicit_problem`) and a vector $b$ (same type as `state_t`) and return the solution of the linear problem
+If `state_t` is floating point, a Eigen vector or a samurai field, ponio provides functions to solve implicit problems. In all cases, you can specify your own linear algebra object that contains a `solver` method (see `lin_alg_2_2` structure), that takes a matrix $A$ (same type as the returns type of jacobian gives to `ponio::implicit_problem`) and a vector $b$ (same type as `state_t`) and return the solution of the linear problem
 
 $$
-  Ax = b
+  Ax = b.
 $$
 
 | Brusselator concentration                                                         | Brusselator concentration in phase space                                                         |
@@ -163,11 +199,25 @@ All example in [`brusselator_dirk.cpp`](brusselator_dirk.cpp), and run
 
 ## 5. Curtiss-Hirschfelder equation
 
+A classical stiff problem is the Curtiss-Hirschfelder equation
+
 $$
   \dot{y} = k(\cos(t) - y)
 $$
 
-![...](img/5-curtiss-hirschfelder-equation_01.png)
+with $k>1$ and $y(0) = y_0$. We choose $k = 50$ and $y_0 = 2$.
+
+In this example we present how to control time loop with a `ponio::solver_range`. You can do it with an iterator on this range with :
+
+```cpp
+  auto sol_range = ponio::make_solver_range( ... );
+```
+
+and iterate over this range with a classical iterator with `sol_range.begin()` and `sol_range.end()`, or with a range-based for loop `for ( auto ui : sol_range )`. Only in the first case you can control time step before increment (with your adaptive time step heuristic) with modification of `it->time_step` data member.
+
+| Curtiss-Hirschfelder solution                                                |
+|------------------------------------------------------------------------------|
+| ![Curtiss-Hirschfelder solution](img/5-curtiss-hirschfelder-equation_01.png) |
 
 All example in [`curtiss_hirschfelder.cpp`](curtiss_hirschfelder.cpp), and run
 
@@ -177,12 +227,19 @@ All example in [`curtiss_hirschfelder.cpp`](curtiss_hirschfelder.cpp), and run
 
 ## 6. Curtiss-Hirschfelder equation with expRK method
 
+A classical stiff problem is the Curtiss-Hirschfelder equation
+
 $$
   \dot{y} = k(\cos(t) - y)
 $$
 
+with $k>1$ and $y(0) = y_0$. We choose $k = 50$ and $y_0 = 2$.
 
-![...](img/6-curtiss-hirschfelder-equation-with-exprk-method_01.png)
+In this example we solve the equation with Krogstad method (an exponential Runge-Kutta method), and LRK(4, 4) method (a Lawson method). In both methods, you need to define a `ponio::lawson_problem` with a linear and non-linear part. We choose the linear part $-k$ and the non-linear part as $N:t, y\mapsto k\cos(t)$. Exponential Runge-Kutta methods and Lawson methods are build to solve exactly the linear part when the non-linear part goes to 0.
+
+| Curtiss-Hirschfelder solution                                                                  |
+|------------------------------------------------------------------------------------------------|
+| ![Curtiss-Hirschfelder solution](img/6-curtiss-hirschfelder-equation-with-exprk-method_01.png) |
 
 All example in [`curtiss_hirschfelder_exprk.cpp`](curtiss_hirschfelder_exprk.cpp), and run
 
