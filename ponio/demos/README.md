@@ -286,7 +286,7 @@ All example in [`exp.cpp`](exp.cpp), and run
 ## 8. Heat model
 
 $$
-  \dot{u} = -\partial_{xx} u
+  \partial_t u = -\partial_{xx} u
 $$
 
 
@@ -301,7 +301,7 @@ All example in [`heat.cpp`](heat.cpp), and run
 ## 9. ROCK method
 
 $$
-  \dot{u} = -\partial_{xx} u
+  \partial_t u = -\partial_{xx} u
 $$
 
 ![...](img/9-rock-method_01.png)
@@ -315,7 +315,7 @@ All example in [`heat_rock.cpp`](heat_rock.cpp), and run
 ## 10. Samurai is hot
 
 $$
-  \dot{u} = -\partial_{xx} u
+  \partial_t u = -\partial_{xx} u
 $$
 
 ![...](img/10-samurai-is-hot_01.png)

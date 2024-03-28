@@ -13,7 +13,7 @@
 // solve $\dot{u} = u$ with $u(t=0) = 1$, and $t\in[0,2]$.
 
 int
-main( int, char** )
+main()
 {
     std::string const dirname = "exp_data";
     auto filename             = std::filesystem::path( dirname ) / "exp.dat";
