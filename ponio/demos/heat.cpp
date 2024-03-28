@@ -103,7 +103,7 @@ main()
     std::valarray<double> yend( 0., nx );
     ponio::time_span<double> const tspan = { tini, tend };
 
-    // save( x, yini, std::filesystem::path( dirname ) / "heat_ini.dat" );
+    save( x, yini, std::filesystem::path( dirname ) / "heat_ini.dat" );
 
     yend = ponio::solve( pb_heat, ponio::runge_kutta::explicit_rkc2<15>(), yini, tspan, dt, observer::null_observer() );
 

@@ -290,12 +290,19 @@ All example in [`exp.cpp`](exp.cpp), and run
 
 ## 8. Heat model
 
+In this example we propose to solve a PDE, the heat equation in 1D
+
 $$
   \partial_t u = -\partial_{xx} u
 $$
 
+In ponio, the `state_t` should propose arithmetic operations as addition and multiplication by a scalar (of type `value_t`). For the sake of simplicity, we use in the example a `std::valarray<double>`.
 
-![...](img/8-heat-model_01.png)
+The heat equation is quite complicated to solve with an explicit Runge-Kutta method but we do it with a extended stability method with the Runge-Kutta Chebyshev of order 2. In ponio you could choose the number of stages of this method : `ponio::runge_kutta::explicit_rkc2<15>()` (for 15 stages).
+
+| Solution of heat equation                             |
+|-------------------------------------------------------|
+| ![Solution of heat equation](img/8-heat-model_01.png) |
 
 All example in [`heat.cpp`](heat.cpp), and run
 

@@ -20,13 +20,21 @@ args = [os.path.join(".", name)]
 process = subprocess.Popen(args)
 process.wait()
 
+plt.rcParams["figure.figsize"] = (8, 4)
+
+data = np.loadtxt(os.path.join(data_dir, "heat_ini.dat"))
+plt.plot(data[:, 0], data[:, 1], ":", label="initial condition")
+
 data = np.loadtxt(os.path.join(data_dir, "heat_sol.dat"))
-plt.plot(data[:,0], data[:,1],"-", label="solution with RKC (15,2)")
+plt.plot(data[:, 0], data[:, 1], "-", label="solution with RKC (15,2)")
 
 data = np.loadtxt(os.path.join(data_dir, "heat_exa.dat"))
-plt.plot(data[:,0], data[:,1],":", label="exact solution")
+plt.plot(data[:, 0], data[:, 1], ":", label="exact solution")
+
+plt.legend()
+plt.ylim(-0.1, 1)
+
+plt.savefig("8-heat-model_01.png")
 
 plt.title("Heat equation")
-plt.legend()
-plt.ylim(top=0.8)
 plt.show()
