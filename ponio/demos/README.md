@@ -17,7 +17,7 @@ The following table gives an overview over all examples.
 | [11. Lorenz equations](#11-lorenz-equations)                                                              | The chaotic system example of Lorenz equations                     | [`lorenz.cpp`](lorenz.cpp)                                         |
 | [12. Lorenz equations with multiple methods](#12-lorenz-equations-with-multiple-methods)                  | This example shows how to use splitting methods and Lawson methods | [`lorenz_tuto.cpp`](lorenz_tuto.cpp)                               |
 | [13. Lotka-Volterra model](#13-lotka-volterra-model)                                                      | The classical predator–prey model of Lotka-Volterra                | [`lotka_volterra.cpp`](lotka_volterra.cpp)                         |
-| [14. Nagumo equation](#14-nagumo-equation)                                                                | This example shows how to use ponio to mesure order of a method    | [`nagumo.cpp`](nagumo.cpp)                                         |
+| [14. Nagumo equation](#14-nagumo-equation)                                                                | Example of a traveling wave                                        | [`nagumo.cpp`](nagumo.cpp)                                         |
 | [15. Pendulum equation](#15-pendulum-equation)                                                            | The classical pendulum equation                                    | [`pendulum.cpp`](pendulum.cpp)                                     |
 
 To lunch examples, in the main directory of ponio run:
@@ -468,8 +468,16 @@ All example in [`nagumo.cpp`](nagumo.cpp), and run
 
 ## 15. Pendulum equation
 
+The second order differential equation for the angle $\theta$ of a pendulum acted on by gravity with friction can be written:
+
 $$
   \ddot{\theta} + b\dot{\theta} + c\sin(\theta) = 0
+$$
+
+where $b$ and $c$ are positive constants, we take $b=0.25$, $c=5.0$. As [Arenstorf orbit](#1-arenstorf-orbit), we have to rewrite problem as $\dot{u} = f(t, u)$ :
+
+$$
+  \partial_t \begin{pmatrix} \theta \\ \omega \end{pmatrix} = \begin{pmatrix} \omega \\ -b\omega - c\sin(\theta) \end{pmatrix}
 $$
 
 | Pendulum equation (solved with RK (4,4))                                     |
