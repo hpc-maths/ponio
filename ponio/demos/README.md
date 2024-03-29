@@ -414,6 +414,8 @@ All example in [`lorenz_tuto.cpp`](lorenz_tuto.cpp), and run
 
 ## 13. Lotka-Volterra model
 
+The classical predator–prey model of Lotka-Volterra:
+
 $$
   \begin{cases}
     \dot{x} = \alpha x - \beta xy \\
@@ -421,7 +423,11 @@ $$
   \end{cases}
 $$
 
-![...](img/13-lotka-volterra-model_01.png)
+with parameters $\alpha=\frac{2}{3}$, $\beta=\frac{4}{3}$, $\gamma = \delta = 1$, and with the initial condition $(x, y) = (x_0, x_0)$, with different values of $x_0$.
+
+| Prey predator history                                        | Solution in phase space                                        |
+|--------------------------------------------------------------|----------------------------------------------------------------|
+| ![Prey predator history](img/13-lotka-volterra-model_01.png) | ![Solution in phase space](img/13-lotka-volterra-model_02.png) |
 
 All example in [`lotka_volterra.cpp`](lotka_volterra.cpp), and run
 

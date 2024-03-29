@@ -6,36 +6,86 @@
 
 import subprocess
 import os
+import dataclasses
 
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 import numpy as np
-
-
-X = np.linspace(0.9,1.8,10)
-
-filename_fmt = "lotka_volterra_data/lotka_volterra_{:0.2f}.dat"
-
-os.makedirs("lotka_volterra_data", exist_ok=True)
+import numpy.typing as npt
 
 name = "lotka_volterra"
+data_dir = name+"_data"
+filename_fmt = f"{name}_{{:0.2f}}.dat"
+
+
+@dataclasses.dataclass
+class simu_data:
+    x0: float
+    data: npt.NDArray[np.float64]
+
+    def time(self):
+        return self.data[:, 0]
+
+    def rabbit(self):
+        return self.data[:, 1]
+
+    def fox(self):
+        return self.data[:, 2]
+
+
+def load_data(x0):
+    return simu_data(x0=x0, data=np.loadtxt(os.path.join(data_dir, filename_fmt.format(x0))))
+
+
+os.makedirs(data_dir, exist_ok=True)
 
 make = subprocess.Popen(["make", name])
 make.wait()
 
-for x0 in X:
-    args = [os.path.join(".", "lotka_volterra"), filename_fmt.format(x0),str(x0)]
+X0 = np.linspace(0.9, 1.8, 10)
+
+# launch multiple simulation
+for x0 in X0:
+    args = [os.path.join(".", name),
+            os.path.join(data_dir, filename_fmt.format(x0)), str(x0)]
     process = subprocess.Popen(args)
     process.wait()
 
-for i, x0 in enumerate(X):
-    print(filename_fmt.format(x0))
-    data = np.loadtxt(filename_fmt.format(x0))
-    plt.plot(data[:,1],data[:,2],"-",color=cm.tab10(i),label=r"$x_0 = {:0.2f}$".format(x0))
-    plt.plot([x0],[x0],"o",color=cm.tab10(i),label=None)
+data = [load_data(x0) for x0 in X0]
 
-plt.title("Lotka-Volterra system (solved witk RK (11,8))")
+# composantes plot
+fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(10, 6))
+
+for i, d in enumerate(data):
+    ax1.plot(d.time(), d.rabbit(), color=f"C{i}", label=f"$x_0 = {d.x0:0.2f}$")
+    ax2.plot(d.time(), d.fox(), color=f"C{i}", label=f"$x_0 = {d.x0:0.2f}$")
+
+ax1.set_ylabel("rabbit: $x$")
+ax2.set_ylabel("fox: $y$")
+ax2.set_xlabel("time")
+
+box1 = ax1.get_position()
+ax1.set_position([box1.x0, box1.y0, box1.width * 0.95, box1.height])
+box2 = ax2.get_position()
+ax2.set_position([box2.x0, box2.y0, box2.width * 0.95, box2.height])
+
+ax1.legend(bbox_to_anchor=(1.01, 1),
+           loc='upper left', borderaxespad=0.)
+
+plt.savefig("13-lotka-volterra-model_01.png")
+
+fig.suptitle("Lotka-Volterra system (solved witk RK (11,8))")
+plt.show()
+
+
+for i, d in enumerate(data):
+    plt.plot(d.rabbit(), d.fox(), color=f"C{i}", label=f"$x_0 = {d.x0:0.2f}$")
+    plt.plot([d.x0], [d.x0], "o", color=f"C{i}", label=None)
+
 plt.xlabel("$x$")
 plt.ylabel("$y$")
 plt.legend()
+
+plt.savefig("13-lotka-volterra-model_02.png")
+
+plt.title("Lotka-Volterra system (solved witk RK (11,8))")
 plt.show()
