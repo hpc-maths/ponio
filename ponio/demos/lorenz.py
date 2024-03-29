@@ -22,29 +22,61 @@ process = subprocess.Popen(args)
 process.wait()
 
 data = np.loadtxt(os.path.join(data_dir, "lorenz.dat"))
-T,x,y,z = data[:,0],data[:,1],data[:,2],data[:,3]
-fig = plt.figure(constrained_layout=True,figsize=(8,8))
-gs = fig.add_gridspec(6,1)
+t, x, y, z = data[:, 0], data[:, 1], data[:, 2], data[:, 3]
+
+# 3d plot
+fig = plt.figure(constrained_layout=True, figsize=(8, 8))
+gs = fig.add_gridspec(6, 1)
 axlist = []
 
-ax = fig.add_subplot(gs[:3,0],projection='3d')
-ax.set_title("Lorenz attractor (solved  with RK NSSP (5,3))")
-ax.plot(x,y,z,label="Lorenz attractor",linewidth=0.375)
-ax.set_xlim3d([-20,20])
-ax.set_ylim3d([-20,20])
-ax.set_zlim3d(bottom=0,top=50)
+ax = fig.add_subplot(gs[:, 0], projection='3d')
+ax.set_title("Lorenz attractor")
+ax.set_xlim3d([-20, 20])
+ax.set_ylim3d([-20, 20])
+ax.set_zlim3d(bottom=0, top=50)
+
+ax.xaxis.pane.fill = False
+ax.yaxis.pane.fill = False
+ax.zaxis.pane.fill = False
+ax.xaxis.pane.set_edgecolor('w')
+ax.yaxis.pane.set_edgecolor('w')
+ax.zaxis.pane.set_edgecolor('w')
+# ax.grid(False)
+
+ax.plot(x, y, z, linewidth=0.5)
+
 axlist.append(ax)
 
-for i,(lab,data,ylim) in enumerate(zip(("x","y","z"),(x,y,z),([-20,20],[-20,20],[0,50]))):
-  ax = fig.add_subplot(gs[3+i,0])
-  ax.set_ylabel("${}$".format(lab))
-  if lab == "z" :
-    ax.set_xlabel("$t$")
-  ax.set_xlim((T[0],T[-1]))
-  ax.set_ylim(ylim)
-  ax.plot( T , data , label="${}$".format(lab) , color=cm.tab10(i+1) )
-  axlist.append(ax)
+plt.savefig("11-lorenz-equations_01.png")
 
-handles, labels = map(lambda x:sum(x,start=[]),zip(*map( lambda ax:ax.get_legend_handles_labels() , axlist )))
-#fig.legend(handles, labels,loc="center",bbox_to_anchor=(0.26,0.55),ncol=len(labels))
+ax.set_title("Lorenz Attractor")
+plt.show()
+
+# 2d plot
+fig, (ax1, ax2, ax3) = plt.subplots(nrows=3)
+
+ax1.plot(t, x, linewidth=0.5)
+ax1.set_ylabel("$x$")
+# print(ax1.get_xticklabels()[0])
+xticklabels = ax1.get_xticklabels()
+for xlab in xticklabels:
+    xlab.set_text("")
+
+ax1.set_xticks(ax1.get_xticks(), xticklabels)
+ax1.set_xlim(t[0], t[-1])
+
+ax2.plot(t, y, linewidth=0.5)
+ax2.set_ylabel("$y$")
+ax2.set_xticks(ax2.get_xticks(), xticklabels)
+ax2.set_xlim(t[0], t[-1])
+
+ax3.plot(t, z, linewidth=0.5)
+ax3.set_ylabel("$z$")
+
+ax3.set_xlabel("$t$")
+ax3.set_xlim(t[0], t[-1])
+
+plt.savefig("11-lorenz-equations_02.png")
+
+fig.suptitle("Composantes of Lorenz Attractor")
 plt.show()

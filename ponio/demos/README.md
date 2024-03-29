@@ -358,6 +358,8 @@ $$
   u(t, x) = \frac{1}{2\sqrt{\pi t}} e^{-\frac{x^2}{4t}}
 $$
 
+In this example we coupling the mesh refinement library [samurai](https://github.com/hpc-maths/samurai) with ponio.
+
 ![...](img/10-samurai-is-hot_01.png)
 
 All example in [`heat_samurai.cpp`](heat_samurai.cpp), and run
@@ -368,6 +370,8 @@ All example in [`heat_samurai.cpp`](heat_samurai.cpp), and run
 
 ## 11. Lorenz equations
 
+The classical chaotic system example of Lorenz equations
+
 $$
   \begin{cases}
     \dot{x} &= \sigma (y - x) \\
@@ -376,7 +380,9 @@ $$
   \end{cases}
 $$
 
-![...](img/11-lorenz-equations_01.png)
+| Solution in 3D                                    | Solution by composant                                    |
+|---------------------------------------------------|----------------------------------------------------------|
+| ![Solution in 3D](img/11-lorenz-equations_01.png) | ![Solution by composant](img/11-lorenz-equations_02.png) |
 
 All example in [`lorenz.cpp`](lorenz.cpp), and run
 
@@ -386,6 +392,8 @@ All example in [`lorenz.cpp`](lorenz.cpp), and run
 
 ## 12. Lorenz equations with multiple methods
 
+The classical chaotic system example of Lorenz equations
+
 $$
   \begin{cases}
     \dot{x} &= \sigma (y - x) \\
@@ -394,7 +402,9 @@ $$
   \end{cases}
 $$
 
-![...](img/12-lorenz-equations-with-multiple-methods_01.png)
+| Solution in 3D                                                          | Solution by composant                                                          |
+|-------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| ![Solution in 3D](img/12-lorenz-equations-with-multiple-methods_01.png) | ![Solution by composant](img/12-lorenz-equations-with-multiple-methods_02.png) |
 
 All example in [`lorenz_tuto.cpp`](lorenz_tuto.cpp), and run
 
