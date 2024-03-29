@@ -477,7 +477,13 @@ $$
 where $b$ and $c$ are positive constants, we take $b=0.25$, $c=5.0$. As [Arenstorf orbit](#1-arenstorf-orbit), we have to rewrite problem as $\dot{u} = f(t, u)$ :
 
 $$
-  \partial_t \begin{pmatrix} \theta \\ \omega \end{pmatrix} = \begin{pmatrix} \omega \\ -b\omega - c\sin(\theta) \end{pmatrix}
+  \partial_t \begin{pmatrix}
+    \theta \\
+    \omega
+  \end{pmatrix} = \begin{pmatrix}
+    \omega \\
+    -b\omega - c\sin(\theta)
+  \end{pmatrix}
 $$
 
 | Pendulum equation (solved with RK (4,4))                                     |
