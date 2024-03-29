@@ -59,8 +59,8 @@ for i, d in enumerate(data):
     ax1.plot(d.time(), d.rabbit(), color=f"C{i}", label=f"$x_0 = {d.x0:0.2f}$")
     ax2.plot(d.time(), d.fox(), color=f"C{i}", label=f"$x_0 = {d.x0:0.2f}$")
 
-ax1.set_ylabel("rabbit: $x$")
-ax2.set_ylabel("fox: $y$")
+ax1.set_ylabel("prey: $x$")
+ax2.set_ylabel("predator: $y$")
 ax2.set_xlabel("time")
 
 box1 = ax1.get_position()
