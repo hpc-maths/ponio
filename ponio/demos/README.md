@@ -456,7 +456,7 @@ with parameter $x_0 = -10$.
 
 | Solution with RKC(20, 2)                          | Absolute error $u^n_i - u(t^n, x_i)$             |
 |---------------------------------------------------|--------------------------------------------------|
-| ![Nagumo solution](img/14-nagumo-equation_01.png) | ![Absolute error](img/14-nagumo-equation_02.png) |
+| ![Nagumo solution](img/13-lotka-volterra-model_01.png) | ![Absolute error](img/14-nagumo-equation_02.png) |
 
 All example in [`nagumo.cpp`](nagumo.cpp), and run
 
