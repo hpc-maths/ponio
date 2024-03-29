@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <iostream>
-#include <numbers>
-#include <numeric>
+#include <cmath>
+#include <filesystem>
+#include <string>
 #include <valarray>
 
 #include <ponio/observer.hpp>
-#include <ponio/problem.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 

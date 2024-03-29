@@ -7,6 +7,7 @@
 #include <array>
 #include <cmath>
 #include <concepts>
+#include <cstddef>
 #include <ranges>
 #include <tuple>
 #include <type_traits>
@@ -86,7 +87,7 @@ namespace ponio
     {
         static constexpr bool is_embedded = Algorithm_t::is_embedded;
         using step_storage_t              = typename std::
-            conditional<is_embedded, std::array<state_t, Algorithm_t::N_stages + 2>, std::array<state_t, Algorithm_t::N_stages + 1>>::type;
+            conditional_t<is_embedded, std::array<state_t, Algorithm_t::N_stages + 2>, std::array<state_t, Algorithm_t::N_stages + 1>>;
 
         Algorithm_t alg;
         step_storage_t kis;

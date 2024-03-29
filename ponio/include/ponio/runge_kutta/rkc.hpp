@@ -4,15 +4,9 @@
 
 #pragma once
 
-#include <concepts>
-#include <numeric>
-#include <ranges>
+#include <cstddef>
 #include <string_view>
-#include <type_traits>
 
-#include "../butcher_tableau.hpp"
-#include "../detail.hpp"
-#include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
 

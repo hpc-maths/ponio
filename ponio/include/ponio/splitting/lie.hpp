@@ -5,9 +5,9 @@
 #pragma once
 
 #include <array>
-#include <concepts>
+#include <cstddef>
 #include <tuple>
-#include <type_traits>
+#include <utility>
 
 #include "detail.hpp"
 
@@ -135,8 +135,8 @@ namespace ponio::splitting::lie
     template <typename value_t, typename... Algorithms_t>
     inline lie_tuple<value_t, Algorithms_t...>::lie_tuple( std::tuple<Algorithms_t...>&& algs,
         std::array<value_t, sizeof...( Algorithms_t )>&& dts )
-        : algos( algs )
-        , time_steps( dts )
+        : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
+        , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
     {
     }
 

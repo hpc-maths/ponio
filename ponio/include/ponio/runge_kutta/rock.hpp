@@ -6,15 +6,12 @@
 
 #include <algorithm>
 #include <cmath>
-#include <concepts>
+#include <cstddef>
 #include <numeric>
 #include <ranges>
 #include <string_view>
-#include <type_traits>
+#include <utility>
 
-#include "../butcher_tableau.hpp"
-#include "../detail.hpp"
-#include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
 

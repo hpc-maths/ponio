@@ -6,11 +6,14 @@
 #include <valarray>
 
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <numbers>
 #include <sstream>
+#include <string>
 
 #include <ponio/observer.hpp>
 #include <ponio/runge_kutta.hpp>
@@ -110,7 +113,7 @@ main()
     std::valarray<double> const yexa = heat_model::fundamental_sol( tend, x );
 
     auto const err = std::abs( yexa - yend ).sum() / static_cast<double>( nx );
-    std::cout << "L1 norm of error = " << err << std::endl;
+    std::cout << "L1 norm of error = " << err << "\n";
 
     save( x, yend, std::filesystem::path( dirname ) / "heat_sol.dat" );
     save( x, yexa, std::filesystem::path( dirname ) / "heat_exa.dat" );
