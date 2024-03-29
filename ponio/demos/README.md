@@ -472,7 +472,9 @@ $$
   \ddot{\theta} + b\dot{\theta} + c\sin(\theta) = 0
 $$
 
-![...](img/15-pendulum-equation_01.png)
+| Pendulum equation (solved with RK (4,4))                                     |
+|------------------------------------------------------------------------------|
+| ![Pendulum equation (solved with RK (4,4))](img/15-pendulum-equation_01.png) |
 
 All example in [`pendulum.cpp`](pendulum.cpp), and run
 
