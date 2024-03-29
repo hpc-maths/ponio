@@ -122,8 +122,8 @@ set(PONIO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/ponio/include)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 option(BUILD_TESTS "build the tests" OFF)
-option(BUILD_DEMOS "build the demos" OFF)
-option(BUILD_SAMURAI_DEMOS "build demos working with samurai" OFF)
+option(BUILD_DEMOS "build the examples" OFF)
+option(BUILD_SAMURAI_DEMOS "build examples working with samurai" OFF)
 
 if (BUILD_TESTS)
     add_subdirectory(ponio/test)
