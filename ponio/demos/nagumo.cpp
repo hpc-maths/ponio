@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iterator>
 #include <numbers>
 #include <sstream>
@@ -67,7 +68,7 @@ struct nagumo
 };
 
 void
-save( std::valarray<double> const& x, std::valarray<double> const& y, std::filesystem::path const& filename )
+save( std::valarray<double> const& x, std::valarray<double> const& y, std::filesystem::path const& dir, double t )
 {
     auto printer_xy = []( double a, double b )
     {
@@ -76,7 +77,10 @@ save( std::valarray<double> const& x, std::valarray<double> const& y, std::files
         return ss.str();
     };
 
-    std::ofstream of( filename );
+    std::stringstream filename;
+    filename << "u_" << std::setprecision( 3 ) << t << ".dat";
+
+    std::ofstream of( dir / filename.str() );
     std::transform( std::begin( x ), std::end( x ), std::begin( y ), std::ostream_iterator<std::string>( of, "\n" ), printer_xy );
     of.close();
 }
@@ -87,7 +91,7 @@ main()
     std::string const dirname = "nagumo_data";
     std::filesystem::create_directories( dirname );
 
-    std::size_t const nx = 2001;
+    std::size_t const nx = 501;
 
     double const x_max = 50.0;
     double const x_min = -50.0;
@@ -107,41 +111,29 @@ main()
 
     auto pb = nagumo( dx, x_min, x_max, x_0, k, d );
 
-    double t_ini                          = 0.0;
-    double t_end                          = 10.0;
+    double t_ini = 0.0;
+    double t_end = 50.0;
+    double dt    = ( t_end - t_ini ) / 100;
+
     ponio::time_span<double> const t_span = { t_ini, t_end };
 
-    std::valarray<double> u_ini = pb.exact_solution( t_ini, x );
-    std::valarray<double> u_end( 0., nx );
+    std::valarray<double> u_n = pb.exact_solution( t_ini, x );
 
-    save( x, u_ini, std::filesystem::path( dirname ) / "ini.dat" );
+    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::rkc_202(), u_n, t_span, dt );
+    auto it_sol    = sol_range.begin();
 
-    std::valarray<double> u_qexa( nx );
-    std::ifstream is( std::filesystem::path( dirname ) / "qexa.txt" );
-    std::istream_iterator<double> start( is ), end;
-    std::copy( start, end, std::begin( u_qexa ) );
-    // save( x, u_qexa, std::filesystem::path( dirname ) / "qexa.dat" );
-
-    for ( std::size_t N = 10; N < 20000; N *= 2 )
+    std::size_t n_iteration = 0;
+    while ( it_sol->time < t_end )
     {
-        // double dt = 0.01;
-        double dt = ( t_end - t_ini ) / static_cast<double>( N );
-        u_end     = ponio::solve( pb, ponio::runge_kutta::rock::rock2(), u_ini, t_span, dt, observer::null_observer() );
-        // u_end = ponio::solve( pb, ponio::runge_kutta::rkc_202(), u_ini, t_span, dt, observer::null_observer() );
+        if ( n_iteration % 10 == 0 )
+        {
+            save( x, it_sol->state, std::filesystem::path( dirname ), it_sol->time );
+        }
 
-        std::valarray<double> diff = std::abs( u_qexa - u_end );
-        // save( x, diff, std::filesystem::path( dirname ) / "diff.dat" );
-        double err = std::sqrt( std::accumulate( std::begin( diff ),
-            std::end( diff ),
-            0.0,
-            [dx]( double partial_sum, double val ) -> double
-            {
-                return partial_sum + val * val * dx;
-            } ) );
-        std::cout << dt << " " << std::setprecision( 20 ) << err << std::endl;
+        ++n_iteration;
+        ++it_sol;
     }
-
-    save( x, u_end, std::filesystem::path( dirname ) / "end.dat" );
+    save( x, it_sol->state, std::filesystem::path( dirname ), it_sol->time );
 
     return 0;
 }

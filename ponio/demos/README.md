@@ -437,11 +437,26 @@ All example in [`lotka_volterra.cpp`](lotka_volterra.cpp), and run
 
 ## 14. Nagumo equation
 
+The Nagumo equation is a propagation of a traveling wave
+
 $$
   \partial_t u = d \partial_{xx}u + ku^2(1-u)
 $$
 
-![...](img/14-nagumo-equation_01.png)
+with parameter $k=1$, $d=1$, with the initial solution given by exact solution to time $t=0$:
+
+$$
+  \begin{aligned}
+    v = \frac{1}{\sqrt{2}}\sqrt{kd},\quad c = -\frac{1}{\sqrt{2}}\sqrt{\frac{k}{d}}, \\
+    u(t, x) = \frac{\exp(c(x - x_0 - vt))}{1 + \exp(c(x-x_0 - vt))}
+  \end{aligned}
+$$
+
+with parameter $x_0 = -10$.
+
+| Solution with RKC(20, 2)                          | Absolute error $u^n_i - u(t^n, x_i)$             |
+|---------------------------------------------------|--------------------------------------------------|
+| ![Nagumo solution](img/14-nagumo-equation_01.png) | ![Absolute error](img/14-nagumo-equation_02.png) |
 
 All example in [`nagumo.cpp`](nagumo.cpp), and run
 
