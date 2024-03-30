@@ -12,6 +12,8 @@ dependencies:
   - pkg-config
   - eigen
   - cli11
+  - pandoc
+  - nbconvert
   - graphviz
   - breathe
   - doxygen

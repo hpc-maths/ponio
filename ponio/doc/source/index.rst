@@ -14,3 +14,10 @@ ode_solver |version| documentation
    :caption: User Documentation
 
    demos/lorenz
+
+.. toctree::
+   :caption: Examples
+   :glob:
+
+   user/notebook/*
+   user/examples/examples
