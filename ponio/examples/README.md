@@ -2,24 +2,24 @@
 
 The following table gives an overview over all examples.
 
-| Section                                                                                                   | Brief Description                                                  | File                                                                 |
-|-----------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|----------------------------------------------------------------------|
-| [1. Arenstorf orbit](#1-arenstorf-orbit)                                                                  | This example shows how to use multiple adaptive time step methods  | [`arenstorf.cpp`](arenstorf.cpp)                                     |
-| [2. Brownian movement](#2-brownian-movement)                                                              | This example shows how to use random in an ODE                     | [`brownian.cpp`](brownian.cpp)                                       |
-| [3. Brusselator equations](#3-brusselator-equations)                                                      | The chemistry example of Brusselator (2 equations model)           | [`brusselator.cpp`](brusselator.cpp)                                 |
-| [4. Brusselator equations with DIRK method](#4-brusselator-equations-with-dirk-method)                    | This example shows hos to use DIRK methods                         | [`brusselator_dirk.cpp`](brusselator_dirk.cpp)                       |
-| [5. Curtiss-Hirschfelder equation](#5-curtiss-hirschfelder-equation)                                      | This example shows how to use range and iterators on solution      | [`curtiss_hirschfelder.cpp`](curtiss_hirschfelder.cpp)               |
-| [6. Curtiss-Hirschfelder equation with expRK method](#6-curtiss-hirschfelder-equation-with-exprk-method)  | This example shows how to use exponential Runge-Kutta methods      | [`curtiss_hirschfelder_exprk.cpp`](curtiss_hirschfelder_exprk.cpp)   |
-| [7. Exponential function](#7-exponential-function)                                                        | This example is the simplest example                               | [`exp.cpp`](exp.cpp)                                                 |
-| [8. Heat model](#8-heat-model)                                                                            | The classical heat equation solving with RKC2 method               | [`heat.cpp`](heat.cpp)                                               |
-| [9. ROCK method](#9-rock-method)                                                                          | This example shows how to use ROCK2 and ROCK4 methods              | [`heat_rock.cpp`](heat_rock.cpp)                                     |
-| [10. Samurai is hot](#10-samurai-is-hot)                                                                  | This example shows how to coupling ponio and samurai               | [`heat_samurai.cpp`](heat_samurai.cpp)                               |
-| [11. Lorenz equations](#11-lorenz-equations)                                                              | The chaotic system example of Lorenz equations                     | [`lorenz.cpp`](lorenz.cpp)                                           |
-| [12. Lorenz equations with multiple methods](#12-lorenz-equations-with-multiple-methods)                  | This example shows how to use splitting methods and Lawson methods | [`lorenz_tuto.cpp`](lorenz_tuto.cpp)                                 |
-| [13. Lotka-Volterra model](#13-lotka-volterra-model)                                                      | The classical predator–prey model of Lotka-Volterra                | [`lotka_volterra.cpp`](lotka_volterra.cpp)                           |
-| [14. Nagumo equation](#14-nagumo-equation)                                                                | Example of a traveling wave                                        | [`nagumo.cpp`](nagumo.cpp)                                           |
-| [15. Pendulum equation](#15-pendulum-equation)                                                            | The classical pendulum equation                                    | [`pendulum.cpp`](pendulum.cpp)                                       |
-| [16. Belousov Zhabotinsky](#16-belouzov-zhabotinsky)                                                      | Solves Belousov-Zhabotinsky equations with PIROCK method           | [`belousov_zhabotinsky_pirock.cpp`](belousov_zhabotinsky_pirock.cpp) |
+| Section                                                                                             | Brief Description                                                  | File                                                                 |
+|-----------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|----------------------------------------------------------------------|
+| [Arenstorf orbit](#arenstorf-orbit)                                                                 | This example shows how to use multiple adaptive time step methods  | [`arenstorf.cpp`](arenstorf.cpp)                                     |
+| [Brownian movement](#brownian-movement)                                                             | This example shows how to use random in an ODE                     | [`brownian.cpp`](brownian.cpp)                                       |
+| [Brusselator equations](#brusselator-equations)                                                     | The chemistry example of Brusselator (2 equations model)           | [`brusselator.cpp`](brusselator.cpp)                                 |
+| [Brusselator equations with DIRK method](#brusselator-equations-with-dirk-method)                   | This example shows hos to use DIRK methods                         | [`brusselator_dirk.cpp`](brusselator_dirk.cpp)                       |
+| [Curtiss-Hirschfelder equation](#curtiss-hirschfelder-equation)                                     | This example shows how to use range and iterators on solution      | [`curtiss_hirschfelder.cpp`](curtiss_hirschfelder.cpp)               |
+| [Curtiss-Hirschfelder equation with expRK method](#curtiss-hirschfelder-equation-with-exprk-method) | This example shows how to use exponential Runge-Kutta methods      | [`curtiss_hirschfelder_exprk.cpp`](curtiss_hirschfelder_exprk.cpp)   |
+| [Exponential function](#exponential-function)                                                       | This example is the simplest example                               | [`exp.cpp`](exp.cpp)                                                 |
+| [Heat model](#heat-model)                                                                           | The classical heat equation solving with RKC2 method               | [`heat.cpp`](heat.cpp)                                               |
+| [ROCK method](#rock-method)                                                                         | This example shows how to use ROCK2 and ROCK4 methods              | [`heat_rock.cpp`](heat_rock.cpp)                                     |
+| [Samurai is hot](#samurai-is-hot)                                                                   | This example shows how to coupling ponio and samurai               | [`heat_samurai.cpp`](heat_samurai.cpp)                               |
+| [Lorenz equations](#lorenz-equations)                                                               | The chaotic system example of Lorenz equations                     | [`lorenz.cpp`](lorenz.cpp)                                           |
+| [Lorenz equations with multiple methods](#lorenz-equations-with-multiple-methods)                   | This example shows how to use splitting methods and Lawson methods | [`lorenz_tuto.cpp`](lorenz_tuto.cpp)                                 |
+| [Lotka-Volterra model](#lotka-volterra-model)                                                       | The classical predator–prey model of Lotka-Volterra                | [`lotka_volterra.cpp`](lotka_volterra.cpp)                           |
+| [Nagumo equation](#nagumo-equation)                                                                 | Example of a traveling wave                                        | [`nagumo.cpp`](nagumo.cpp)                                           |
+| [Pendulum equation](#pendulum-equation)                                                             | The classical pendulum equation                                    | [`pendulum.cpp`](pendulum.cpp)                                       |
+| [Belousov Zhabotinsky](#belouzov-zhabotinsky)                                                       | Solves Belousov-Zhabotinsky equations with PIROCK method           | [`belousov_zhabotinsky_pirock.cpp`](belousov_zhabotinsky_pirock.cpp) |
 
 To lunch examples, in the main directory of ponio run:
 
@@ -57,7 +57,7 @@ or
   make visu_AN_EXAMPLE
 ```
 
-## 1. Arenstorf orbit
+## Arenstorf orbit
 
 The system of differential equations for the Arenstorf orbit are:
 
@@ -109,13 +109,13 @@ $$
 
 In this example we solve this system with some explicit adaptive time step methods from [Dormand, J.R., Prince, P.J., A family of embedded Runge-Kutta formulae (1980) *Journal of Computational and Applied Mathematics*](http://dx.doi.org/10.1016/0771-050x(80)90013-3)
 
-| Arenstorf orbit                                  | Arenstorf velocity                                  |
-|--------------------------------------------------|-----------------------------------------------------|
-| ![Arenstorf orbit](img/1-arenstorf-orbit_01.png) | ![Arenstorf velocity](img/1-arenstorf-orbit_02.png) |
+| Arenstorf orbit                          | Arenstorf velocity                          |
+|------------------------------------------|---------------------------------------------|
+| ![Arenstorf orbit](img/arenstorf/01.png) | ![Arenstorf velocity](img/arenstorf/02.png) |
 
-| Time step history                                  |
-|----------------------------------------------------|
-| ![Time step history](img/1-arenstorf-orbit_03.png) |
+| Time step history                          |
+|--------------------------------------------|
+| ![Time step history](img/arenstorf/03.png) |
 
 All example in [`arenstorf.cpp`](arenstorf.cpp), and run
 
@@ -123,7 +123,7 @@ All example in [`arenstorf.cpp`](arenstorf.cpp), and run
   make arenstorf_visu
 ```
 
-## 2. Brownian movement
+## Brownian movement
 
 We write a simple Brownian movement
 
@@ -136,9 +136,9 @@ $$
 
 where $X(t)$ and $Y(t)$ are random variable (juste a `std::rand` at each iteration).
 
-| Some Brownian movement in 2D                         |
-|------------------------------------------------------|
-| ![brownian movement](img/2-brownian-movement_01.png) |
+| Some Brownian movement in 2D              |
+|-------------------------------------------|
+| ![brownian movement](img/brownian/01.png) |
 
 All example in [`brownian.cpp`](brownian.cpp), and run
 
@@ -146,7 +146,7 @@ All example in [`brownian.cpp`](brownian.cpp), and run
   make brownian_visu
 ```
 
-## 3. Brusselator equations
+## Brusselator equations
 
 The Brusselator is a model of periodic chemical reaction. We present the version ODE with two species
 
@@ -159,9 +159,9 @@ $$
 
 We solve this model with a hight order explicit Runge-Kutta method: RK(8, 6).
 
-| Brusselator concentration                                        | Brusselator concentration in phase space                                        |
-|------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| ![Brusselator concentration](img/3-brusselator-equations_01.png) | ![Brusselator concentration in phase space](img/3-brusselator-equations_02.png) |
+| Brusselator concentration                            | Brusselator concentration in phase space                            |
+|------------------------------------------------------|---------------------------------------------------------------------|
+| ![Brusselator concentration](img/brusselator/01.png) | ![Brusselator concentration in phase space](img/brusselator/02.png) |
 
 All example in [`brusselator.cpp`](brusselator.cpp), and run
 
@@ -169,7 +169,7 @@ All example in [`brusselator.cpp`](brusselator.cpp), and run
   make brusselator_visu
 ```
 
-## 4. Brusselator equations with DIRK method
+## Brusselator equations with DIRK method
 
 The Brusselator is a model of periodic chemical reaction. We present the version ODE with two species
 
@@ -188,9 +188,9 @@ $$
   Ax = b.
 $$
 
-| Brusselator concentration                                                         | Brusselator concentration in phase space                                                         |
-|-----------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| ![Brusselator concentration](img/4-brusselator-equations-with-dirk-method_01.png) | ![Brusselator concentration in phase space](img/4-brusselator-equations-with-dirk-method_02.png) |
+| Brusselator concentration                                 | Brusselator concentration in phase space                                 |
+|-----------------------------------------------------------|--------------------------------------------------------------------------|
+| ![Brusselator concentration](img/brusselator_dirk/01.png) | ![Brusselator concentration in phase space](img/brusselator_dirk/02.png) |
 
 All example in [`brusselator_dirk.cpp`](brusselator_dirk.cpp), and run
 
@@ -198,7 +198,7 @@ All example in [`brusselator_dirk.cpp`](brusselator_dirk.cpp), and run
   make brusselator_dirk_visu
 ```
 
-## 5. Curtiss-Hirschfelder equation
+## Curtiss-Hirschfelder equation
 
 A classical stiff problem is the Curtiss-Hirschfelder equation
 
@@ -237,9 +237,9 @@ or with a range-based for loop:
 
 Only in the first case you can control time step before increment (with your adaptive time step heuristic) with modification of `it->time_step` data member.
 
-| Curtiss-Hirschfelder solution                                                |
-|------------------------------------------------------------------------------|
-| ![Curtiss-Hirschfelder solution](img/5-curtiss-hirschfelder-equation_01.png) |
+| Curtiss-Hirschfelder solution                                     |
+|-------------------------------------------------------------------|
+| ![Curtiss-Hirschfelder solution](img/curtiss_hirschfelder/01.png) |
 
 All example in [`curtiss_hirschfelder.cpp`](curtiss_hirschfelder.cpp), and run
 
@@ -247,7 +247,7 @@ All example in [`curtiss_hirschfelder.cpp`](curtiss_hirschfelder.cpp), and run
   make curtiss_hirschfelder_visu
 ```
 
-## 6. Curtiss-Hirschfelder equation with expRK method
+## Curtiss-Hirschfelder equation with expRK method
 
 A classical stiff problem is the Curtiss-Hirschfelder equation
 
@@ -259,9 +259,9 @@ with $k>1$ and $y(0) = y_0$. We choose $k = 50$ and $y_0 = 2$.
 
 In this example we solve the equation with Krogstad method (an exponential Runge-Kutta method), and LRK(4, 4) method (a Lawson method). In both methods, you need to define a `ponio::lawson_problem` with a linear and non-linear part. We choose the linear part $-k$ and the non-linear part as $N:t, y\mapsto k\cos(t)$. Exponential Runge-Kutta methods and Lawson methods are build to solve exactly the linear part when the non-linear part goes to 0.
 
-| Curtiss-Hirschfelder solution                                                                  |
-|------------------------------------------------------------------------------------------------|
-| ![Curtiss-Hirschfelder solution](img/6-curtiss-hirschfelder-equation-with-exprk-method_01.png) |
+| Curtiss-Hirschfelder solution                                           |
+|-------------------------------------------------------------------------|
+| ![Curtiss-Hirschfelder solution](img/curtiss_hirschfelder_exprk/01.png) |
 
 All example in [`curtiss_hirschfelder_exprk.cpp`](curtiss_hirschfelder_exprk.cpp), and run
 
@@ -269,7 +269,7 @@ All example in [`curtiss_hirschfelder_exprk.cpp`](curtiss_hirschfelder_exprk.cpp
   make curtiss_hirschfelder_exprk_visu
 ```
 
-## 7. Exponential function
+## Exponential function
 
 In this example we solve the simplest differential equation:
 
@@ -279,9 +279,9 @@ $$
 
 with $y(0) = 1$. After a lot of calculus we can find the exact solution $y(t) = e^t$, or we can approximate it with RK NSSP (2, 1) method.
 
-| Exponential function                                       |
-|------------------------------------------------------------|
-| ![Exponential function](img/7-exponential-function_01.png) |
+| Exponential function                    |
+|-----------------------------------------|
+| ![Exponential function](img/exp/01.png) |
 
 All example in [`exp.cpp`](exp.cpp), and run
 
@@ -289,7 +289,7 @@ All example in [`exp.cpp`](exp.cpp), and run
   make exp_visu
 ```
 
-## 8. Heat model
+## Heat model
 
 In this example we propose to solve a PDE, the heat equation in 1D
 
@@ -307,9 +307,9 @@ In ponio, the `state_t` should propose arithmetic operations as addition and mul
 
 The heat equation is quite complicated to solve with an explicit Runge-Kutta method but we do it with a extended stability method with the Runge-Kutta Chebyshev of order 2. In ponio you could choose the number of stages of this method : `ponio::runge_kutta::explicit_rkc2<15>()` (for 15 stages).
 
-| Solution of heat equation                             |
-|-------------------------------------------------------|
-| ![Solution of heat equation](img/8-heat-model_01.png) |
+| Solution of heat equation                     |
+|-----------------------------------------------|
+| ![Solution of heat equation](img/heat/01.png) |
 
 All example in [`heat.cpp`](heat.cpp), and run
 
@@ -317,7 +317,7 @@ All example in [`heat.cpp`](heat.cpp), and run
   make heat_visu
 ```
 
-## 9. ROCK method
+## ROCK method
 
 In this example we propose to solve a PDE, the heat equation in 1D
 
@@ -335,9 +335,9 @@ In ponio, the `state_t` should propose arithmetic operations as addition and mul
 
 An optimization of RKC2 is the ROCK2 method from [Abdulle, A., Medovikov, A. Second order Chebyshev methods based on orthogonal polynomials. *Numer. Math* (2001)](https://doi.org/10.1007/s002110100292), and its extension to order 4, ROCK4 method presented in [Abdulle, A. Fourth Order Chebyshev Methods with Recurrence Relation. *SIAM Journal on Scientific Computing* (2002)](https://doi.org/10.1137/S106482750037954).
 
-| Solution of heat equation                              | Mesure of order of ROCK2 and ROCK4           |
-|--------------------------------------------------------|----------------------------------------------|
-| ![Solution of heat equation](img/9-rock-method_01.png) | ![Mesure of order](img/9-rock-method_02.png) |
+| Solution of heat equation                          | Mesure of order of ROCK2 and ROCK4       |
+|----------------------------------------------------|------------------------------------------|
+| ![Solution of heat equation](img/heat_rock/01.png) | ![Mesure of order](img/heat_rock/02.png) |
 
 All example in [`heat_rock.cpp`](heat_rock.cpp), and run
 
@@ -345,7 +345,7 @@ All example in [`heat_rock.cpp`](heat_rock.cpp), and run
   make heat_rock_visu
 ```
 
-## 10. Samurai is hot
+## Samurai is hot
 
 > This example needs to activate `-DBUILD_SAMURAI_DEMOS=ON`
 
@@ -363,7 +363,7 @@ $$
 
 In this example we coupling the mesh refinement library [samurai](https://github.com/hpc-maths/samurai) with ponio.
 
-![...](img/10-samurai-is-hot_01.png)
+![...](img/heat_samurai/01.png)
 
 All example in [`heat_samurai.cpp`](heat_samurai.cpp), and run
 
@@ -371,7 +371,7 @@ All example in [`heat_samurai.cpp`](heat_samurai.cpp), and run
   make heat_samurai_visu
 ```
 
-## 11. Lorenz equations
+## Lorenz equations
 
 The classical chaotic system example of Lorenz equations
 
@@ -383,9 +383,9 @@ $$
   \end{cases}
 $$
 
-| Solution in 3D                                    | Solution by composant                                    |
-|---------------------------------------------------|----------------------------------------------------------|
-| ![Solution in 3D](img/11-lorenz-equations_01.png) | ![Solution by composant](img/11-lorenz-equations_02.png) |
+| Solution in 3D                       | Solution by composant                       |
+|--------------------------------------|---------------------------------------------|
+| ![Solution in 3D](img/lorenz/01.png) | ![Solution by composant](img/lorenz/02.png) |
 
 All example in [`lorenz.cpp`](lorenz.cpp), and run
 
@@ -393,7 +393,7 @@ All example in [`lorenz.cpp`](lorenz.cpp), and run
   make lorenz_visu
 ```
 
-## 12. Lorenz equations with multiple methods
+## Lorenz equations with multiple methods
 
 The classical chaotic system example of Lorenz equations
 
@@ -405,9 +405,9 @@ $$
   \end{cases}
 $$
 
-| Solution in 3D                                                          | Solution by composant                                                          |
-|-------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| ![Solution in 3D](img/12-lorenz-equations-with-multiple-methods_01.png) | ![Solution by composant](img/12-lorenz-equations-with-multiple-methods_02.png) |
+| Solution in 3D                            | Solution by composant                            |
+|-------------------------------------------|--------------------------------------------------|
+| ![Solution in 3D](img/lorenz_tuto/01.png) | ![Solution by composant](img/lorenz_tuto/02.png) |
 
 All example in [`lorenz_tuto.cpp`](lorenz_tuto.cpp), and run
 
@@ -415,7 +415,7 @@ All example in [`lorenz_tuto.cpp`](lorenz_tuto.cpp), and run
   make lorenz_tuto_visu
 ```
 
-## 13. Lotka-Volterra model
+## Lotka-Volterra model
 
 The classical predator–prey model of Lotka-Volterra:
 
@@ -428,9 +428,9 @@ $$
 
 with parameters $\alpha=\frac{2}{3}$, $\beta=\frac{4}{3}$, $\gamma = \delta = 1$, and with the initial condition $(x, y) = (x_0, x_0)$, with different values of $x_0$.
 
-| Prey predator history                                        | Solution in phase space                                        |
-|--------------------------------------------------------------|----------------------------------------------------------------|
-| ![Prey predator history](img/13-lotka-volterra-model_01.png) | ![Solution in phase space](img/13-lotka-volterra-model_02.png) |
+| Prey predator history                               | Solution in phase space                               |
+|-----------------------------------------------------|-------------------------------------------------------|
+| ![Prey predator history](img/lotka_volterra/01.png) | ![Solution in phase space](img/lotka_volterra/02.png) |
 
 All example in [`lotka_volterra.cpp`](lotka_volterra.cpp), and run
 
@@ -438,7 +438,7 @@ All example in [`lotka_volterra.cpp`](lotka_volterra.cpp), and run
   make lotka_volterra_visu
 ```
 
-## 14. Nagumo equation
+## Nagumo equation
 
 The Nagumo equation is a propagation of a traveling wave
 
@@ -459,9 +459,9 @@ $$
 $$
 
 
-| Solution with RKC(20, 2)                          | Absolute error                                   |
-|---------------------------------------------------|--------------------------------------------------|
-| ![Nagumo solution](img/14-nagumo-equation_01.png) | ![Absolute error](img/14-nagumo-equation_02.png) |
+| Solution with RKC(20, 2)              | Absolute error                       |
+|---------------------------------------|--------------------------------------|
+| ![Nagumo solution](img/nagumo/01.png) | ![Absolute error](img/nagumo/02.png) |
 
 All example in [`nagumo.cpp`](nagumo.cpp), and run
 
@@ -469,7 +469,7 @@ All example in [`nagumo.cpp`](nagumo.cpp), and run
   make nagumo_visu
 ```
 
-## 15. Pendulum equation
+## Pendulum equation
 
 The second order differential equation for the angle $\theta$ of a pendulum acted on by gravity with friction can be written:
 
@@ -477,7 +477,7 @@ $$
   \ddot{\theta} + b\dot{\theta} + c\sin(\theta) = 0
 $$
 
-where $b$ and $c$ are positive constants, we take $b=0.25$, $c=5.0$. As [Arenstorf orbit](#1-arenstorf-orbit), we have to rewrite problem as $\dot{u} = f(t, u)$ :
+where $b$ and $c$ are positive constants, we take $b=0.25$, $c=5.0$. As [Arenstorf orbit](#arenstorf-orbit), we have to rewrite problem as $\dot{u} = f(t, u)$ :
 
 $$
   \partial_t \begin{pmatrix}
@@ -489,9 +489,9 @@ $$
   \end{pmatrix}
 $$
 
-| Pendulum equation (solved with RK (4,4))                                     |
-|------------------------------------------------------------------------------|
-| ![Pendulum equation (solved with RK (4,4))](img/15-pendulum-equation_01.png) |
+| Pendulum equation (solved with RK (4,4))                         |
+|------------------------------------------------------------------|
+| ![Pendulum equation (solved with RK (4,4))](img/pendulum/01.png) |
 
 All example in [`pendulum.cpp`](pendulum.cpp), and run
 
