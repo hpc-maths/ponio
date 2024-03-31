@@ -19,6 +19,7 @@ mkdir -p ${OUTPUT_dir}
 cp -r ${EXAMPLES_dir}/img ${OUTPUT_dir}
 pandoc ${EXAMPLES_dir}/README.md -T rst --wrap=preserve --columns=512 -o ${OUTPUT_dir}/examples.rst
 
+# laucnh doxygen
 pushd ponio/doc
 doxygen
 ls
