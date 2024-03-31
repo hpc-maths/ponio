@@ -20,13 +20,18 @@
 
 import os
 import subprocess
+import json
+
 project = 'solver'
 author = 'Josselin'
 
 # The short X.Y version
-version = '0.0'
+version_list = json.load(
+    open("../../../.release-please-manifest.json", 'r'))["."].split(".")
+
+version = '.'.join(version_list[0:-1])
 # The full version, including alpha/beta/rc tags
-release = '0.0.0'
+release = '.'.join(version_list)
 
 
 # -- General configuration ---------------------------------------------------

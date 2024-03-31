@@ -1,8 +1,8 @@
 .. _topics-index:
 
-==================================
-ode_solver |version| documentation
-==================================
+=============================
+ponio |version| documentation
+=============================
 
 .. toctree::
    :caption: Developer Documentation
