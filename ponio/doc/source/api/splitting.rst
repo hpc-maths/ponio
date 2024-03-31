@@ -19,21 +19,21 @@ In Lie splitting method, the solution is computed as:
    u^{n+1} = \phi_{\Delta t}^{[f_1]}\circ \cdots \circ \phi_{\Delta t}^{[f_n]} (t^n,u^n)
 
 .. doxygenclass:: ponio::splitting::lie::lie
-   :project: solver
+   :project: ponio
    :members:
 
 Helper functions and classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. doxygenfunction:: ponio::splitting::lie::make_lie_from_tuple
-   :project: solver
+   :project: ponio
 
 .. doxygenclass:: ponio::splitting::lie::lie_tuple
-   :project: solver
+   :project: ponio
    :members:
 
 .. doxygenfunction:: ponio::splitting::lie::make_lie_tuple
-   :project: solver
+   :project: ponio
 
 Strang splitting method
 -----------------------
@@ -48,18 +48,18 @@ In Strang splitting method, the solution is computed as:
               (t^n,u^n)
 
 .. doxygenclass:: ponio::splitting::strang::strang
-   :project: solver
+   :project: ponio
    :members:
 
 Helper functions and classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. doxygenfunction:: ponio::splitting::strang::make_strang_from_tuple
-   :project: solver
+   :project: ponio
 
 .. doxygenclass:: ponio::splitting::strang::strang_tuple
-   :project: solver
+   :project: ponio
    :members:
 
 .. doxygenfunction:: ponio::splitting::strang::make_strang_tuple
-   :project: solver
+   :project: ponio

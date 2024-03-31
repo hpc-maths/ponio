@@ -22,7 +22,7 @@ import os
 import subprocess
 import json
 
-project = 'solver'
+project = 'ponio'
 author = 'Josselin'
 
 # The short X.Y version
@@ -50,7 +50,7 @@ extensions = [
     'breathe'
 ]
 
-breathe_projects = {'solver': '../xml'}
+breathe_projects = {'ponio': '../xml'}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

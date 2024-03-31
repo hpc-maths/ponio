@@ -2,10 +2,10 @@ Details
 =======
 
 .. doxygenfunction:: detail::init_fill_array(T && value)
-   :project: solver
+   :project: ponio
 
 .. doxygenfunction:: detail::tpl_inner_product
-   :project: solver
+   :project: ponio
 
 .. doxygenfunction:: detail::power
-   :project: solver
+   :project: ponio

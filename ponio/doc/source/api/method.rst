@@ -16,21 +16,21 @@ Method class
       state_t operator()(Problem_t& f, value_t tn, state_t const& un, value_t dt)
 
 .. doxygenclass:: ponio::method
-   :project: solver
+   :project: ponio
    :members:
 
 There is 0 overloading of ``ponio::make_method`` function, one for generic algorithm, and one for each implemanted splitting method (Lie splitting method and Strang splitting method).
 
 .. doxygenfunction:: ponio::make_method(Algorithm_t const& algo, state_t const& shadow_of_u0)
-   :project: solver
+   :project: ponio
 
 .. doxygenfunction:: ponio::make_method(splitting::lie::lie_tuple<Algorithms_t...> const &algos, state_t const &shadow_of_u0)
-   :project: solver
+   :project: ponio
 
 .. doxygenfunction:: ponio::make_method(splitting::strang::strang_tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0)
-   :project: solver
+   :project: ponio
 
 An helper function for splitting method factory.
 
 .. doxygenfunction:: ponio::make_tuple_methods
-   :project: solver
+   :project: ponio
