@@ -17,7 +17,7 @@ OUTPUT_dir="ponio/doc/source/user/examples"
 
 mkdir -p ${OUTPUT_dir}
 cp -r ${EXAMPLES_dir}/img ${OUTPUT_dir}
-pandoc ${EXAMPLES_dir}/README.md -T rst -o ${OUTPUT_dir}/examples.rst
+pandoc ${EXAMPLES_dir}/README.md -T rst --wrap=preserve --columns=512 -o ${OUTPUT_dir}/examples.rst
 
 pushd ponio/doc
 doxygen
