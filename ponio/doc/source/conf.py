@@ -161,7 +161,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'samurai.tex', 'Samurai Documentation',
+    (master_doc, 'ponio.tex', 'Ponio Documentation',
      author, 'manual'),
 ]
 
@@ -171,7 +171,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'samurai', 'Samurai Documentation',
+    (master_doc, 'ponio', 'Ponio Documentation',
      [author], 1)
 ]
 
@@ -182,7 +182,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Ponio', 'Ponio Documentation',
+    (master_doc, 'ponio', 'Ponio Documentation',
      author, 'Ponio developers', 'One line description of project.',
      'Miscellaneous'),
 ]
