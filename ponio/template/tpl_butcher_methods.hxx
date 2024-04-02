@@ -115,7 +115,7 @@ struct butcher_{{ rk.id }}
   using func_t   = std::function<linear_t(linear_t &&)>;
   static constexpr std::size_t N_stages = {{ rk.b.type|length }};
   static constexpr std::size_t order    = 1;
-  static constexpr const char* id       = "{{ rk.id }}";
+  static constexpr std::string_view id  = "{{ rk.id }}";
 
   std::tuple<{% for t in rk.A.type -%}{{ t }}{{ " , " if not loop.last else "" }}{%- endfor %}> a;
   std::tuple<{% for t in rk.b.type -%}{{ t }}{{ " , " if not loop.last else "" }}{%- endfor %}> b;
@@ -158,7 +158,7 @@ struct butcher_{{ rk.id }} : public butcher::{{ "adaptive_" if 'b2' in rk else "
   using base_t = butcher::{{ "adaptive_" if 'b2' in rk else "" }}butcher_tableau<{{ rk.A|length }},value_t>;
   static constexpr std::size_t N_stages = base_t::N_stages;
   static constexpr std::size_t order    = {{ rk.order }};
-  static constexpr const char* id       = "{{ rk.id }}";
+  static constexpr std::string_view id  = "{{ rk.id }}";
 
   using base_t::A;
   using base_t::b;
