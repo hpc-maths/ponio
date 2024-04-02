@@ -70,7 +70,7 @@ for i, (tag, label) in enumerate(methods.items()):
 plt.xlabel('time')
 plt.legend(loc="upper right")
 
-plt.savefig("4-brusselator-equations-with-dirk-method_01.png", dpi=200)
+plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
 
 plt.title("Solution of Brusselator system")
 plt.show()
@@ -84,7 +84,7 @@ plt.xlabel('$x$')
 plt.ylabel('$y$')
 plt.legend(loc="upper right")
 
-plt.savefig("4-brusselator-equations-with-dirk-method_02.png", dpi=200)
+plt.savefig(os.path.join(data_dir, "02.png"), dpi=200)
 
 plt.title("Phase plane")
 plt.show()

@@ -32,7 +32,7 @@ plt.plot(t, y, "-", label="$y$")
 plt.xlabel('time')
 plt.legend()
 
-plt.savefig("3-brusselator-equations_01.png", dpi=200)
+plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
 
 plt.title("Solution of Brusselator system with RK (8,6) method")
 plt.show()
@@ -42,7 +42,7 @@ plt.plot(x, y, "-")
 plt.xlabel('x')
 plt.ylabel('y')
 
-plt.savefig("3-brusselator-equations_02.png", dpi=200)
+plt.savefig(os.path.join(data_dir, "02.png"), dpi=200)
 
 plt.title("Phase plane")
 plt.show()

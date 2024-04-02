@@ -34,7 +34,7 @@ plt.plot(data[:, 0], data[:, 1], ":", label="exact solution")
 plt.legend()
 plt.ylim(-0.1, 1)
 
-plt.savefig("8-heat-model_01.png")
+plt.savefig(os.path.join(data_dir, "01.png"))
 
 plt.title("Heat equation")
 plt.show()

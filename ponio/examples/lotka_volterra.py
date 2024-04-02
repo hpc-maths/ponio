@@ -71,7 +71,7 @@ ax2.set_position([box2.x0, box2.y0, box2.width * 0.95, box2.height])
 ax1.legend(bbox_to_anchor=(1.01, 1),
            loc='upper left', borderaxespad=0.)
 
-plt.savefig("13-lotka-volterra-model_01.png")
+plt.savefig(os.path.join(data_dir, "01.png"))
 
 fig.suptitle("Lotka-Volterra system (solved witk RK (11,8))")
 plt.show()
@@ -85,7 +85,7 @@ plt.xlabel("$x$")
 plt.ylabel("$y$")
 plt.legend()
 
-plt.savefig("13-lotka-volterra-model_02.png")
+plt.savefig(os.path.join(data_dir, "02.png"))
 
 plt.title("Lotka-Volterra system (solved witk RK (11,8))")
 plt.show()

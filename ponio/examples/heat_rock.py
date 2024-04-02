@@ -36,7 +36,7 @@ plt.plot(data[:, 0], data[:, 1], ":", label="initial solution")
 plt.legend(loc="lower left")
 plt.ylim(bottom=-0.4)
 
-plt.savefig("9-rock-method_01.png", dpi=200)
+plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
 
 plt.title("Heat equation")
 plt.show()
@@ -52,6 +52,6 @@ plt.yscale('log')
 plt.grid(True)
 plt.legend()
 
-plt.savefig("9-rock-method_02.png", dpi=200)
+plt.savefig(os.path.join(data_dir, "02.png"), dpi=200)
 
 plt.show()

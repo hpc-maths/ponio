@@ -79,7 +79,7 @@ for d in data:
 ax.legend()
 axlist.append(ax)
 
-plt.savefig("12-lorenz-equations-with-multiple-methods_01.png")
+plt.savefig(os.path.join(data_dir, "01.png"))
 
 ax.set_title("Lorenz Attractor")
 plt.show()
@@ -114,7 +114,7 @@ ax3.set_ylabel("$z$")
 ax3.set_xlabel("$t$")
 ax3.set_xlim(d.time()[0], d.time()[-1])
 
-plt.savefig("12-lorenz-equations-with-multiple-methods_02.png")
+plt.savefig(os.path.join(data_dir, "01.png"))
 
 fig.suptitle("Composantes of Lorenz Attractor")
 plt.show()

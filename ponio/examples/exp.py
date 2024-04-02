@@ -27,7 +27,7 @@ plt.plot(data[:, 0], data[:, 1], "-+", label="solution with RK NSSP (2,1)")
 
 plt.legend()
 
-plt.savefig("7-exponential-function_01.png")
+plt.savefig(os.path.join(data_dir, "01.png"))
 
 plt.title("$\dot{u} = u$, $u(t=0)=1$")
 plt.show()

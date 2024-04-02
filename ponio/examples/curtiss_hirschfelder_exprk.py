@@ -42,7 +42,7 @@ plt.xlabel('time')
 
 plt.legend()
 
-plt.savefig("6-curtiss-hirschfelder-equation-with-exprk-method_01.png", dpi=200)
+plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
 
 plt.title("Solution of Curtiss Hirschfelder problem")
 plt.show()

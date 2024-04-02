@@ -62,7 +62,7 @@ for i, dat in enumerate(data):
 
 plt.legend()
 
-plt.savefig("14-nagumo-equation_01.png")
+plt.savefig(os.path.join(data_dir, "01.png"))
 
 plt.title("Nagumo solution")
 plt.show()
@@ -73,7 +73,7 @@ for i, dat in enumerate(data):
 
 plt.legend()
 
-plt.savefig("14-nagumo-equation_02.png")
+plt.savefig(os.path.join(data_dir, "02.png"))
 
 plt.title("Absolute error in time")
 plt.show()

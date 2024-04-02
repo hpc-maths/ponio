@@ -32,7 +32,7 @@ for i in range(n):
 plt.xlim(-.5, .5)
 plt.ylim(-.5, .5)
 
-plt.savefig("2-brownian-movement_01.png", dpi=200)
+plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
 
 plt.title("Brownian motion")
 plt.show()

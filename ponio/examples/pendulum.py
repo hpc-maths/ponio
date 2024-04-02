@@ -46,7 +46,7 @@ plt.plot(data[:, 0], data[:, 2], "-+", label=r"$\omega$ with ponio")
 plt.xlabel("time")
 plt.legend()
 
-plt.savefig("15-pendulum-equation_01.png")
+plt.savefig(os.path.join(data_dir, "01.png"))
 
 plt.title("Pendulum equation (solved with RK (4,4))")
 plt.show()

@@ -89,7 +89,7 @@ plt.ylabel("$y$")
 plt.tight_layout(pad=1.0)
 plt.legend()
 
-plt.savefig("1-arenstorf-orbit_01.png", dpi=200)
+plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
 
 plt.title("Arenstorf orbit")
 plt.show()
@@ -116,7 +116,7 @@ plt.ylabel(r"$\dot{{y}}$")
 plt.tight_layout(pad=1.0)
 plt.legend()
 
-plt.savefig("1-arenstorf-orbit_02.png", dpi=200)
+plt.savefig(os.path.join(data_dir, "02.png"), dpi=200)
 
 plt.title("Arenstorf velocity")
 plt.show()
@@ -132,7 +132,7 @@ plt.xlabel(r"$t$")
 plt.ylabel(r"$\Delta t$")
 plt.legend()
 
-plt.savefig("1-arenstorf-orbit_03.png")
+plt.savefig(os.path.join(data_dir, "03.png"))
 
 plt.title("Arenstorf orbit, time step size")
 plt.show()

@@ -47,7 +47,7 @@ ax.plot(x, y, z, linewidth=0.5)
 
 axlist.append(ax)
 
-plt.savefig("11-lorenz-equations_01.png")
+plt.savefig(os.path.join(data_dir, "01.png"))
 
 ax.set_title("Lorenz Attractor")
 plt.show()
@@ -76,7 +76,7 @@ ax3.set_ylabel("$z$")
 ax3.set_xlabel("$t$")
 ax3.set_xlim(t[0], t[-1])
 
-plt.savefig("11-lorenz-equations_02.png")
+plt.savefig(os.path.join(data_dir, "02.png"))
 
 fig.suptitle("Composantes of Lorenz Attractor")
 plt.show()

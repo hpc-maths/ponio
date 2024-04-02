@@ -45,7 +45,7 @@ axs[1].set_xlabel('time')
 
 plt.legend()
 
-plt.savefig("5-curtiss-hirschfelder-equation_01.png", dpi=200)
+plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
 
 fig.suptitle("Solution of Curtiss Hirschfelder problem")
 plt.show()
