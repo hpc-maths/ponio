@@ -8,16 +8,15 @@ ponio |version| documentation
    :caption: Developer Documentation
    :glob:
 
-   api/*
+   api/api
 
 .. toctree::
    :caption: User Documentation
 
-   demos/lorenz
+   user/user
 
 .. toctree::
-   :caption: Examples
+   :caption: Gallery
    :glob:
 
-   user/notebook/*
-   user/examples/examples
+   gallery/gallery
