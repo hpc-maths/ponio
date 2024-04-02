@@ -16,6 +16,7 @@ The following table gives an overview over all examples.
 | [Samurai is hot](#samurai-is-hot)                                                                   | This example shows how to coupling ponio and samurai               | [heat_samurai.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat_samurai.cpp)                             |
 | [Lorenz equations](#lorenz-equations)                                                               | The chaotic system example of Lorenz equations                     | [lorenz.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz.cpp)                                         |
 | [Lorenz equations with multiple methods](#lorenz-equations-with-multiple-methods)                   | This example shows how to use splitting methods and Lawson methods | [lorenz_tuto.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz_tuto.cpp)                               |
+| [Lorenz equations with all methods](#lorenz-equations-with-all-methods)                             | This example shows how to use all methods (except expRK)           | [lorenz_all.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz_all.cpp)                                 |
 | [Lotka-Volterra model](#lotka-volterra-model)                                                       | The classical predator–prey model of Lotka-Volterra                | [lotka_volterra.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lotka_volterra.cpp)                         |
 | [Nagumo equation](#nagumo-equation)                                                                 | Example of a traveling wave                                        | [nagumo.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/nagumo.cpp)                                         |
 | [Pendulum equation](#pendulum-equation)                                                             | The classical pendulum equation                                    | [pendulum.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/pendulum.cpp)                                     |
@@ -413,6 +414,28 @@ All example in [lorenz_tuto.cpp](https://github.com/hpc-maths/ponio/blob/main/po
 
 ```
   make lorenz_tuto_visu
+```
+
+## Lorenz equations with all methods
+
+The classical chaotic system example of Lorenz equations
+
+$$
+  \begin{cases}
+    \dot{x} &= \sigma (y - x) \\
+    \dot{y} &= \rho x - y - xz \\
+    \dot{z} &= xy - \beta z
+  \end{cases}
+$$
+
+| Solution in 3D                           |
+|------------------------------------------|
+| ![Solution in 3D](img/lorenz_all/01.gif) |
+
+All example in [lorenz_all.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz_all.cpp), and run
+
+```
+  make lorenz_all_visu
 ```
 
 ## Lotka-Volterra model
