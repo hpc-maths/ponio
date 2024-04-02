@@ -51,8 +51,9 @@ data = [load_data(os.path.basename(f)[:-4])
         for f in glob.glob(os.path.join(data_dir, "*.dat"))]
 
 # 3d plot
-fig = plt.figure(constrained_layout=True, figsize=(8, 8))
-gs = fig.add_gridspec(6, 1)
+fig = plt.figure(figsize=(6, 4))
+fig.subplots_adjust(top=1.25, bottom=-0.25, left=-0.5, right=1.5)
+gs = fig.add_gridspec(1, 1)
 axlist = []
 
 ax = fig.add_subplot(gs[:, 0], projection='3d')
@@ -66,15 +67,20 @@ ax.zaxis.pane.fill = False
 ax.xaxis.pane.set_edgecolor('w')
 ax.yaxis.pane.set_edgecolor('w')
 ax.zaxis.pane.set_edgecolor('w')
-# ax.grid(False)
+plt.axis('off')
+ax.grid(False)
 
 lines = [ax.plot(d.x()[0], d.y()[0], d.z()[0], linewidth=0.375)[0]
          for d in data]
 
+N_frames = 42
+
 
 def update(frame):
     for l, d in zip(lines, data):
-        l.set_data_3d(d.x()[:frame], d.y()[:frame], d.z()[:frame])
+        len_simu = len(d.time())
+        i = int(frame/N_frames*len_simu)
+        l.set_data_3d(d.x()[:i], d.y()[:i], d.z()[:i])
 
     return lines
 
@@ -84,13 +90,14 @@ def update(frame):
 
 
 ani = animation.FuncAnimation(
-    fig=fig, func=update, frames=len(data[0].time()), interval=1)
+    fig=fig, func=update, frames=N_frames, interval=1)
 
 # ax.legend()
 axlist.append(ax)
 
 print("save...")
-ani.save(filename=os.path.join(data_dir, "01.gif"), writer="pillow")
+ani.save(filename=os.path.join(data_dir, "01.gif"), dpi=50,
+         writer="pillow")
 print("!")
 # plt.savefig(os.path.join(data_dir, "01.png"))
 
