@@ -60,7 +60,6 @@ gs = fig.add_gridspec(6, 1)
 axlist = []
 
 ax = fig.add_subplot(gs[:, 0], projection='3d')
-ax.set_title("Lorenz attractor")
 ax.set_xlim3d([-20, 20])
 ax.set_ylim3d([-20, 20])
 ax.set_zlim3d(bottom=0, top=50)
@@ -114,7 +113,7 @@ ax3.set_ylabel("$z$")
 ax3.set_xlabel("$t$")
 ax3.set_xlim(d.time()[0], d.time()[-1])
 
-plt.savefig(os.path.join(data_dir, "01.png"))
+plt.savefig(os.path.join(data_dir, "02.png"))
 
 fig.suptitle("Composantes of Lorenz Attractor")
 plt.show()
