@@ -41,7 +41,7 @@ Implicit problem with operator
 
 This kind of problems are defined by a function and an operator, for example to solve :
 
-.. maths::
+.. math::
 
   \dot{u} = f(t, u)
 
