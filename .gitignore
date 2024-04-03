@@ -279,3 +279,8 @@ _deps
 butcher_methods.hpp
 # pixi environments
 .pixi
+
+# doc generation
+ponio/doc/xml
+ponio/doc/source/gallery/examples
+ponio/doc/source/gallery/notebook
