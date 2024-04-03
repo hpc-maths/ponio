@@ -364,7 +364,10 @@ $$
 
 In this example we coupling the mesh refinement library [samurai](https://github.com/hpc-maths/samurai) with ponio.
 
-![...](img/heat_samurai/01.png)
+
+| Solution of heat equation with levels of adaptive mesh |
+|--------------------------------------------------------|
+| ![Solution of heat equation](img/heat_samurai/01.png)  |
 
 All example in [heat_samurai.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat_samurai.cpp), and run
 

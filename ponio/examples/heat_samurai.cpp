@@ -49,9 +49,9 @@ init( Mesh& mesh )
         [&]( auto& cell )
         {
             auto center         = cell.center();
-            const double radius = .2;
+            double const radius = .2;
 
-            const double x_center = 0;
+            double const x_center = 0;
             if ( std::abs( center[0] - x_center ) <= radius )
             {
                 u[cell] = 1;
