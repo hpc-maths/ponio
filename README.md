@@ -103,7 +103,7 @@ Now you are ready to solve your problem with an explicit Runge-Kutta method, see
 
 The whole example can be found in [here](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz.cpp).
 
-![Lorenz attractor](https://gist.github.com/assets/7198360/f263304a-6d1e-4698-9be7-963bad655cb8)
+![Lorenz attractor](https://gist.github.com/assets/7198360/f263304a-6d1e-4698-9be7-963bad655cb8?.gif)
 
 ### More examples
 
