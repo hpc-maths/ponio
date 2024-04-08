@@ -103,7 +103,7 @@ Now you are ready to solve your problem with an explicit Runge-Kutta method, see
 
 The whole example can be found in [here](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz.cpp).
 
-![Lorenz attractor](https://gist.github.com/assets/7198360/f263304a-6d1e-4698-9be7-963bad655cb8?.gif)
+![Lorenz attractor](https://private-user-images.githubusercontent.com/7198360/318870562-f263304a-6d1e-4698-9be7-963bad655cb8.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTI1NTIxMTQsIm5iZiI6MTcxMjU1MTgxNCwicGF0aCI6Ii83MTk4MzYwLzMxODg3MDU2Mi1mMjYzMzA0YS02ZDFlLTQ2OTgtOWJlNy05NjNiYWQ2NTVjYjguZ2lmP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDQwOCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA0MDhUMDQ1MDE0WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9MjcwZWMwNTIwNTY0ZmVmZWMzMzA4ZWZmNmY2MTE3ZGUwNDIzNjJkN2M5ZTY5ODQ3M2EyNDE4NGY3OWIwOTUxYiZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.anvhY6CgxFFdmoScWrHBxQeYHnecVbWaTc_P5HSRPnU)
 
 ### More examples
 
