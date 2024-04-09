@@ -50,7 +50,8 @@ process.wait()
 data = [load_data(os.path.basename(f)[:-4])
         for f in glob.glob(os.path.join(data_dir, "*.dat"))]
 
-# 3d plot
+#####################################################################
+# low def 3d plot
 fig = plt.figure(figsize=(6, 4))
 fig.subplots_adjust(top=1.25, bottom=-0.25, left=-0.5, right=1.5)
 gs = fig.add_gridspec(1, 1)
@@ -84,22 +85,64 @@ def update(frame):
 
     return lines
 
-# for i, d in enumerate(data):
-#     ax.plot(d.x(), d.y(), d.z(), label=d.label,
-#             color=f"#{((712*i) % (16**4)):04x}a2", linewidth=0.375)
-
 
 ani = animation.FuncAnimation(
     fig=fig, func=update, frames=N_frames, interval=1)
 
-# ax.legend()
 axlist.append(ax)
 
 print("save...")
 ani.save(filename=os.path.join(data_dir, "01.gif"), dpi=50,
          writer="pillow")
 print("!")
-# plt.savefig(os.path.join(data_dir, "01.png"))
+
+# ax.set_title("Lorenz Attractor")
+# plt.show()
+
+#####################################################################
+# full 3d plot
+fig = plt.figure(figsize=(8, 8))
+fig.subplots_adjust(top=1., bottom=0., left=-0.5, right=1.5)
+gs = fig.add_gridspec(1, 1)
+axlist = []
+
+ax = fig.add_subplot(gs[:, 0], projection='3d')
+ax.set_xlim3d([-20, 20])
+ax.set_ylim3d([-20, 20])
+ax.set_zlim3d(bottom=0, top=50)
+
+ax.xaxis.pane.fill = False
+ax.yaxis.pane.fill = False
+ax.zaxis.pane.fill = False
+ax.xaxis.pane.set_edgecolor('w')
+ax.yaxis.pane.set_edgecolor('w')
+ax.zaxis.pane.set_edgecolor('w')
+plt.axis('off')
+ax.grid(False)
+
+lines = [ax.plot(d.x()[0], d.y()[0], d.z()[0], linewidth=0.375, color=f"C{i}")[0]
+         for i, d in enumerate(data)]
+points = [ax.plot(d.x()[0], d.y()[0], d.z()[0], "o", linewidth=0.375, color=f"C{i}")[0]
+          for i, d in enumerate(data)]
+
+N_frames = 256
+
+
+def update(frame):
+    for p, l, d in zip(points, lines, data):
+        len_simu = len(d.time())
+        i = int(frame/N_frames*len_simu)
+        j = 0  # max(0, i-200)
+        p.set_data_3d([d.x()[i]], [d.y()[i]], [d.z()[i]])
+        l.set_data_3d(d.x()[j:i], d.y()[j:i], d.z()[j:i])
+
+    return lines
+
+
+ani = animation.FuncAnimation(
+    fig=fig, func=update, frames=N_frames, interval=1)
+
+axlist.append(ax)
 
 ax.set_title("Lorenz Attractor")
 plt.show()
