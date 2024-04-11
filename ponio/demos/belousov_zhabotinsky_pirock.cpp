@@ -84,8 +84,8 @@ namespace samurai
                     {
                         for ( std::size_t i = 0; i < field_size; ++i )
                         {
-                            coeffs[left]( i ) *= -K( i );
-                            coeffs[right]( i ) *= -K( i );
+                            coeffs[left]( i, i ) *= -K( i );
+                            coeffs[right]( i, i ) *= -K( i );
                         }
                     }
                     return coeffs;
@@ -128,9 +128,9 @@ main( int argc, char** argv )
     using point_t             = typename box_t::point_t;
 
     // simulation parameters --------------------------------------------------
-    constexpr double Da = 1. / 400.;
-    constexpr double Db = 1. / 400.;
-    constexpr double Dc = 0.6 / 400.;
+    constexpr double Da = 2.5e-3;
+    constexpr double Db = 2.5e-3;
+    constexpr double Dc = 1.5e-3;
 
     constexpr double epsilon = 1e-2;
     constexpr double mu      = 1e-5;
@@ -143,8 +143,8 @@ main( int argc, char** argv )
     constexpr double t_end     = 1.;
 
     // multiresolution parameters
-    std::size_t min_level = 0;
-    std::size_t max_level = 6;
+    std::size_t min_level = 8;
+    std::size_t max_level = 8;
     double mr_epsilon     = 1e-5; // Threshold used by multiresolution
     double mr_regularity  = 1.;   // Regularity guess for multiresolution
 
@@ -162,20 +162,21 @@ main( int argc, char** argv )
     samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
 
     // init solution ----------------------------------------------------------
+    // auto u_ini = init( mesh );
     auto u_ini = samurai::make_field<3>( "u", mesh );
 
-    double a = 0.2;
-    double b = 0.2;
-    double c = 0.2;
+    double a = 0.;
+    double b = 0.;
+    double c = 0.;
     u_ini.fill( 0 );
     samurai::for_each_cell( mesh,
-        [&]( auto& cell ) mutable
+        [&]( auto& cell )
         {
             if ( cell.center()[0] < ( right_box - left_box ) / 20. )
             {
                 double y_lim  = 0.05;
                 double x_coor = 0.5;
-                double y_coor = cell.center()[0] - y_lim;
+                double y_coor = 20.0 * cell.center()[0] - y_lim;
 
                 if ( y_coor >= 0. && y_coor <= 0.3 * x_coor )
                 {
@@ -199,11 +200,13 @@ main( int argc, char** argv )
 
             a = ( f * c ) / ( q + b );
 
+            // std::cout << cell.center()[0] << "\t a:" << a << " b:" << b << " c:" << c << "\n";
+
             u_ini[cell]( 0 ) = a;
             u_ini[cell]( 1 ) = b;
             u_ini[cell]( 2 ) = c;
         } );
-    samurai::make_bc<samurai::Neumann>( u_ini, 0., 0., 0. );
+    samurai::make_bc<samurai::Neumann<1>>( u_ini, 0., 0., 0. );
 
     // define problem ---------------------------------------------------------
 
@@ -212,7 +215,7 @@ main( int argc, char** argv )
     auto diff = samurai::make_multi_diffusion_order2<decltype( u_ini )>( d );
     auto fd   = [&]( double /* t */, auto&& u )
     {
-        samurai::make_bc<samurai::Neumann>( u, 0., 0., 0. );
+        samurai::make_bc<samurai::Neumann<1>>( u, 0., 0., 0. );
         samurai::update_ghost_mr( u );
         return -diff( u );
     };
@@ -240,8 +243,8 @@ main( int argc, char** argv )
             // auto& c = u[2];
 
             return {
-                {-q * b / mu,          -a / mu,                           f / mu},
-                { ( q - b ) / epsilon, 1. / epsilon * ( -a - 2 * b - 1 ), 0.    },
+                {( -q - b ) / mu,      -a / mu,                           f / mu},
+                { ( q - b ) / epsilon, 1. / epsilon * ( -a - 2 * b + 1 ), 0.    },
                 { 0.,                  1.,                                -1.   }
             };
         } );
@@ -251,15 +254,13 @@ main( int argc, char** argv )
     };
     auto fr = [&]( double t, auto&& u )
     {
-        samurai::make_bc<samurai::Neumann>( u, 0., 0., 0. );
+        samurai::make_bc<samurai::Neumann<1>>( u, 0., 0., 0. );
         samurai::update_ghost_mr( u );
         return fr_t( t )( u );
     };
 
-    auto pb = ponio::make_imex_operator_problem( fd, fr, fr_t );
-
-    ponio::time_span<double> const tspan = { t_ini, t_end };
-    double dt                            = ( t_end - t_ini ) / 2000;
+    ponio::time_span<double> const t_span = { t_ini, t_end };
+    double dt                             = ( t_end - t_ini ) / 2001;
 
     auto eigmax_computer = [=]( auto&, double, auto&, double )
     {
@@ -267,20 +268,23 @@ main( int argc, char** argv )
         return 4. / ( dx * dx );
     };
 
+    auto pb = ponio::make_imex_operator_problem( fd, fr, fr_t );
+
     // time loop  -------------------------------------------------------------
-    auto sol_range = ponio::make_solver_range( pb,
-        ponio::runge_kutta::pirock::pirock<1>( ponio::runge_kutta::pirock::beta_0<double>(),
-            eigmax_computer,
-            ponio::shampine_trick::shampine_trick<decltype( u_ini )>() ),
-        u_ini,
-        tspan,
-        dt );
+    // auto sol_range = ponio::make_solver_range( pb,
+    //     ponio::runge_kutta::pirock::pirock<1>( ponio::runge_kutta::pirock::beta_0<double>(),
+    //         eigmax_computer,
+    //         ponio::shampine_trick::shampine_trick<decltype( u_ini )>() ),
+    //     u_ini,
+    //     t_span,
+    //     dt );
+    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::pirock::pirock_b0( eigmax_computer ), u_ini, t_span, dt );
 
     auto it_sol = sol_range.begin();
 
     // preapre MR for solution on iterator
     auto mr_adaptation = samurai::make_MRAdapt( it_sol->state );
-    samurai::make_bc<samurai::Neumann>( it_sol->state, 0., 0., 0. );
+    samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0., 0., 0. );
     mr_adaptation( mr_epsilon, mr_regularity );
     samurai::update_ghost_mr( it_sol->state );
 
@@ -289,7 +293,7 @@ main( int argc, char** argv )
 
     while ( it_sol->time < t_end )
     {
-        // samurai::make_bc<samurai::Neumann>( it_sol->state, 0. );
+        samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0., 0., 0. );
         //  TODO: add a callback function to make this before each iteration
         for ( auto& ki : it_sol.meth.kis )
         {

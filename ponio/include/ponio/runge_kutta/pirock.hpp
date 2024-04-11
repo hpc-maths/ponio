@@ -333,10 +333,10 @@ namespace ponio::runge_kutta::pirock
             auto& u_sm2pl = u_j;
 
             auto& u_sp1 = U[6];
-            u_sp1       = u_sm2pl;
+            u_sp1       = un;
 
             auto& u_sp2 = U[7];
-            u_sp2       = u_sm2pl;
+            u_sp2       = un;
 
             if constexpr ( detail::problem_operator<decltype( pb.implicit_part ), value_t> )
             {
