@@ -143,7 +143,7 @@ main( int argc, char** argv )
     constexpr double t_end     = 1.;
 
     // multiresolution parameters
-    std::size_t min_level = 8;
+    std::size_t min_level = 0;
     std::size_t max_level = 8;
     double mr_epsilon     = 1e-5; // Threshold used by multiresolution
     double mr_regularity  = 1.;   // Regularity guess for multiresolution
@@ -234,6 +234,7 @@ main( int argc, char** argv )
 
             return { 1. / mu * ( -q * a - a * b + f * c ), 1. / epsilon * ( q * a - a * b + b * ( 1. - b ) ), b - c };
         } );
+    // or set option in command line with : -snes_fd -pc_type none
     react.set_jacobian_function(
         [&]( auto const& cell, auto const& field ) -> samurai::JacobianMatrix<cfg>
         {
@@ -260,7 +261,7 @@ main( int argc, char** argv )
     };
 
     ponio::time_span<double> const t_span = { t_ini, t_end };
-    double dt                             = ( t_end - t_ini ) / 2001;
+    double dt                             = ( t_end - t_ini ) / 2000;
 
     auto eigmax_computer = [=]( auto&, double, auto&, double )
     {
@@ -271,14 +272,14 @@ main( int argc, char** argv )
     auto pb = ponio::make_imex_operator_problem( fd, fr, fr_t );
 
     // time loop  -------------------------------------------------------------
-    // auto sol_range = ponio::make_solver_range( pb,
-    //     ponio::runge_kutta::pirock::pirock<1>( ponio::runge_kutta::pirock::beta_0<double>(),
-    //         eigmax_computer,
-    //         ponio::shampine_trick::shampine_trick<decltype( u_ini )>() ),
-    //     u_ini,
-    //     t_span,
-    //     dt );
-    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::pirock::pirock_b0( eigmax_computer ), u_ini, t_span, dt );
+    auto sol_range = ponio::make_solver_range( pb,
+        ponio::runge_kutta::pirock::pirock<1>( ponio::runge_kutta::pirock::beta_0<double>(),
+            eigmax_computer,
+            ponio::shampine_trick::shampine_trick<decltype( u_ini )>() ),
+        u_ini,
+        t_span,
+        dt );
+    // auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::pirock::pirock_b0( eigmax_computer ), u_ini, t_span, dt );
 
     auto it_sol = sol_range.begin();
 

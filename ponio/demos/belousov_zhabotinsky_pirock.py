@@ -61,7 +61,7 @@ fig, (ax_a, ax_b, ax_c, ax_level) = plt.subplots(4)
 
 
 def a_eq(b, c):
-    f = 2.0
+    f = 3.0
     q = 2e-4
     return (f*c)/(q+b)
 
@@ -99,13 +99,15 @@ def update(frame):
     x = data[frame][0]
 
     sol_a.set_xdata(x)
-    sol_a_eq.set_xdata(x)
-    sol_b.set_xdata(x)
-    sol_c.set_xdata(x)
-
     sol_a.set_ydata(a)
+
+    sol_a_eq.set_xdata(x)
     sol_a_eq.set_ydata(a_eq(b, c))
+
+    sol_b.set_xdata(x)
     sol_b.set_ydata(b)
+
+    sol_c.set_xdata(x)
     sol_c.set_ydata(c)
 
     levels.set_xdata(x)
