@@ -85,11 +85,21 @@ set(Ndigit 36)
 file(GLOB json_files
     "database/*.json")
 
+set(DOC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ponio/doc)
+option(BUILD_DOC "build the documentation algorithms page" OFF)
+set(DOC_ALGO_RST "")
+set(DOC_ALGO_CMD "")
+if (BUILD_DOC)
+  set(DOC_ALGO_RST "${DOC_DIR}/source/api/algorithm.rst")
+  set(DOC_ALGO_CMD -d -do ${DOC_ALGO_RST})
+endif()
+
 add_custom_command(
-    OUTPUT ${BUTCHER_METHODS}
+    OUTPUT ${BUTCHER_METHODS} ${DOC_ALGO_RST}
     COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/ponio/code_generator.py ${json_files}
                 -o ${BUTCHER_METHODS}
                 --Ndigit=${Ndigit}
+                ${DOC_ALGO_CMD}
     COMMENT "Generating code..."
     VERBATIM
 )
