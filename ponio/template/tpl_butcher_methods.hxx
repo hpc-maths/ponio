@@ -97,6 +97,26 @@ using {{ rk.id }} = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id 
  * @param tol  tolerance (only for adaptive time step methods)
  *
  * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
+ *
+ * This method is based on the following Butcher tableau:
+ *
+ * \f[
+ *  \begin{array}{c|{%- for ci in rk.butcher.c -%}c{%- endfor -%}}
+      {%- for ai in rk.butcher.A %}
+ *      {{ rk.butcher.c[loop.index0] }} & {{ ai|join(' & ') }} \\
+ {%- endfor %}
+ *    \hline
+ *      & {{ rk.butcher.b|join(' & ') }} {% if 'b2' in rk %} \\
+ *    \hline
+ *      & {{ rk.butcher.b2|join(' & ') }}
+{%- endif %}
+ *  \end{array}
+ * \f]
+ *
+ * + **stages:** {{ rk.A|length }}
+ * + **order:** {{ rk.order }}
+ * + **stages order:** {{ rk.stage_order }}
+ * + **stability function:** \f[ {{ rk.stability_function }} \f]
  */
 template <typename value_t, typename Exp_t>
 constexpr auto l{{ rk.id }}_t = []( Exp_t exp_ , double tol=ponio::default_config::tol )
@@ -209,6 +229,26 @@ struct butcher_{{ rk.id }} : public butcher::{{ "adaptive_" if 'b2' in rk else "
  * @tparam value_t          type of coefficient (``double``by default)
  * @tparam linear_algebra_t type that provides linear algebra if it is undefined for state_t (``void`` by default)
  * @tparam Args optional    arguments to build linear_algebra_t object
+ *
+ * This method is based on the following Butcher tableau:
+ *
+ * \f[
+ *  \begin{array}{c|{%- for ci in rk.butcher.c -%}c{%- endfor -%}}
+      {%- for ai in rk.butcher.A %}
+ *      {{ rk.butcher.c[loop.index0] }} & {{ ai|join(' & ') }} \\
+ {%- endfor %}
+ *    \hline
+ *      & {{ rk.butcher.b|join(' & ') }} {% if 'b2' in rk %} \\
+ *    \hline
+ *      & {{ rk.butcher.b2|join(' & ') }}
+{%- endif %}
+ *  \end{array}
+ * \f]
+ *
+ * + **stages:** {{ rk.A|length }}
+ * + **order:** {{ rk.order }}
+ * + **stages order:** {{ rk.stage_order }}
+ * + **stability function:** \f[ {{ rk.stability_function }} \f]
  */
 template <typename value_t, typename linear_algebra_t=void, typename ... Args>
 auto
