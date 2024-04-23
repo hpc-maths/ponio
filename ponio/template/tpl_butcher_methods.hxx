@@ -80,7 +80,10 @@ struct butcher_{{ rk.id }} : public butcher::{{ "adaptive_" if 'b2' in rk else "
  * + **stages:** {{ rk.A|length }}
  * + **order:** {{ rk.order }}
  * + **stages order:** {{ rk.stage_order }}
- * + **stability function:** \f[ {{ rk.stability_function }} \f]
+ * + **stability function:** \f[ {{ rk.stability_function }} \f] {% if 'bib' in rk %}
+ * + **bibliography:** `{{ rk.bib.bib }} <{{ rk.bib.url }}>`_
+{%- endif %}
+ *
  */
 template <typename value_t>
 using {{ rk.id }}_t = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id }}<value_t>>;
@@ -116,7 +119,10 @@ using {{ rk.id }} = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id 
  * + **stages:** {{ rk.A|length }}
  * + **order:** {{ rk.order }}
  * + **stages order:** {{ rk.stage_order }}
- * + **stability function:** \f[ {{ rk.stability_function }} \f]
+ * + **stability function:** \f[ {{ rk.stability_function }} \f] {% if 'bib' in rk %}
+ * + **bibliography:** `{{ rk.bib.bib }} <{{ rk.bib.url }}>`_
+{%- endif %}
+ *
  */
 template <typename value_t, typename Exp_t>
 constexpr auto l{{ rk.id }}_t = []( Exp_t exp_ , double tol=ponio::default_config::tol )
@@ -248,7 +254,10 @@ struct butcher_{{ rk.id }} : public butcher::{{ "adaptive_" if 'b2' in rk else "
  * + **stages:** {{ rk.A|length }}
  * + **order:** {{ rk.order }}
  * + **stages order:** {{ rk.stage_order }}
- * + **stability function:** \f[ {{ rk.stability_function }} \f]
+ * + **stability function:** \f[ {{ rk.stability_function }} \f] {% if 'bib' in rk %}
+ * + **bibliography:** `{{ rk.bib.bib }} <{{ rk.bib.url }}>`_
+{%- endif %}
+ *
  */
 template <typename value_t, typename linear_algebra_t=void, typename ... Args>
 auto

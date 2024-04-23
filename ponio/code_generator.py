@@ -163,14 +163,15 @@ def tag_id(rk):
 def doi_bib(doi: str):
     import urllib.request
 
-    with urllib.request(f"https://api.crossref.org/works/{doi}") as response:
+    with urllib.request.urlopen(f"https://api.crossref.org/works/{doi}") as response:
         message = json.loads(response.read())['message']
 
         author = " & ".join(
             [f"{auth['family']}, {auth['given']}" for auth in message['author']])
-        title = message['titile'][0]
+        title = message['title'][0]
         pubdate = message['published']['date-parts'][0][0]
-        publisher = message['short-container-title'][0] if 'short-container-title' in message else message['publisher']
+        publisher = message['short-container-title'][0] if len(
+            message['short-container-title']) > 0 else message['publisher']
 
     return {
         'url': message['URL'],
