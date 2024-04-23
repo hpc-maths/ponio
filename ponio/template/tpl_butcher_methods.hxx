@@ -255,7 +255,7 @@ struct butcher_{{ rk.id }} : public butcher::{{ "adaptive_" if 'b2' in rk else "
  * + **order:** {{ rk.order }}
  * + **stages order:** {{ rk.stage_order }}
  * + **stability function:** \f[ {{ rk.stability_function }} \f] {% if 'bib' in rk %}
- * + **bibliography:** `{{ rk.bib.bib }} <{{ rk.bib.url }}>`_
+ * + **bibliography:** [{{ rk.bib.bib }}]({{ rk.bib.url }})
 {%- endif %}
  *
  */
