@@ -127,6 +127,9 @@ def extract_method(file_list: str):
             ])
         butcher['tag'] = data['tag'] if 'tag' in data else tag(butcher)
 
+        if 'doi' in data:
+            butcher['doi'] = data['doi']
+
         yield butcher
 
 
@@ -155,6 +158,24 @@ def tag_id(rk):
         'iRK': 3
     }
     return select[rk['tag']]
+
+
+def doi_bib(doi: str):
+    import urllib.request
+
+    with urllib.request(f"https://api.crossref.org/works/{doi}") as response:
+        message = json.loads(response.read())['message']
+
+        author = " & ".join(
+            [f"{auth['family']}, {auth['given']}" for auth in message['author']])
+        title = message['titile'][0]
+        pubdate = message['published']['date-parts'][0][0]
+        publisher = message['short-container-title'][0] if 'short-container-title' in message else message['publisher']
+
+    return {
+        'url': message['URL'],
+        'bib': f"{author}, *{title}*, {pubdate}, {publisher}"
+    }
 
 
 def expRK_code_skeleton(X: list, c: list):
@@ -203,6 +224,9 @@ def prepare_expRK(rk: dict, Ndigit: int):
     r['label'] = rk['label']
     r['id'] = label_to_id(r['label'])
 
+    if 'doi' in rk:
+        r['bib'] = doi_bib(rk['doi'])
+
     return r
 
 
@@ -240,6 +264,9 @@ def prepare_RK(rk: dict, Ndigit: int):
         b2 = rk['b2'].evalf(n=Ndigit).T.tolist()[0]
         r['b2'] = " , ".join(map(str, b2))
         r['butcher']['b2'] = list(map(sp.latex, rk['b2'].T.tolist()[0]))
+
+    if 'doi' in rk:
+        r['bib'] = doi_bib(rk['doi'])
 
     return r
 
