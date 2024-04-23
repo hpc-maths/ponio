@@ -116,7 +116,7 @@ Explicit methods
 ~~~~~~~~~~~~~~~~
 
 {% for rk in list_erk %}{% if rk.b2 is undefined %}
-.. doxygenfunction:: ponio::runge_kutta::l{{ rk.id }}_t
+.. doxygenvariable:: ponio::runge_kutta::l{{ rk.id }}_t
   :project: ponio
 
 {% endif %}{% endfor %}
@@ -126,7 +126,7 @@ Embedded methods
 ~~~~~~~~~~~~~~~~
 
 {% for rk in list_erk %}{% if rk.b2 is defined %}
-.. doxygenfunction:: ponio::runge_kutta::l{{ rk.id }}_t
+.. doxygenvariable:: ponio::runge_kutta::l{{ rk.id }}_t
   :project: ponio
 
 {% endif %}{% endfor %}
@@ -159,7 +159,7 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
 
 
 {% for rk in list_exprk %}
-.. doxygenfunction:: ponio::runge_kutta::{{ rk.id }}_t
+.. doxygenvariable:: ponio::runge_kutta::{{ rk.id }}_t
   :project: ponio
 
 {% endfor %}
