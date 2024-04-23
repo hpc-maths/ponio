@@ -61,6 +61,26 @@ struct butcher_{{ rk.id }} : public butcher::{{ "adaptive_" if 'b2' in rk else "
  * @tparam value_t type of coefficient (``double``by default)
  *
  * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
+ *
+ * This method is based on the following Butcher tableau:
+ *
+ * \f[
+ *  \begin{array}{c|{%- for ci in rk.butcher.c -%}c{%- endfor -%}}
+      {%- for ai in rk.butcher.A %}
+ *      {{ rk.butcher.c[loop.index0] }} & {{ ai|join(' & ') }} \\
+ {%- endfor %}
+ *    \hline
+ *      & {{ rk.butcher.b|join(' & ') }} {% if 'b2' in rk %} \\
+ *    \hline
+ *      & {{ rk.butcher.b2|join(' & ') }}
+{%- endif %}
+ *  \end{array}
+ * \f]
+ *
+ * + **stages:** {{ rk.A|length }}
+ * + **order:** {{ rk.order }}
+ * + **stages order:** {{ rk.stage_order }}
+ * + **stability function:** \f[ {{ rk.stability_function }} \f]
  */
 template <typename value_t>
 using {{ rk.id }}_t = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id }}<value_t>>;
@@ -68,8 +88,13 @@ using {{ rk.id }}_t = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.i
 using {{ rk.id }} = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id }}<double>>;
 
 /**
- * @brief l{{ rk.label }} method
+ * @brief Lawson l{{ rk.label }} method
+ *
  * @tparam value_t type of coefficient (``double``by default)
+ * @tparam Exp_t   type of exponential function passing in argument
+ *
+ * @param exp_ exponential function for the Lawson method
+ * @param tol  tolerance (only for adaptive time step methods)
  *
  * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
  */
@@ -104,7 +129,7 @@ using lrk_tuple = std::tuple< {{ list_erk | sformat("decltype(l{}_t<value_t, Exp
 {% for rk in list_exprk %}
 /**
  * @brief Butcher tableau of {{ rk.label }} method
- * @tparam _value_t type of coefficient (``double`` by default)
+ * @tparam _value_t  type of coefficient (``double`` by default)
  * @tparam _linear_t type of linear part (``double`` by default)
  */
 template <typename _value_t=double, typename _linear_t=double>
@@ -130,7 +155,7 @@ struct butcher_{{ rk.id }}
 
 /**
  * @brief {{ rk.label }} method
- * @tparam value_t type of coefficient (``double``by default)
+ * @tparam value_t  type of coefficient (``double``by default)
  * @tparam linear_t type of coefficient (``double``by default)
  */
 template <typename value_t, typename linear_t>
@@ -178,6 +203,13 @@ struct butcher_{{ rk.id }} : public butcher::{{ "adaptive_" if 'b2' in rk else "
   {}
 };
 
+/**
+ * @brief {{ rk.label }} method
+ *
+ * @tparam value_t          type of coefficient (``double``by default)
+ * @tparam linear_algebra_t type that provides linear algebra if it is undefined for state_t (``void`` by default)
+ * @tparam Args optional    arguments to build linear_algebra_t object
+ */
 template <typename value_t, typename linear_algebra_t=void, typename ... Args>
 auto
 {{ rk.id }}_t ( Args ... args )

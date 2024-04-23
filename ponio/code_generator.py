@@ -226,12 +226,20 @@ def prepare_RK(rk: dict, Ndigit: int):
         'A': [" , ".join(map(str, ai)) for ai in A],
         'b': " , ".join(map(str, b)),
         'c': " , ".join(map(str, c)),
-        'order': tmp_rk.order
+        'butcher': {
+            'A': [list(map(sp.latex, ai)) for ai in rk['A'].tolist()],
+            'b': list(map(sp.latex, rk['b'].T.tolist()[0])),
+            'c': list(map(sp.latex, rk['c'].T.tolist()[0]))
+        },
+        'stability_function': sp.latex(tmp_rk.stability_function()),
+        'order': tmp_rk.order,
+        'stage_order': tmp_rk.stage_order
     }
 
     if 'b2' in rk:
         b2 = rk['b2'].evalf(n=Ndigit).T.tolist()[0]
         r['b2'] = " , ".join(map(str, b2))
+        r['butcher']['b2'] = list(map(sp.latex, rk['b2'].T.tolist()[0]))
 
     return r
 
