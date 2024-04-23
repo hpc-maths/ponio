@@ -159,7 +159,7 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
 
 
 {% for rk in list_exprk %}
-.. doxygenvariable:: ponio::runge_kutta::{{ rk.id }}_t
+.. doxygentypedef:: ponio::runge_kutta::{{ rk.id }}_t
   :project: ponio
 
 {% endfor %}
