@@ -225,6 +225,12 @@ def prepare_expRK(rk: dict, Ndigit: int):
     r['label'] = rk['label']
     r['id'] = label_to_id(r['label'])
 
+    r['butcher'] = {
+        'A': [list(map(sp.latex, ai)) for ai in rk['A'].tolist()],
+        'b': list(map(sp.latex, rk['b'].T.tolist()[0])),
+        'c': list(map(sp.latex, rk['c'].T.tolist()[0]))
+    }
+
     if 'doi' in rk:
         r['bib'] = doi_bib(rk['doi'])
 

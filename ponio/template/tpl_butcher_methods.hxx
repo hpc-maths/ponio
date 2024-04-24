@@ -91,7 +91,7 @@ using {{ rk.id }}_t = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.i
 using {{ rk.id }} = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id }}<double>>;
 
 /**
- * @brief Lawson l{{ rk.label }} method
+ * @brief Lawson {{ rk.label }} method
  *
  * @tparam value_t type of coefficient (``double``by default)
  * @tparam Exp_t   type of exponential function passing in argument
@@ -101,27 +101,9 @@ using {{ rk.id }} = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id 
  *
  * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
  *
- * This method is based on the following Butcher tableau:
- *
- * \f[
- *  \begin{array}{c|{%- for ci in rk.butcher.c -%}c{%- endfor -%}}
-      {%- for ai in rk.butcher.A %}
- *      {{ rk.butcher.c[loop.index0] }} & {{ ai|join(' & ') }} \\
- {%- endfor %}
- *    \hline
- *      & {{ rk.butcher.b|join(' & ') }} {% if 'b2' in rk %} \\
- *    \hline
- *      & {{ rk.butcher.b2|join(' & ') }}
-{%- endif %}
- *  \end{array}
- * \f]
- *
  * + **stages:** {{ rk.A|length }}
  * + **order:** {{ rk.order }}
- * + **stages order:** {{ rk.stage_order }}
- * + **stability function:** \f[ {{ rk.stability_function }} \f] {% if 'bib' in rk %}
- * + **bibliography:** [{{ rk.bib.bib }}]({{ rk.bib.url }})
-{%- endif %}
+ * + **underlying Runge-Kutta method:** {{ rk.label }} (for more information see {{ rk.id }}_t)
  *
  */
 template <typename value_t, typename Exp_t>
@@ -183,6 +165,25 @@ struct butcher_{{ rk.id }}
  * @brief {{ rk.label }} method
  * @tparam value_t  type of coefficient (``double``by default)
  * @tparam linear_t type of coefficient (``double``by default)
+ *
+ * This method is based on the following Butcher tableau:
+ *
+ * \f[
+ *  \begin{array}{c|{%- for ci in rk.butcher.c -%}c{%- endfor -%}}
+      {%- for ai in rk.butcher.A %}
+ *      {{ rk.butcher.c[loop.index0] }} & {{ ai|join(' & ') }} \\
+ {%- endfor %}
+ *    \hline
+ *      & {{ rk.butcher.b|join(' & ') }} {% if 'b2' in rk %} \\
+ *    \hline
+ *      & {{ rk.butcher.b2|join(' & ') }}
+{%- endif %}
+ *  \end{array}
+ * \f]
+ *  {% if 'bib' in rk %}
+ * + **bibliography:** [{{ rk.bib.bib }}]({{ rk.bib.url }})
+{%- endif %}
+ *
  */
 template <typename value_t, typename linear_t>
 using {{ rk.id }}_t = exponential_runge_kutta::explicit_exp_rk_butcher<butcher_{{ rk.id }}<value_t, linear_t>>;
