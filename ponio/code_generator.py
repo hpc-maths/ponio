@@ -226,8 +226,8 @@ def prepare_expRK(rk: dict, Ndigit: int):
     r['id'] = label_to_id(r['label'])
 
     r['butcher'] = {
-        'A': [list(map(sp.latex, ai)) for ai in rk['A'].tolist()],
-        'b': list(map(sp.latex, rk['b'].T.tolist()[0])),
+        'A': [[sp.latex(aij).replace("phi", "varphi") for aij in ai] for ai in rk['A'].tolist()],
+        'b': [sp.latex(bi).replace("phi", "varphi") for bi in rk['b'].T.tolist()[0]],
         'c': list(map(sp.latex, rk['c'].T.tolist()[0]))
     }
 
