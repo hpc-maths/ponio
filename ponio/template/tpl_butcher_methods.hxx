@@ -103,7 +103,7 @@ using {{ rk.id }} = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id 
  *
  * + **stages:** {{ rk.A|length }}
  * + **order:** {{ rk.order }}
- * + **underlying Runge-Kutta method:** {{ rk.label }} (for more information see {{ rk.id }}_t)
+ * + **underlying Runge-Kutta method:** {{ rk.label }} (for more information see ponio::runge_kutta::{{ rk.id }}_t)
  *
  */
 template <typename value_t, typename Exp_t>
