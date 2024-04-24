@@ -166,7 +166,7 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
     \varphi_\ell(z) = \frac{e^z - \sum_{k=0}^{\ell-1} \frac{1}{k!}z^k }{z^\ell}
 
 
-  and we use the notations :\math:`\varphi_\ell = \varphi_ell(\Delta t L)` and :math:`\varphi_{\ell,j} = \varphi_\ell(c_j \Delta t L)`.
+  and we use the notations :\math:`\varphi_\ell = \varphi_\ell(\Delta t L)` and :math:`\varphi_{\ell,j} = \varphi_\ell(c_j \Delta t L)`.
 
 
 {% for rk in list_exprk %}
