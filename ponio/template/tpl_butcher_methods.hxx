@@ -94,7 +94,6 @@ using {{ rk.id }} = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id 
  * @brief Lawson {{ rk.label }} method
  *
  * @tparam value_t type of coefficient (``double``by default)
- * @tparam Exp_t   type of exponential function passing in argument
  *
  * @param exp_ exponential function for the Lawson method
  * @param tol  tolerance (only for adaptive time step methods)

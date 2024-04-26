@@ -62,7 +62,7 @@ The ponio library provides also adaptive time step methods.
 Diagonal implicit methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When the matrix :math:`A` is lower triangular with a diagonal, the Runge-Kutta method is called diagonal implicit (or DIRK). You have to provide a Jacobian function that returns the Jacobian matrix in point :math:`(t, u)` (see :ref:`implcit_problem`). You can also provide an operator base definition (see :ref:`implicit_operator_problem`).
+When the matrix :math:`A` is lower triangular with a diagonal, the Runge-Kutta method is called diagonal implicit (or DIRK). You have to provide a Jacobian function that returns the Jacobian matrix in point :math:`(t, u)` (see :cpp:class:`ponio::implicit_problem`). You can also provide an operator base definition (see :cpp:class:`ponio::implicit_operator_problem`).
 
 {% for rk in list_dirk %}
 .. doxygenfunction:: ponio::runge_kutta::{{ rk.id }}_t
