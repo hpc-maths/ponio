@@ -60,7 +60,7 @@ main( int argc, char** argv )
 
     constexpr std::size_t dim = 2; // cppcheck-suppress unreadVariable
 
-    using config_t = samurai::MRConfig<dim>;
+    using config_t = samurai::MRConfig<dim, 1>;
     using box_t    = samurai::Box<double, dim>;
     using point_t  = typename box_t::point_t;
 
@@ -71,11 +71,11 @@ main( int argc, char** argv )
     constexpr double delta = 20.;
 
     constexpr double t_ini = 0.;
-    constexpr double t_end = 0.36;
+    constexpr double t_end = 0.26;
 
     // multiresolution parameters
-    std::size_t min_level = 8;
-    std::size_t max_level = 8;
+    std::size_t min_level = 6;
+    std::size_t max_level = 6;
     double mr_epsilon     = 1e-5; // Threshold used by multiresolution
     double mr_regularity  = 1.;   // Regularity guess for multiresolution
 
@@ -139,7 +139,7 @@ main( int argc, char** argv )
         {
             auto u = field[cell];
 
-            return ( -R / ( alpha * delta ) + R / ( alpha * delta * u * u ) * ( alpha - u + 1 ) ) * exp( 1. - 1. / u );
+            return -R * exp( 1. - 1. / u ) / ( alpha * delta ) + R * ( alpha - u + 1.0 ) * exp( 1. - 1. / u ) / ( alpha * delta * u * u );
         } );
     auto fr_t = [&]( double /* t */ )
     {
@@ -161,10 +161,24 @@ main( int argc, char** argv )
     auto pb = ponio::make_imex_operator_problem( fd, fr, fr_t );
 
     // time loop  -------------------------------------------------------------
-    ponio::time_span<double> const t_span = { t_ini, t_end };
-    double dt                             = ( t_end - t_ini ) / 5000;
+    static constexpr bool is_embedded = true;
 
-    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::pirock::pirock_b0( eigmax_computer ), u_ini, t_span, dt );
+    ponio::time_span<double> const t_span = { t_ini, t_end };
+    double dt                             = ( t_end - t_ini ) / 1000;
+
+    auto sol_range = ponio::make_solver_range( pb,
+        ponio::runge_kutta::pirock::pirock<2, is_embedded>( ponio::runge_kutta::pirock::alpha_fixed<double>( 1.0 ),
+            eigmax_computer,
+            ponio::shampine_trick::shampine_trick<decltype( u_ini )>(),
+            1e-10 ),
+        u_ini,
+        t_span,
+        dt );
+    // auto sol_range = ponio::make_solver_range( pb,
+    //     ponio::runge_kutta::pirock::pirock<1>( ponio::runge_kutta::pirock::alpha_fixed<double>( 1.0 ), eigmax_computer ),
+    //     u_ini,
+    //     t_span,
+    //     dt );
 
     auto it_sol = sol_range.begin();
 
@@ -187,6 +201,7 @@ main( int argc, char** argv )
         {
             ki.resize();
             ki.fill( 0. );
+            set_bc( ki );
         }
 
         ++it_sol;

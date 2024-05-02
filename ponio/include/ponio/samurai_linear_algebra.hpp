@@ -41,19 +41,40 @@ namespace ponio::linear_algebra
 
 namespace ponio::shampine_trick
 {
+    /**
+     * @brief For PIROCK method, compute the Shampine's trick
+     *
+     * @tparam mesh_t  type of underlying mesh in samurai::Field
+     * @tparam value_t value stored in samurai::Field
+     * @tparam size    the "size" of the samurai::Field (warning: this is not a size in container meaning)
+     * @tparam SOA     SOA or AOS
+     */
     template <class mesh_t, class value_t, std::size_t size, bool SOA>
     struct shampine_trick<::samurai::Field<mesh_t, value_t, size, SOA>>
     {
+        /**
+         * @brief solves \f$(I - \alpha R)^{\ell}X = b\f$
+         *
+         * @tparam l
+         * @tparam operator_t
+         * @tparam state_t
+         * @param alpha           in Shampine's trick \f$\alpha = \gamma \Delta t\f$
+         * @param op_reac         \f$R\f$ operator
+         * @param initial_guess   initial guess for \f$X\f$ unknown
+         * @param rhs             right hand side term, \f$b\f$
+         * @param u_tmp           temporary variable
+         * @param shampine_result result of unknown \f$X\f$
+         */
         template <std::size_t l, typename operator_t, typename state_t>
         void
-        operator()( value_t gamma_dt, operator_t&& op_reac, state_t& u_sm2pl, state_t& f_D_u, state_t& u_tmp, state_t& shampine_result )
+        operator()( value_t alpha, operator_t&& op_reac, state_t& initial_guess, state_t& rhs, state_t& u_tmp, state_t& shampine_result )
         {
             auto id = ::samurai::make_identity<state_t>();
             // matrix assembly
-            auto J_R_op = id - gamma_dt * op_reac;
+            auto J_R_op = id - alpha * op_reac;
 
             auto assembly = samurai::petsc::make_assembly( J_R_op );
-            assembly.set_unknown( u_sm2pl );
+            assembly.set_unknown( initial_guess );
             Mat J_R;
             assembly.create_matrix( J_R );
             assembly.assemble_matrix( J_R );
@@ -73,9 +94,9 @@ namespace ponio::shampine_trick
             auto& result_l1 = ( l == 1 ) ? shampine_result : u_tmp;
 
             // Solve the system
-            Vec f_D_U_petsc = samurai::petsc::create_petsc_vector_from( f_D_u );
+            Vec rhs_petsc   = samurai::petsc::create_petsc_vector_from( rhs );
             Vec u_tmp_petsc = samurai::petsc::create_petsc_vector_from( result_l1 );
-            KSPSolve( ksp, u_tmp_petsc, f_D_U_petsc );
+            KSPSolve( ksp, u_tmp_petsc, rhs_petsc );
             KSPConvergedReason reason_code;
             KSPGetConvergedReason( ksp, &reason_code );
             if ( reason_code < 0 )

@@ -204,16 +204,21 @@ namespace ponio::runge_kutta::pirock
      *
      *  @warning the implementation is only with l=1 and beta=0 with a fixed number of stages
      */
-    template <std::size_t _l, typename alpha_beta_computer_t, typename eig_computer_t, typename _shampine_trick_caller_t = void, typename value_t = double>
+    template <std::size_t _l,
+        typename alpha_beta_computer_t,
+        typename eig_computer_t,
+        typename _shampine_trick_caller_t = void,
+        bool _is_embedded                 = false,
+        typename value_t                  = double>
     struct pirock_impl
     {
-        static constexpr bool is_embedded           = false;
+        static constexpr bool is_embedded           = _is_embedded;
         static constexpr bool shampine_trick_enable = !std::is_void<_shampine_trick_caller_t>::value;
 
         static constexpr std::size_t l         = _l;
         static constexpr std::size_t N_stages  = stages::dynamic;
         static constexpr std::size_t N_storage = std::
-            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 13>, std::integral_constant<std::size_t, 10>>::value;
+            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 17>, std::integral_constant<std::size_t, 10>>::value;
         static constexpr std::size_t order   = 2;
         static constexpr std::string_view id = "PIROCK";
 
@@ -224,6 +229,7 @@ namespace ponio::runge_kutta::pirock
         alpha_beta_computer_t alpha_beta_computer;
         eig_computer_t eig_computer;
         shampine_trick_caller_t shampine_trick_caller;
+        value_t tolerance;
 
         pirock_impl()
         {
@@ -240,10 +246,12 @@ namespace ponio::runge_kutta::pirock
                       && std::same_as<std::bool_constant<shampine_trick_enable>, std::true_type>
         pirock_impl( alpha_beta_computer_t&& _alpha_beta_computer,
             eig_computer_t&& _eig_computer,
-            _shampine_trick_caller_t_&& _shampine_trick_caller )
+            _shampine_trick_caller_t_&& _shampine_trick_caller,
+            value_t tol = default_config::tol )
             : alpha_beta_computer( _alpha_beta_computer )
             , eig_computer( _eig_computer )
             , shampine_trick_caller( _shampine_trick_caller )
+            , tolerance( tol )
         {
         }
 
@@ -396,15 +404,64 @@ namespace ponio::runge_kutta::pirock
                 auto& f_D_u            = U[11];
                 auto& u_tmp            = U[12];
 
+                // for embedded method
+                auto& err_D = U[13];
+                auto& tmp_R = U[14];
+
+                // $err_D = \sigma_\alpha(1-\tau_a/\sigma_a^2)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)}))$
+                err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
+                      * ( pb.explicit_part( tn, us_sm1 ) - pb.explicit_part( tn, u_sm2 ) );
+
+                tmp_R = dt * ( pb.implicit_part( tn, u_sp1 ) - pb.implicit_part( tn, u_sp2 ) );
+
                 f_D_u = pb.explicit_part( tn, u_sp3 ) - pb.explicit_part( tn, u_sp1 );
 
                 shampine_trick_caller.template operator()<l>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, f_D_u, u_tmp, shampine_element );
 
-                u_np1 = us_s
-                      - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
-                            * ( pb.explicit_part( tn, us_sm1 ) - pb.explicit_part( tn, u_sm2 ) )
-                      + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
-                      + dt / ( 2. - 4. * gamma ) * shampine_element;
+                if constexpr ( is_embedded )
+                {
+                    auto& rhs_R = U[15];
+                    auto& err_R = U[16];
+
+                    rhs_R = tmp_R / 6.;
+
+                    // $err_R = J_R^{-1} \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
+                    // to compute it, get $rhs_R = \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
+                    // then solve $J_R err_R = rhs_R$ (that what Shampine's trick does, it build $J_R$ and solve it)
+                    shampine_trick_caller.template operator()<1>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, rhs_R, u_tmp, err_R );
+
+                    // TODO: this couple of lines works only with samurai (because of err_D.array())
+                    auto err = std::max( std::accumulate( err_D.array().begin(),
+                                             err_D.array().end(),
+                                             static_cast<value_t>( 0. ),
+                                             []( value_t const& acc, value_t const xi )
+                                             {
+                                                 return acc + std::abs( xi );
+                                             } ),
+                        std::accumulate( err_R.array().begin(),
+                            err_R.array().end(),
+                            static_cast<value_t>( 0. ),
+                            []( value_t const& acc, value_t const xi )
+                            {
+                                return acc + std::abs( xi );
+                            } ) );
+
+                    value_t new_dt = dt;
+                    if ( err > 0. )
+                    {
+                        new_dt = 0.8 * std::sqrt( tolerance / err ) * dt;
+                    }
+
+                    if ( err > tolerance )
+                    {
+                        return { tn, un, new_dt };
+                    }
+
+                    u_np1 = us_s - err_D + 0.5 * tmp_R + dt / ( 2. - 4. * gamma ) * shampine_element;
+                    return { tn + dt, u_np1, new_dt };
+                }
+
+                u_np1 = us_s - err_D + 0.5 * tmp_R + dt / ( 2. - 4. * gamma ) * shampine_element;
             }
             else
             {
@@ -421,21 +478,25 @@ namespace ponio::runge_kutta::pirock
 
     // cppcheck-suppress-begin unusedFunction
 
-    template <std::size_t l = 1, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t, typename shampine_trick_caller_t>
+    template <std::size_t l = 1, bool is_embedded = false, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t, typename shampine_trick_caller_t>
     auto
-    pirock( alpha_beta_computer_t&& alpha_beta_computer, eig_computer_t&& eig_computer, shampine_trick_caller_t&& shampine_trick_caller )
+    pirock( alpha_beta_computer_t&& alpha_beta_computer,
+        eig_computer_t&& eig_computer,
+        shampine_trick_caller_t&& shampine_trick_caller,
+        value_t tolerance = default_config::tol )
     {
-        return pirock_impl<l, alpha_beta_computer_t, eig_computer_t, shampine_trick_caller_t, value_t>(
+        return pirock_impl<l, alpha_beta_computer_t, eig_computer_t, shampine_trick_caller_t, is_embedded, value_t>(
             std::forward<alpha_beta_computer_t>( alpha_beta_computer ),
             std::forward<eig_computer_t>( eig_computer ),
-            std::forward<shampine_trick_caller_t>( shampine_trick_caller ) );
+            std::forward<shampine_trick_caller_t>( shampine_trick_caller ),
+            tolerance );
     }
 
     template <std::size_t l = 1, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t>
     auto
     pirock( alpha_beta_computer_t&& alpha_beta_computer, eig_computer_t&& eig_computer )
     {
-        return pirock_impl<l, alpha_beta_computer_t, eig_computer_t, void, value_t>(
+        return pirock_impl<l, alpha_beta_computer_t, eig_computer_t, void, false, value_t>(
             std::forward<alpha_beta_computer_t>( alpha_beta_computer ),
             std::forward<eig_computer_t>( eig_computer ) );
     }
