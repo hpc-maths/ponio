@@ -199,10 +199,15 @@ namespace ponio::runge_kutta::pirock
         }
     };
 
-    /** @class pirock_impl
-     *  @brief define PIROCK method
+    /**
+     * @brief implementation of PIROCK method
      *
-     *  @warning the implementation is only with l=1 and beta=0 with a fixed number of stages
+     * @tparam _l                       Number of augmented stages (l = 1, 2)
+     * @tparam alpha_beta_computer_t    Choice of computing of \f$\alpha\f$ and \f$\beta\f$ parameters
+     * @tparam eig_computer_t           Computing of eigenvalues of explicit part (diffusion)
+     * @tparam _shampine_trick_caller_t Computing of Shampine's trick
+     * @tparam _is_embedded             Set adaptive time step method (default: false)
+     * @tparam value_t                  Type of coefficients
      */
     template <std::size_t _l,
         typename alpha_beta_computer_t,
@@ -231,16 +236,36 @@ namespace ponio::runge_kutta::pirock
         shampine_trick_caller_t shampine_trick_caller;
         value_t tolerance;
 
+        /**
+         * @brief Construct a new pirock impl object
+         *
+         */
         pirock_impl()
         {
         }
 
+        /**
+         * @brief Construct a new pirock impl object
+         *
+         * @param _alpha_beta_computer computer of parameters alpha and beta object that has two member functions which take number of
+         * stages (s) l parameter
+         * @param _eig_computer        eigenvalue computer functor (that take as argument the function of explicit part, the current time,
+         * the current state and the current time step)
+         */
         pirock_impl( alpha_beta_computer_t&& _alpha_beta_computer, eig_computer_t&& _eig_computer )
             : alpha_beta_computer( _alpha_beta_computer )
             , eig_computer( _eig_computer )
         {
         }
 
+        /**
+         * @brief Construct a new pirock impl object with Shampine's trick
+         *
+         * @param _alpha_beta_computer   alpha and beta computer object
+         * @param _eig_computer          eigenvalue computer functor
+         * @param _shampine_trick_caller Shampine's trick functor
+         * @param tol                    tolerance
+         */
         template <typename _shampine_trick_caller_t_>
             requires std::same_as<_shampine_trick_caller_t_, shampine_trick_caller_t>
                       && std::same_as<std::bool_constant<shampine_trick_enable>, std::true_type>
@@ -478,6 +503,20 @@ namespace ponio::runge_kutta::pirock
 
     // cppcheck-suppress-begin unusedFunction
 
+    /**
+     * @brief helper function to build PIROCK algorithm
+     *
+     * @tparam l                       Number of augmented stages (l = 1, 2)
+     * @tparam is_embedded             Set adaptive time step method (default: false)
+     * @tparam value_t                 Type of coefficients
+     * @tparam alpha_beta_computer_t   Choice of computing of \f$\alpha\f$ and \f$\beta\f$ parameters
+     * @tparam eig_computer_t          Computing of eigenvalues of explicit part (diffusion)
+     * @tparam shampine_trick_caller_t Computing of Shampine's trick
+     * @param alpha_beta_computer      \f$\alpha\f$ and \f$\beta\f$ computer object
+     * @param eig_computer             Eigenvalue computer of explicit part of the problem
+     * @param shampine_trick_caller    Shampine's trick computer
+     * @param tolerance                Tolerance for adaptive time step method (default: ponio::default_config::tol)
+     */
     template <std::size_t l = 1, bool is_embedded = false, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t, typename shampine_trick_caller_t>
     auto
     pirock( alpha_beta_computer_t&& alpha_beta_computer,
@@ -492,6 +531,18 @@ namespace ponio::runge_kutta::pirock
             tolerance );
     }
 
+    /**
+     * @brief helper function to build PIROCK algorithm
+     *
+     * @tparam l                     Number of augmented stages (l = 1, 2)
+     * @tparam value_t               Type of coefficients
+     * @tparam alpha_beta_computer_t Choice of computing of \f$\alpha\f$ and \f$\beta\f$ parameters
+     * @tparam eig_computer_t        Computing of eigenvalues of explicit part (diffusion)
+     * @param alpha_beta_computer    \f$\alpha\f$ and \f$\beta\f$ computer object
+     * @param eig_computer           Eigenvalue computer of explicit part of the problem
+     *
+     * @note Without a Shampine's trick caller, this method is fixed time step.
+     */
     template <std::size_t l = 1, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t>
     auto
     pirock( alpha_beta_computer_t&& alpha_beta_computer, eig_computer_t&& eig_computer )
@@ -501,6 +552,17 @@ namespace ponio::runge_kutta::pirock
             std::forward<eig_computer_t>( eig_computer ) );
     }
 
+    /**
+     * @brief helper function to build PIROCK algorithm
+     *
+     * @tparam l              Number of augmented stages (l = 1, 2)
+     * @tparam value_t        Type of coefficients
+     * @tparam eig_computer_t Computing of eigenvalues of explicit part (diffusion)
+     * @param eig_computer    Eigenvalue computer of explicit part of the problem
+     *
+     * @note Without a Shampine's trick caller, this method is fixed time step, and without a \f$\alpha\f$ and \f$\beta\f$ computer,
+     * parameters are fixed to \f$\beta = 0\f$.
+     */
     template <std::size_t l = 1, typename value_t = double, typename eig_computer_t>
     auto
     pirock( eig_computer_t&& eig_computer )
@@ -508,6 +570,16 @@ namespace ponio::runge_kutta::pirock
         return pirock<l, value_t>( beta_0<value_t>(), std::forward<eig_computer_t>( eig_computer ) );
     }
 
+    /**
+     * @brief helper function to build PIROCK algorithm
+     *
+     * @tparam l       Number of augmented stages (l = 1, 2)
+     * @tparam value_t Type of coefficients
+     *
+     * @note Without a Shampine's trick caller, this method is fixed time step, without a \f$\alpha\f$ and \f$\beta\f$ computer, parameters
+     * are fixed to \f$\beta = 0\f$ and without a eigenvalues computer this method use power method to estimate spectral radius of explicit
+     * part (diffusion operator).
+     */
     template <std::size_t l = 1, typename value_t = double>
     auto
     pirock()
@@ -515,6 +587,16 @@ namespace ponio::runge_kutta::pirock
         return pirock<l, value_t>( rock::detail::power_method() );
     }
 
+    /**
+     * @brief helper function to build PIROCK algorithm
+     *
+     * @tparam value_t        Type of coefficients
+     * @tparam eig_computer_t Computing of eigenvalues of explicit part (diffusion)
+     * @param eig_computer    Eigenvalue computer of explicit part of the problem
+     *
+     * @note This function builds a PIROCK algorithm with parameters \f$\ell=2\f$ and \f$\alpha = 1\f$ and specific spectral radius
+     * estimator of explicit part (diffusion operator).
+     */
     template <typename value_t = double, typename eig_computer_t>
     auto
     pirock_a1( eig_computer_t&& eig_computer )
@@ -522,6 +604,14 @@ namespace ponio::runge_kutta::pirock
         return pirock<2, value_t>( alpha_fixed<value_t>( 1.0 ), std::forward<eig_computer_t>( eig_computer ) );
     }
 
+    /**
+     * @brief helper function to build PIROCK algorithm
+     *
+     * @tparam value_t Type of coefficients
+     *
+     * @note This function builds a PIROCK algorithm with parameters \f$\ell=2\f$ and \f$\alpha = 1\f$ and power method to estimate spectral
+     * radius.
+     */
     template <typename value_t = double>
     auto
     pirock_a1()
@@ -529,6 +619,16 @@ namespace ponio::runge_kutta::pirock
         return pirock_a1<value_t>( rock::detail::power_method() );
     }
 
+    /**
+     * @brief helper function to build PIROCK algorithm
+     *
+     * @tparam value_t        Type of coefficients
+     * @tparam eig_computer_t Computing of eigenvalues of explicit part (diffusion)
+     * @param eig_computer    Eigenvalue computer of explicit part of the problem
+     *
+     * @note This function builds a PIROCK algorithm with parameters \f$\ell=1\f$ and \f$\beta = 0\f$ and specific spectral radius estimator
+     * of explicit part (diffusion operator).
+     */
     template <typename value_t = double, typename eig_computer_t>
     auto
     pirock_b0( eig_computer_t&& eig_computer )
@@ -536,6 +636,14 @@ namespace ponio::runge_kutta::pirock
         return pirock<1, value_t>( beta_0<value_t>(), std::forward<eig_computer_t>( eig_computer ) );
     }
 
+    /**
+     * @brief helper function to build PIROCK algorithm
+     *
+     * @tparam value_t Type of coefficients
+     *
+     * @note This function builds a PIROCK algorithm with parameters \f$\ell=1\f$ and \f$\beta = 0\f$ and power method to estimate spectral
+     * radius.
+     */
     template <typename value_t = double>
     auto
     pirock_b0()
