@@ -112,6 +112,13 @@ namespace ponio::runge_kutta::pirock
 
     namespace polynomial
     {
+        /**
+         * @brief Computes \f$P'_{s-2+\ell}(0)\f$ from number of stages \f$s\f$ and \f$\ell\f$
+         *
+         * @tparam value_t type of coefficients
+         * @param s        number of stages
+         * @param l        number of additional stages
+         */
         template <typename value_t = double>
         value_t
         Pp_sm2pl_0( std::size_t s, std::size_t l )
@@ -160,6 +167,11 @@ namespace ponio::runge_kutta::pirock
         }
     } // namespace polynomial
 
+    /**
+     * @brief Computer of \f$\alpha\f$ and \f$\beta\f$ parameters with fixed value of \f$\alpha\f$
+     *
+     * @tparam value_t
+     */
     template <typename value_t = double>
     struct alpha_fixed
     {
@@ -183,6 +195,11 @@ namespace ponio::runge_kutta::pirock
         }
     };
 
+    /**
+     * @brief Computer of \f$\alpha\f$ and \f$\beta\f$ parameters with fixed value of \f$\beta\f$ to 0
+     *
+     * @tparam value_t
+     */
     template <typename value_t = double>
     struct beta_0
     {
