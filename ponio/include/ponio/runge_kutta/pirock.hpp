@@ -364,7 +364,7 @@ namespace ponio::runge_kutta::pirock
                 err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
                       * ( pb.explicit_part( tn, us_sm1 ) - pb.explicit_part( tn, u_sm2 ) );
 
-                tmp_R = dt * ( pb.implicit_part( tn, u_sp1 ) - pb.implicit_part( tn, u_sp2 ) );
+                tmp_R = static_cast<state_t>( dt * ( pb.implicit_part( tn, u_sp1 ) - pb.implicit_part( tn, u_sp2 ) ) );
 
                 f_D_u = pb.explicit_part( tn, u_sp3 ) - pb.explicit_part( tn, u_sp1 );
 
@@ -375,7 +375,7 @@ namespace ponio::runge_kutta::pirock
                     auto& rhs_R = U[15];
                     auto& err_R = U[16];
 
-                    rhs_R = tmp_R / 6.;
+                    rhs_R = static_cast<state_t>( tmp_R / 6. );
 
                     // $err_R = J_R^{-1} \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
                     // to compute it, get $rhs_R = \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$

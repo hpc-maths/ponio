@@ -278,7 +278,7 @@ namespace ponio::runge_kutta::rock
             {
                 uj = ujm1;
             }
-
+            // std::cout << "\nmdeg = " << mdeg << "\n";
             for ( std::size_t j = 2; j < mdeg + 1; ++j )
             {
                 value_t const mu    = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 1 - 1];
