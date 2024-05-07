@@ -131,7 +131,7 @@ main( int argc, char** argv )
         {
             auto u = field[cell];
 
-            return R / ( alpha * delta ) * ( 1. + alpha - u ) * exp( 1. - 1. / u );
+            return ( R / ( alpha * delta ) ) * ( 1 + alpha - u ) * exp( delta * ( 1 - 1 / u ) );
         } );
     // set the jacobian function or set option in command line with : -snes_fd -pc_type none
     react.set_jacobian_function(
@@ -139,7 +139,7 @@ main( int argc, char** argv )
         {
             auto u = field[cell];
 
-            return -R * exp( 1. - 1. / u ) / ( alpha * delta ) + R * ( alpha - u + 1.0 ) * exp( 1. - 1. / u ) / ( alpha * delta * u * u );
+            return ( R / ( alpha * delta ) ) * exp( delta * ( 1 - 1 / u ) ) * ( -1 + ( 1 + alpha - u ) * ( delta / ( u * u ) ) );
         } );
     auto fr_t = [&]( double /* t */ )
     {
@@ -155,30 +155,26 @@ main( int argc, char** argv )
     auto eigmax_computer = [=]( auto&, double, auto&, double )
     {
         double dx = samurai::cell_length( max_level );
-        return 4. * d / ( dx * dx );
+        return 2.01 * 4. * d / ( dx * dx );
     };
 
     auto pb = ponio::make_imex_operator_problem( fd, fr, fr_t );
 
     // time loop  -------------------------------------------------------------
-    static constexpr bool is_embedded = true;
+    static constexpr bool is_embedded = false;
 
     ponio::time_span<double> const t_span = { t_ini, t_end };
-    double dt                             = ( t_end - t_ini ) / 1000;
+    double dt                             = 0.00026; // ( t_end - t_ini ) / 1000;
 
-    auto sol_range = ponio::make_solver_range( pb,
-        ponio::runge_kutta::pirock::pirock<2, is_embedded>( ponio::runge_kutta::pirock::alpha_fixed<double>( 1.0 ),
-            eigmax_computer,
-            ponio::shampine_trick::shampine_trick<decltype( u_ini )>(),
-            1e-10 ),
-        u_ini,
-        t_span,
-        dt );
     // auto sol_range = ponio::make_solver_range( pb,
-    //     ponio::runge_kutta::pirock::pirock<1>( ponio::runge_kutta::pirock::alpha_fixed<double>( 1.0 ), eigmax_computer ),
+    //     ponio::runge_kutta::pirock::pirock<2, is_embedded>( ponio::runge_kutta::pirock::alpha_fixed<double>( 1.0 ),
+    //         eigmax_computer,
+    //         ponio::shampine_trick::shampine_trick<decltype( u_ini )>(),
+    //         1e-4 ),
     //     u_ini,
     //     t_span,
     //     dt );
+    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::rock::rock4<is_embedded>( eigmax_computer ), u_ini, t_span, dt );
 
     auto it_sol = sol_range.begin();
 
