@@ -134,8 +134,12 @@ namespace ponio
     };
 
     /**
-     * constructor of \ref implicit_operator_problem from a callable and hints
-     * @param f_       callable object
+     * @brief Construct a new implicit operator problem<Callable1 t, Callable2 t>::implicit operator problem object
+     *
+     * @tparam Callable1_t
+     * @tparam Callable2_t
+     * @param f_   callable object that represents problem, \f$f:t,u\mapsto f(t,u)\f$
+     * @param f_t_ callable object that returns operator, \f$f_t:t\maptso f(t,\cdot)\f$
      */
     template <typename Callable1_t, typename Callable2_t>
     inline implicit_operator_problem<Callable1_t, Callable2_t>::implicit_operator_problem( Callable1_t&& f_, Callable2_t&& f_t_ )
