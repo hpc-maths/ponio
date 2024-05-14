@@ -238,6 +238,21 @@ and where :math:`T_j(x)` is the Chebyshev polynomial.
 ROCK2 method
 ~~~~~~~~~~~~
 
+The algorithm of ROCK2 method is the following:
+
+.. math::
+
+  \begin{aligned}
+    y_0 &= y^n \\
+    y_1 &= y^n + \Delta t \mu_1 f(y^n) \\
+    y_j &= \Delta t \mu_j f(y_{j-1}) - \nu_j y_{j-1} - \kappa_j y_{j-2}, \quad j=2,\dots, s-2\\
+    y_{s-1} &= y_{s-2} + \Delta t \sigma f(u_{s-2}) \\
+    y_{s}^\star &= y_{s-1} + \Delta t \sigma f(y_{s-1}) \\
+    y^{n+1} &= y_s^\star - \Delta t \sigma (1 - \frac{\tau}{\sigma})( f(y_{s-1}) - f(y_{s-2}) )
+  \end{aligned}
+
+where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from a minimization problem.
+
 .. doxygenclass:: ponio::runge_kutta::rock::rock2_impl
    :project: ponio
    :members:
@@ -251,6 +266,22 @@ ROCK2 method
 
 ROCK4 method
 ~~~~~~~~~~~~
+
+The algorithm of ROCK4 method is the following:
+
+.. math::
+
+  \begin{aligned}
+    y_0 &= y^n \\
+    y_1 &= y^n + \Delta t \mu_1 f(y^n) \\
+    y_j &= \Delta t \mu_j f(y_{j-1}) - \nu_j y_{j-1} - \kappa_j y_{j-2}, \quad j=2,\dots, s-4 \\
+    y_{s-3} &= y_{s-4} + a_{21} \Delta t f(u_{s-4}) \\
+    y_{s-2} &= y_{s-4} + a_{31} \Delta t f(u_{s-4}) + a_{32} \Delta t f(y_{s-3}) \\
+    y_{s-1} &= y_{s-4} + a_{41} \Delta t f(u_{s-4}) + a_{42} \Delta t f(y_{s-3}) + a_{43} \Delta t f(y_{s-2}) \\
+    y^{n+1} &= y_{s-4} + b_1 \Delta t f(y_{s-4}) + b_2 \Delta t f(y_{s-3}) + b_3 \Delta t f(y_{s-2}) + b_4 \Delta t f(y_{s-1})
+  \end{aligned}
+
+where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from a minimization problem, and :math:`a_{ij}`, :math:`b_i` coming from an order 4 method build with :math:`y_{s-4}` as initial condition.
 
 .. doxygenclass:: ponio::runge_kutta::rock::rock4_impl
    :project: ponio
