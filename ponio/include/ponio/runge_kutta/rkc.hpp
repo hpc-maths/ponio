@@ -126,6 +126,13 @@ namespace ponio::runge_kutta::chebyshev
         value_t w0;
         value_t w1;
 
+        /**
+         * @brief computes \f$b_j = \f$ coefficients with following formula: \f$b_0=b_2\f$, \f$b_1=\frac{1}{\omega_0}\f$, \f$b_j =
+         * \frac{T_j''(\omega_0)}{(T_j'(\omega_0))^2}\f$
+         *
+         * @tparam J index \f$j\f$
+         * @param x  value of \f$\omega_0\f$
+         */
         template <std::size_t J>
         static constexpr value_t
         b( value_t const x )
@@ -140,15 +147,36 @@ namespace ponio::runge_kutta::chebyshev
             }
         }
 
+        /**
+         * @brief Construct a new explicit RKC2 algorithm
+         *
+         * @param eps value of relaxation
+         */
         explicit_rkc2( value_t eps = 2. / 13. )
             : w0( 1. + eps / ( N_stages * N_stages ) )
             , w1( dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) )
         {
         }
 
+        /**
+         * @brief computes stage \f$j\f$ of RKC2 method
+         *
+         * @tparam problem_t  type of operator \f$f\f$
+         * @tparam state_t    type of current state
+         * @tparam array_ki_t type of array of temporary stages
+         * @tparam j          integer of stage
+         * @param f  operator \f$f\f$
+         * @param tn current time
+         * @param yn current state
+         * @param Yi array of temporary stages
+         * @param dt current time step
+         *
+         * @details \f$y_j = (1 - \mu_j - \nu_j)y^n + \mu_j y_{j-1} + \nu_j y_{j-2} + \tilde{\mu}_j\Delta tf(t^n + c_{j-1}\Delta t, y_{j-1})
+         * + \tilde{\gamma}_j\Delta t f(t^n, y^n)\f$
+         */
         template <typename problem_t, typename state_t, typename array_ki_t, std::size_t j>
         inline state_t
-        stage( Stage<j>, problem_t& f, value_t tn, state_t& un, array_ki_t const& Yi, value_t dt )
+        stage( Stage<j>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yi, value_t dt )
         {
             value_t mj   = 2. * b<j>( w0 ) / b<j - 1>( w0 ) * w0;
             value_t nj   = -b<j>( w0 ) / b<j - 2>( w0 );
@@ -156,27 +184,69 @@ namespace ponio::runge_kutta::chebyshev
             value_t gjt  = -( 1. - b<j - 1>( w0 ) * T<j - 1>( w0 ) ) * mjt;
             value_t cjm1 = dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) * ddT<j - 1>( w0 ) / dT<j - 1>( w0 );
 
-            return ( 1. - mj - nj ) * un + mj * Yi[j - 1] + nj * Yi[j - 2] + mjt * dt * f( tn + cjm1 * dt, Yi[j - 1] ) + gjt * dt * Yi[0];
+            return ( 1. - mj - nj ) * yn + mj * Yi[j - 1] + nj * Yi[j - 2] + mjt * dt * f( tn + cjm1 * dt, Yi[j - 1] ) + gjt * dt * Yi[0];
         }
 
+        /**
+         * @brief computes pseudo first stage of RKC2 method
+         *
+         * @tparam problem_t  type of operator \f$f\f$
+         * @tparam state_t    type of current state
+         * @tparam array_ki_t type of array of temporary stages
+         * @tparam j          integer of stage
+         * @param f  operator \f$f\f$
+         * @param tn current time
+         * @param yn current state
+         *
+         * @details \f$y_0 = f(t^n, y^n)\f$
+         */
         template <typename problem_t, typename state_t, typename array_ki_t>
         inline state_t
-        stage( Stage<0>, problem_t& f, value_t tn, state_t& un, array_ki_t const&, value_t )
+        stage( Stage<0>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t )
         {
-            return f( tn, un ); // be careful Yi[0] stores f(tn,un) not un!!!
+            return f( tn, yn ); // be careful Yi[0] stores f(tn,yn) not yn!!!
         }
 
+        /**
+         * @brief computes first stage of RKC2 method
+         *
+         * @tparam problem_t  type of operator \f$f\f$
+         * @tparam state_t    type of current state
+         * @tparam array_ki_t type of array of temporary stages
+         * @tparam j          integer of stage
+         * @param yn current state
+         * @param Yi array of temporary stages
+         * @param dt current time step
+         *
+         * @details \f$y_1 = y^n + \tilde{\mu}_1 \Delta t f(t^n, y^n)\f$
+         */
         template <typename problem_t, typename state_t, typename array_ki_t>
         inline state_t
-        stage( Stage<1>, problem_t&, value_t, state_t& un, array_ki_t const& Yi, value_t dt )
+        stage( Stage<1>, problem_t&, value_t, state_t& yn, array_ki_t const& Yi, value_t dt )
         {
             value_t m1t = b<1>( w0 ) * w1;
-            return un + dt * m1t * Yi[0];
+            return yn + dt * m1t * Yi[0];
         }
 
+        /**
+         * @brief computes second stage of RKC2 method
+         *
+         * @tparam problem_t  type of operator \f$f\f$
+         * @tparam state_t    type of current state
+         * @tparam array_ki_t type of array of temporary stages
+         * @tparam j          integer of stage
+         * @param f  operator \f$f\f$
+         * @param tn current time
+         * @param yn current state
+         * @param Yi array of temporary stages
+         * @param dt current time step
+         *
+         * @details \f$y_2 = (1-\mu_2 -\nu_2)y^n + \mu_2y_1 + \nu_2y^n + \tilde{\mu}_2\Delta t f(t^n + c_1\Delta t, y_1) + \tilde{\gamma}_2
+         * \Delta t f(t^n, y^n)\f$
+         */
         template <typename problem_t, typename state_t, typename array_ki_t>
         inline state_t
-        stage( Stage<2>, problem_t& f, value_t tn, state_t& un, array_ki_t const& Yi, value_t dt )
+        stage( Stage<2>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yi, value_t dt )
         {
             value_t m2  = 2. * w0;
             value_t n2  = -1.;
@@ -185,7 +255,7 @@ namespace ponio::runge_kutta::chebyshev
             value_t c1  = c2 / dT<2>( w0 );
             value_t g2t = -( 1. - b<1>( w0 ) * T<1>( w0 ) ) * m2t;
 
-            return ( 1. - m2 - n2 ) * un + m2 * Yi[1] + n2 * un + m2t * dt * f( tn + c1 * dt, Yi[1] ) + g2t * dt * Yi[0];
+            return ( 1. - m2 - n2 ) * yn + m2 * Yi[1] + n2 * yn + m2t * dt * f( tn + c1 * dt, Yi[1] ) + g2t * dt * Yi[0];
         }
     };
 

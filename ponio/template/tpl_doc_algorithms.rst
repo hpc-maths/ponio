@@ -176,9 +176,88 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
 {% endfor %}
 
 
-Runge-Kutta Chebyshev methods
------------------------------
+Explicit stabilized Runge-Kutta methods
+---------------------------------------
+
+Some problems, like heat equation, require methods stabilized on the negative real axis. The ponio library provides a Runge-Kutta Chebyshev method of order 2, ROCK2 method (of order 2) and ROCK4 method (of order 4).
+
+Runge-Kutta Chebyshev method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The algorithm of RKC2 is the following:
+
+.. math::
+
+   \begin{aligned}
+      y_0 &= f(t^n, y^n) \\
+      y_1 &= y_0 + \tilde{\mu}_1\Delta t f(t^n, y^n) \\
+      y_j &= (1 - \mu_j - \nu_j)y^n + \mu_j y_{j-1} + \nu_j y_{j-2} \\
+          &~~~~~~  + \tilde{\mu}_j \Delta t f(t^n + c_j\Delta t, y_{j-1}) + \tilde{\gamma}_j\Delta t f(t^n, y^n), \quad j=2,\dots, s
+   \end{aligned}
+
+with coefficients given by
+
+.. math::
+
+  \tilde{\mu}_1 = b_1 \omega_1
+
+.. math::
+
+  \mu_j = \frac{2b_j}{b_{j-1}}\omega_0, \quad \nu_j = -\frac{b_j}{b_{j-2}}, \quad \tilde{\mu}_j = \frac{2b_j}{b_{j-1}}\omega_1
+
+.. math::
+
+  \tilde{\gamma}_j = -(1 - b_{j-1}T_{j-1}(\omega_0))
+
+where
+
+.. math::
+
+  b_0 = b_2, \quad b_1 = \frac{1}{\omega_0}, \quad
+  b_j = \frac{T_j''(\omega_0)}{(T_j'(\omega_0))^2},\ j=2,\dots, s
+
+
+.. math::
+
+  c_0 = 0, \quad c_1 = c_2, \quad c_j = \frac{T_s'(\omega_0)}{T_s''(\omega_0)}\frac{T_j''(\omega_0)}{T_j'(\omega_0)}, \quad c_s = 1
+
+and
+
+.. math::
+
+  \omega_0 = 1 + \frac{\epsilon}{s^2},\quad \omega_1 = \frac{T_s'(\omega_0)}{T_s''(\omega_0)},\quad \epsilon \approx \frac{2}{13}
+
+and where :math:`T_j(x)` is the Chebyshev polynomial.
+
 
 .. doxygenclass:: ponio::runge_kutta::chebyshev::explicit_rkc2
    :project: ponio
    :members:
+
+
+ROCK2 method
+~~~~~~~~~~~~
+
+.. doxygenclass:: ponio::runge_kutta::rock::rock2_impl
+   :project: ponio
+   :members:
+
+.. doxygenfunction:: ponio::runge_kutta::rock::rock2(eig_computer_t&&)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::rock::rock2()
+  :project: ponio
+
+
+ROCK4 method
+~~~~~~~~~~~~
+
+.. doxygenclass:: ponio::runge_kutta::rock::rock4_impl
+   :project: ponio
+   :members:
+
+.. doxygenfunction:: ponio::runge_kutta::rock::rock4(eig_computer_t&&)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::rock::rock4()
+  :project: ponio

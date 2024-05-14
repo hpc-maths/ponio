@@ -29,6 +29,12 @@ namespace ponio::runge_kutta::rock
             return std::abs( u );
         }
 
+        /**
+         * @brief compute norm 2 of a range
+         *
+         * @tparam state_t type of range
+         * @param u        range where compute \f$||u||_2 = \left(\sum_j u_j^2\right)^{\frac{1}{2}}\f$
+         */
         template <typename state_t>
             requires std::ranges::range<state_t>
         auto
@@ -43,8 +49,24 @@ namespace ponio::runge_kutta::rock
                 } ) );
         }
 
+        /**
+         * @brief functor of power method to estimate spectral radius of an operator \f$f\f$
+         *
+         */
         struct power_method
         {
+            /**
+             * @brief implementation of power method
+             *
+             * @tparam problem_t type of operator \f$f\f$
+             * @tparam value_t   type of coefficients
+             * @tparam state_t   type of state
+             * @param f          operator \f$f\f$
+             * @param tn         current time where estimate spectral radius
+             * @param un         current state where estimate spectral radius
+             * @param dt         current time step (unused in power method)
+             * @return value_t   estimation of spectral radius
+             */
             template <typename problem_t, typename value_t, typename state_t>
             value_t
             operator()( problem_t&& f, value_t tn, state_t& un, [[maybe_unused]] value_t dt )
@@ -122,11 +144,23 @@ namespace ponio::runge_kutta::rock
             }
         };
 
+        /**
+         * @brief computes degree of ROCK polynomial
+         *
+         * @tparam value_t     type of coefficient
+         * @tparam rock_coeff_ structure of ROCK coefficients (ROCK2 or ROCK4)
+         */
         template <typename value_t, typename rock_coeff_>
         struct degree_computer
         {
             using rock_coeff = rock_coeff_;
 
+            /**
+             * @brief computes optimal degree of ROCK polynomial
+             *
+             * @param mdeg                                 number of stages estimates by spectral radius
+             * @return std::pair<std::size_t, std::size_t> shift indexes to read ROCK coefficients
+             */
             static std::pair<std::size_t, std::size_t>
             optimal_degree( std::size_t& mdeg )
             {
@@ -155,6 +189,18 @@ namespace ponio::runge_kutta::rock
                 return { mz, mr };
             }
 
+            /**
+             * @brief computes number of stages needed to stabilized spectral radius of \f$f\f$
+             *
+             * @tparam eig_computer_t type of computer of spectral radius
+             * @tparam problem_t      type of operator \f$f\f$
+             * @tparam state_t        type of state
+             * @param eig_computer computer of spectral radius
+             * @param f            operator \f$f\f$
+             * @param tn           current time
+             * @param un           current state
+             * @param dt           current time step
+             */
             template <typename eig_computer_t, typename problem_t, typename state_t>
             static std::size_t
             compute_n_stages( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt, std::size_t s_min )
@@ -170,6 +216,20 @@ namespace ponio::runge_kutta::rock
                 return mdeg;
             }
 
+            /**
+             * @brief complete procedure to compute number of stages of ROCK method and shift indexes to read ROCK coefficients
+             *
+             * @tparam eig_computer_t type of computer of spectral radius
+             * @tparam problem_t      type of operator \f$f\f$
+             * @tparam state_t        type of state
+             * @param eig_computer computer of spectral radius
+             * @param f            operator \f$f\f$
+             * @param tn           current time
+             * @param un           current state
+             * @param dt           current time step
+             * @return std::tuple<std::size_t, std::size_t, std::size_t> tuple with number of stages of ROCK method, shift index for last
+             * stages, shift index of ROCK stages
+             */
             template <typename eig_computer_t, typename problem_t, typename state_t>
             static std::tuple<std::size_t, std::size_t, std::size_t>
             compute_n_stages_optimal_degree( eig_computer_t&& eig_computer,
@@ -211,13 +271,13 @@ namespace ponio::runge_kutta::rock
 
         eig_computer_t eig_computer;
 
-        rock2_impl()
-            : a_tol( 1e-4 )
-            , r_tol( 1e-4 )
-            , eig_computer( eig_computer_t() )
-        {
-        }
-
+        /**
+         * @brief Construct a new ROCK2 algorithm object
+         *
+         * @param _eig_computer estimator of spectral radius
+         * @param _a_tol        absolute tolerance (for adaptive time step method)
+         * @param _r_tol        relative tolerance (for adaptive time step method)
+         */
         rock2_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
             , r_tol( _r_tol )
@@ -225,6 +285,15 @@ namespace ponio::runge_kutta::rock
         {
         }
 
+        /**
+         * @brief computes an error for adaptive time step method
+         *
+         * @tparam state_t type of current state
+         * @param unp1     estimation of solution at time \f$t^{n+1} = t^n+\Delta t\f$
+         * @param un       solution at time \f$t^n\f$
+         * @param tmp      \f$-\Delta t \sigma(1 - \frac{\tau}{\sigma^2})(f(u_{s-1}) - f(u_{s-2}))\f$
+         * @return auto    estimation of error to compare to 1
+         */
         template <typename state_t>
         auto
         error( state_t&& unp1, state_t&& un, state_t&& tmp )
@@ -232,6 +301,7 @@ namespace ponio::runge_kutta::rock
             return std::abs( tmp / ( a_tol + r_tol * std::max( std::abs( unp1 ), std::abs( un ) ) ) );
         }
 
+        // same with ranges
         template <typename state_t>
             requires std::ranges::range<state_t>
         auto
@@ -250,6 +320,18 @@ namespace ponio::runge_kutta::rock
                               / static_cast<value_t>( std::size( unp1 ) ) );
         }
 
+        /**
+         * @brief iteration of ROCK2 method
+         *
+         * @tparam problem_t  type of \f$f\f$
+         * @tparam state_t    type of current state
+         * @tparam array_ki_t type of temporary stages (only 3 needed for ROCK2)
+         * @param f  operator \f$f\f$
+         * @param tn current time
+         * @param un current state
+         * @param G  array of temporary stages
+         * @param dt current time step
+         */
         template <typename problem_t, typename state_t, typename array_ki_t>
         inline std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
@@ -387,13 +469,13 @@ namespace ponio::runge_kutta::rock
 
         eig_computer_t eig_computer;
 
-        rock4_impl()
-            : a_tol( 1e-4 )
-            , r_tol( 1e-4 )
-            , eig_computer( eig_computer_t() )
-        {
-        }
-
+        /**
+         * @brief Construct a new ROCK4 algorithm object
+         *
+         * @param _eig_computer estimator of spectral radius
+         * @param _a_tol        absolute tolerance (for adaptive time step method)
+         * @param _r_tol        relative tolerance (for adaptive time step method)
+         */
         rock4_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
             , r_tol( _r_tol )
@@ -401,6 +483,14 @@ namespace ponio::runge_kutta::rock
         {
         }
 
+        /**
+         * @brief computes an error for adaptive time step method
+         *
+         * @tparam state_t type of current state
+         * @param unp1     estimation of solution at time \f$t^{n+1} = t^n+\Delta t\f$
+         * @param tmp      other estimation of solution at time \f$t^{n+1} = t^n+\Delta t\f$
+         * @return auto    estimation of error to compare to 1
+         */
         template <typename state_t>
         auto
         error( state_t const& unp1, state_t const& tmp )
@@ -408,6 +498,7 @@ namespace ponio::runge_kutta::rock
             return std::abs( tmp / ( a_tol + r_tol * std::abs( unp1 ) ) );
         }
 
+        // same with ranges
         template <typename state_t>
             requires std::ranges::range<state_t>
         auto
@@ -425,6 +516,18 @@ namespace ponio::runge_kutta::rock
                               / static_cast<value_t>( std::size( unp1 ) ) );
         }
 
+        /**
+         * @brief iteration of ROCK4 method
+         *
+         * @tparam problem_t  type of \f$f\f$
+         * @tparam state_t    type of current state
+         * @tparam array_ki_t type of temporary stages (only 6 needed for ROCK4)
+         * @param f  operator \f$f\f$
+         * @param tn current time
+         * @param un current state
+         * @param G  array of temporary stages
+         * @param dt current time step
+         */
         template <typename problem_t, typename state_t, typename array_ki_t>
         inline std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
