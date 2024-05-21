@@ -7,3 +7,4 @@ In this section we will present how to use ponio step by step, with tutorials.
    :caption: User Documentation
 
    lorenz
+   lotka_volterra
