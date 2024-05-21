@@ -20,6 +20,7 @@ cp -r ${EXAMPLES_dir}/img ${OUTPUT_dir}
 pandoc ${EXAMPLES_dir}/README.md -T rst --wrap=preserve --columns=512 -o ${OUTPUT_dir}/examples.rst
 
 # launch examples in doc
+echo ${CONDA_PREFIX}
 make -C ponio/doc/source/_static/cpp run
 
 # launch doxygen
