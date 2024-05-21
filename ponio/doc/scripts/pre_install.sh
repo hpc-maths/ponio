@@ -21,6 +21,8 @@ pandoc ${EXAMPLES_dir}/README.md -T rst --wrap=preserve --columns=512 -o ${OUTPU
 
 # launch examples in documentation
 pushd ponio/doc/source/_static/cpp
+mamba activate ponio-solver-doc
+mamba install make
 make run
 popd
 
