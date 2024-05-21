@@ -37,14 +37,9 @@ The file observer
 
 In this example we export data into a file with :cpp:class:`observer::file_observer` class. The ponio library provides this output for simple types and containers (thanks concepts). The output is formate as following
 
-.. code-block:: text
-
-  0 1 1  0.1
-  0.1 0.935643088500222 0.9967482825344086  0.1
-  0.2 0.8761711657044153 0.9873721234208231  0.1
-  0.3 0.8218115746656955 0.9725321355277284  0.1
-  0.4 0.772601128774527 0.9529677908342663  0.1
-  ...
+.. literalinclude:: ../_static/cpp/lotka_volterra_fobs.txt
+  :language: text
+  :lines: 1-5
 
 First column is the current time, the last one is the current time step, and between we get the multiple values of current state. Other observers provide by ponio have the same format.
 
