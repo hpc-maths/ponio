@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+#include <valarray>
+
 #include <ponio/observer.hpp>
+#include <ponio/problem.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 #include <ponio/splitting.hpp>
@@ -16,7 +19,7 @@ main()
 
     double sigma = 10., rho = 28., beta = 8. / 3.;
 
-    auto phi_0 = [=]( double /* t */, state_t& u ) -> state_t
+    auto phi_0 = [=]( double /* t */, state_t&& u ) -> state_t
     {
         double dt_u0 = sigma * u[1];
         double dt_u1 = rho * u[0];
@@ -24,7 +27,7 @@ main()
 
         return { dt_u0, dt_u1, dt_u2 };
     };
-    auto phi_1 = [=]( double /* t */, state_t& u ) -> state_t
+    auto phi_1 = [=]( double /* t */, state_t&& u ) -> state_t
     {
         double dt_u0 = -sigma * -u[0];
         double dt_u1 = -u[1];
@@ -32,7 +35,7 @@ main()
 
         return { dt_u0, dt_u1, dt_u2 };
     };
-    auto phi_2 = [=]( double /* t */, state_t& u ) -> state_t
+    auto phi_2 = [=]( double /* t */, state_t&& u ) -> state_t
     {
         double dt_u0 = 0;
         double dt_u1 = -u[0] * u[2];
@@ -51,7 +54,7 @@ main()
     ponio::time_span<double> const tspan = { 0., 20. };
     double const dt                      = 0.01;
 
-    ponio::solve( lorenz, strang, u0, tspan, dt, "lorenz_rk44.txt"_fobs );
+    ponio::solve( lorenz, strang, u0, tspan, dt, "lorenz_split.txt"_fobs );
 
     return 0;
 }

@@ -68,7 +68,7 @@ main()
         return { dt_x, dt_y };
     };
 
-    auto obs = LV_observer( "lv_2.txt", alpha, beta, delta, gamma );
+    auto obs = LV_observer( "lotka_volterra_uobs.txt", alpha, beta, delta, gamma );
 
     ponio::time_span<double> const t_span = { 0., 15. }; // begin and end time
     double const dt                       = 0.1;         // time step

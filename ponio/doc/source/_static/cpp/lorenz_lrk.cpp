@@ -6,6 +6,7 @@
 #include <unsupported/Eigen/MatrixFunctions>
 
 #include <ponio/observer.hpp>
+#include <ponio/problem.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
@@ -26,7 +27,7 @@ main()
         { rho,   -1,    0    },
         { 0,     0,     -beta}
     };
-    auto N = [=]( double, state_t& u ) -> state_t
+    auto N = [=]( double, state_t&& u ) -> state_t
     {
         return { 0., -u[0] * u[2], u[0] * u[1] };
     };
@@ -43,7 +44,7 @@ main()
     ponio::time_span<double> const tspan = { 0., 20. };
     double const dt                      = 0.01;
 
-    ponio::solve( lorenz, ponio::runge_kutta::lrk_44( m_exp ), u0, tspan, dt, "lorenz_rk44.txt"_fobs );
+    ponio::solve( lorenz, ponio::runge_kutta::lrk_44( m_exp ), u0, tspan, dt, "lorenz_lrk.txt"_fobs );
 
     return 0;
 }

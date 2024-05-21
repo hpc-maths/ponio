@@ -30,7 +30,7 @@ main()
         return { dt_x, dt_y };
     };
 
-    std::string filename = "lv_1.txt";
+    std::string filename = "lotka_volterra_fobs.txt";
     auto obs             = observer::file_observer( filename );
 
     ponio::time_span<double> const t_span = { 0., 15. }; // begin and end time

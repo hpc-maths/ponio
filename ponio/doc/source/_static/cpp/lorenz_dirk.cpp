@@ -5,9 +5,12 @@
 #include <Eigen/Dense>
 
 #include <ponio/observer.hpp>
+#include <ponio/problem.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
+
+#include <ponio/eigen_linear_algebra.hpp>
 
 int
 main()
@@ -20,7 +23,7 @@ main()
 
     double sigma = 10., rho = 28., beta = 8. / 3.;
 
-    auto f = [=]( double /* t */, state_t& u ) -> state_t
+    auto f = [=]( double /* t */, state_t const& u ) -> state_t
     {
         double dt_u0 = sigma * ( u[1] - u[0] );
         double dt_u1 = rho * u[0] - u[1] - u[0] * u[2];
@@ -28,7 +31,7 @@ main()
 
         return { dt_u0, dt_u1, dt_u2 };
     };
-    auto jac_f = [=]( double, state_t& u ) -> matrix_type
+    auto jac_f = [=]( double, state_t const& u ) -> matrix_type
     {
         return matrix_type( {
             {-sigma,      sigma, 0    },
@@ -43,7 +46,7 @@ main()
     ponio::time_span<double> const tspan = { 0., 20. };
     double const dt                      = 0.01;
 
-    ponio::solve( lorenz, ponio::runge_kutta::dirk34( m_exp ), u0, tspan, dt, "lorenz_dirk34.txt"_fobs );
+    ponio::solve( lorenz, ponio::runge_kutta::dirk34(), u0, tspan, dt, "lorenz_dirk.txt"_fobs );
 
     return 0;
 }

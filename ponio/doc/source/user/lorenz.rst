@@ -36,16 +36,16 @@ next we choose a data structure to store state :math:`u`, for the sake of simpli
 
 .. literalinclude:: ../_static/cpp/lorenz_rk.cpp
   :language: cpp
-  :lines: 14
-  :lineno-start: 14
+  :lines: 16
+  :lineno-start: 16
   :linenos:
 
 Now we can write :math:`f:t, u\mapsto f(t,u)` as a lambda function:
 
 .. literalinclude:: ../_static/cpp/lorenz_rk.cpp
   :language: cpp
-  :lines: 16-25
-  :lineno-start: 16
+  :lines: 18-27
+  :lineno-start: 18
   :linenos:
 
 we can also use a :cpp:class:`ponio::problem` object, a user-defined functor or a function. Next we define the initial condition to :math:`u_0 = (1, 1, 1)`, the initial and final time in a time span (here between :math:`0` and :math:`20`) the time step :math:`\Delta t = 0.01` and solve with all this parameters with a classical RK(4,4): :cpp:type:`ponio::runge_kutta::rk_44_t`.
@@ -56,8 +56,8 @@ we can also use a :cpp:class:`ponio::problem` object, a user-defined functor or 
 
 .. literalinclude:: ../_static/cpp/lorenz_rk.cpp
   :language: cpp
-  :lines: 27-32
-  :lineno-start: 27
+  :lines: 29-34
+  :lineno-start: 29
   :linenos:
   :emphasize-lines: 6
 
@@ -69,7 +69,7 @@ In the last line we call :cpp:func:`ponio::solve` function, with a :cpp:class:`o
 
   .. literalinclude:: ../_static/cpp/lorenz_rk.cpp
     :language: cpp
-    :lines: 13
+    :lines: 15
 
 The full example can be found in :download:`lorenz_rk.cpp <../_static/cpp/lorenz_rk.cpp>`.
 
@@ -114,16 +114,16 @@ A Lawson method needs to compute an exponential of the linear part, but the poni
 
 .. literalinclude:: ../_static/cpp/lorenz_lrk.cpp
   :language: cpp
-  :lines: 17-20
-  :lineno-start: 17
+  :lines: 18-21
+  :lineno-start: 18
   :linenos:
 
 Now we can write the linear part :math:`L` and non-linear part :math:`N:t, u\mapsto N(t,u)`, and store them into a :cpp:class:`ponio::lawson_problem`
 
 .. literalinclude:: ../_static/cpp/lorenz_lrk.cpp
   :language: cpp
-  :lines: 22-33
-  :lineno-start: 22
+  :lines: 23-34
+  :lineno-start: 23
   :linenos:
   :emphasize-lines: 12
 
@@ -133,8 +133,8 @@ We have to define the exponential function which takes a matrix and return a mat
 
 .. literalinclude:: ../_static/cpp/lorenz_lrk.cpp
   :language: cpp
-  :lines: 35-39
-  :lineno-start: 35
+  :lines: 36-40
+  :lineno-start: 36
   :linenos:
 
 We can also define your own exponential function if you know the analytic form of the result of :math:`\exp(\tau L)` with :math:`\tau = c_j\Delta t`.
@@ -143,8 +143,8 @@ The call of function :cpp:func:`ponio::solve` doesn't change
 
 .. literalinclude:: ../_static/cpp/lorenz_lrk.cpp
   :language: cpp
-  :lines: 41-46
-  :lineno-start: 41
+  :lines: 42-47
+  :lineno-start: 42
   :linenos:
 
 We use the Lawson method given by the underlying RK(4,4) method: :cpp:var:`ponio::runge_kutta::lrk_44_t`.
@@ -168,8 +168,8 @@ Because we will use linear algebra, we use `Eigen 3 <https://eigen.tuxfamily.org
 
 .. literalinclude:: ../_static/cpp/lorenz_dirk.cpp
   :language: cpp
-  :lines: 16-19
-  :lineno-start: 16
+  :lines: 19-22
+  :lineno-start: 19
   :linenos:
 
 Now we define the function and its Jacobian defined by
@@ -186,16 +186,16 @@ and create a :cpp:class:`ponio::implicit_problem`
 
 .. literalinclude:: ../_static/cpp/lorenz_dirk.cpp
   :language: cpp
-  :lines: 21-39
-  :lineno-start: 21
+  :lines: 24-42
+  :lineno-start: 24
   :linenos:
 
 Finally we can solve the problem with the same lines of previous solver
 
 .. literalinclude:: ../_static/cpp/lorenz_dirk.cpp
   :language: cpp
-  :lines: 41-46
-  :lineno-start: 41
+  :lines: 44-49
+  :lineno-start: 44
   :linenos:
 
 We use the DIRK(3, 4) method: :cpp:func:`ponio::runge_kutta::dirk34_t`.
@@ -255,24 +255,24 @@ Like other solver, first of all we define our state
 
 .. literalinclude:: ../_static/cpp/lorenz_split.cpp
   :language: cpp
-  :lines: 15
-  :lineno-start: 15
+  :lines: 18
+  :lineno-start: 18
   :linenos:
 
 Next we define the three function to represent :math:`\varphi^{[0]}`, :math:`\varphi^{[1]}`, :math:`\varphi^{[2]}`
 
 .. literalinclude:: ../_static/cpp/lorenz_split.cpp
   :language: cpp
-  :lines: 17-43
-  :lineno-start: 17
+  :lines: 20-46
+  :lineno-start: 20
   :linenos:
 
 Now we create a tuple of algorithms with :cpp:func:`ponio::splitting::lie::make_lie_tuple` or :cpp:func:`ponio::splitting::strang::make_strang_tuple` for respectively a Lie splitting method or Strang splitting method.
 
 .. literalinclude:: ../_static/cpp/lorenz_split.cpp
   :language: cpp
-  :lines: 45-47
-  :lineno-start: 45
+  :lines: 48-50
+  :lineno-start: 48
   :linenos:
 
 We have to select an algorithm for each step of splitting method, and specify a time step (smaller than splitting time step), in this case we choose 3 different Runge-Kutta methods of order 4 with 4 stages:
@@ -295,8 +295,8 @@ Finally we call :cpp:func:`ponio::solve` function, as previous solver
 
 .. literalinclude:: ../_static/cpp/lorenz_split.cpp
   :language: cpp
-  :lines: 49-54
-  :lineno-start: 49
+  :lines: 52-57
+  :lineno-start: 52
   :linenos:
 
 

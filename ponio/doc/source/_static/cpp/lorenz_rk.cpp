@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+#include <valarray>
+
 #include <ponio/observer.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
@@ -15,7 +17,7 @@ main()
 
     double sigma = 10., rho = 28., beta = 8. / 3.;
 
-    auto lorenz = [=]( double /* t */, state_t& u ) -> state_t
+    auto lorenz = [=]( double /* t */, state_t&& u ) -> state_t
     {
         double dt_u0 = sigma * ( u[1] - u[0] );
         double dt_u1 = rho * u[0] - u[1] - u[0] * u[2];
@@ -29,7 +31,7 @@ main()
     ponio::time_span<double> const tspan = { 0., 20. };
     double const dt                      = 0.01;
 
-    ponio::solve( lorenz, ponio::runge_kutta::rk_44(), u0, tspan, dt, "lorenz_rk44.txt"_fobs );
+    ponio::solve( lorenz, ponio::runge_kutta::rk_44(), u0, tspan, dt, "lorenz_rk.txt"_fobs );
 
     return 0;
 }
