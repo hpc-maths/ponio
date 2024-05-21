@@ -44,7 +44,7 @@ main()
 
     auto strang = ponio::splitting::make_strang_tuple( std::make_pair( ponio::runge_kutta::rk_44_38(), 0.01 ),
         std::make_pair( ponio::runge_kutta::rk_44(), 0.005 ),
-        std::make_pair( ponio::runge_kutta::rk_44(), 0.0005 ) );
+        std::make_pair( ponio::runge_kutta::rk_44_ralston(), 0.0005 ) );
 
     state_t const u0 = { 1., 1., 1. };
 

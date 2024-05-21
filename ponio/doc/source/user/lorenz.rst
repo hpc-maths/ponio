@@ -1,5 +1,5 @@
-Lorenz system
-=============
+Very first steps with Lorenz system
+===================================
 
 In this example, we present how to solve Lorenz system, step by step, with ponio library. The Lorenz system is the following
 
@@ -247,7 +247,7 @@ for the Lie splitting method, and
 
   u^{n+1} = \varphi_{\Delta t/2}^{[0]} \circ \varphi_{\Delta t/2}^{[1]} \circ \varphi_{\Delta t}^{[2]} \circ \varphi_{\Delta t/2}^{[1]} \circ \varphi_{\Delta t/2}^{[0]}(u^n)
 
-for the Strang splitting method, where :math:`\varphi_{\tau}^{[j]}` is a numerical approximation of the step :math:`j` between :math:`0` and :math:`\tau`. For more information see :doc:`splitting section <../api/splitting>`.
+for the Strang splitting method, where :math:`\varphi_{\tau}^{[j]}` is a numerical approximation of the step :math:`j` between :math:`0` and :math:`\tau` with a specific time step :math:`\delta t < \tau`. For more information see :doc:`splitting section <../api/splitting>`.
 
 For the sake of simplicity, we solve each step with a explicit Runge-Kutta method, but you can use any other solver (even a splitting method!).
 
@@ -275,11 +275,11 @@ Now we create a tuple of algorithms with :cpp:func:`ponio::splitting::lie::make_
   :lineno-start: 45
   :linenos:
 
-We have to select an algorithm for each step of splitting method, in this case we choose 3 different Runge-Kutta methods of order 4 with 4 stages:
+We have to select an algorithm for each step of splitting method, and specify a time step (smaller than splitting time step), in this case we choose 3 different Runge-Kutta methods of order 4 with 4 stages:
 
-* A first RK(4,4) 3/8 rule: :cpp:type:`ponio::runge_kutta::rk_44_38_t`
-* A second RK(4,4), classical one: :cpp:type:`ponio::runge_kutta::rk_44_t`
-* A third RK(4,4), from Ralston: :cpp:type:`ponio::runge_kutta::rk_44_ralston_t`
+* A first RK(4,4) 3/8 rule: :cpp:type:`ponio::runge_kutta::rk_44_38_t`, with a time step :math:`\delta t = 0.01` (equals to the splitting time step)
+* A second RK(4,4), classical one: :cpp:type:`ponio::runge_kutta::rk_44_t`, with a time step :math:`\delta t = 0.005`
+* A third RK(4,4), from Ralston: :cpp:type:`ponio::runge_kutta::rk_44_ralston_t`, with a time step :math:`\delta t = 0.0005`
 
 For each algorithm we specify a time step to solve each :math:`\varphi^{[i]}`.
 
