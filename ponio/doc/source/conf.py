@@ -220,6 +220,3 @@ read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
 if read_the_docs_build:
     print("launch doxygen")
     subprocess.call('cd ..; doxygen', shell=True)
-    print("print CONDA_PREFIX")
-    subprocess.call('cd ..; echo $CONDA_PREFIX', shell=True)
-    subprocess.call('cd _static/cpp; make run', shell=True)
