@@ -19,10 +19,14 @@ mkdir -p ${OUTPUT_dir}
 cp -r ${EXAMPLES_dir}/img ${OUTPUT_dir}
 pandoc ${EXAMPLES_dir}/README.md -T rst --wrap=preserve --columns=512 -o ${OUTPUT_dir}/examples.rst
 
-# launch examples in doc
+# launch examples in doc and plot figure
 echo "make run"
 export CONDA_PREFIX=$(dirname $(which doxygen))/..
 make -C ponio/doc/source/_static/cpp run
+
+pushd ponio/doc/source/_static/cpp
+python figures.py
+popd
 
 # launch doxygen
 pushd ponio/doc

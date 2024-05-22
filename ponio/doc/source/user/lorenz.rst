@@ -81,6 +81,31 @@ You can compile this example
 
 or with a cmake like in `ponio-gallery <https://github.com/hpc-maths/ponio-gallery>`_ repository.
 
+The output looks like this
+
+.. literalinclude:: ../_static/cpp/lorenz_rk.txt
+    :language: text
+    :lines: 1-5
+
+with in the first column the current time, the last one the current time step and between all compostant of current state. We can plot it using NumPy and Matplotlib with the following example script
+
+.. code-block:: python
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    data = np.loadtxt("lorenz_rk.txt")
+    ax = plt.figure().add_subplot(projection='3d')
+    x, y, z = data[:,1], data[:, 2], data[:, 3]
+    ax.plot( x, y, z )
+
+
+.. figure:: ../_static/cpp/lorenz_rk.png
+    :scale: 50 %
+    :alt: Lorenz attractor solved by RK(4, 4) method
+
+    Lorenz attractor solved by RK(4, 4) method
+
 
 ----
 
@@ -301,3 +326,10 @@ Finally we call :cpp:func:`ponio::solve` function, as previous solver
 
 
 The full example can be found in :download:`lorenz_split.cpp <../_static/cpp/lorenz_split.cpp>`.
+
+
+.. figure:: ../_static/cpp/lorenz.png
+    :scale: 75 %
+    :alt: Lorenz attractor
+
+    Lorenz attractor solved by each presented methods

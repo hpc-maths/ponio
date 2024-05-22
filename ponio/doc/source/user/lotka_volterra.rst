@@ -10,7 +10,7 @@ In this example, we present what can we do with :doc:`observers <../api/observer
     \frac{\mathrm{d}y}{\mathrm{d}t} = \delta xy - \gamma y\\
   \end{cases}
 
-with :math:`\alpha = \frac{2}{3}`, :math:`\beta = \frac{4}{3}` and :math:`\delta = \gamma = 1`. Initial condition :math:`(x, y)(t=0) = (x_0, x_0)`, and we will take multiple values of :math:`x_0`.
+with :math:`\alpha = \frac{2}{3}`, :math:`\beta = \frac{4}{3}` and :math:`\delta = \gamma = 1`. Initial condition :math:`(x, y)(t=0) = (x_0, x_0)`, and :math:`x_0 = 1`.
 
 We write the problem like
 
@@ -53,10 +53,26 @@ The :cpp:class:`observer::file_observer` class can be build with a `std::string 
 
 .. note::
 
+  If name is fixed at compile time you can use literal :code:`_fobs` by
+
+  .. code-block:: cpp
+
+    using namespace observer;
+
+    auto obs = "output.txt"_fobs;
+
+.. note::
+
   Data are not flushed into the output file, you have to wait the flush of the buffer.
 
 The full example can be found in :download:`lotka_volterra_fobs.cpp <../_static/cpp/lotka_volterra_fobs.cpp>`.
 
+
+.. figure:: ../_static/cpp/lotka_volterra_fobs.png
+    :width: 500 px
+    :alt: Solution in phase space (x, y)
+
+    Solution in phase space :math:`(x, y)`
 
 
 The :code:`cout` observer
@@ -76,6 +92,12 @@ In this example we export data into the standard output with :cpp:class:`observe
 
 The full example can be found in :download:`lotka_volterra_cobs.cpp <../_static/cpp/lotka_volterra_cobs.cpp>`.
 
+
+.. figure:: ../_static/cpp/lotka_volterra_cobs.png
+    :width: 500 px
+    :alt: Solution in phase space (x, y)
+
+    Solution in phase space :math:`(x, y)`
 
 
 The stream observer
@@ -101,6 +123,12 @@ Next we get all informations into the observer or our buffer.
 
 The full example can be found in :download:`lotka_volterra_sobs.cpp <../_static/cpp/lotka_volterra_sobs.cpp>`.
 
+
+.. figure:: ../_static/cpp/lotka_volterra_sobs.png
+    :width: 500 px
+    :alt: Solution in phase space (x, y)
+
+    Solution in phase space :math:`(x, y)`
 
 
 The user-defined observer
@@ -134,4 +162,26 @@ Now we just have to build an instance of this class
   :lineno-start: 71
   :linenos:
 
+The output of this observer looks like this
+
+
+.. literalinclude:: ../_static/cpp/lotka_volterra_uobs.txt
+  :language: text
+  :lines: 1-5
+
 The full example can be found in :download:`lotka_volterra_uobs.cpp <../_static/cpp/lotka_volterra_uobs.cpp>`.
+
+.. figure:: ../_static/cpp/lotka_volterra_uobs.png
+    :width: 500 px
+    :alt: Solution in phase space (x, y)
+
+    Solution in phase space :math:`(x, y)`
+
+
+We can compute from previous simulation the invariant :math:`V`, or display it with out user-defined observer. We forget to force precision in the last output, so we get steps in the output.
+
+.. figure:: ../_static/cpp/lotka_volterra.png
+    :width: 500 px
+    :alt: Relative error of invariant V
+
+    Relative error of invariant :math:`V`
