@@ -29,7 +29,7 @@ main()
     };
     auto phi_1 = [=]( double /* t */, state_t&& u ) -> state_t
     {
-        double dt_u0 = -sigma * -u[0];
+        double dt_u0 = -sigma * u[0];
         double dt_u1 = -u[1];
         double dt_u2 = -beta * u[2];
 
