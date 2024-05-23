@@ -14,6 +14,9 @@ lorenz_%.out: lorenz_%.cpp
 lotka_volterra_%.out: lotka_volterra_%.cpp
 	${CXX} -std=c++20 -I$(PONIO_include) $< -o $@
 
+curtiss_hirschfelder_%.out: curtiss_hirschfelder_%.cpp
+	${CXX} -std=c++20 -I$(PONIO_include) $< -o $@
+
 run: $(RUN)
 
 %.txt: %.out

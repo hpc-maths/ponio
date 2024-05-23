@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+### Lorenz ##########################################################
+
 
 def plot_lorenz(filename: str, output: str):
     data = np.loadtxt(filename)
@@ -78,6 +80,8 @@ def lorenz_fig():
     }
     plot_multi_lorenz(methods, "lorenz.png")
 
+### Lotka-Voleterra #################################################
+
 
 def plot_lv_obs(filename: str, output: str):
     data = np.loadtxt(filename)
@@ -125,6 +129,30 @@ def lotka_volterra_fig():
     }
     plot_lv_V(methods, "lotka_volterra.png", [True, True, True, False])
 
+### Curtiss-Hirschfelder ############################################
+
+
+def plot_ch(filename: str, output: str):
+    data = np.loadtxt(filename)
+    t, y, dt = data[:, 0], data[:, 1], data[:, 2]
+
+    fig, axs = plt.subplots(2)
+    axs[0].plot(t, y)
+    axs[1].plot(t, dt)
+
+    axs[0].set_ylabel("$y$")
+    axs[1].set_ylabel("$\\Delta t$")
+    axs[1].set_xlabel('time')
+
+    plt.savefig(output)
+
+
+def curtiss_hirschfelder_fig():
+    plot_ch("curtiss_hirschfelder_solve.txt", "curtiss_hirschfelder_solve.png")
+    plot_ch("curtiss_hirschfelder_while.txt", "curtiss_hirschfelder_while.png")
+    plot_ch("curtiss_hirschfelder_for.txt", "curtiss_hirschfelder_for.png")
+
 
 lorenz_fig()
 lotka_volterra_fig()
+curtiss_hirschfelder_fig()
