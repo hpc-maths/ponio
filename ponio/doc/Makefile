@@ -11,6 +11,7 @@ CPPDIR        = $(SOURCEDIR)/_static/cpp
 # Examples of documentation
 examples:
 	$(MAKE) -C $(CPPDIR) run
+	cd $(CPPDIR) && python figures.py
 
 # Put it first so that "make" without argument is like "make help".
 help:
