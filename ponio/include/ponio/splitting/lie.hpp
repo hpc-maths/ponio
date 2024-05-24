@@ -122,11 +122,7 @@ namespace ponio::splitting::lie
     {
         static constexpr std::size_t order        = 1;
         static constexpr bool is_splitting_method = true;
-<<<<<<< HEAD
-        static constexpr std::string_view id      = "Lie";
-=======
-        static constexpr std::string_view id = "lie";
->>>>>>> 1decce5 (uniform id of methods)
+        static constexpr std::string_view id      = "lie";
 
         std::tuple<Algorithms_t...> algos;
         std::array<value_t, sizeof...( Algorithms_t )> time_steps;

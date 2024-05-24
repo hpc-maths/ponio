@@ -149,11 +149,7 @@ namespace ponio::splitting::strang
     {
         static constexpr std::size_t order        = 2;
         static constexpr bool is_splitting_method = true;
-<<<<<<< HEAD
-        static constexpr std::string_view id      = "Strang";
-=======
-        static constexpr std::string_view id = "strang";
->>>>>>> 1decce5 (uniform id of methods)
+        static constexpr std::string_view id      = "strang";
 
         std::tuple<Algorithms_t...> algos;
         std::array<value_t, sizeof...( Algorithms_t )> time_steps;
