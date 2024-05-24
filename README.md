@@ -135,10 +135,8 @@ More examples can be found in [notebooks](https://github.com/hpc-maths/ponio/tre
 
 ### From conda
 
->  **SOON**
-
 ```
-  conda install ponio
+  conda install conda-forge::ponio
 ```
 
 ### From source
