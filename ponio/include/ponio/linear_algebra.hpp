@@ -90,3 +90,15 @@ namespace ponio::linear_algebra
     };
 
 } // namespace ponio::linear_algebra
+
+namespace ponio::shampine_trick
+{
+    template <typename state_t>
+    struct shampine_trick
+    {
+        template <typename>
+        static constexpr bool dependent_false = false;
+
+        static_assert( dependent_false<state_t>, "non implemented Shampine's trick structure for this type" );
+    };
+} // namespace ponio::shampine_trick

@@ -2,7 +2,7 @@ set(demos arenstorf brownian brusselator brusselator_dirk exp heat heat_rock pen
 set(demos_eigen brusselator_dirk lorenz_tuto)
 set(demos_cli11 brownian lotka_volterra)
 
-set(demos_samurai heat_samurai)
+set(demos_samurai heat_samurai nagumo_pirock belousov_zhabotinsky_pirock)
 
 if(BUILD_SAMURAI_DEMOS)
     list(APPEND demos ${demos_samurai})

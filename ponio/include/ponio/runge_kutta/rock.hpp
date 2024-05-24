@@ -136,21 +136,31 @@ namespace ponio::runge_kutta::rock
                 std::size_t mz = 1;
                 std::size_t mr = 1;
 
-                std::size_t iter = 1;
-                while ( iter < rock_coeff::ms.size() + 1 && rock_coeff::ms[iter - 1] / mdeg <= 1 )
+                if ( mdeg < 2 )
                 {
-                    mr = mr + rock_coeff::ms[iter - 1] * 2 - 1;
-                    ++iter;
+                    return { mz, mr };
                 }
-                mdeg = rock_coeff::ms[iter - 1];
-                mz   = iter;
+
+                std::size_t i = 1;
+                for ( auto ms_i : rock_coeff::ms )
+                {
+                    if ( ms_i / mdeg >= 1 )
+                    {
+                        mdeg = rock_coeff::ms[i - 1];
+                        mz   = i;
+                        break;
+                    }
+                    mr = mr + rock_coeff::ms[i - 1] * 2 - 1;
+
+                    ++i;
+                }
 
                 return { mz, mr };
             }
 
             template <typename eig_computer_t, typename problem_t, typename state_t>
             static std::size_t
-            compute_n_stages( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt )
+            compute_n_stages( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt, std::size_t s_min )
             {
                 double eigmax = eig_computer( f, tn, un, dt );
                 auto mdeg     = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
@@ -159,15 +169,20 @@ namespace ponio::runge_kutta::rock
                     mdeg = 200;
                     dt   = 0.8 * ( static_cast<double>( mdeg * mdeg ) * 0.811 - 1.5 ) / eigmax;
                 }
-                mdeg = std::max( mdeg, static_cast<std::size_t>( 3 ) ) - 2;
+                mdeg = std::max( mdeg, s_min ) - 2;
                 return mdeg;
             }
 
             template <typename eig_computer_t, typename problem_t, typename state_t>
             static std::tuple<std::size_t, std::size_t, std::size_t>
-            compute_n_stages_optimal_degree( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt )
+            compute_n_stages_optimal_degree( eig_computer_t&& eig_computer,
+                problem_t& f,
+                value_t tn,
+                state_t& un,
+                value_t& dt,
+                std::size_t s_min = 3 )
             {
-                std::size_t mdeg = compute_n_stages( std::forward<eig_computer_t>( eig_computer ), f, tn, un, dt );
+                std::size_t mdeg = compute_n_stages( std::forward<eig_computer_t>( eig_computer ), f, tn, un, dt, s_min );
                 auto [mz, mr]    = optimal_degree( mdeg );
 
                 return { mdeg, mz, mr };
@@ -188,6 +203,8 @@ namespace ponio::runge_kutta::rock
         static constexpr bool is_embedded      = _is_embedded;
         static constexpr std::size_t N_stages  = stages::dynamic;
         static constexpr std::size_t N_storage = 3;
+        static constexpr std::size_t order     = 2;
+        static constexpr std::string_view id   = "ROCK2";
 
         using rock_coeff      = rock2_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
@@ -196,6 +213,13 @@ namespace ponio::runge_kutta::rock
         value_t r_tol; // relative tolerance
 
         eig_computer_t eig_computer;
+
+        rock2_impl()
+            : a_tol( 1e-4 )
+            , r_tol( 1e-4 )
+            , eig_computer( eig_computer_t() )
+        {
+        }
 
         rock2_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
@@ -254,7 +278,7 @@ namespace ponio::runge_kutta::rock
             {
                 uj = ujm1;
             }
-
+            // std::cout << "\nmdeg = " << mdeg << "\n";
             for ( std::size_t j = 2; j < mdeg + 1; ++j )
             {
                 value_t const mu    = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 1 - 1];
@@ -355,6 +379,8 @@ namespace ponio::runge_kutta::rock
         static constexpr bool is_embedded      = _is_embedded;
         static constexpr std::size_t N_stages  = stages::dynamic;
         static constexpr std::size_t N_storage = 6;
+        static constexpr std::size_t order     = 4;
+        static constexpr std::string_view id   = "ROCK4";
 
         using rock_coeff      = rock4_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
@@ -363,6 +389,13 @@ namespace ponio::runge_kutta::rock
         value_t r_tol; // relative tolerance
 
         eig_computer_t eig_computer;
+
+        rock4_impl()
+            : a_tol( 1e-4 )
+            , r_tol( 1e-4 )
+            , eig_computer( eig_computer_t() )
+        {
+        }
 
         rock4_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )

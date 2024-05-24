@@ -155,6 +155,83 @@ namespace ponio
         return implicit_operator_problem<Callable1_t, Callable2_t>( std::forward<Callable1_t>( f ), std::forward<Callable2_t>( f_t ) );
     }
 
+    // --- IMEX_PROBLEM -----------------------------------------------------------
+    /** @class imex_problem
+     *  define a problem with its explicit and implicit part
+     *  @tparam Callable_explicit_t type of callable object (or function) that represents the explicit part of the problem
+     *  @tparam Implicit_problem_t  type of implicit problem (by operator or jacobian) that represents the implict part of the problem
+     */
+    template <typename Callable_explicit_t, typename Implicit_problem_t>
+    struct imex_problem
+    {
+        Callable_explicit_t explicit_part;
+        Implicit_problem_t implicit_part;
+
+        imex_problem( Callable_explicit_t&& f_explicit, Implicit_problem_t&& pb_implicit );
+
+        template <typename state_t, typename value_t>
+        state_t
+        operator()( value_t t, state_t&& u )
+        {
+            return explicit_part( t, std::forward<state_t>( u ) ) + implicit_part( t, std::forward<state_t>( u ) );
+        }
+
+        template <typename state_t, typename value_t>
+        state_t
+        operator()( value_t t, state_t& u )
+        {
+            return explicit_part( t, u ) + implicit_part( t, u );
+        }
+    };
+
+    /**
+     * @brief Construct a new imex_problem<Callable explicit t, Implicit problem t>::imex_problem object
+     *
+     * @tparam Callable_explicit_t
+     * @tparam Implicit_problem_t
+     * @param f_explicit  explicit part of problem
+     * @param pb_implicit implicit part of problem (a implicit_operator_problem or a implicit_problem)
+     */
+    template <typename Callable_explicit_t, typename Implicit_problem_t>
+    inline imex_problem<Callable_explicit_t, Implicit_problem_t>::imex_problem( Callable_explicit_t&& f_explicit,
+        Implicit_problem_t&& pb_implicit )
+        : explicit_part( f_explicit )
+        , implicit_part( pb_implicit )
+    {
+    }
+
+    // cppcheck-suppress-begin unusedFunction
+
+    /**
+     * @brief factory of imex_problem from an explicit part and a implicit part which is a implicit_operator_problem
+     *
+     * @tparam Callable_explicit_t
+     * @tparam Callable_implicit_t
+     * @tparam Callable_implicit_op_t
+     * @param f explicit part
+     * @param g implicit part
+     * @param g_t operator on the implicit part
+     */
+    template <typename Callable_explicit_t, typename Callable_implicit_t, typename Callable_implicit_op_t>
+    auto
+    make_imex_operator_problem( Callable_explicit_t&& f, Callable_implicit_t&& g, Callable_implicit_op_t&& g_t )
+    {
+        return imex_problem<Callable_explicit_t, implicit_operator_problem<Callable_implicit_t, Callable_implicit_op_t>>(
+            std::forward<Callable_explicit_t>( f ),
+            make_implicit_operator_problem( std::forward<Callable_implicit_t>( g ), std::forward<Callable_implicit_op_t>( g_t ) ) );
+    }
+
+    template <typename Callable_explicit_t, typename Callable_implicit_t, typename Callable_implicit_jac_t>
+    auto
+    make_imex_jacobian_problem( Callable_explicit_t&& f, Callable_implicit_t&& g, Callable_implicit_jac_t&& dg )
+    {
+        return imex_problem<Callable_explicit_t, implicit_problem<Callable_implicit_t, Callable_implicit_jac_t>>(
+            std::forward<Callable_explicit_t>( f ),
+            make_implicit_problem( std::forward<Callable_implicit_t>( g ), std::forward<Callable_implicit_jac_t>( dg ) ) );
+    }
+
+    // cppcheck-suppress-end unusedFunction
+
     // --- LAWSON_PROBLEM ----------------------------------------------------------
     /** @class lawson_problem
      *  define a problem with a linear part and non-linear part
@@ -232,13 +309,25 @@ namespace ponio
         state_t
         _sum_components_impl( value_t t, state_t&& u, std::index_sequence<Is...> );
 
+        template <typename value_t, typename state_t, std::size_t... Is>
+        state_t
+        _sum_components_impl( value_t t, state_t& u, std::index_sequence<Is...> );
+
         template <typename value_t, typename state_t>
         state_t
         operator()( value_t t, state_t&& u );
 
+        template <typename value_t, typename state_t>
+        state_t
+        operator()( value_t t, state_t& u );
+
         template <std::size_t Index, typename value_t, typename state_t>
         state_t
         call( value_t t, state_t&& u );
+
+        template <std::size_t Index, typename value_t, typename state_t>
+        state_t
+        call( value_t t, state_t& u );
     };
 
     /**
@@ -266,6 +355,14 @@ namespace ponio
         return ( call<Is>( t, std::forward<state_t>( u ) ) + ... );
     }
 
+    template <typename... Callables_t>
+    template <typename value_t, typename state_t, std::size_t... Is>
+    inline state_t
+    problem<Callables_t...>::_sum_components_impl( value_t t, state_t& u, std::index_sequence<Is...> )
+    {
+        return ( call<Is>( t, u ) + ... );
+    }
+
     /**
      * call operator
      * @param t time \f$t\f$
@@ -276,6 +373,14 @@ namespace ponio
     template <typename value_t, typename state_t>
     inline state_t
     problem<Callables_t...>::operator()( value_t t, state_t&& u )
+    {
+        return _sum_components_impl( t, std::forward<state_t>( u ), std::make_index_sequence<size>{} );
+    }
+
+    template <typename... Callables_t>
+    template <typename value_t, typename state_t>
+    inline state_t
+    problem<Callables_t...>::operator()( value_t t, state_t& u )
     {
         return _sum_components_impl( t, u, std::make_index_sequence<size>{} );
     }
@@ -293,6 +398,14 @@ namespace ponio
     problem<Callables_t...>::call( value_t t, state_t&& u )
     {
         return std::get<Index>( system )( t, std::forward<state_t>( u ) );
+    }
+
+    template <typename... Callables_t>
+    template <std::size_t Index, typename value_t, typename state_t>
+    inline state_t
+    problem<Callables_t...>::call( value_t t, state_t& u )
+    {
+        return std::get<Index>( system )( t, u );
     }
 
     /**
