@@ -20,7 +20,7 @@ The following table gives an overview over all examples.
 | [Lotka-Volterra model](#lotka-volterra-model)                                                       | The classical predator–prey model of Lotka-Volterra                | [lotka_volterra.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lotka_volterra.cpp)                         |
 | [Nagumo equation](#nagumo-equation)                                                                 | Example of a traveling wave                                        | [nagumo.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/nagumo.cpp)                                         |
 | [Pendulum equation](#pendulum-equation)                                                             | The classical pendulum equation                                    | [pendulum.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/pendulum.cpp)                                     |
-| [Belousov Zhabotinsky](#belouzov-zhabotinsky)                                                       | Solves Belousov-Zhabotinsky equations with PIROCK method           | [belousov_zhabotinsky_pirock.cpp](belousov_zhabotinsky_pirock.cpp)                                                           |
+| [Belousov Zhabotinsky](#belousov-zhabotinsky)                                                       | Solves Belousov-Zhabotinsky equations with PIROCK method           | [belousov_zhabotinsky_pirock.cpp](belousov_zhabotinsky_pirock.cpp)                                                           |
 
 To lunch examples, in the main directory of ponio run:
 
@@ -553,9 +553,9 @@ $$
 
 In this example we coupling the mesh refinement library [samurai](https://github.com/hpc-maths/samurai) with ponio, and the system is solved by PIROCK method.
 
-| Belousov Zhabotinsky system solved by PIROCK method                                        |
-|--------------------------------------------------------------------------------------------|
-| ![Belousov Zhabotinsky system solved by PIROCK method](img/16-belousov-zhabotinsky_01.png) |
+| Belousov Zhabotinsky system solved by PIROCK method                                            |
+|------------------------------------------------------------------------------------------------|
+| ![Belousov Zhabotinsky system solved by PIROCK method](img/belousov_zhabotinsky_pirock/01.png) |
 
 All example in [`belousov_zhabotinsky_pirock.cpp`](belousov_zhabotinsky_pirock.cpp), and run
 
