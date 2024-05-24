@@ -273,9 +273,7 @@ main( int argc, char** argv )
 
     // time loop  -------------------------------------------------------------
     auto sol_range = ponio::make_solver_range( pb,
-        ponio::runge_kutta::pirock::pirock<1>( ponio::runge_kutta::pirock::beta_0<double>(),
-            eigmax_computer,
-            ponio::shampine_trick::shampine_trick<decltype( u_ini )>() ),
+        ponio::runge_kutta::pirock::pirock<1>( ponio::runge_kutta::pirock::beta_0<double>(), eigmax_computer ),
         u_ini,
         t_span,
         dt );

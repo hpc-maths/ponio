@@ -101,11 +101,11 @@ Now you are ready to solve your problem with an explicit Runge-Kutta method, see
   ponio::solver( lorenz_rhs, ponio::runge_kutta::rk_44(), u_ini, t_span, dt, obs);
 ```
 
-The whole example can be found in [here](https://github.com/hpc-maths/ponio/blob/main/ponio/demos/lorenz.cpp).
+The whole example can be found in [here](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz.cpp).
 
 ### More examples
 
-More examples can be found in [notebooks](https://github.com/hpc-maths/ponio/tree/main/ponio/notebooks) or [demos](https://github.com/hpc-maths/ponio/tree/main/ponio/demos) directories.
+More examples can be found in [notebooks](https://github.com/hpc-maths/ponio/tree/main/ponio/notebooks) or [examples](https://github.com/hpc-maths/ponio/tree/main/ponio/examples) directories.
 
 ## Features
 
@@ -142,7 +142,7 @@ More examples can be found in [notebooks](https://github.com/hpc-maths/ponio/tre
 
 * With [pixi](https://pixi.sh/latest/)
 
-This method will install all dependencies for all demos.
+This method will install all dependencies for all examples.
 
 ```
   pixi install
@@ -162,7 +162,7 @@ Get only sources to run a project
 
 * [Documentation](https://ponio.readthedocs.io/en/latest/index.html)
 * [Github repository](https://github.com/hpc-maths/ponio)
-* [Demos](https://github.com/hpc-maths/ponio/tree/main/ponio/demos)
+* [Examples](https://github.com/hpc-maths/ponio/tree/main/ponio/examples)
 * [Notebooks examples](https://github.com/hpc-maths/ponio/tree/main/ponio/notebooks)
 * [List of methods and their analysis](http://jmassot.perso.math.cnrs.fr/ponio/) (personal webpage of main developer)
 

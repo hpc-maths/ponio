@@ -57,14 +57,51 @@ data = sorted([read_file(file) for file in glob.glob(
     os.path.join(data_dir, "u_ite_*.h5"))], key=lambda tmp: tmp[-1])
 
 
-fig, (ax_a, ax_b, ax_c, ax_level) = plt.subplots(4)
-
-
 def a_eq(b, c):
     f = 3.0
     q = 2e-4
     return (f*c)/(q+b)
 
+
+fig, (ax_a, ax_b, ax_c, ax_level) = plt.subplots(4)
+
+t_ini, t_end = 0., 1.
+dt = (t_end - t_ini)/2000.
+
+for i, idx in enumerate(range(0, len(data), int(len(data)/9))):
+    a = data[idx][1][0]
+    b = data[idx][1][1]
+    c = data[idx][1][2]
+    x = data[idx][0]
+
+    ax_a.plot(x, a, label=f"$t^n = {idx*dt:.3f}$", color=f"C{i}")
+    ax_a.plot(x, a_eq(b, c), "--", color=f"C{i}")
+    ax_b.plot(x, b, color=f"C{i}")
+    ax_c.plot(x, c, color=f"C{i}")
+
+    ax_level.plot(data[idx][0], data[idx][2], color=f"C{i}")
+
+ax_a.get_xaxis().set_ticklabels([])
+ax_b.get_xaxis().set_ticklabels([])
+ax_c.get_xaxis().set_ticklabels([])
+
+ax_a.set_ylabel("a")
+ax_b.set_ylabel("b")
+ax_c.set_ylabel("c")
+ax_level.set_ylabel("level")
+
+ax_a.set_ylim(-50, 900)
+ax_b.set_ylim(-1e-2, 0.9)
+ax_c.set_ylim(-1e-3, 0.12)
+
+ax_a.legend(loc="lower left", bbox_to_anchor=(
+    0.01, 1.1), ncol=5, fontsize='x-small')
+
+plt.savefig("16-belousov-zhabotinsky_01.png", dpi=200)
+
+plt.show()
+
+fig, (ax_a, ax_b, ax_c, ax_level) = plt.subplots(4)
 
 a = data[0][1][0]
 b = data[0][1][1]
@@ -85,7 +122,7 @@ ax_b.set_ylabel("b")
 ax_c.set_ylabel("c")
 ax_level.set_ylabel("level")
 
-ax_a.set_ylim(-10, 800)
+ax_a.set_ylim(-50, 850)
 ax_b.set_ylim(-1e-2, 0.8)
 ax_c.set_ylim(-1e-3, 0.12)
 
@@ -120,10 +157,5 @@ N_frames = len(data)
 
 ani = animation.FuncAnimation(
     fig=fig, func=update, frames=N_frames, interval=1)
-
-print("save...", end="")
-# ani.save(filename=os.path.join(data_dir, "01.gif"), writer="pillow")
-print("\rsave ! ")
-
 
 plt.show()

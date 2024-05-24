@@ -130,7 +130,7 @@ if (BUILD_TESTS)
 endif()
 
 if (BUILD_DEMOS)
-  add_subdirectory(ponio/demos)
+  add_subdirectory(ponio/examples)
 endif()
 
 # package the project
