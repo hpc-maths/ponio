@@ -151,7 +151,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/readline-8.2-h8228510_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/rhash-1.4.4-hd590300_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/rpds-py-0.17.1-py311h46250e7_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/samurai-0.9.0-h9e63375_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/samurai-0.10.0-h9e63375_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scalapack-2.2.0-hd931219_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.12.0-py311h64a7726_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scotch-7.0.4-h23d43cc_1.conda
@@ -514,7 +514,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/readline-8.2-h9e318b2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/rhash-1.4.4-h0dc2134_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/rpds-py-0.17.1-py311h5e0f0e4_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/samurai-0.9.0-h5f51523_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/samurai-0.10.0-hfa9c4bb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/scalapack-2.2.0-hc746714_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-64/scipy-1.12.0-py311h86d0cd9_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/scotch-7.0.4-h40132e6_1.conda
@@ -745,7 +745,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/readline-8.2-h92ec313_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/rhash-1.4.4-hb547adb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/rpds-py-0.17.1-py311h94f323b_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/samurai-0.9.0-ha40e6a3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/samurai-0.10.0-h9d109c9_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scalapack-2.2.0-h515df86_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scipy-1.12.0-py311h4f9446f_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scotch-7.0.4-hc1c4572_1.conda
@@ -968,7 +968,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/pyzmq-25.1.2-py312h1ac6f91_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/qt-main-5.15.8-h9e85ed6_18.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/rpds-py-0.17.1-py312hfccd98a_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/samurai-0.9.0-h281f53c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/samurai-0.10.0-h281f53c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.12.0-py312h8753938_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/sip-6.7.12-py312h53d5487_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/tbb-2021.11.0-h91493d7_1.conda
@@ -10296,15 +10296,15 @@ packages:
   timestamp: 1705160842347
 - kind: conda
   name: samurai
-  version: 0.9.0
+  version: 0.10.0
   build: h281f53c_0
   subdir: win-64
-  url: https://conda.anaconda.org/conda-forge/win-64/samurai-0.9.0-h281f53c_0.conda
-  sha256: 1ee8a31614c207e914af35b3cb6a74d3a9cd15f167beb26a127b89bb7daeca8f
-  md5: d51bc3579ba600c37b8922d7414f3ec1
+  url: https://conda.anaconda.org/conda-forge/win-64/samurai-0.10.0-h281f53c_0.conda
+  sha256: 403758a578a5459cb20c50e2aa2420ebabacacb0d47b0af3e4246177fe058010
+  md5: c954f7c6e5d8c4c27245c1502fb25859
   depends:
   - cli11
-  - fmt >=10.1.1,<11.0a0
+  - fmt >=10.2.1,<11.0a0
   - highfive
   - pugixml >=1.14,<1.15.0a0
   - ucrt >=10.0.20348.0
@@ -10313,39 +10313,38 @@ packages:
   - xtensor
   license: BSD-3-Clause
   license_family: BSD
-  size: 114238
-  timestamp: 1700112332822
+  size: 127211
+  timestamp: 1709210973141
 - kind: conda
   name: samurai
-  version: 0.9.0
-  build: h5f51523_0
-  subdir: osx-64
-  url: https://conda.anaconda.org/conda-forge/osx-64/samurai-0.9.0-h5f51523_0.conda
-  sha256: 4893a5dae7bffffeaf1979c3a7feab67c76fb59902e759b5f81025823bd9aaf2
-  md5: 1e8f07e0eb3ff05a84a45c7a76a7b561
+  version: 0.10.0
+  build: h9d109c9_0
+  subdir: osx-arm64
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/samurai-0.10.0-h9d109c9_0.conda
+  sha256: f5c6d521e3a682c785b05b19cce98167a127288fc65f911a440e2cf7daf7f23d
+  md5: 5880c3532c2f57b4fa25c1af20b6541b
   depends:
-  - __osx >=10.9
   - cli11
-  - fmt >=10.1.1,<11.0a0
+  - fmt >=10.2.1,<11.0a0
   - highfive
-  - libcxx >=16.0.6
+  - libcxx >=16
   - pugixml >=1.14,<1.15.0a0
   - xtensor
   license: BSD-3-Clause
   license_family: BSD
-  size: 114126
-  timestamp: 1700112294137
+  size: 127367
+  timestamp: 1709211173587
 - kind: conda
   name: samurai
-  version: 0.9.0
+  version: 0.10.0
   build: h9e63375_0
   subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/samurai-0.9.0-h9e63375_0.conda
-  sha256: 7c57f551147cc2f77ba628d49dbec6fe0c922a166d0385b967ad8f6fd9d49412
-  md5: 52f25e69467c6ded45cc94a86f46cef5
+  url: https://conda.anaconda.org/conda-forge/linux-64/samurai-0.10.0-h9e63375_0.conda
+  sha256: 4c57ea083e91fe448184bfff7ef96557631a2d3b2c86566afc7efd2034313e55
+  md5: da2ec4fa5f6cf4e00c291339a2b1b013
   depends:
   - cli11
-  - fmt >=10.1.1,<11.0a0
+  - fmt >=10.2.1,<11.0a0
   - highfive
   - libgcc-ng >=12
   - libstdcxx-ng >=12
@@ -10353,28 +10352,27 @@ packages:
   - xtensor
   license: BSD-3-Clause
   license_family: BSD
-  size: 114151
-  timestamp: 1700112160304
+  size: 126495
+  timestamp: 1709210717365
 - kind: conda
   name: samurai
-  version: 0.9.0
-  build: ha40e6a3_0
-  subdir: osx-arm64
-  url: https://conda.anaconda.org/conda-forge/osx-arm64/samurai-0.9.0-ha40e6a3_0.conda
-  sha256: a8e7279ff30e6c493d51bc447c133519a8a8db1432f455322feacda18aceca04
-  md5: 651dc224a9577ed8ff25ecfcbb424485
+  version: 0.10.0
+  build: hfa9c4bb_0
+  subdir: osx-64
+  url: https://conda.anaconda.org/conda-forge/osx-64/samurai-0.10.0-hfa9c4bb_0.conda
+  sha256: 63c18e0ab5cccb59a4a68621e822442d33da3d66aabccdee05881b66700c8284
+  md5: 35a963012b12a46213836b8d63dafa3b
   depends:
-  - __osx >=10.9
   - cli11
-  - fmt >=10.1.1,<11.0a0
+  - fmt >=10.2.1,<11.0a0
   - highfive
-  - libcxx >=16.0.6
+  - libcxx >=16
   - pugixml >=1.14,<1.15.0a0
   - xtensor
   license: BSD-3-Clause
   license_family: BSD
-  size: 114010
-  timestamp: 1700112326361
+  size: 126785
+  timestamp: 1709211210900
 - kind: conda
   name: scalapack
   version: 2.2.0

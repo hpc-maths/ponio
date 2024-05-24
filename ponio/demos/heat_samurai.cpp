@@ -97,7 +97,7 @@ main( int argc, char** argv )
     // Define problem (diffusion), solve : d_t u = - d_xx u
     samurai::DiffCoeff<dim> diff_coeff;
     diff_coeff.fill( 1.0 );
-    auto diff = samurai::make_diffusion<decltype( un_ini )>( diff_coeff );
+    auto diff = samurai::make_diffusion_order2<decltype( un_ini )>( diff_coeff );
 
     auto f_t = [&]( [[maybe_unused]] double t )
     {
