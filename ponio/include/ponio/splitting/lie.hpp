@@ -27,7 +27,7 @@ namespace ponio::splitting::lie
     {
         static constexpr std::size_t order        = 1;
         static constexpr bool is_splitting_method = true;
-        static constexpr std::string_view id      = "Lie";
+        static constexpr std::string_view id      = "lie";
 
         std::tuple<Methods_t...> methods;
         std::array<value_t, sizeof...( Methods_t )> time_steps;
@@ -38,8 +38,7 @@ namespace ponio::splitting::lie
         // (see https://github.com/llvm/llvm-project/issues/56482)
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I == sizeof...( Methods_t ) )
-        inline void
-        _call_inc( Problem_t&, value_t, state_t&, value_t )
+        inline void _call_inc( Problem_t&, value_t, state_t&, value_t )
         {
         }
 
@@ -54,8 +53,7 @@ namespace ponio::splitting::lie
          */
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I < sizeof...( Methods_t ) )
-        inline void
-        _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+        inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
             ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
             _call_inc<I + 1>( f, tn, ui, dt );
