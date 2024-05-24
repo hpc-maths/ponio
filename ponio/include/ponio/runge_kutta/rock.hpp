@@ -271,6 +271,12 @@ namespace ponio::runge_kutta::rock
 
         eig_computer_t eig_computer;
 
+        rock2_impl()
+            : a_tol( 1e-4 )
+            , r_tol( 1e-4 )
+        {
+        }
+
         /**
          * @brief Construct a new ROCK2 algorithm object
          *
@@ -468,6 +474,12 @@ namespace ponio::runge_kutta::rock
         value_t r_tol; // relative tolerance
 
         eig_computer_t eig_computer;
+
+        rock4_impl()
+            : a_tol( 1e-4 )
+            , r_tol( 1e-4 )
+        {
+        }
 
         /**
          * @brief Construct a new ROCK4 algorithm object
