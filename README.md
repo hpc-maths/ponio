@@ -2,27 +2,30 @@
 
 > Presentation Overview of Numerical Integrator for ODE
 
-The library ponio is a collection of time integrators for solving ODE and PDE written in C++. This library aims to be the easiest to use without compromising on performance.
+The library ponio is a collection of time integrators for solving differential equations written in C++. The purpose of this library is to supply efficient and flexible C++ implementation of solvers for various differential equations. Main method classes are :
 
-## Installation
+* explicit Runge-Kutta methods (eRK)
+* diagonal implicit Runge-Kutta methods (DIRK)
+* Lawson methods (based with an underlying Runge-Kutta method) (LRK)
+* exponential Runge-Kutta methods (expRK)
+* Runge-Kutta Chebyshev (RKC)
+* splitting method (Lie or Strang)
 
-### From conda
+This library aims to be the easiest to use without compromising on performance.
 
->  **SOON**
+<details>
+<summary>Table of Contents</summary>
 
-```
-  conda install ponio
-```
+- [Get started](#get-started)
+- [Features](#features)
+- [Installation](#installation)
+  - [From conda](#from-conda)
+  - [From source](#from-source)
+- [For more information](#for-more-information)
+- [How to contribute](#how-to-contribute)
+- [License](#license)
 
-### From source
-
-```
-  git clone https://github.com/hpc-maths/ponio.git
-  cd ponio
-  pixi install
-  pixi build
-```
-
+</details>
 
 ## Get started
 
@@ -32,11 +35,18 @@ In this section, we will present how to solve the Lorenz equations, defined:
 
 $$
   \begin{cases}
-    \dot{u}_1 &= \sigma(u_2 - u_1) \\
-    \dot{u}_2 &= \rho u_1 - u_2 - u_1 u_3 \\
-    \dot{u}_3 &= u_1 u_2 - \beta u_3
+    \dot{y}_1 &= \sigma(y_2 - y_1) \\
+    \dot{y}_2 &= \rho y_1 - y_2 - y_1 y_3 \\
+    \dot{y}_3 &= y_1 y_2 - \beta y_3
   \end{cases}
 $$
+
+This model is weell know to be a chaotic system, here the solution plots form every 92 methods provide by ponio.
+
+| Lorenz attractor                                          |
+|-----------------------------------------------------------|
+| ![Lorenz attractor](ponio/examples/img/lorenz_all/01.gif) |
+
 
 The ponio library solve a problem written of the form:
 
@@ -87,8 +97,10 @@ The function `ponio::solve`, which be used to solve the ODE, returns the state a
 ```cpp
   using namespace observer;
 
-  auto obs = "sol.txt"_fobs
+  auto obs = "sol.txt"_fobs;
 ```
+
+This line will create a file `sol.txt` and push all output data in it. ponio observes write data as `csv` format : `current_time, current_state, current_time_step`, with eventually multiple columns for `current_state`.
 
 Now you are ready to solve your problem with an explicit Runge-Kutta method, see [algorithm overview](https://ponio.readthedocs.io/en/latest/api/algorithm.html). In this example we will use the classical Runge-Kutta scheme of 4th order.
 
@@ -96,19 +108,75 @@ Now you are ready to solve your problem with an explicit Runge-Kutta method, see
   ponio::solver( lorenz_rhs, ponio::runge_kutta::rk_44(), u_ini, t_span, dt, obs);
 ```
 
+The whole example can be found in [here](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz.cpp).
+
+
+### More examples
+
+More examples can be found in [notebooks](https://github.com/hpc-maths/ponio/tree/main/ponio/notebooks) or [examples](https://github.com/hpc-maths/ponio/tree/main/ponio/examples) directories.
+
+## Features
+
+* [x] Explicit Runge-Kutta methods from their Butcher tableau
+* [x] Diagonal-implicit Runge-Kutta methods from their Butcher tableau
+* [x] Lawson methods from all explicit Runge-Kutta methods
+* [x] exponential Runge-Kutta methods from their Butcher tableau
+* [x] Runge-Kutta Chebyshev method of order 2
+* [x] ROCK 2 and ROCK 4 methods
+* [x] Splitting methods : Lie splitting method and Strang splitting method
+* [x] PIROCK method
+* [ ] Additive Runge-Kutta methods (IMEX) from their Butcher tableau
+* [x] Coupling ponio and adaptive mesh library [samurai](https://github.com/hpc-maths/samurai)
+* [x] Coupling ponio and linear algebra library [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page)
+* [ ] Parareal method
+* [ ] Simplify multi-equations problem
+
+## Installation
+
+### From conda
+
+```
+  conda install conda-forge::ponio
+```
+
+### From source
+
+```
+  git clone https://github.com/hpc-maths/ponio.git
+  cd ponio
+```
+
+* With [pixi](https://pixi.sh/latest/)
+
+This method will install all dependencies for all examples.
+
+```
+  pixi install
+  pixi build
+```
+
+* With only cmake
+
+Get only sources to run a project
+
+```
+  cmake . -B build -DCMAKE_BUILD_TYPE=Release
+  cmake --build build --target install
+```
+
 ## For more information
 
 * [Documentation](https://ponio.readthedocs.io/en/latest/index.html)
 * [Github repository](https://github.com/hpc-maths/ponio)
-* [Demos](https://github.com/hpc-maths/ponio/tree/main/ponio/demos)
+* [Examples](https://github.com/hpc-maths/ponio/tree/main/ponio/examples)
 * [Notebooks examples](https://github.com/hpc-maths/ponio/tree/main/ponio/notebooks)
 * [List of methods and their analysis](http://jmassot.perso.math.cnrs.fr/ponio/) (personal webpage of main developer)
 
 ## How to contribute
 
-## Roadmap
+First off, thanks for taking the time to contribute! Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make will benefit everybody else and are greatly appreciated.
 
-## How to cite
+Please read [our contribution guidelines](https://github.com/hpc-maths/ponio/blob/main/ponio/doc/CONTRIBUTING.md), and thank you for being involved!
 
 ## License
 

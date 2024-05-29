@@ -20,13 +20,18 @@
 
 import os
 import subprocess
-project = 'solver'
+import json
+
+project = 'ponio'
 author = 'Josselin'
 
 # The short X.Y version
-version = '0.0'
+version_list = json.load(
+    open("../../../.release-please-manifest.json", 'r'))["."].split(".")
+
+version = '.'.join(version_list[0:-1])
 # The full version, including alpha/beta/rc tags
-release = '0.0.0'
+release = '.'.join(version_list)
 
 
 # -- General configuration ---------------------------------------------------
@@ -45,7 +50,7 @@ extensions = [
     'breathe'
 ]
 
-breathe_projects = {'solver': '../xml'}
+breathe_projects = {'ponio': '../xml'}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -156,7 +161,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'samurai.tex', 'Samurai Documentation',
+    (master_doc, 'ponio.tex', 'Ponio Documentation',
      author, 'manual'),
 ]
 
@@ -166,7 +171,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'samurai', 'Samurai Documentation',
+    (master_doc, 'ponio', 'Ponio Documentation',
      [author], 1)
 ]
 
@@ -177,7 +182,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Ponio', 'Ponio Documentation',
+    (master_doc, 'ponio', 'Ponio Documentation',
      author, 'Ponio developers', 'One line description of project.',
      'Miscellaneous'),
 ]
@@ -213,4 +218,5 @@ todo_include_todos = True
 read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
 
 if read_the_docs_build:
+    print("launch doxygen")
     subprocess.call('cd ..; doxygen', shell=True)

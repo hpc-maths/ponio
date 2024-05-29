@@ -7,12 +7,16 @@ dependencies:
   - sympy
   - numpy
   - jinja2
+  - matplotlib
+  - cxx-compiler
   - cmake
   - ninja
   - pkg-config
   - eigen
   - cli11
+  - pandoc
+  - nbconvert
   - graphviz
-  - breathe
   - doxygen
+  - breathe
   - pydata-sphinx-theme

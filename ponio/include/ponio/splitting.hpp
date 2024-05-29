@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <concepts>
-
 #include "splitting/lie.hpp"
 #include "splitting/strang.hpp"
 

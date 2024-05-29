@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <concepts>
+#include <cstddef>
 
 namespace ponio::linear_algebra
 {

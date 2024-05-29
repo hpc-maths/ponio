@@ -6,8 +6,11 @@
 
 #include <array>
 #include <concepts>
+#include <cstddef>
 #include <functional>
 #include <ranges>
+#include <tuple>
+#include <type_traits>
 #include <utility>
 
 namespace detail
@@ -54,7 +57,7 @@ namespace detail
     constexpr std::array<std::remove_cvref_t<T>, sizeof...( Is )>
     init_fill_array_impl( T&& value, std::index_sequence<Is...> )
     {
-        return { { ( static_cast<void>( Is ), value )... } };
+        return { { ( static_cast<void>( Is ), std::forward<T>( value ) )... } };
     }
 
     /**
@@ -128,10 +131,10 @@ namespace detail
      */
     template <std::size_t N, typename Function_t, typename... Args>
         requires std::invocable<Function_t, Args...>
-    constexpr std::array<typename std::invoke_result<Function_t, Args...>::type, N>
+    constexpr std::array<typename std::invoke_result_t<Function_t, Args...>, N>
     init_fill_array( Function_t&& f, Args&&... args )
     {
-        return init_fill_array_impl<typename std::invoke_result<Function_t, Args...>::type>( std::forward<Function_t>( f ),
+        return init_fill_array_impl<typename std::invoke_result_t<Function_t, Args...>>( std::forward<Function_t>( f ),
             std::forward_as_tuple( args... ),
             std::make_index_sequence<N>() );
     }
@@ -141,7 +144,7 @@ namespace detail
     constexpr Arithmetic
     power_impl( Arithmetic&& value, std::index_sequence<Is...> )
     {
-        return ( static_cast<Arithmetic>( 1.0 ) * ... * ( static_cast<void>( Is ), value ) );
+        return ( static_cast<Arithmetic>( 1.0 ) * ... * ( static_cast<void>( Is ), std::forward<Arithmetic>( value ) ) );
     }
 
     /**
