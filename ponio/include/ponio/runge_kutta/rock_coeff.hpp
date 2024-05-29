@@ -5,6 +5,7 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 
 namespace ponio::runge_kutta::rock
 {

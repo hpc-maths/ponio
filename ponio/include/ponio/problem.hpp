@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include <bitset>
+#include <cstddef>
 #include <tuple>
+#include <utility>
 
 namespace ponio
 {
@@ -39,7 +40,7 @@ namespace ponio
      */
     template <typename Callable_t>
     inline simple_problem<Callable_t>::simple_problem( Callable_t&& f_ )
-        : f( f_ )
+        : f( std::forward<Callable_t>( f_ ) )
     {
     }
 
@@ -100,7 +101,7 @@ namespace ponio
     template <typename Callable_t, typename Jacobian_t>
     inline implicit_problem<Callable_t, Jacobian_t>::implicit_problem( Callable_t&& f_, Jacobian_t&& df_ )
         : simple_problem<Callable_t>( std::forward<Callable_t>( f_ ) )
-        , df( df_ )
+        , df( std::forward<Jacobian_t>( df_ ) )
     {
     }
 
@@ -133,13 +134,17 @@ namespace ponio
     };
 
     /**
-     * constructor of \ref implicit_operator_problem from a callable and hints
-     * @param f_       callable object
+     * @brief Construct a new implicit operator problem<Callable1 t, Callable2 t>::implicit operator problem object
+     *
+     * @tparam Callable1_t
+     * @tparam Callable2_t
+     * @param f_   callable object that represents problem, \f$f:t,u\mapsto f(t,u)\f$
+     * @param f_t_ callable object that returns operator, \f$f_t:t\mapsto f(t,\cdot)\f$
      */
     template <typename Callable1_t, typename Callable2_t>
     inline implicit_operator_problem<Callable1_t, Callable2_t>::implicit_operator_problem( Callable1_t&& f_, Callable2_t&& f_t_ )
         : simple_problem<Callable1_t>( std::forward<Callable1_t>( f_ ) )
-        , f_t( f_t_ )
+        , f_t( std::forward<Callable2_t>( f_t_ ) )
     {
     }
 
@@ -260,8 +265,8 @@ namespace ponio
      */
     template <typename Linear_t, typename Nonlinear_t>
     lawson_problem<Linear_t, Nonlinear_t>::lawson_problem( Linear_t&& l_, Nonlinear_t&& n_ )
-        : l( l_ )
-        , n( n_ )
+        : l( std::forward<Linear_t>( l_ ) )
+        , n( std::forward<Nonlinear_t>( n_ ) )
     {
     }
 
@@ -276,7 +281,7 @@ namespace ponio
     state_t
     lawson_problem<Linear_t, Nonlinear_t>::operator()( value_t t, state_t&& u )
     {
-        return l * u + n( t, u );
+        return l * u + n( t, std::forward<state_t>( u ) );
     }
 
     /**

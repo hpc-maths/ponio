@@ -5,7 +5,7 @@
 #pragma once
 
 #include <algorithm>
-#include <concepts>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -13,9 +13,9 @@
 #include <iterator>
 #include <limits>
 #include <ranges>
+#include <tuple>
 #include <type_traits>
-
-#include "detail.hpp"
+#include <vector>
 
 namespace observer
 {

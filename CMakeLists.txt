@@ -85,11 +85,21 @@ set(Ndigit 36)
 file(GLOB json_files
     "database/*.json")
 
+set(DOC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ponio/doc)
+option(BUILD_DOC "build the documentation algorithms page" OFF)
+set(DOC_ALGO_RST "")
+set(DOC_ALGO_CMD "")
+if (BUILD_DOC)
+  set(DOC_ALGO_RST "${DOC_DIR}/source/api/algorithm.rst")
+  set(DOC_ALGO_CMD -d -do ${DOC_ALGO_RST})
+endif()
+
 add_custom_command(
-    OUTPUT ${BUTCHER_METHODS}
+    OUTPUT ${BUTCHER_METHODS} ${DOC_ALGO_RST}
     COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/ponio/code_generator.py ${json_files}
                 -o ${BUTCHER_METHODS}
                 --Ndigit=${Ndigit}
+                ${DOC_ALGO_CMD}
     COMMENT "Generating code..."
     VERBATIM
 )
@@ -122,15 +132,15 @@ set(PONIO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/ponio/include)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 option(BUILD_TESTS "build the tests" OFF)
-option(BUILD_DEMOS "build the demos" OFF)
-option(BUILD_SAMURAI_DEMOS "build demos working with samurai" OFF)
+option(BUILD_DEMOS "build the examples" OFF)
+option(BUILD_SAMURAI_DEMOS "build examples working with samurai" OFF)
 
 if (BUILD_TESTS)
     add_subdirectory(ponio/test)
 endif()
 
 if (BUILD_DEMOS)
-  add_subdirectory(ponio/demos)
+  add_subdirectory(ponio/examples)
 endif()
 
 # package the project

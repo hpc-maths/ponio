@@ -37,9 +37,41 @@ namespace ponio
         }
     };
 
+    /**
+     * @brief iterator on ponio::solver_range
+     *
+     * @tparam value_t   type of time value
+     * @tparam state_t   type of solution \f$u^n\f$
+     * @tparam method_t  type of object used to iterate (an instance of ponio::method)
+     * @tparam problem_t type of callable object problem \f$f: t, u \mapsto f(t, u)\f$
+     */
     template <typename value_t, typename state_t, typename method_t, typename problem_t>
     struct time_iterator
     {
+        /**
+         * @typedef difference_type
+         * @brief type of difference between two iterators, returns difference of current time of each iterator
+         *
+         * @typedef value_type
+         * @brief type of stored value
+         *
+         * @typedef pointer
+         * @brief type of pointer on stored value
+         *
+         * @typedef reference
+         * @brief type of reference on stored value
+         *
+         * @typedef const_pointer
+         * @brief type of constant pointer on stored value
+         *
+         * @typedef const_reference
+         * @brief type of constant reference on stored value
+         *
+         * @typedef iterator_category
+         * @brief specify the category of iterator, here corresponds to output iterator (see [iterator
+         * tags](https://en.cppreference.com/w/cpp/iterator/iterator_tags) for more information)
+         */
+
         using difference_type   = value_t;
         using value_type        = current_solution<value_t, state_t>;
         using pointer           = value_type*;
@@ -56,15 +88,17 @@ namespace ponio
         std::optional<value_t> dt_reference;
         static constexpr value_t sentinel = std::numeric_limits<value_t>::max();
 
-        // time_iterator ( problem_t & pb_, method_t meth_, state_t const& u0, ponio::time_span<value_t> && times, value_t dt )
-        // : sol(times.front(), u0, dt)
-        // , meth(meth_)
-        // , pb(pb_)
-        // , t_span(times)
-        // , it_next_time(++times.begin())
-        // {
-        // }
-
+        /**
+         * @brief Construct a new time iterator object
+         *
+         * @param pb_     problem object that represent \f$f: t, u \mapsto f(t, u)\f$
+         * @param meth_   ponio::method object
+         * @param u0      initial value of state \f$u\f$
+         * @param t_span_ vector of initial time and final time with optional intermediate time
+         * @param dt      time step value \f$\Delta t\f$
+         *
+         * @note In user interface ponio::time_iterator object is build by ponio::solver_range member functions.
+         */
         time_iterator( problem_t& pb_, method_t meth_, state_t const& u0, ponio::time_span<value_t> const& t_span_, value_t dt )
             : sol( ( t_span_.front() == t_span_.back() ) ? sentinel : t_span_.front(), u0, dt )
             , meth( meth_ )
@@ -77,6 +111,11 @@ namespace ponio
 
         time_iterator() = delete;
 
+        /**
+         * @brief Copy constructor of time_iterator
+         *
+         * @param rhs
+         */
         time_iterator( time_iterator const& rhs )
             : sol( rhs.sol )
             , meth( rhs.meth )
@@ -87,6 +126,11 @@ namespace ponio
         {
         }
 
+        /**
+         * @brief Move constructor of time_iterator
+         *
+         * @param rhs
+         */
         time_iterator( time_iterator&& rhs ) noexcept
             : sol( std::move( rhs.sol ) )
             , meth( std::move( rhs.meth ) )
@@ -97,6 +141,12 @@ namespace ponio
         {
         }
 
+        /**
+         * @brief Equality operator of time_iterator
+         *
+         * @param rhs
+         * @return time_iterator&
+         */
         time_iterator&
         operator=( time_iterator const& rhs )
         {
@@ -113,6 +163,12 @@ namespace ponio
             return *this;
         }
 
+        /**
+         * @brief Equality operator of time_iterator
+         *
+         * @param rhs
+         * @return time_iterator&
+         */
         time_iterator&
         operator=( time_iterator&& rhs ) noexcept
         {
@@ -131,18 +187,32 @@ namespace ponio
 
         ~time_iterator() = default;
 
+        /**
+         * @brief increment current state by current time step
+         *
+         * @details \f$(t^n, u^n, \Delta t^n ) \gets \phi(t^n, u^n, \Delta t^n)\f$ where \f$\phi\f$ represents the method.
+         */
         void
         increment()
         {
             std::tie( sol.time, sol.state, sol.time_step ) = meth( pb, sol.time, sol.state, sol.time_step );
         }
 
+        /**
+         * @brief get the next time value \f$t^n + \Delta t^n\f$
+         *
+         * @return difference_type
+         */
         difference_type
         next_time() const
         {
             return sol.time + sol.time_step;
         }
 
+        /**
+         * @brief increment properly time_iterator in the solver_range (take care of end point and optionally middle points in given t_span)
+         *
+         */
         time_iterator&
         operator++()
         {
@@ -173,6 +243,10 @@ namespace ponio
             return *this;
         }
 
+        /**
+         * @brief post fix increment time_iterator
+         *
+         */
         time_iterator // NOLINT(cert-dcl21-cpp): This check is deprecated since it’s no longer part of the CERT standard
         operator++( int )
         {
@@ -181,24 +255,36 @@ namespace ponio
             return copy;
         }
 
+        /**
+         * @brief dereference time_iterator and get current solution data member
+         */
         reference
         operator*()
         {
             return sol;
         }
 
+        /**
+         * @brief dereference time_iterator and get current solution data member
+         */
         const_reference
         operator*() const
         {
             return sol;
         }
 
+        /**
+         * @brief accessor to current solution data member
+         */
         pointer
         operator->()
         {
             return &sol;
         }
 
+        /**
+         * @brief accessor to current solution data member
+         */
         const_pointer
         operator->() const
         {
@@ -255,7 +341,7 @@ namespace ponio
     }
 
     /**
-     * @brief structure that stores begin and end `time_iterator` of a range of solutions
+     * @brief structure that stores begin and end time_iterator of a range of solutions
      *
      * @tparam value_t   type of time and time step
      * @tparam state_t   type of solution \f$u^n\f$
@@ -269,42 +355,72 @@ namespace ponio
         iterator_type _begin;
         iterator_type _end;
 
+        /**
+         * @brief Construct a new solver range object
+         *
+         * @param begin initial iterator on solver_range
+         * @param end   end iterator on solver_range (sentinel)
+         */
         solver_range( iterator_type const& begin, iterator_type const& end )
             : _begin( begin )
             , _end( end )
         {
         }
 
+        /**
+         * @brief returns an iterator to the beginning solver_range
+         *
+         */
         inline auto&
         begin()
         {
             return _begin;
         }
 
+        /**
+         * @brief returns a constant iterator to the beginning solver_range
+         *
+         */
         inline auto const&
         cbegin() const
         {
             return _begin;
         }
 
+        /**
+         * @brief returns a constant iterator to the beginning solver_range
+         *
+         */
         inline auto const&
         begin() const
         {
             return cbegin();
         }
 
+        /**
+         * @brief returns an iterator to the ending solver_range
+         *
+         */
         inline auto&
         end()
         {
             return _end;
         }
 
+        /**
+         * @brief returns a constant iterator to the ending solver_range
+         *
+         */
         inline auto const&
         cend() const
         {
             return _end;
         }
 
+        /**
+         * @brief returns a constant iterator to the ending solver_range
+         *
+         */
         inline auto const&
         end() const
         {
@@ -332,7 +448,7 @@ namespace ponio
     auto
     make_solver_range( problem_t& pb, algorithm_t&& algo, state_t const& u0, ponio::time_span<value_t> const& t_span, value_t dt )
     {
-        auto meth = make_method( algo, u0 );
+        auto meth = make_method( std::forward<algorithm_t>( algo ), u0 );
 
         auto begin = make_time_iterator( pb, meth, u0, t_span, dt );
         auto end   = make_time_iterator( pb, meth, u0, { t_span.back() }, dt );
@@ -344,7 +460,7 @@ namespace ponio
      * @brief solve a problem on a specific time range with a specific method
      *
      * @param pb     problem to solve, it could by any function or functor with a call operator with following parameter `(value_t tn,
-     * state_t const& un)`.
+     * state_t& un)`.
      * @param algo   choosen method to solve the problem `pb`
      * @param u0     initial condition \f$u_0 = u(t=0)\f$
      * @param t_span container \f$[t_\text{start} , t_\text{end}]\f$ with possible intermediate time value where solver should go
@@ -368,7 +484,7 @@ namespace ponio
 
         value_t last_time = t_span.back();
 
-        auto meth = make_method( algo, un );
+        auto meth = make_method( std::forward<Algorithm_t>( algo ), un );
 
         obs( current_time, un, dt );
 

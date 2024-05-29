@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <concepts>
+#include <cstddef>
 #include <numeric>
 #include <ranges>
 #include <string_view>
@@ -71,10 +72,10 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         static constexpr bool is_embedded         = butcher::is_embedded_tableau<tableau_t>;
         static constexpr std::size_t order        = tableau_t::order;
         static constexpr std::string_view id      = tableau_t::id;
-        static constexpr bool void_linear_algebra = std::is_void<lin_alg_t>::value;
-        using linear_algebra_t                    = typename std::conditional<void_linear_algebra,
+        static constexpr bool void_linear_algebra = std::is_void_v<lin_alg_t>;
+        using linear_algebra_t                    = typename std::conditional_t<void_linear_algebra,
             bool, // just a small valid type
-            lin_alg_t>::type;
+            lin_alg_t>;
 
         template <typename>
         diagonal_implicit_rk_butcher( double tol_, std::size_t max_iter_ )

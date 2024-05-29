@@ -5,9 +5,10 @@
 #pragma once
 
 #include <array>
-#include <concepts>
+#include <cstddef>
+#include <string_view>
 #include <tuple>
-#include <type_traits>
+#include <utility>
 
 #include "detail.hpp"
 
@@ -26,7 +27,7 @@ namespace ponio::splitting::lie
     {
         static constexpr std::size_t order        = 1;
         static constexpr bool is_splitting_method = true;
-        static constexpr std::string_view id      = "Lie";
+        static constexpr std::string_view id      = "lie";
 
         std::tuple<Methods_t...> methods;
         std::array<value_t, sizeof...( Methods_t )> time_steps;
@@ -121,7 +122,7 @@ namespace ponio::splitting::lie
     {
         static constexpr std::size_t order        = 1;
         static constexpr bool is_splitting_method = true;
-        static constexpr std::string_view id      = "Lie";
+        static constexpr std::string_view id      = "lie";
 
         std::tuple<Algorithms_t...> algos;
         std::array<value_t, sizeof...( Algorithms_t )> time_steps;
@@ -135,8 +136,8 @@ namespace ponio::splitting::lie
     template <typename value_t, typename... Algorithms_t>
     inline lie_tuple<value_t, Algorithms_t...>::lie_tuple( std::tuple<Algorithms_t...>&& algs,
         std::array<value_t, sizeof...( Algorithms_t )>&& dts )
-        : algos( algs )
-        , time_steps( dts )
+        : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
+        , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
     {
     }
 

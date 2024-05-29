@@ -276,6 +276,14 @@ _deps
 
 # End of https://www.toptal.com/developers/gitignore/api/python,macos,linux,vim,visualstudiocode,cmake
 
+# generated files by code_generator.py
 butcher_methods.hpp
+algorithm.rst
+
 # pixi environments
 .pixi
+
+# doc generation
+ponio/doc/xml
+ponio/doc/source/gallery/examples
+ponio/doc/source/gallery/notebook

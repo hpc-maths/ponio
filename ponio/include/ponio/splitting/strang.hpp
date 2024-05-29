@@ -5,9 +5,10 @@
 #pragma once
 
 #include <array>
-#include <concepts>
+#include <cstddef>
+#include <string_view>
 #include <tuple>
-#include <type_traits>
+#include <utility>
 
 #include "detail.hpp"
 #include "lie.hpp"
@@ -30,7 +31,7 @@ namespace ponio::splitting::strang
 
         static constexpr std::size_t order        = 2;
         static constexpr bool is_splitting_method = true;
-        static constexpr std::string_view id      = "Strang";
+        static constexpr std::string_view id      = "strang";
 
         // end of incremental recursion, start of decremental recursion
         // _call_inc can not be outside the class definition due to llvm bug
@@ -148,7 +149,7 @@ namespace ponio::splitting::strang
     {
         static constexpr std::size_t order        = 2;
         static constexpr bool is_splitting_method = true;
-        static constexpr std::string_view id      = "Strang";
+        static constexpr std::string_view id      = "strang";
 
         std::tuple<Algorithms_t...> algos;
         std::array<value_t, sizeof...( Algorithms_t )> time_steps;
@@ -162,8 +163,8 @@ namespace ponio::splitting::strang
     template <typename value_t, typename... Algorithms_t>
     inline strang_tuple<value_t, Algorithms_t...>::strang_tuple( std::tuple<Algorithms_t...>&& algs,
         std::array<value_t, sizeof...( Algorithms_t )>&& dts )
-        : algos( algs )
-        , time_steps( dts )
+        : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
+        , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
     {
     }
 

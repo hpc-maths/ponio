@@ -5,6 +5,7 @@
 #pragma once
 
 #include <concepts>
+#include <cstddef>
 #include <string_view>
 
 #include "../butcher_tableau.hpp"

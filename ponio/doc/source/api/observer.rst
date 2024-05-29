@@ -2,30 +2,30 @@ Observers
 =========
 
 .. doxygenclass:: observer::capsule
-   :project: solver
+   :project: ponio
    :members:
 
 .. doxygenfunction:: observer::make_capsule
-   :project: solver
+   :project: ponio
 
 .. doxygenfunction:: observer::operator<<( std::ostream & os , capsule<state_t> const& data )
-   :project: solver
+   :project: ponio
 
 .. doxygenclass:: observer::base_observer
-   :project: solver
+   :project: ponio
    :members:
 
 .. doxygenclass:: observer::stream_observer
-   :project: solver
+   :project: ponio
    :members:
 
 .. doxygenclass:: observer::cout_observer
-   :project: solver
+   :project: ponio
    :members:
 
 .. doxygenclass:: observer::file_observer
-   :project: solver
+   :project: ponio
    :members:
 
 .. doxygenfunction:: observer::operator""_fobs
-   :project: solver
+   :project: ponio
