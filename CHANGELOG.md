@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/hpc-maths/ponio/compare/v0.2.0...v0.3.0) (2024-05-30)
+
+
+### Features
+
+* add PIROCK method ([#44](https://github.com/hpc-maths/ponio/issues/44)) ([9df536f](https://github.com/hpc-maths/ponio/commit/9df536f0c17719af8f0a5086ea7e31b293b76111))
+
 ## [0.2.0](https://github.com/hpc-maths/ponio/compare/v0.1.0...v0.2.0) (2024-03-18)
 
 
