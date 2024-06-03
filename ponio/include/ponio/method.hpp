@@ -258,31 +258,21 @@ namespace ponio
     }
 
     /**
-     *  generic factory to build a method from an algoritm, it only reuses `method`
-     *  constructor
-     *  @param algos        a variadic `splitting::lie_tuple` of `Algorithms_t`
-     *  @param shadow_of_u0 an object with the same size of computed value for allocation
+     * @brief generic factory for splitting methods to build a method from a tuple of algorithms and a state
+     *
+     * @tparam _splitting_method_t splitting method (Lie or Strang splitting)
+     * @tparam value_t             type of coefficients and time step
+     * @tparam state_t             type of state
+     * @tparam Algorithms_t        types of algorithms to solve each step of splitting
+     * @param algos        tuple of algorithms and splitting method
+     * @param shadow_of_u0 an object with the same sixe of computed value for allocation
      */
-    template <typename... Algorithms_t, typename state_t>
+    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename state_t, typename... Algorithms_t>
     auto
-    make_method( splitting::lie::lie_tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
+    make_method( splitting::detail::_splitting_tuple<_splitting_method_t, value_t, Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
     {
         auto methods = make_tuple_methods( algos.algos, shadow_of_u0 );
-        return splitting::lie::make_lie_from_tuple( methods, algos.time_steps );
-    }
-
-    /**
-     *  generic factory to build a method from an algoritm, it only reuses `method`
-     *  constructor
-     *  @param algos        a variadic `splitting::strang_tuple` of `Algorithms_t`
-     *  @param shadow_of_u0 an object with the same size of computed value for allocation
-     */
-    template <typename... Algorithms_t, typename state_t>
-    auto
-    make_method( splitting::strang::strang_tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
-    {
-        auto methods = make_tuple_methods( algos.algos, shadow_of_u0 );
-        return splitting::strang::make_strang_from_tuple( methods, algos.time_steps );
+        return splitting::detail::make_splitting_from_tuple<_splitting_method_t>( methods, algos.time_steps );
     }
 
 } // namespace ponio

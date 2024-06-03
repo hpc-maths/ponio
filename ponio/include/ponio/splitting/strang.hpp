@@ -38,7 +38,8 @@ namespace ponio::splitting::strang
         // (see https://github.com/llvm/llvm-project/issues/56482)
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I == sizeof...( Methods_t ) - 1 )
-        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+        void
+        _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
             ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
             _call_dec<I - 1>( f, tn, ui, dt );
@@ -55,7 +56,8 @@ namespace ponio::splitting::strang
          */
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I < sizeof...( Methods_t ) - 1 )
-        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+        void
+        _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
             ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I] );
             _call_inc<I + 1>( f, tn, ui, dt );
@@ -63,11 +65,13 @@ namespace ponio::splitting::strang
 
         template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
             requires( I == 0 )
-        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt );
+        void
+        _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt );
 
         template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
             requires( I > 0 )
-        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt );
+        void
+        _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt );
 
         template <typename Problem_t, typename state_t>
         auto
@@ -78,9 +82,10 @@ namespace ponio::splitting::strang
     template <typename value_t, typename... Methods_t>
     template <std::size_t I, typename Problem_t, typename state_t>
         requires( I == 0 )
-    inline void strang<value_t, Methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+    inline void
+    strang<value_t, Methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
     {
-        ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I] );
+        ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I] );
     }
 
     /**
@@ -96,9 +101,10 @@ namespace ponio::splitting::strang
     template <typename value_t, typename... Methods_t>
     template <std::size_t I, typename Problem_t, typename state_t>
         requires( I > 0 )
-    inline void strang<value_t, Methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+    inline void
+    strang<value_t, Methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
     {
-        ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I] );
+        ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I] );
         _call_dec<I - 1>( f, tn, ui, dt );
     }
 
@@ -122,55 +128,6 @@ namespace ponio::splitting::strang
     // ---- *helper* ----
 
     /**
-     * a helper factory for \ref strang functor from a tuple of methods
-     *
-     * @tparam value_t   type of coefficients
-     * @tparam Methods_t variadic list of types of methods
-     * @param meths      list of methods
-     * @param dts        associated time step foreach method
-     * @return a \ref strang object build from the tuple of methods
-     */
-    template <typename value_t, typename... Methods_t>
-    auto
-    make_strang_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
-    {
-        return strang<value_t, Methods_t...>( meths, dts );
-    }
-
-    // ---- class strang_tuple --------------------------------------
-
-    /** @class strang_tuple
-     *  a helper to deduce method for ::ponio::make_method(splitting::strang::strang_tuple<Algorithms_t...> const &, state_t const &)
-     *  @tparam Algorithms_t variadic template of algorithms to solve each subproblem
-     *  @details This is a dummy class to select correct \ref method to solve the problem
-     */
-    template <typename value_t, typename... Algorithms_t>
-    struct strang_tuple
-    {
-        static constexpr std::size_t order        = 2;
-        static constexpr bool is_splitting_method = true;
-        static constexpr std::string_view id      = "strang";
-
-        std::tuple<Algorithms_t...> algos;
-        std::array<value_t, sizeof...( Algorithms_t )> time_steps;
-
-        strang_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts );
-    };
-
-    /**
-     * constructor of \ref strang_tuple from a variadic number of algorithms
-     */
-    template <typename value_t, typename... Algorithms_t>
-    inline strang_tuple<value_t, Algorithms_t...>::strang_tuple( std::tuple<Algorithms_t...>&& algs,
-        std::array<value_t, sizeof...( Algorithms_t )>&& dts )
-        : algos( std::forward<std::tuple<Algorithms_t...>>( std::move( algs ) ) )
-        , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( std::move( dts ) ) )
-    {
-    }
-
-    // ---- *helper* ----
-
-    /**
      * a helper factory for \ref strang_tuple from a tuple of algorithms
      *
      * @tparam value_t      type of coefficients
@@ -182,7 +139,7 @@ namespace ponio::splitting::strang
     auto
     make_strang_tuple( std::pair<Algorithms_t, value_t>&&... args )
     {
-        return strang_tuple<value_t, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
+        return detail::_splitting_tuple<strang, value_t, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
     }
 
 } // namespace ponio::splitting::strang

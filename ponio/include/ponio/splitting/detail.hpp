@@ -40,4 +40,30 @@ namespace ponio::splitting::detail
         return ui;
     }
 
+    // ---- class _splitting_tuple ----------------------------------
+    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename... Algorithms_t>
+    struct _splitting_tuple
+    {
+        using splitting_method_t                  = _splitting_method_t<value_t, Algorithms_t...>;
+        static constexpr std::size_t order        = splitting_method_t::order;
+        static constexpr bool is_splitting_method = true;
+        static constexpr std::string_view id      = splitting_method_t::id;
+
+        std::tuple<Algorithms_t...> algos;
+        std::array<value_t, sizeof...( Algorithms_t )> time_steps;
+
+        _splitting_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts )
+            : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
+            , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
+        {
+        }
+    };
+
+    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename... Methods_t>
+    auto
+    make_splitting_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
+    {
+        return _splitting_method_t<value_t, Methods_t...>( meths, dts );
+    }
+
 } // namespace ponio::splitting::detail
