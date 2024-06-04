@@ -142,4 +142,37 @@ namespace ponio::splitting::strang
         return detail::_splitting_tuple<strang, value_t, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
     }
 
+    // ---- class adaptive_strang -----------------------------------
+
+    /** @class adaptive_strang
+     *  adaptive time step Strang splitting method
+     *  @tparam Methods_t list of methods to solve each sub-problem
+     */
+    template <typename value_t, typename... Methods_t>
+    struct adaptive_strang : strang<value_t, Methods_t...>
+    {
+        using strang<value_t, Methods_t...>::strang;
+        using strang<value_t, Methods_t...>::methods;
+        using strang<value_t, Methods_t...>::time_steps;
+
+        static constexpr std::size_t order        = 2;
+        static constexpr bool is_splitting_method = true;
+        static constexpr bool is_embedded         = true;
+        static constexpr std::string_view id      = "adaptive strang";
+
+        value_t delta;
+
+        adaptive_strang( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts, value_t _delta )
+            : strang( meths, dts )
+            , delta( _delta )
+        {
+        }
+
+        template <typename Problem_t, typename state_t>
+        auto
+        operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
+        {
+        }
+    };
+
 } // namespace ponio::splitting::strang
