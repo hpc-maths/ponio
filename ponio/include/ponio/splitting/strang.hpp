@@ -7,9 +7,12 @@
 #include <array>
 #include <cstddef>
 #include <string_view>
+#include <thread>
 #include <tuple>
 #include <utility>
 
+#include "../method.hpp"
+#include "../ponio_config.hpp"
 #include "detail.hpp"
 #include "lie.hpp"
 
@@ -161,18 +164,95 @@ namespace ponio::splitting::strang
         static constexpr std::string_view id      = "adaptive strang";
 
         value_t delta;
+        value_t tol;
 
-        adaptive_strang( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts, value_t _delta )
-            : strang( meths, dts )
+        adaptive_strang( std::tuple<Methods_t...> const& meths,
+            std::array<value_t, sizeof...( Methods_t )> const& dts,
+            value_t _delta,
+            value_t _tol = default_config::tol )
+            : strang<value_t, Methods_t...>( meths, dts )
             , delta( _delta )
+            , tol( _tol )
         {
+        }
+
+        template <std::size_t I = 0, typename Problem_t, typename state_t>
+            requires( I == sizeof...( Methods_t ) - 1 )
+        inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        {
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
+            _call_dec<I - 1>( f, tn, ui, dt, shift );
+        }
+
+        template <std::size_t I = 0, typename Problem_t, typename state_t>
+            requires( I < sizeof...( Methods_t ) - 1 )
+        inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        {
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + ( 0.5 + shift ) * dt, time_steps[I] );
+            _call_inc<I + 1>( f, tn, ui, dt, shift );
+        }
+
+        template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
+            requires( I > 0 )
+        inline void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        {
+            ui = detail::_split_solve<I>( f, methods, ui, tn + ( 0.5 + shift ) * dt, tn + dt, time_steps[I] );
+            _call_dec<I - 1>( f, tn, ui, dt, shift );
+        }
+
+        template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
+            requires( I == 0 )
+        inline void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        {
+            ui = detail::_split_solve<I>( f, methods, ui, tn + ( 0.5 + shift ) * dt, tn + dt, time_steps[I] );
         }
 
         template <typename Problem_t, typename state_t>
         auto
-        operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
+        operator()( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
+            state_t u_np1_ref   = un;
+            state_t u_np1_shift = un;
+
+            // TODO: launch _call_inc in parallel
+            // j'ai voulu lancer chacune de ces 2 fonctions dans des threads différents
+            // avec std::thread
+            // mais j'ai eu une erreur, donc à corriger plus tard
+            _call_inc( f, tn, un, dt, u_np1_ref, 0. );
+            _call_inc( f, tn, un, dt, u_np1_shift, delta );
+
+            // TODO compute norm between u_np1_ref and u_np1_shift
+            auto error = error_estimate( un, u_np1_ref, u_np1_shift );
+
+            value_t new_dt = 0.9 * std::sqrt( tol / error ) * dt;
+            new_dt         = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
+
+            if ( error > tol )
+            {
+                return std::make_tuple( tn, un, new_dt );
+            }
+            return std::make_tuple( tn + dt, u_np1_ref, new_dt );
         }
     };
+
+    // ---- *helper* ----
+
+    /**
+     * a helper factory for \ref strang_tuple from a tuple of algorithms
+     *
+     * @tparam value_t      type of coefficients
+     * @tparam Algorithms_t variadic list of types of algorithms
+     * @param args          variadic list of pairs of algorithm and time step
+     * @return a \ref strang_tuple object build from the tuple of methods
+     */
+    template <typename value_t, typename... Algorithms_t>
+    auto
+    make_adaptive_strang_tuple( value_t delta, value_t tolerance, std::pair<Algorithms_t, value_t>&&... args )
+    {
+        return detail::_splitting_tuple<adaptive_strang, value_t, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ),
+            { args.second... },
+            delta,
+            tolerance );
+    }
 
 } // namespace ponio::splitting::strang

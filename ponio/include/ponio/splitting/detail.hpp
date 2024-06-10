@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "../ponio_config.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <tuple>
@@ -51,19 +52,26 @@ namespace ponio::splitting::detail
 
         std::tuple<Algorithms_t...> algos;
         std::array<value_t, sizeof...( Algorithms_t )> time_steps;
+        std::array<value_t, 2> optional_arguments;
 
-        _splitting_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts )
+        _splitting_tuple( std::tuple<Algorithms_t...>&& algs,
+            std::array<value_t, sizeof...( Algorithms_t )>&& dts,
+            value_t delta     = 0.1,
+            value_t tolerance = default_config::tol )
             : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
             , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
+            , optional_arguments( { delta, tolerance } )
         {
         }
     };
 
-    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename... Methods_t>
+    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename... Methods_t, typename... Args_t>
     auto
-    make_splitting_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
+    make_splitting_from_tuple( std::tuple<Methods_t...> const& meths,
+        std::array<value_t, sizeof...( Methods_t )> const& dts,
+        Args_t... optional_args )
     {
-        return _splitting_method_t<value_t, Methods_t...>( meths, dts );
+        return _splitting_method_t<value_t, Methods_t...>( meths, dts, optional_args... );
     }
 
 } // namespace ponio::splitting::detail
