@@ -150,7 +150,7 @@ namespace ponio::runge_kutta::pirock
         static constexpr std::size_t l         = _l;
         static constexpr std::size_t N_stages  = stages::dynamic;
         static constexpr std::size_t N_storage = std::
-            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 17>, std::integral_constant<std::size_t, 10>>::value;
+            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 16>, std::integral_constant<std::size_t, 10>>::value;
         static constexpr std::size_t order   = 2;
         static constexpr std::string_view id = "PIROCK";
 
@@ -358,24 +358,21 @@ namespace ponio::runge_kutta::pirock
 
                 // for embedded method
                 auto& err_D = U[13];
-                auto& tmp_R = U[14];
 
                 // $err_D = \sigma_\alpha(1-\tau_a/\sigma_a^2)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)}))$
                 err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
                       * ( pb.explicit_part( tn, us_sm1 ) - pb.explicit_part( tn, u_sm2 ) );
 
-                tmp_R = static_cast<state_t>( dt * ( pb.implicit_part( tn, u_sp1 ) - pb.implicit_part( tn, u_sp2 ) ) );
-
-                f_D_u = pb.explicit_part( tn, u_sp3 ) - pb.explicit_part( tn, u_sp1 );
+                f_D_u = static_cast<state_t>( pb.explicit_part( tn, u_sp3 ) - pb.explicit_part( tn, u_sp1 ) );
 
                 shampine_trick_caller.template operator()<l>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, f_D_u, u_tmp, shampine_element );
 
                 if constexpr ( is_embedded )
                 {
-                    auto& rhs_R = U[15];
-                    auto& err_R = U[16];
+                    auto& rhs_R = U[14];
+                    auto& err_R = U[15];
 
-                    rhs_R = static_cast<state_t>( tmp_R / 6. );
+                    rhs_R = dt * ( pb.implicit_part( tn, u_sp1 ) - pb.implicit_part( tn, u_sp2 ) ) / 6.;
 
                     // $err_R = J_R^{-1} \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
                     // to compute it, get $rhs_R = \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
@@ -409,11 +406,13 @@ namespace ponio::runge_kutta::pirock
                         return { tn, un, new_dt };
                     }
 
-                    u_np1 = us_s - err_D + 0.5 * tmp_R + dt / ( 2. - 4. * gamma ) * shampine_element;
+                    u_np1 = us_s - err_D + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
+                          + 1.0 / ( 2. - 4. * gamma ) * shampine_element;
                     return { tn + dt, u_np1, new_dt };
                 }
 
-                u_np1 = us_s - err_D + 0.5 * tmp_R + dt / ( 2. - 4. * gamma ) * shampine_element;
+                u_np1 = us_s - err_D + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
+                      + dt / ( 2. - 4. * gamma ) * shampine_element;
             }
             else
             {
