@@ -376,8 +376,8 @@ namespace ponio::runge_kutta::rock
 
                 if ( j < mdeg )
                 {
-                    ujm2 = std::move( ujm1 );
-                    ujm1 = std::move( uj );
+                    std::swap( ujm2, ujm1 );
+                    std::swap( ujm1, uj );
                 }
 
                 t_jm3 = t_jm2;
@@ -581,8 +581,8 @@ namespace ponio::runge_kutta::rock
 
                 if ( j < mdeg )
                 {
-                    ujm2 = std::move( ujm1 );
-                    ujm1 = std::move( uj );
+                    std::swap( ujm2, ujm1 );
+                    std::swap( ujm1, uj );
                 }
 
                 t_jm3 = t_jm2;
