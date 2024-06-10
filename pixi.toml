@@ -31,7 +31,7 @@ test = { cmd = "./build/ponio/test/Release/ponio_tests", depends_on = [
 nbval = { cmd = "pytest --nbval --nbval-current-env -p no:warnings", cwd = "./ponio/notebooks", depends_on = [
   "build",
 ] }
-cppcheck = { cmd = "cppcheck --enable=all -q --project=./build/compile_commands.json --suppressions-list=.cppcheck --inline-suppr 2> cppcheck_err.txt", depends_on = [
+cppcheck = { cmd = "cppcheck --enable=all --check-level=exhaustive -q --project=./build/compile_commands.json --suppressions-list=.cppcheck --inline-suppr 2> cppcheck_err.txt", depends_on = [
   "build_debug",
 ] }
 
