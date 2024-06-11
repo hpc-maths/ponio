@@ -42,7 +42,7 @@ namespace ponio::splitting::detail
     }
 
     // ---- class _splitting_tuple ----------------------------------
-    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename... Algorithms_t>
+    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename optional_args_t, typename... Algorithms_t>
     struct _splitting_tuple
     {
         using splitting_method_t                  = _splitting_method_t<value_t, Algorithms_t...>;
@@ -50,28 +50,51 @@ namespace ponio::splitting::detail
         static constexpr bool is_splitting_method = true;
         static constexpr std::string_view id      = splitting_method_t::id;
 
+        static constexpr bool has_optional_args = !std::is_void<optional_args_t>::value;
+        using optional_args_container           = typename std::conditional<has_optional_args, optional_args_t, bool>::type;
+
         std::tuple<Algorithms_t...> algos;
         std::array<value_t, sizeof...( Algorithms_t )> time_steps;
-        std::array<value_t, 2> optional_arguments;
+        optional_args_container optional_arguments;
 
+        template <bool _has_optional_args = has_optional_args>
+            requires std::same_as<std::bool_constant<has_optional_args>, std::true_type>
         _splitting_tuple( std::tuple<Algorithms_t...>&& algs,
             std::array<value_t, sizeof...( Algorithms_t )>&& dts,
-            value_t delta     = 0.1,
-            value_t tolerance = default_config::tol )
+            optional_args_container args )
             : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
             , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
-            , optional_arguments( { delta, tolerance } )
+            , optional_arguments( args )
+        {
+        }
+
+        template <bool _has_optional_args = has_optional_args>
+        _splitting_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts )
+            : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
+            , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
         {
         }
     };
 
-    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename... Methods_t, typename... Args_t>
+    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename... Methods_t>
+    auto
+    make_splitting_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
+    {
+        return _splitting_method_t<value_t, Methods_t...>( meths, dts );
+    }
+
+    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename optional_tuple_t, typename... Methods_t>
     auto
     make_splitting_from_tuple( std::tuple<Methods_t...> const& meths,
         std::array<value_t, sizeof...( Methods_t )> const& dts,
-        Args_t... optional_args )
+        optional_tuple_t optional_args )
     {
-        return _splitting_method_t<value_t, Methods_t...>( meths, dts, optional_args... );
+        return std::apply(
+            [&]<typename... Args_t>( Args_t&&... args )
+            {
+                return _splitting_method_t<value_t, Methods_t...>( meths, dts, args... );
+            },
+            optional_args );
     }
 
 } // namespace ponio::splitting::detail

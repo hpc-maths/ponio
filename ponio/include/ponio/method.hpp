@@ -18,49 +18,6 @@
 
 namespace ponio
 {
-
-    template <typename state_t>
-    auto
-    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
-    {
-        return std::abs( ( unp1 - unp1bis ) / ( 1.0 + std::max( std::abs( un ), std::abs( unp1 ) ) ) );
-    }
-
-    template <typename state_t>
-        requires std::ranges::range<state_t>
-    auto
-    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
-    {
-        auto it_unp1    = std::ranges::cbegin( unp1 );
-        auto it_unp1bis = std::ranges::cbegin( unp1bis );
-        auto last       = std::ranges::cend( un );
-
-        auto n_elm = std::distance( std::ranges::cbegin( un ), last );
-
-        using value_t = std::remove_cvref_t<decltype( *it_unp1 )>;
-        auto r        = static_cast<value_t>( 0. );
-
-        for ( auto it_un = std::ranges::cbegin( un ); it_un != last; ++it_un, ++it_unp1, ++it_unp1bis )
-        {
-            auto tmp = ( *it_unp1 - *it_unp1bis ) / ( 1.0 + std::max( std::abs( *it_un ), std::abs( *it_unp1 ) ) );
-            r += tmp * tmp;
-        }
-        return std::sqrt( ( 1. / static_cast<double>( n_elm ) ) * r );
-
-        /*
-        return std::sqrt(
-          std::accumulate(
-            std::cbegin(un), std::cend(un),
-            [&it_unp1,&it_unp1bis]( auto r , auto uni ) mutable {
-              return std::pow(
-                  (*it_unp1 - *it_unp1bis++)/(1.0 + std::max(uni,*it_unp1++))
-                , 2u );
-            }
-          )
-        );
-        */
-    }
-
     template <typename Algorithm_t, typename state_t>
     struct method;
 
@@ -178,7 +135,7 @@ namespace ponio
         std::tuple<value_t, state_t, value_t>
         _return( value_t tn, state_t const& un, value_t dt )
         {
-            auto error = error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
+            auto error = ::detail::error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
 
             value_t new_dt = 0.9 * std::pow( alg.tol / error, 1. / static_cast<value_t>( Algorithm_t::order ) ) * dt;
             new_dt         = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
@@ -267,11 +224,20 @@ namespace ponio
      * @param algos        tuple of algorithms and splitting method
      * @param shadow_of_u0 an object with the same sixe of computed value for allocation
      */
-    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename state_t, typename... Algorithms_t>
+    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename state_t, typename optional_args_t, typename... Algorithms_t>
     auto
-    make_method( splitting::detail::_splitting_tuple<_splitting_method_t, value_t, Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
+    make_method( splitting::detail::_splitting_tuple<_splitting_method_t, value_t, optional_args_t, Algorithms_t...> const& algos,
+        state_t const& shadow_of_u0 )
     {
+        using splitting_tuple = splitting::detail::_splitting_tuple<_splitting_method_t, value_t, optional_args_t, Algorithms_t...>;
+
         auto methods = make_tuple_methods( algos.algos, shadow_of_u0 );
+
+        if constexpr ( splitting_tuple::has_optional_args )
+        {
+            return splitting::detail::make_splitting_from_tuple<_splitting_method_t>( methods, algos.time_steps, algos.optional_arguments );
+        }
+
         return splitting::detail::make_splitting_from_tuple<_splitting_method_t>( methods, algos.time_steps );
     }
 
