@@ -107,7 +107,7 @@ namespace ponio::splitting::lie
     auto
     make_lie_tuple( std::pair<Algorithms_t, value_t>&&... args )
     {
-        return detail::_splitting_tuple<lie, value_t, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
+        return detail::_splitting_tuple<lie, value_t, void, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
     }
 
 } // namespace ponio::splitting::lie

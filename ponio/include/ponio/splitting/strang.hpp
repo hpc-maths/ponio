@@ -11,7 +11,7 @@
 #include <tuple>
 #include <utility>
 
-#include "../method.hpp"
+#include "../detail.hpp"
 #include "../ponio_config.hpp"
 #include "detail.hpp"
 #include "lie.hpp"
@@ -142,7 +142,8 @@ namespace ponio::splitting::strang
     auto
     make_strang_tuple( std::pair<Algorithms_t, value_t>&&... args )
     {
-        return detail::_splitting_tuple<strang, value_t, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
+        return detail::_splitting_tuple<strang, value_t, void, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ),
+            { args.second... } );
     }
 
     // ---- class adaptive_strang -----------------------------------
@@ -161,7 +162,7 @@ namespace ponio::splitting::strang
         static constexpr std::size_t order        = 2;
         static constexpr bool is_splitting_method = true;
         static constexpr bool is_embedded         = true;
-        static constexpr std::string_view id      = "adaptive strang";
+        static constexpr std::string_view id      = "adaptive_strang";
 
         value_t delta;
         value_t tol;
@@ -218,11 +219,11 @@ namespace ponio::splitting::strang
             // j'ai voulu lancer chacune de ces 2 fonctions dans des threads différents
             // avec std::thread
             // mais j'ai eu une erreur, donc à corriger plus tard
-            _call_inc( f, tn, un, dt, u_np1_ref, 0. );
-            _call_inc( f, tn, un, dt, u_np1_shift, delta );
+            _call_inc( f, tn, u_np1_ref, dt, 0. );
+            _call_inc( f, tn, u_np1_shift, dt, delta );
 
             // TODO compute norm between u_np1_ref and u_np1_shift
-            auto error = error_estimate( un, u_np1_ref, u_np1_shift );
+            auto error = ::detail::error_estimate( un, u_np1_ref, u_np1_shift );
 
             value_t new_dt = 0.9 * std::sqrt( tol / error ) * dt;
             new_dt         = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
@@ -249,10 +250,10 @@ namespace ponio::splitting::strang
     auto
     make_adaptive_strang_tuple( value_t delta, value_t tolerance, std::pair<Algorithms_t, value_t>&&... args )
     {
-        return detail::_splitting_tuple<adaptive_strang, value_t, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ),
+        return detail::_splitting_tuple<adaptive_strang, value_t, std::tuple<value_t, value_t>, Algorithms_t...>(
+            std::forward_as_tuple( ( args.first )... ),
             { args.second... },
-            delta,
-            tolerance );
+            std::make_tuple( delta, tolerance ) );
     }
 
 } // namespace ponio::splitting::strang
