@@ -6,8 +6,8 @@ checkersReport
 # suppress unusedFunction in butcher_methods.hpp
 unusedFunction:ponio/include/ponio/runge_kutta/butcher_methods.hpp
 # possible false positive
-unusedFunction:ponio/include/ponio/detail.hpp:84
-unusedFunction:ponio/include/ponio/detail.hpp:93
+unusedFunction:ponio/include/ponio/detail.hpp:125
+unusedFunction:ponio/include/ponio/detail.hpp:134
 unusedFunction:ponio/include/ponio/problem.hpp:115
 unusedFunction:ponio/include/ponio/problem.hpp:154
 unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:25
