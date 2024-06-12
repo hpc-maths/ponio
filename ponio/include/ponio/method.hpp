@@ -220,6 +220,7 @@ namespace ponio
      * @tparam _splitting_method_t splitting method (Lie or Strang splitting)
      * @tparam value_t             type of coefficients and time step
      * @tparam state_t             type of state
+     * @tparam optional_args_t     type of tuple of optional arguments to build _splitting_method_t object (void if not needed)
      * @tparam Algorithms_t        types of algorithms to solve each step of splitting
      * @param algos        tuple of algorithms and splitting method
      * @param shadow_of_u0 an object with the same sixe of computed value for allocation
