@@ -42,6 +42,15 @@ namespace ponio::splitting::detail
     }
 
     // ---- class _splitting_tuple ----------------------------------
+
+    /**
+     * @brief generic class to prevent code duplication between splitting method
+     *
+     * @tparam _splitting_method_t type of splitting method
+     * @tparam value_t             type of coefficient
+     * @tparam optional_args_t     type of tuple of optional arguments (void if not needed)
+     * @tparam Algorithms_t        type of algorithms to solve each step of splitting
+     */
     template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename optional_args_t, typename... Algorithms_t>
     struct _splitting_tuple
     {
@@ -76,6 +85,15 @@ namespace ponio::splitting::detail
         }
     };
 
+    /**
+     * @brief factory for generic splitting method (strang, lie)
+     *
+     * @tparam _splitting_method_t type of splitting method
+     * @tparam value_t             type of coefficients
+     * @tparam Methods_t           type of methods to solve each step of splitting
+     * @param meths tuple of methods
+     * @param dts   time step for each method
+     */
     template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename... Methods_t>
     auto
     make_splitting_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
@@ -83,6 +101,17 @@ namespace ponio::splitting::detail
         return _splitting_method_t<value_t, Methods_t...>( meths, dts );
     }
 
+    /**
+     * @brief factory for generic splitting method (adaptive_strang)
+     *
+     * @tparam _splitting_method_t type of splitting method
+     * @tparam value_t             type of coefficients
+     * @tparam optional_tuple_t    type of tuple of optional arguments
+     * @tparam Methods_t           type of methods to solve each step of splitting
+     * @param meths         tuple of methods
+     * @param dts           time step for each method
+     * @param optional_args tuple of optional arguments
+     */
     template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename optional_tuple_t, typename... Methods_t>
     auto
     make_splitting_from_tuple( std::tuple<Methods_t...> const& meths,

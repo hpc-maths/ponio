@@ -222,7 +222,6 @@ namespace ponio::splitting::strang
             _call_inc( f, tn, u_np1_ref, dt, 0. );
             _call_inc( f, tn, u_np1_shift, dt, delta );
 
-            // TODO compute norm between u_np1_ref and u_np1_shift
             auto error = ::detail::error_estimate( un, u_np1_ref, u_np1_shift );
 
             value_t new_dt = 0.9 * std::sqrt( tol / error ) * dt;
