@@ -12,4 +12,4 @@ unusedFunction:ponio/include/ponio/problem.hpp:115
 unusedFunction:ponio/include/ponio/problem.hpp:154
 unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:25
 unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:40
-unusedFunction:ponio/include/ponio/splitting/strang.hpp:250
+unusedFunction:ponio/include/ponio/splitting/strang.hpp:258
