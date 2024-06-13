@@ -22,15 +22,8 @@ In Lie splitting method, the solution is computed as:
    :project: ponio
    :members:
 
-Helper functions and classes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. doxygenfunction:: ponio::splitting::lie::make_lie_from_tuple
-   :project: ponio
-
-.. doxygenclass:: ponio::splitting::lie::lie_tuple
-   :project: ponio
-   :members:
+Helper function
+~~~~~~~~~~~~~~~
 
 .. doxygenfunction:: ponio::splitting::lie::make_lie_tuple
    :project: ponio
@@ -51,15 +44,46 @@ In Strang splitting method, the solution is computed as:
    :project: ponio
    :members:
 
-Helper functions and classes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Helper function
+~~~~~~~~~~~~~~~
 
-.. doxygenfunction:: ponio::splitting::strang::make_strang_from_tuple
+.. doxygenfunction:: ponio::splitting::strang::make_strang_tuple
    :project: ponio
 
-.. doxygenclass:: ponio::splitting::strang::strang_tuple
+
+Adaptive time step Strang splitting method
+------------------------------------------
+
+In Strang splitting method, the solution is computed as:
+
+.. math::
+
+   u^{n+1} = \phi_{\frac{\Delta t}{2}}^{[f_1]}\circ \cdots \circ \phi_{\frac{\Delta t}{2}}^{[f_{n-1}]}
+              \circ \phi_{\Delta t}^{[f_n]}
+              \circ \phi_{\frac{\Delta t}{2}}^{[f_{n-1}]}\circ\cdots\circ \phi_{\frac{\Delta t}{2}}^{[f_1]}
+              (t^n,u^n)
+
+The approximation of order 1 is computed with a shifted Strang splitting method:
+
+.. math::
+
+   \tilde{u}^{n+1} = \phi_{(\frac{1}{2}-\delta)\Delta t}^{[f_1]}\circ\phi_{\frac{\Delta t}{2}}^{[f_2]}\circ \cdots \circ \phi_{\frac{\Delta t}{2}}^{[f_{n-1}]}
+              \circ \phi_{\Delta t}^{[f_n]}
+              \circ \phi_{\frac{\Delta t}{2}}^{[f_{n-1}]}\circ\cdots\circ\phi_{\frac{\Delta t}{2}}^{[f_2]}\circ \phi_{(\frac{1}{2}+\delta)\Delta t}^{[f_1]}
+              (t^n,u^n)
+
+with :math:`\delta\in[-1/2, 0)\cup(0,1/2]`
+
+.. note::
+
+   + Only the first (and last) step is shifted by :math:`\delta\Delta t`.
+
+.. doxygenclass:: ponio::splitting::strang::adaptive_strang
    :project: ponio
    :members:
 
-.. doxygenfunction:: ponio::splitting::strang::make_strang_tuple
+Helper function
+~~~~~~~~~~~~~~~
+
+.. doxygenfunction:: ponio::splitting::strang::make_adaptive_strang_tuple
    :project: ponio
