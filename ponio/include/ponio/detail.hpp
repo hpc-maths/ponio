@@ -184,4 +184,7 @@ namespace detail
     concept problem_jacobian = std::invocable<decltype( &Problem_t::df ), Problem_t, value_t, state_t>
                             || std::invocable<decltype( Problem_t::df ), value_t, state_t>;
 
+    template <typename state_t>
+    concept has_array_range = requires( state_t u ) { requires std::ranges::range<decltype( u.array() )>; };
+
 } // namespace detail
