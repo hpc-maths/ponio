@@ -12,6 +12,7 @@
 #include <string_view>
 #include <utility>
 
+#include "../detail.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
 
@@ -326,6 +327,15 @@ namespace ponio::runge_kutta::rock
                               / static_cast<value_t>( std::size( unp1 ) ) );
         }
 
+        // same with something which contains a range
+        template <typename state_t>
+            requires ::detail::has_array_range<state_t>
+        auto
+        error( state_t&& unp1, state_t&& un, state_t&& tmp )
+        {
+            return error( unp1.array(), un.array(), tmp.array() );
+        }
+
         /**
          * @brief iteration of ROCK2 method
          *
@@ -526,6 +536,15 @@ namespace ponio::runge_kutta::rock
                                       return sum + ::detail::power<2>( error( unp1_i, *it_tmp++ ) );
                                   } )
                               / static_cast<value_t>( std::size( unp1 ) ) );
+        }
+
+        // same with something which contains a range
+        template <typename state_t>
+            requires ::detail::has_array_range<state_t>
+        auto
+        error( state_t const& unp1, state_t const& tmp )
+        {
+            return error( unp1.array(), tmp.array() );
         }
 
         /**

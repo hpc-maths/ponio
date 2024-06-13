@@ -105,7 +105,7 @@ main( int argc, char** argv )
     };
     auto f = [&]( [[maybe_unused]] double t, auto&& u )
     {
-        samurai::make_bc<samurai::Neumann>( u, 0. );
+        samurai::make_bc<samurai::Neumann<1>>( u, 0. );
         samurai::update_ghost_mr( u );
         return f_t( t )( u );
     };
@@ -123,13 +123,13 @@ main( int argc, char** argv )
     // Range to iterate over solution
     // auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::rkc_202(), un_ini, { 0., Tf }, dt );
     // auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::dirk23(), un_ini, { 0., Tf }, dt );
-    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::rock::rock4<false>( eigmax_computer ), un_ini, { 0., Tf }, dt );
+    auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::rock::rock4<true>( eigmax_computer ), un_ini, { 0., Tf }, dt );
 
     auto it_sol = sol_range.begin();
 
     // Prepare MR for solution on iterator
     auto MRadaptation = samurai::make_MRAdapt( it_sol->state );
-    samurai::make_bc<samurai::Neumann>( it_sol->state, 0. );
+    samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
     MRadaptation( mr_epsilon, mr_regularity );
     samurai::update_ghost_mr( it_sol->state );
 
