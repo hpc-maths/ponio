@@ -76,7 +76,7 @@ with :math:`\delta\in[-1/2, 0)\cup(0,1/2]`
 
 .. note::
 
-   + Only the first (and last) step is shifted by :math:`\delta\Delta t`.
+   Only the first (and last) step is shifted by :math:`\delta\Delta t`.
 
 .. doxygenclass:: ponio::splitting::strang::adaptive_strang
    :project: ponio
@@ -86,4 +86,22 @@ Helper function
 ~~~~~~~~~~~~~~~
 
 .. doxygenfunction:: ponio::splitting::strang::make_adaptive_strang_tuple
+   :project: ponio
+
+Generic splitting tuple
+-----------------------
+
+The class :cpp:class:`ponio::splitting::detail::_splitting_tuple` is useful to build each splitting method from variadic number of pair of algorithm and time step. This class can has optional arguments, stored in a tuple, to call constructor of :code:`_splitting_method_t` (which is :cpp:class:`ponio::splitting::lie::lie`, :cpp:class:`ponio::splitting::strang::strang` or :cpp:class:`ponio::splitting::strang::adaptive_strang`).
+
+.. doxygenclass:: ponio::splitting::detail::_splitting_tuple
+   :project: ponio
+   :members:
+
+Helper function
+~~~~~~~~~~~~~~~
+
+.. doxygenfunction:: ponio::splitting::detail::make_splitting_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
+   :project: ponio
+
+.. doxygenfunction:: ponio::splitting::detail::make_splitting_from_tuplee( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts, optional_tuple_t optional_args )
    :project: ponio

@@ -292,7 +292,7 @@ Next we define the three function to represent :math:`\varphi^{[0]}`, :math:`\va
   :lineno-start: 20
   :linenos:
 
-Now we create a tuple of algorithms with :cpp:func:`ponio::splitting::lie::make_lie_tuple` or :cpp:func:`ponio::splitting::strang::make_strang_tuple` for respectively a Lie splitting method or Strang splitting method.
+Now we create a tuple of algorithms with :cpp:func:`ponio::splitting::lie::make_lie_tuple` or :cpp:func:`ponio::splitting::strang::make_strang_tuple` for respectively a Lie splitting method or Strang splitting method. In ponio their is also an adaptive time stepping Strang splitting method with :cpp:func:`ponio::splitting::strang::make_adaptive_strang_tuple`.
 
 .. literalinclude:: ../_static/cpp/lorenz_split.cpp
   :language: cpp
