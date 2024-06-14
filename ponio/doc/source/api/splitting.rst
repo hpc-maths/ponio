@@ -91,9 +91,9 @@ Helper function
 Generic splitting tuple
 -----------------------
 
-The class :cpp:class:`ponio::splitting::detail::_splitting_tuple` is useful to build each splitting method from variadic number of pair of algorithm and time step. This class can has optional arguments, stored in a tuple, to call constructor of :code:`_splitting_method_t` (which is :cpp:class:`ponio::splitting::lie::lie`, :cpp:class:`ponio::splitting::strang::strang` or :cpp:class:`ponio::splitting::strang::adaptive_strang`).
+The class :cpp:class:`ponio::splitting::detail::splitting_tuple` is useful to build each splitting method from variadic number of pair of algorithm and time step. This class can has optional arguments, stored in a tuple, to call constructor of :code:`_splitting_method_t` (which is :cpp:class:`ponio::splitting::lie::lie`, :cpp:class:`ponio::splitting::strang::strang` or :cpp:class:`ponio::splitting::strang::adaptive_strang`).
 
-.. doxygenclass:: ponio::splitting::detail::_splitting_tuple
+.. doxygenclass:: ponio::splitting::detail::splitting_tuple
    :project: ponio
    :members:
 

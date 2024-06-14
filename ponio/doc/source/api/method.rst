@@ -24,7 +24,7 @@ There is 0 overloading of ``ponio::make_method`` function, one for generic algor
 .. doxygenfunction:: ponio::make_method(Algorithm_t const& algo, state_t const& shadow_of_u0)
    :project: ponio
 
-.. doxygenfunction:: ponio::make_method( splitting::detail::_splitting_tuple<_splitting_method_t, value_t, optional_args_t, Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
+.. doxygenfunction:: ponio::make_method( splitting::detail::splitting_tuple<_splitting_method_t, value_t, optional_args_t, Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
    :project: ponio
 
 An helper function for splitting method factory.

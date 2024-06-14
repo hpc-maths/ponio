@@ -227,10 +227,10 @@ namespace ponio
      */
     template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename state_t, typename optional_args_t, typename... Algorithms_t>
     auto
-    make_method( splitting::detail::_splitting_tuple<_splitting_method_t, value_t, optional_args_t, Algorithms_t...> const& algos,
+    make_method( splitting::detail::splitting_tuple<_splitting_method_t, value_t, optional_args_t, Algorithms_t...> const& algos,
         state_t const& shadow_of_u0 )
     {
-        using splitting_tuple = splitting::detail::_splitting_tuple<_splitting_method_t, value_t, optional_args_t, Algorithms_t...>;
+        using splitting_tuple = splitting::detail::splitting_tuple<_splitting_method_t, value_t, optional_args_t, Algorithms_t...>;
 
         auto methods = make_tuple_methods( algos.algos, shadow_of_u0 );
 
