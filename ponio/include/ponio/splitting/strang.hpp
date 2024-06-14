@@ -131,18 +131,18 @@ namespace ponio::splitting::strang
     // ---- *helper* ----
 
     /**
-     * a helper factory for \ref _splitting_tuple from a tuple of algorithms to build a Strang method
+     * a helper factory for @ref ponio::splitting::detail::splitting_tuple from a tuple of algorithms to build a Strang method
      *
      * @tparam value_t      type of coefficients
      * @tparam Algorithms_t variadic list of types of algorithms
      * @param args          variadic list of pairs of algorithm and time step
-     * @return a \ref _splitting_tuple object build from the tuple of methods
+     * @return a @ref ponio::splitting::detail::splitting_tuple object build from the tuple of methods
      */
     template <typename value_t, typename... Algorithms_t>
     auto
     make_strang_tuple( std::pair<Algorithms_t, value_t>&&... args )
     {
-        return detail::_splitting_tuple<strang, value_t, void, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ),
+        return detail::splitting_tuple<strang, value_t, void, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ),
             { args.second... } );
     }
 
@@ -246,20 +246,21 @@ namespace ponio::splitting::strang
     // ---- *helper* ----
 
     /**
-     * a helper factory for \ref _splitting_tuple from a tuple of algorithms to build an adaptive time step Strang method
+     * a helper factory for @ref ponio::splitting::detail::splitting_tuple from a tuple of algorithms to build an adaptive time step Strang
+     * method
      *
      * @tparam value_t      type of coefficients
      * @tparam Algorithms_t variadic list of types of algorithms
      * @param delta     shift argument
      * @param tolerance tolerance for adaptive time step algorithm
      * @param args      variadic list of pairs of algorithm and time step
-     * @return a \ref _splitting_tuple object build from the tuple of methods
+     * @return a @ref ponio::splitting::detail::splitting_tuple object build from the tuple of methods
      */
     template <typename value_t, typename... Algorithms_t>
     auto
     make_adaptive_strang_tuple( value_t delta, value_t tolerance, std::pair<Algorithms_t, value_t>&&... args )
     {
-        return detail::_splitting_tuple<adaptive_strang, value_t, std::tuple<value_t, value_t>, Algorithms_t...>(
+        return detail::splitting_tuple<adaptive_strang, value_t, std::tuple<value_t, value_t>, Algorithms_t...>(
             std::forward_as_tuple( ( args.first )... ),
             { args.second... },
             std::make_tuple( delta, tolerance ) );

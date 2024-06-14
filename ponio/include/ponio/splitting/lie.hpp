@@ -96,18 +96,18 @@ namespace ponio::splitting::lie
     // ---- *helper* ----
 
     /**
-     * a helper factory for \ref _splitting_tuple from a tuple of algorithms to build a Lie method
+     * a helper factory for @ref ponio::splitting::detail::splitting_tuple from a tuple of algorithms to build a Lie method
      *
      * @tparam value_t      type of coefficients
      * @tparam Algorithms_t variadic list of types of algorithms
      * @param args          variadic list of pairs of algorithm and time step
-     * @return a \ref _splitting_tuple object build from the tuple of methods
+     * @return a @ref ponio::splitting::detail::splitting_tuple object build from the tuple of methods
      */
     template <typename value_t, typename... Algorithms_t>
     auto
     make_lie_tuple( std::pair<Algorithms_t, value_t>&&... args )
     {
-        return detail::_splitting_tuple<lie, value_t, void, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
+        return detail::splitting_tuple<lie, value_t, void, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
     }
 
 } // namespace ponio::splitting::lie

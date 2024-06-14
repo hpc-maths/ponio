@@ -41,10 +41,10 @@ namespace ponio::splitting::detail
         return ui;
     }
 
-    // ---- class _splitting_tuple ----------------------------------
+    // ---- class splitting_tuple ----------------------------------
 
-    /**
-     * @brief generic class to prevent code duplication between splitting method
+    /** @class splitting_tuple
+     *  generic class to prevent code duplication between splitting method
      *
      * @tparam _splitting_method_t type of splitting method
      * @tparam value_t             type of coefficient
@@ -52,7 +52,7 @@ namespace ponio::splitting::detail
      * @tparam Algorithms_t        type of algorithms to solve each step of splitting
      */
     template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename optional_args_t, typename... Algorithms_t>
-    struct _splitting_tuple
+    struct splitting_tuple
     {
         using splitting_method_t                  = _splitting_method_t<value_t, Algorithms_t...>;
         static constexpr std::size_t order        = splitting_method_t::order;
@@ -68,9 +68,7 @@ namespace ponio::splitting::detail
 
         template <bool _has_optional_args = has_optional_args>
             requires std::same_as<std::bool_constant<has_optional_args>, std::true_type>
-        _splitting_tuple( std::tuple<Algorithms_t...>&& algs,
-            std::array<value_t, sizeof...( Algorithms_t )>&& dts,
-            optional_args_container args )
+        splitting_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts, optional_args_container args )
             : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
             , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
             , optional_arguments( args )
@@ -78,7 +76,7 @@ namespace ponio::splitting::detail
         }
 
         template <bool _has_optional_args = has_optional_args>
-        _splitting_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts )
+        splitting_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts )
             : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
             , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
         {
