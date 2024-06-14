@@ -103,5 +103,5 @@ Helper function
 .. doxygenfunction:: ponio::splitting::detail::make_splitting_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
    :project: ponio
 
-.. doxygenfunction:: ponio::splitting::detail::make_splitting_from_tuplee( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts, optional_tuple_t optional_args )
+.. doxygenfunction:: ponio::splitting::detail::make_splitting_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts, optional_tuple_t optional_args )
    :project: ponio

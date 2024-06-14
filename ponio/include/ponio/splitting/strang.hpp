@@ -131,12 +131,12 @@ namespace ponio::splitting::strang
     // ---- *helper* ----
 
     /**
-     * a helper factory for \ref strang_tuple from a tuple of algorithms
+     * a helper factory for \ref _splitting_tuple from a tuple of algorithms to build a Strang method
      *
      * @tparam value_t      type of coefficients
      * @tparam Algorithms_t variadic list of types of algorithms
      * @param args          variadic list of pairs of algorithm and time step
-     * @return a \ref strang_tuple object build from the tuple of methods
+     * @return a \ref _splitting_tuple object build from the tuple of methods
      */
     template <typename value_t, typename... Algorithms_t>
     auto
@@ -246,12 +246,14 @@ namespace ponio::splitting::strang
     // ---- *helper* ----
 
     /**
-     * a helper factory for \ref strang_tuple from a tuple of algorithms
+     * a helper factory for \ref _splitting_tuple from a tuple of algorithms to build an adaptive time step Strang method
      *
      * @tparam value_t      type of coefficients
      * @tparam Algorithms_t variadic list of types of algorithms
-     * @param args          variadic list of pairs of algorithm and time step
-     * @return a \ref strang_tuple object build from the tuple of methods
+     * @param delta     shift argument
+     * @param tolerance tolerance for adaptive time step algorithm
+     * @param args      variadic list of pairs of algorithm and time step
+     * @return a \ref _splitting_tuple object build from the tuple of methods
      */
     template <typename value_t, typename... Algorithms_t>
     auto

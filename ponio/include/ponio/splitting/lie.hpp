@@ -96,12 +96,12 @@ namespace ponio::splitting::lie
     // ---- *helper* ----
 
     /**
-     * a helper factory for \ref lie_tuple from a tuple of algorithms
+     * a helper factory for \ref _splitting_tuple from a tuple of algorithms to build a Lie method
      *
      * @tparam value_t      type of coefficients
      * @tparam Algorithms_t variadic list of types of algorithms
      * @param args          variadic list of pairs of algorithm and time step
-     * @return a \ref lie_tuple object build from the tuple of methods
+     * @return a \ref _splitting_tuple object build from the tuple of methods
      */
     template <typename value_t, typename... Algorithms_t>
     auto
