@@ -14,7 +14,6 @@
 #include <limits>
 #include <ranges>
 #include <tuple>
-#include <type_traits>
 #include <vector>
 
 namespace observer

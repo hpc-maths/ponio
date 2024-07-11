@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include <iostream>
-#include <valarray>
-
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 #include <iterator>
 #include <numbers>
 #include <sstream>
+#include <string>
+#include <valarray>
 
-#include <ponio/observer.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
@@ -38,7 +39,7 @@ struct nagumo
     }
 
     std::valarray<double>
-    operator()( double, std::valarray<double> const& u )
+    operator()( double, std::valarray<double> const& u ) const
     {
         double const oneoverdxdx = 1. / ( dx * dx );
         std::size_t const nx     = u.size();
@@ -58,10 +59,10 @@ struct nagumo
     }
 
     std::valarray<double>
-    exact_solution( double t, std::valarray<double> const& x )
+    exact_solution( double t, std::valarray<double> const& x ) const
     {
-        double v   = ( 1. / std::sqrt( 2.0 ) ) * ( std::sqrt( k * d ) );
-        double cst = -( 1. / std::sqrt( 2.0 ) ) * std::sqrt( k / d );
+        double const v   = ( 1. / std::numbers::sqrt2 ) * ( std::sqrt( k * d ) );
+        double const cst = -( 1. / std::numbers::sqrt2 ) * std::sqrt( k / d );
 
         return std::exp( cst * ( x - x_0 - v * t ) ) / ( 1.0 + std::exp( cst * ( x - x_0 - v * t ) ) );
     }
@@ -96,8 +97,8 @@ main()
     double const x_max = 50.0;
     double const x_min = -50.0;
     double const x_0   = -10.0;
-    double k           = 1.0;
-    double d           = 1.0;
+    double const k     = 1.0;
+    double const d     = 1.0;
 
     double const dx = ( x_max - x_min ) / static_cast<double>( nx - 1 );
 
@@ -111,13 +112,13 @@ main()
 
     auto pb = nagumo( dx, x_min, x_max, x_0, k, d );
 
-    double t_ini = 0.0;
-    double t_end = 50.0;
-    double dt    = ( t_end - t_ini ) / 100;
+    double const t_ini = 0.0;
+    double const t_end = 50.0;
+    double const dt    = ( t_end - t_ini ) / 100;
 
     ponio::time_span<double> const t_span = { t_ini, t_end };
 
-    std::valarray<double> u_n = pb.exact_solution( t_ini, x );
+    std::valarray<double> const u_n = pb.exact_solution( t_ini, x );
 
     auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::rkc_202(), u_n, t_span, dt );
     auto it_sol    = sol_range.begin();

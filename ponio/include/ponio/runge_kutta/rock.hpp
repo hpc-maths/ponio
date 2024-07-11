@@ -7,9 +7,11 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <limits>
 #include <numeric>
 #include <ranges>
 #include <string_view>
+#include <tuple>
 #include <utility>
 
 #include "../detail.hpp"
@@ -75,10 +77,10 @@ namespace ponio::runge_kutta::rock
                 value_t eigmax  = 0.;
                 value_t eigmaxo = 0.;
 
-                auto fn = f( tn, un );
+                auto fn = std::forward<problem_t>( f )( tn, un );
                 auto fz = fn;
 
-                auto z = f( tn, fz );
+                auto z = std::forward<problem_t>( f )( tn, fz );
 
                 value_t ynor = detail::norm_2( un );
                 value_t znor = detail::norm_2( z );
@@ -122,7 +124,7 @@ namespace ponio::runge_kutta::rock
                 while ( necessary )
                 {
                     eigmaxo = eigmax;
-                    fz      = f( tn, z );
+                    fz      = std::forward<problem_t>( f )( tn, z );
                     dfzfn   = detail::norm_2( static_cast<state_t>( fz - fn ) );
                     eigmax  = safety_factor * dfzfn / dzyn;
 
@@ -206,7 +208,7 @@ namespace ponio::runge_kutta::rock
             static std::size_t
             compute_n_stages( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt, std::size_t s_min )
             {
-                double eigmax = eig_computer( f, tn, un, dt );
+                double eigmax = std::forward<eig_computer_t>( eig_computer )( f, tn, un, dt );
                 auto mdeg     = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
                 if ( mdeg > 200 )
                 {
@@ -273,8 +275,8 @@ namespace ponio::runge_kutta::rock
         eig_computer_t eig_computer;
 
         rock2_impl()
-            : a_tol( 1e-4 )
-            , r_tol( 1e-4 )
+            : a_tol( default_config::tol )
+            , r_tol( default_config::tol )
         {
         }
 
@@ -288,7 +290,7 @@ namespace ponio::runge_kutta::rock
         rock2_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
             , r_tol( _r_tol )
-            , eig_computer( _eig_computer )
+            , eig_computer( std::move( _eig_computer ) )
         {
         }
 
@@ -305,7 +307,9 @@ namespace ponio::runge_kutta::rock
         auto
         error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
-            return std::abs( tmp / ( a_tol + r_tol * std::max( std::abs( unp1 ), std::abs( un ) ) ) );
+            return std::abs(
+                std::forward<state_t>( tmp )
+                / ( a_tol + r_tol * std::max( std::abs( std::forward<state_t>( unp1 ) ), std::abs( std::forward<state_t>( un ) ) ) ) );
         }
 
         // same with ranges
@@ -314,11 +318,11 @@ namespace ponio::runge_kutta::rock
         auto
         error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
-            auto it_un  = std::ranges::begin( un );
-            auto it_tmp = std::ranges::begin( tmp );
+            auto it_un  = std::ranges::begin( std::forward<state_t>( un ) );
+            auto it_tmp = std::ranges::begin( std::forward<state_t>( tmp ) );
 
-            return std::sqrt( std::accumulate( std::ranges::begin( unp1 ),
-                                  std::ranges::end( unp1 ),
+            return std::sqrt( std::accumulate( std::ranges::begin( std::forward<state_t>( unp1 ) ),
+                                  std::ranges::end( std::forward<state_t>( unp1 ) ),
                                   0.,
                                   [&]( auto sum, auto unp1_i )
                                   {
@@ -333,7 +337,7 @@ namespace ponio::runge_kutta::rock
         auto
         error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
-            return error( unp1.array(), un.array(), tmp.array() );
+            return error( std::forward<state_t>( unp1 ).array(), std::forward<state_t>( un ).array(), std::forward<state_t>( tmp ).array() );
         }
 
         /**
@@ -349,7 +353,7 @@ namespace ponio::runge_kutta::rock
          * @param dt current time step
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        inline std::tuple<value_t, state_t, value_t>
+        std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
             auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
@@ -486,8 +490,8 @@ namespace ponio::runge_kutta::rock
         eig_computer_t eig_computer;
 
         rock4_impl()
-            : a_tol( 1e-4 )
-            , r_tol( 1e-4 )
+            : a_tol( default_config::tol )
+            , r_tol( default_config::tol )
         {
         }
 
@@ -501,7 +505,7 @@ namespace ponio::runge_kutta::rock
         rock4_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
             , r_tol( _r_tol )
-            , eig_computer( _eig_computer )
+            , eig_computer( std::move( _eig_computer ) )
         {
         }
 
@@ -560,7 +564,7 @@ namespace ponio::runge_kutta::rock
          * @param dt current time step
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        inline std::tuple<value_t, state_t, value_t>
+        std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
             auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );

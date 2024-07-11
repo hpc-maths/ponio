@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
-#include <numeric>
 #include <random>
 #include <sstream>
 #include <string>
