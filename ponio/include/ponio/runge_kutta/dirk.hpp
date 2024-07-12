@@ -54,7 +54,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
 
         while ( iter < max_iter && residual > tol )
         {
-            auto increment = std::forward<solver_t>( solver )( std::forward<jacobian_t>( df )( xk ), -std::forward<funct_t>( f )( xk ) );
+            auto increment = std::forward<solver_t>( solver )( std::forward<jacobian_t>( df )( xk ), -std::forward<func_t>( f )( xk ) );
 
             xk       = xk + increment;
             residual = norm( std::forward<func_t>( f )( xk ) );
