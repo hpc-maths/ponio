@@ -40,7 +40,7 @@ namespace ponio
      */
     template <typename Callable_t>
     inline simple_problem<Callable_t>::simple_problem( Callable_t&& f_ )
-        : f( std::move( f_ ) )
+        : f( std::forward<Callable_t>( f_ ) )
     {
     }
 
@@ -101,7 +101,7 @@ namespace ponio
     template <typename Callable_t, typename Jacobian_t>
     inline implicit_problem<Callable_t, Jacobian_t>::implicit_problem( Callable_t&& f_, Jacobian_t&& df_ )
         : simple_problem<Callable_t>( std::forward<Callable_t>( f_ ) )
-        , df( std::move( df_ ) )
+        , df( std::forward<Jacobian_t>( df_ ) )
     {
     }
 
@@ -144,7 +144,7 @@ namespace ponio
     template <typename Callable1_t, typename Callable2_t>
     inline implicit_operator_problem<Callable1_t, Callable2_t>::implicit_operator_problem( Callable1_t&& f_, Callable2_t&& f_t_ )
         : simple_problem<Callable1_t>( std::forward<Callable1_t>( f_ ) )
-        , f_t( std::move( f_t_ ) )
+        , f_t( std::forward<Callable2_t>( f_t_ ) )
     {
     }
 
@@ -200,8 +200,8 @@ namespace ponio
     template <typename Callable_explicit_t, typename Implicit_problem_t>
     inline imex_problem<Callable_explicit_t, Implicit_problem_t>::imex_problem( Callable_explicit_t&& f_explicit,
         Implicit_problem_t&& pb_implicit )
-        : explicit_part( std::move( f_explicit ) )
-        , implicit_part( std::move( pb_implicit ) )
+        : explicit_part( std::forward<Callable_explicit_t>( f_explicit ) )
+        , implicit_part( std::forward<Implicit_problem_t>( pb_implicit ) )
     {
     }
 
@@ -265,8 +265,8 @@ namespace ponio
      */
     template <typename Linear_t, typename Nonlinear_t>
     lawson_problem<Linear_t, Nonlinear_t>::lawson_problem( Linear_t&& l_, Nonlinear_t&& n_ )
-        : l( std::move( l_ ) )
-        , n( std::move( n_ ) )
+        : l( std::forward<Linear_t>( l_ ) )
+        , n( std::forward<Nonlinear_t>( n_ ) )
     {
     }
 
