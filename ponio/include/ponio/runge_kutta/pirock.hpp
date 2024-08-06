@@ -180,8 +180,8 @@ namespace ponio::runge_kutta::pirock
          * the current state and the current time step)
          */
         pirock_impl( alpha_beta_computer_t&& _alpha_beta_computer, eig_computer_t&& _eig_computer )
-            : alpha_beta_computer( std::move( _alpha_beta_computer ) )
-            , eig_computer( std::move( _eig_computer ) )
+            : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
+            , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
         {
         }
 
@@ -200,9 +200,9 @@ namespace ponio::runge_kutta::pirock
             eig_computer_t&& _eig_computer,
             _shampine_trick_caller_t_&& _shampine_trick_caller,
             value_t tol = default_config::tol )
-            : alpha_beta_computer( std::move( _alpha_beta_computer ) )
-            , eig_computer( std::move( _eig_computer ) )
-            , shampine_trick_caller( std::move( _shampine_trick_caller ) )
+            : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
+            , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
+            , shampine_trick_caller( std::forward<_shampine_trick_caller_t_>( _shampine_trick_caller ) )
             , tolerance( tol )
         {
         }
