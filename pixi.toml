@@ -55,7 +55,7 @@ doctest = ">=2.4.11,<2.5"
 sympy = ">=1.12,<2"
 eigen = ">=3.4.0,<3.5"
 numpy = ">=1.26.3,<1.27"
-samurai = ">=0.10.0,<0.11"
+samurai = ">=0.16.0,<0.17"
 
 [target.linux-64.dependencies]
 petsc = "3.20.*"
