@@ -90,7 +90,7 @@ jobs:
         shell: pixi run bash {0}
         run: |
           export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"
-          pixi run build_test_samurai
+          pixi run build_test
       - name: Run tests
         shell: pixi run bash {0}
         run: |
