@@ -290,7 +290,7 @@ namespace ponio::runge_kutta::rock
         rock2_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
             , r_tol( _r_tol )
-            , eig_computer( std::move( _eig_computer ) )
+            , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
         {
         }
 
@@ -505,7 +505,7 @@ namespace ponio::runge_kutta::rock
         rock4_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
             , r_tol( _r_tol )
-            , eig_computer( std::move( _eig_computer ) )
+            , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
         {
         }
 
