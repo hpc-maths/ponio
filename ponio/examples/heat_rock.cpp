@@ -13,6 +13,7 @@
 #include <numbers>
 #include <numeric>
 #include <sstream>
+#include <string>
 #include <valarray>
 
 #include <ponio/observer.hpp>

@@ -200,8 +200,8 @@ namespace ponio
     template <typename Callable_explicit_t, typename Implicit_problem_t>
     inline imex_problem<Callable_explicit_t, Implicit_problem_t>::imex_problem( Callable_explicit_t&& f_explicit,
         Implicit_problem_t&& pb_implicit )
-        : explicit_part( f_explicit )
-        , implicit_part( pb_implicit )
+        : explicit_part( std::forward<Callable_explicit_t>( f_explicit ) )
+        , implicit_part( std::forward<Implicit_problem_t>( pb_implicit ) )
     {
     }
 

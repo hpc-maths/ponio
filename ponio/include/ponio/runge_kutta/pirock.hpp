@@ -5,18 +5,20 @@
 #pragma once
 #include <array>
 #include <concepts>
+#include <cstddef>
+#include <numbers>
 #include <numeric>
-#include <ranges>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 
-#include "../butcher_tableau.hpp"
 #include "../detail.hpp"
 #include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
 #include "dirk.hpp"
 #include "rock.hpp"
+#include "rock_coeff.hpp"
 
 namespace ponio::runge_kutta::pirock
 {
@@ -92,13 +94,13 @@ namespace ponio::runge_kutta::pirock
         {
         }
 
-        inline value_t
+        value_t
         alpha( std::size_t, std::size_t ) const
         {
             return _alpha;
         }
 
-        inline value_t
+        value_t
         beta( std::size_t s, std::size_t l ) const
         {
             return 1. - 2. * alpha( s, l ) * polynomial::Pp_sm2pl_0<value_t>( s, l );
@@ -113,13 +115,13 @@ namespace ponio::runge_kutta::pirock
     template <typename value_t = double>
     struct beta_0
     {
-        inline value_t
+        value_t
         alpha( std::size_t s, std::size_t l ) const
         {
             return 1. / ( 2. * polynomial::Pp_sm2pl_0<value_t>( s, l ) );
         }
 
-        inline value_t
+        value_t
         beta( std::size_t, std::size_t ) const
         {
             return 0.;
@@ -145,7 +147,7 @@ namespace ponio::runge_kutta::pirock
     struct pirock_impl
     {
         static constexpr bool is_embedded           = _is_embedded;
-        static constexpr bool shampine_trick_enable = !std::is_void<_shampine_trick_caller_t>::value;
+        static constexpr bool shampine_trick_enable = !std::is_void_v<_shampine_trick_caller_t>;
 
         static constexpr std::size_t l         = _l;
         static constexpr std::size_t N_stages  = stages::dynamic;
@@ -156,7 +158,7 @@ namespace ponio::runge_kutta::pirock
 
         using rock_coeff              = rock::rock2_coeff<value_t>;
         using degree_computer         = rock::detail::degree_computer<value_t, rock_coeff>;
-        using shampine_trick_caller_t = typename std::conditional<shampine_trick_enable, _shampine_trick_caller_t, bool>::type;
+        using shampine_trick_caller_t = typename std::conditional_t<shampine_trick_enable, _shampine_trick_caller_t, bool>;
 
         alpha_beta_computer_t alpha_beta_computer;
         eig_computer_t eig_computer;
@@ -167,9 +169,7 @@ namespace ponio::runge_kutta::pirock
          * @brief Construct a new pirock impl object
          *
          */
-        pirock_impl()
-        {
-        }
+        pirock_impl() = default;
 
         /**
          * @brief Construct a new pirock impl object
@@ -180,8 +180,8 @@ namespace ponio::runge_kutta::pirock
          * the current state and the current time step)
          */
         pirock_impl( alpha_beta_computer_t&& _alpha_beta_computer, eig_computer_t&& _eig_computer )
-            : alpha_beta_computer( _alpha_beta_computer )
-            , eig_computer( _eig_computer )
+            : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
+            , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
         {
         }
 
@@ -200,15 +200,15 @@ namespace ponio::runge_kutta::pirock
             eig_computer_t&& _eig_computer,
             _shampine_trick_caller_t_&& _shampine_trick_caller,
             value_t tol = default_config::tol )
-            : alpha_beta_computer( _alpha_beta_computer )
-            , eig_computer( _eig_computer )
-            , shampine_trick_caller( _shampine_trick_caller )
+            : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
+            , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
+            , shampine_trick_caller( std::forward<_shampine_trick_caller_t_>( _shampine_trick_caller ) )
             , tolerance( tol )
         {
         }
 
         template <typename problem_t, typename state_t, typename array_ki_t>
-        inline std::tuple<value_t, state_t, value_t>
+        std::tuple<value_t, state_t, value_t>
         operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt )
         {
             static_assert( detail::problem_operator<decltype( pb.implicit_part ), value_t>
@@ -220,7 +220,7 @@ namespace ponio::runge_kutta::pirock
 
             value_t const alpha = alpha_beta_computer.alpha( s, l );
             value_t const beta  = alpha_beta_computer.beta( s, l );
-            value_t const gamma = 1. - 0.5 * std::sqrt( 2. );
+            value_t const gamma = 1. - 0.5 * std::numbers::sqrt2;
 
             auto& u_j   = U[0];
             auto& u_jm1 = U[1];

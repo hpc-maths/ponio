@@ -287,3 +287,6 @@ algorithm.rst
 ponio/doc/xml
 ponio/doc/source/gallery/examples
 ponio/doc/source/gallery/notebook
+ponio/doc/source/_static/cpp/*.txt
+ponio/doc/source/_static/cpp/*.out
+ponio/doc/source/_static/cpp/*.png

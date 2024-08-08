@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+#include <cstddef>
 #include <filesystem>
+#include <initializer_list>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <utility>
-#include <valarray>
 
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>

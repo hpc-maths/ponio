@@ -116,7 +116,7 @@ namespace ponio
          * initial value.
          */
         template <typename Problem_t, typename value_t>
-        inline std::tuple<value_t, state_t, value_t>
+        std::tuple<value_t, state_t, value_t>
         operator()( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
             _call_stage( f, tn, un, dt );
@@ -211,7 +211,7 @@ namespace ponio
         }
 
         template <typename Problem_t, typename value_t>
-        inline std::tuple<value_t, state_t, value_t>
+        std::tuple<value_t, state_t, value_t>
         operator()( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
             return alg( f, tn, un, kis, dt );

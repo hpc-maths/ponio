@@ -1,7 +1,6 @@
 name: ponio CI - [midnight]
 
 on:
-  workflow_dispatch: # allows manual triggering
   schedule:
     - cron: "0 0 * * *" # runs daily at 00:00
 
@@ -16,8 +15,7 @@ jobs:
         run: echo "nb_commits=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_OUTPUT
   clang-tidy-check:
     needs: check_new_commit
-    # if new commit or manual triggering (not at midnight)
-    if: needs.check_new_commit.outputs.nb_commits > 0 || github.event.schedule != '* 0 * * *'
+    if: github.repository == 'hpc-maths/ponio' && needs.check_new_commit.outputs.nb_commits > 0
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,3 +45,21 @@ jobs:
         shell: pixi run bash {0}
         run: |
           run-clang-tidy
+  # long time tests
+  long-test:
+    needs: check_new_commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: v0.26.1
+          cache: true
+      - name: Install compiler and Python
+        run: pixi add cxx-compiler python
+      - name: Install samurai
+        run: pixi add samurai
+      - name: Build
+        run: pixi run build_long_test
+      - name: Run tests
+        run: pixi run long_test

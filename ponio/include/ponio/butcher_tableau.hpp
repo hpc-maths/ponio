@@ -7,6 +7,7 @@
 #include <array>
 #include <concepts>
 #include <cstddef>
+#include <type_traits>
 #include <utility>
 
 namespace ponio::runge_kutta::butcher
@@ -22,9 +23,9 @@ namespace ponio::runge_kutta::butcher
         using vector_t = std::array<value_t, N_stages>;
 
         constexpr butcher_tableau( matrix_t&& A_, vector_t&& b_, vector_t&& c_ )
-            : A( std::forward<matrix_t>( A_ ) )
-            , b( std::forward<vector_t>( b_ ) )
-            , c( std::forward<vector_t>( c_ ) )
+            : A( std::move( A_ ) )
+            , b( std::move( b_ ) )
+            , c( std::move( c_ ) )
         {
         }
 
@@ -47,8 +48,8 @@ namespace ponio::runge_kutta::butcher
         using base_t::N_stages;
 
         constexpr adaptive_butcher_tableau( matrix_t&& A_, vector_t&& b1_, vector_t&& b2_, vector_t&& c_ )
-            : base_t( std::forward<matrix_t>( A_ ), std::forward<vector_t>( b1_ ), std::forward<vector_t>( c_ ) )
-            , b2( std::forward<vector_t>( b2_ ) )
+            : base_t( std::move( A_ ), std::move( b1_ ), std::move( c_ ) )
+            , b2( std::move( b2_ ) )
         {
         }
 

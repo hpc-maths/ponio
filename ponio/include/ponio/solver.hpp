@@ -8,7 +8,6 @@
 #include <iterator>
 #include <limits>
 #include <optional>
-#include <ranges>
 
 #include "method.hpp"
 #include "time_span.hpp"
@@ -371,7 +370,7 @@ namespace ponio
          * @brief returns an iterator to the beginning solver_range
          *
          */
-        inline auto&
+        auto&
         begin()
         {
             return _begin;
@@ -381,7 +380,7 @@ namespace ponio
          * @brief returns a constant iterator to the beginning solver_range
          *
          */
-        inline auto const&
+        auto const&
         cbegin() const
         {
             return _begin;
@@ -391,7 +390,7 @@ namespace ponio
          * @brief returns a constant iterator to the beginning solver_range
          *
          */
-        inline auto const&
+        auto const&
         begin() const
         {
             return cbegin();
@@ -401,7 +400,7 @@ namespace ponio
          * @brief returns an iterator to the ending solver_range
          *
          */
-        inline auto&
+        auto&
         end()
         {
             return _end;
@@ -411,7 +410,7 @@ namespace ponio
          * @brief returns a constant iterator to the ending solver_range
          *
          */
-        inline auto const&
+        auto const&
         cend() const
         {
             return _end;
@@ -421,7 +420,7 @@ namespace ponio
          * @brief returns a constant iterator to the ending solver_range
          *
          */
-        inline auto const&
+        auto const&
         end() const
         {
             return cend();
