@@ -7,7 +7,6 @@
 #include <array>
 #include <concepts>
 #include <cstddef>
-#include <functional>
 #include <ranges>
 #include <tuple>
 #include <type_traits>
@@ -112,7 +111,7 @@ namespace detail
     constexpr std::array<Return_t, sizeof...( Is )>
     init_fill_array_impl( Function_t&& f, TupleArgs_t&& args, std::index_sequence<Is...> )
     {
-        return { { ( static_cast<void>( Is ), std::apply( f, args ) )... } };
+        return { { ( static_cast<void>( Is ), std::apply( std::forward<Function_t>( f ), std::forward<TupleArgs_t>( args ) ) )... } };
     }
 
     /**

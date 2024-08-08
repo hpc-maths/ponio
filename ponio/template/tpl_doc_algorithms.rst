@@ -74,7 +74,7 @@ When the matrix :math:`A` is lower triangular with a diagonal, the Runge-Kutta m
 Lawson methods
 --------------
 
-Lawson methods are build to solve a problem with a linear and nonlinear part, to solve exactly the problem when the nonlinear part goes to zero. This class of problem can be write as
+Lawson methods was initialy propose into :cite:`Lawson:1967`. Lawson methods are build to solve a problem with a linear and nonlinear part, to solve exactly the problem when the nonlinear part goes to zero. This class of problem can be write as
 
 .. math::
 
@@ -238,7 +238,7 @@ and where :math:`T_j(x)` is the Chebyshev polynomial.
 ROCK2 method
 ~~~~~~~~~~~~
 
-The algorithm of ROCK2 method is the following:
+We write the method ROCK2 presented in :cite:`abdulle:2001`. The algorithm of ROCK2 method is the following:
 
 .. math::
 
@@ -267,7 +267,7 @@ where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from
 ROCK4 method
 ~~~~~~~~~~~~
 
-The algorithm of ROCK4 method is the following:
+We write the method ROCK2 presented in :cite:`abdulle:2002`. The algorithm of ROCK4 method is the following:
 
 .. math::
 
@@ -292,3 +292,8 @@ where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from
 
 .. doxygenfunction:: ponio::runge_kutta::rock::rock4()
   :project: ponio
+
+Bibliography
+------------
+
+.. bibliography::

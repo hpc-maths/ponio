@@ -47,10 +47,13 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinx.ext.graphviz',
-    'breathe'
+    'breathe',
+    'sphinxcontrib.bibtex'
 ]
 
 breathe_projects = {'ponio': '../xml'}
+
+bibtex_bibfiles = ['bibliography.bib']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

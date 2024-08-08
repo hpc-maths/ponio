@@ -18,15 +18,20 @@ configure = { cmd = [
   "./build",
 ] }
 configure_test = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON" }
-configure_test_samurai = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
+configure_long_test = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
 configure_debug = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_DEMOS=ON" }
-build_ninja = { cmd = "cmake --build ./build --config Release" } # don't call this rule alone
+
+build_ninja = { cmd = "cmake --build ./build --config Release" }                 # don't call this rule alone
 build = { depends_on = ["configure", "build_ninja"] }
 build_test = { depends_on = ["configure_test", "build_ninja"] }
-build_test_samurai = { depends_on = ["configure_test_samurai", "build_ninja"] }
+build_long_test = { depends_on = ["configure_long_test", "build_ninja"] }
 build_debug = { cmd = "ninja -C build ponio", depends_on = ["configure_debug"] }
+
 test = { cmd = "./build/ponio/test/Release/ponio_tests", depends_on = [
   "build_test",
+] }
+long_test = { cmd = "./build/ponio/test/Release/ponio_tests", depends_on = [
+  "build_long_test",
 ] }
 nbval = { cmd = "pytest --nbval --nbval-current-env -p no:warnings", cwd = "./ponio/notebooks", depends_on = [
   "build",
@@ -55,7 +60,7 @@ doctest = ">=2.4.11,<2.5"
 sympy = ">=1.12,<2"
 eigen = ">=3.4.0,<3.5"
 numpy = ">=1.26.3,<1.27"
-samurai = ">=0.10.0,<0.11"
+samurai = ">=0.16.0,<0.17"
 
 [target.linux-64.dependencies]
 petsc = "3.20.*"

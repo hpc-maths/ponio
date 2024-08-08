@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <string_view>
 
-#include "../ponio_config.hpp"
+#include "../detail.hpp"
 #include "../stage.hpp"
 
 namespace ponio::runge_kutta::chebyshev
@@ -175,7 +175,7 @@ namespace ponio::runge_kutta::chebyshev
          * + \tilde{\gamma}_j\Delta t f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t, std::size_t j>
-        inline state_t
+        state_t
         stage( Stage<j>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yi, value_t dt )
         {
             value_t mj   = 2. * b<j>( w0 ) / b<j - 1>( w0 ) * w0;
@@ -201,7 +201,7 @@ namespace ponio::runge_kutta::chebyshev
          * @details \f$y_0 = f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        inline state_t
+        state_t
         stage( Stage<0>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t )
         {
             return f( tn, yn ); // be careful Yi[0] stores f(tn,yn) not yn!!!
@@ -221,7 +221,7 @@ namespace ponio::runge_kutta::chebyshev
          * @details \f$y_1 = y^n + \tilde{\mu}_1 \Delta t f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        inline state_t
+        state_t
         stage( Stage<1>, problem_t&, value_t, state_t& yn, array_ki_t const& Yi, value_t dt )
         {
             value_t m1t = b<1>( w0 ) * w1;
@@ -245,7 +245,7 @@ namespace ponio::runge_kutta::chebyshev
          * \Delta t f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        inline state_t
+        state_t
         stage( Stage<2>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yi, value_t dt )
         {
             value_t m2  = 2. * w0;
