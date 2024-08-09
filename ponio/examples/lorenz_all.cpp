@@ -203,6 +203,10 @@ main( int, char** )
         auto splitting_algo = std::make_tuple( ponio::splitting::make_lie_tuple( std::make_pair( ponio::runge_kutta::rk_44(), 0.005 ),
                                                    std::make_pair( ponio::runge_kutta::rk_44(), 0.005 ) ),
             ponio::splitting::make_strang_tuple( std::make_pair( ponio::runge_kutta::rk_44(), 0.005 ),
+                std::make_pair( ponio::runge_kutta::rk_44(), 0.005 ) ),
+            ponio::splitting::make_adaptive_strang_tuple( 5e-3,
+                1e-3,
+                std::make_pair( ponio::runge_kutta::rk_44(), 0.005 ),
                 std::make_pair( ponio::runge_kutta::rk_44(), 0.005 ) ) );
         for_each( splitting_algo, splitting_solve_lorenz );
     }

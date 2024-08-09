@@ -94,68 +94,18 @@ namespace ponio::splitting::lie
     // ---- *helper* ----
 
     /**
-     * a helper factory for \ref lie functor from a tuple of methods
-     *
-     * @tparam value_t   type of coefficients
-     * @tparam Methods_t variadic list of types of methods
-     * @param meths      list of methods
-     * @param dts        associated time step foreach method
-     * @return a \ref lie object build from the tuple of methods
-     */
-    template <typename value_t, typename... Methods_t>
-    auto
-    make_lie_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
-    {
-        return lie<value_t, Methods_t...>( meths, dts );
-    }
-
-    // ---- class lie_tuple -----------------------------------------
-
-    /** @class lie_tuple
-     *  a helper to deduce method for ::ponio::make_method(splitting::lie::lie_tuple<Algorithms_t...> const &, state_t const &)
-     *  @tparam value_t      type of time steps
-     *  @tparam Algorithms_t variadic template of algorithms to solve each subproblem
-     *  @details This is a dummy class to select correct \ref method to solve the problem
-     */
-    template <typename value_t, typename... Algorithms_t>
-    struct lie_tuple
-    {
-        static constexpr std::size_t order        = 1;
-        static constexpr bool is_splitting_method = true;
-        static constexpr std::string_view id      = "lie";
-
-        std::tuple<Algorithms_t...> algos;
-        std::array<value_t, sizeof...( Algorithms_t )> time_steps;
-
-        lie_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts );
-    };
-
-    /**
-     * constructor of \ref lie_tuple from a variadic number of algorithms
-     */
-    template <typename value_t, typename... Algorithms_t>
-    inline lie_tuple<value_t, Algorithms_t...>::lie_tuple( std::tuple<Algorithms_t...>&& algs,
-        std::array<value_t, sizeof...( Algorithms_t )>&& dts )
-        : algos( std::move( algs ) )
-        , time_steps( std::move( dts ) )
-    {
-    }
-
-    // ---- *helper* ----
-
-    /**
-     * a helper factory for \ref lie_tuple from a tuple of algorithms
+     * a helper factory for @ref ponio::splitting::detail::splitting_tuple from a tuple of algorithms to build a Lie method
      *
      * @tparam value_t      type of coefficients
      * @tparam Algorithms_t variadic list of types of algorithms
      * @param args          variadic list of pairs of algorithm and time step
-     * @return a \ref lie_tuple object build from the tuple of methods
+     * @return a @ref ponio::splitting::detail::splitting_tuple object build from the tuple of methods
      */
     template <typename value_t, typename... Algorithms_t>
     auto
     make_lie_tuple( std::pair<Algorithms_t, value_t>&&... args )
     {
-        return lie_tuple<value_t, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
+        return detail::splitting_tuple<lie, value_t, void, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
     }
 
 } // namespace ponio::splitting::lie

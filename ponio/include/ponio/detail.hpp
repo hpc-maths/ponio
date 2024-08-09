@@ -14,6 +14,47 @@
 
 namespace detail
 {
+    template <typename state_t>
+    auto
+    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
+    {
+        return std::abs( ( unp1 - unp1bis ) / ( 1.0 + std::max( std::abs( un ), std::abs( unp1 ) ) ) );
+    }
+
+    template <typename state_t>
+        requires std::ranges::range<state_t>
+    auto
+    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
+    {
+        auto it_unp1    = std::ranges::cbegin( unp1 );
+        auto it_unp1bis = std::ranges::cbegin( unp1bis );
+        auto last       = std::ranges::cend( un );
+
+        auto n_elm = std::distance( std::ranges::cbegin( un ), last );
+
+        using value_t = std::remove_cvref_t<decltype( *it_unp1 )>;
+        auto r        = static_cast<value_t>( 0. );
+
+        for ( auto it_un = std::ranges::cbegin( un ); it_un != last; ++it_un, ++it_unp1, ++it_unp1bis )
+        {
+            auto tmp = ( *it_unp1 - *it_unp1bis ) / ( 1.0 + std::max( std::abs( *it_un ), std::abs( *it_unp1 ) ) );
+            r += tmp * tmp;
+        }
+        return std::sqrt( ( 1. / static_cast<double>( n_elm ) ) * r );
+
+        /*
+        return std::sqrt(
+          std::accumulate(
+            std::cbegin(un), std::cend(un),
+            [&it_unp1,&it_unp1bis]( auto r , auto uni ) mutable {
+              return std::pow(
+                  (*it_unp1 - *it_unp1bis++)/(1.0 + std::max(uni,*it_unp1++))
+                , 2u );
+            }
+          )
+        );
+        */
+    }
 
     /* tpl_inner_product */
     template <typename state_t, typename value_t, typename ArrayA_t, typename ArrayB_t, std::size_t... Is>
