@@ -9,7 +9,7 @@ unusedFunction:ponio/include/ponio/runge_kutta/butcher_methods.hpp
 unusedFunction:ponio/include/ponio/detail.hpp:125
 unusedFunction:ponio/include/ponio/detail.hpp:134
 unusedFunction:ponio/include/ponio/problem.hpp:115
-unusedFunction:ponio/include/ponio/problem.hpp:154
-unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:25
-unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:40
-unusedFunction:ponio/include/ponio/splitting/strang.hpp:261
+unusedFunction:ponio/include/ponio/problem.hpp:154 # implicit_problem<Callable_t, Jacobian_t> make_implicit_problem( Callable_t&& f, Jacobian_t&& df )
+unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:25 # auto coefficient_eval( func_t&& f, linear_t&& l )
+unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:40 # auto triangular_get( tuple_t& t )
+unusedFunction:ponio/include/ponio/splitting/strang.hpp:255 # auto make_adaptive_strang_tuple( value_t delta, value_t tolerance, std::pair<Algorithms_t, value_t>&&... args )
