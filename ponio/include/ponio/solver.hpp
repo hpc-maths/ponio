@@ -103,7 +103,7 @@ namespace ponio
             , meth( meth_ )
             , pb( pb_ )
             , t_span( t_span_ )
-            , it_next_time( std::begin( t_span ) )
+            , it_next_time( std::next( std::begin( t_span ) ) )
             , dt_reference( std::nullopt )
         {
         }
