@@ -6,7 +6,7 @@ checkersReport
 # suppress unusedFunction in butcher_methods.hpp
 unusedFunction:ponio/include/ponio/runge_kutta/butcher_methods.hpp
 # possible false positive
-unusedFunction:ponio/include/ponio/detail.hpp:125
+unusedFunction:ponio/include/ponio/detail.hpp:126 # constexpr std::array<std::remove_cvref_t<T>, N> init_fill_array( T&& value )
 unusedFunction:ponio/include/ponio/detail.hpp:135 # constexpr bool applyable_impl( std::index_sequence<Is...> )
 unusedFunction:ponio/include/ponio/problem.hpp:115
 unusedFunction:ponio/include/ponio/problem.hpp:154 # implicit_problem<Callable_t, Jacobian_t> make_implicit_problem( Callable_t&& f, Jacobian_t&& df )
