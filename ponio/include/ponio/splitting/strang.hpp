@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// IWYU pragma: private, include "../splitting.h"
+
 #pragma once
 
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <string_view>
-#include <thread>
 #include <tuple>
 #include <utility>
 
@@ -173,7 +175,7 @@ namespace ponio::splitting::strang
 
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I == sizeof...( Methods_t ) - 1 )
-        inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
         {
             ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
             _call_dec<I - 1>( f, tn, ui, dt, shift );
@@ -181,7 +183,7 @@ namespace ponio::splitting::strang
 
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( 0 < I && I < sizeof...( Methods_t ) - 1 )
-        inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
         {
             ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I] );
             _call_inc<I + 1>( f, tn, ui, dt, shift );
@@ -189,7 +191,7 @@ namespace ponio::splitting::strang
 
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I == 0 )
-        inline void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
         {
             ui = detail::_split_solve<I>( f, methods, ui, tn, tn + ( 0.5 + shift ) * dt, time_steps[I] );
             _call_inc<I + 1>( f, tn, ui, dt, shift );
@@ -197,7 +199,7 @@ namespace ponio::splitting::strang
 
         template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
             requires( I > 0 )
-        inline void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
         {
             ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I] );
             _call_dec<I - 1>( f, tn, ui, dt, shift );
@@ -205,7 +207,7 @@ namespace ponio::splitting::strang
 
         template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
             requires( I == 0 )
-        inline void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
         {
             ui = detail::_split_solve<I>( f, methods, ui, tn + ( 0.5 + shift ) * dt, tn + dt, time_steps[I] );
         }
