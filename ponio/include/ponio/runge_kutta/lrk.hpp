@@ -12,6 +12,7 @@
 
 #include "../butcher_tableau.hpp"
 #include "../detail.hpp"
+#include "../iteration_info.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
 
@@ -40,11 +41,12 @@ namespace ponio::runge_kutta::lawson_runge_kutta
         static constexpr std::size_t order    = tableau_t::order;
         static constexpr std::string_view id  = tableau_t::id;
 
-        explicit_runge_kutta( exp_t exp_, double tol_ = ponio::default_config::tol )
+        explicit_runge_kutta( exp_t exp_, double tolerance = ponio::default_config::tol )
             : lawson_base<exp_t>( exp_ )
             , butcher()
-            , tol( tol_ )
+            , info( tolerance )
         {
+            info.number_of_eval = N_stages;
         }
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, std::size_t i>
@@ -71,7 +73,7 @@ namespace ponio::runge_kutta::lawson_runge_kutta
             return m_exp( dt * pb.l ) * ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
         }
 
-        double tol;
+        iteration_info<tableau_t> info;
     };
 
     /**

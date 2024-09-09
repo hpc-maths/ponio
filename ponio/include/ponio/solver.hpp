@@ -289,6 +289,28 @@ namespace ponio
         {
             return &sol;
         }
+
+        /**
+         * @brief accessor to informations on iteration with algorithm
+         *
+         * @return auto&
+         */
+        auto&
+        info()
+        {
+            return meth.alg.info;
+        }
+
+        /**
+         * @brief accessor to informations on iteration with algorithm
+         *
+         * @return auto const&
+         */
+        auto const&
+        info() const
+        {
+            return meth.alg.info;
+        }
     };
 
     /**
