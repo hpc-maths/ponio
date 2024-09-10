@@ -296,7 +296,7 @@ namespace ponio
          * @return auto&
          */
         auto&
-        info()
+        info() // cppcheck-suppress unusedFunction
         {
             return meth.alg.info;
         }
@@ -307,7 +307,7 @@ namespace ponio
          * @return auto const&
          */
         auto const&
-        info() const
+        info() const // cppcheck-suppress unusedFunction
         {
             return meth.alg.info;
         }
