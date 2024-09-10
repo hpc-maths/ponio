@@ -14,4 +14,3 @@ unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:28 # auto coefficient_e
 unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:43 # auto triangular_get( tuple_t& t )
 unusedFunction:ponio/include/ponio/splitting/strang.hpp:257 # auto make_adaptive_strang_tuple( value_t delta, value_t tolerance, std::pair<Algorithms_t, value_t>&&... args )
 ctuOneDefinitionRuleViolation:ponio/examples/heat.cpp
-ctuOneDefinitionRuleViolation:ponio/examples/heat_rock.cpp
