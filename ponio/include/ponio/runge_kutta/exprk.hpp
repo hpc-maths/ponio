@@ -98,7 +98,6 @@ namespace ponio::runge_kutta::exponential_runge_kutta
 
         using value_t = typename tableau_t::value_t;
 
-        double tol;
         iteration_info<tableau_t> info;
 
         explicit_exp_rk_butcher( double tolerance = ponio::default_config::tol )
