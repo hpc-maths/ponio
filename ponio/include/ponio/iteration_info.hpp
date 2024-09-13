@@ -26,11 +26,11 @@ namespace ponio
         using value_t = typename tableau_t::value_t;
 
         value_t error;                /**< error makes on time iteration for adaptive time step method */
-        bool success;                 /**< set as true only for success iteration */
-        bool is_step;                 /**< set as true only if iterator is on a step given in solver */
+        bool success;                 /**< sets as true only for success iteration */
+        bool is_step;                 /**< sets as true only if iterator is on a step given in solver */
         std::size_t number_of_stages; /**< number of stages of method */
         std::size_t number_of_eval;   /**< number of evaluation of function */
-        value_t tolerance;            /** tolerance for the method (for adaptive time step method) */
+        value_t tolerance;            /**< tolerance for the method (for adaptive time step method) */
 
         /**
          * @brief Construct a new iteration info object
