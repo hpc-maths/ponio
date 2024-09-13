@@ -257,9 +257,9 @@ namespace ponio::runge_kutta::rock
      *
      *  @tparam eig_computer_t type of computer of maximal eigenvalue
      *  @tparam _is_embedded   define if method is used as adaptive or constant time step method [default is false]
-     *  @tparam value_t        type of coefficients
+     *  @tparam _value_t       type of coefficients
      */
-    template <typename eig_computer_t, bool _is_embedded = false, typename value_t = double>
+    template <typename eig_computer_t, bool _is_embedded = false, typename _value_t = double>
     struct rock2_impl
     {
         static constexpr bool is_embedded      = _is_embedded;
@@ -268,11 +268,14 @@ namespace ponio::runge_kutta::rock
         static constexpr std::size_t order     = 2;
         static constexpr std::string_view id   = "ROCK2";
 
+        using value_t         = _value_t;
         using rock_coeff      = rock2_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
 
         value_t a_tol; // absolute tolerance
         value_t r_tol; // relative tolerance
+
+        iteration_info<rock2_impl> info;
 
         eig_computer_t eig_computer;
 
@@ -360,6 +363,9 @@ namespace ponio::runge_kutta::rock
         {
             auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
 
+            info.number_of_stages = mdeg + 2;
+            info.number_of_eval   = mdeg + 2;
+
             auto& uj   = G[0];
             auto& ujm1 = G[1];
             auto& ujm2 = G[2];
@@ -417,13 +423,14 @@ namespace ponio::runge_kutta::rock
 
                 uj = ujm1 + delta_t_1 * uj + tmp;
 
-                value_t err = error( uj, un, tmp );
+                info.error   = error( uj, un, tmp );
+                info.success = info.error < 1.0;
 
-                value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / err ) ) );
+                value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / info.error ) ) );
                 value_t new_dt = 0.8 * fac * dt;
 
                 // accepted step
-                if ( err < 1.0 )
+                if ( info.success )
                 {
                     return { tn + dt, uj, new_dt };
                 }
@@ -472,9 +479,9 @@ namespace ponio::runge_kutta::rock
      *
      *  @tparam eig_computer_t type of computer of maximal eigenvalue
      *  @tparam _is_embedded   define if method is used as adaptive or constant time step method [default is false]
-     *  @tparam value_t        type of coefficients
+     *  @tparam _value_t       type of coefficients
      */
-    template <typename eig_computer_t, bool _is_embedded = false, typename value_t = double>
+    template <typename eig_computer_t, bool _is_embedded = false, typename _value_t = double>
     struct rock4_impl
     {
         static constexpr bool is_embedded      = _is_embedded;
@@ -483,11 +490,14 @@ namespace ponio::runge_kutta::rock
         static constexpr std::size_t order     = 4;
         static constexpr std::string_view id   = "ROCK4";
 
+        using value_t         = _value_t;
         using rock_coeff      = rock4_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
 
         value_t a_tol; // absolute tolerance
         value_t r_tol; // relative tolerance
+
+        iteration_info<rock4_impl> info;
 
         eig_computer_t eig_computer;
 
@@ -570,6 +580,9 @@ namespace ponio::runge_kutta::rock
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
             auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
+
+            info.number_of_stages = mdeg + 4;
+            info.number_of_eval   = mdeg + 4;
 
             auto& uj   = G[0];
             auto& ujm1 = G[1];
@@ -660,13 +673,14 @@ namespace ponio::runge_kutta::rock
 
                 tmp = bh_1 * ujm1 + bh_2 * ujm2 + bh_3 * ujm3 + bh_4 * tmp + bh_5 * ujm4;
 
-                value_t err = error( uj, tmp );
+                info.error   = error( uj, tmp );
+                info.success = info.error < 1.0;
 
-                value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / err ) ) );
+                value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / info.error ) ) );
                 value_t new_dt = 0.8 * fac * dt;
 
                 // accepted step
-                if ( err < 1.0 )
+                if ( info.success )
                 {
                     return { tn + dt, uj, new_dt };
                 }
