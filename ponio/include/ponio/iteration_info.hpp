@@ -11,19 +11,32 @@
 
 namespace ponio
 {
-
+    /**
+     * @brief stores information for and of current iteration in algorithm
+     *
+     * @tparam tableau_t type of Butcher tableau
+     */
     template <typename tableau_t>
     struct iteration_info
     {
+        /**
+         * @brief type of coefficient of Butcher tableau, same type to store error and tolerance
+         *
+         */
         using value_t = typename tableau_t::value_t;
 
-        value_t error;
-        bool success;
-        bool is_step;
-        std::size_t number_of_stages;
-        std::size_t number_of_eval;
-        value_t tolerance;
+        value_t error;                /**< error makes on time iteration for adaptive time step method */
+        bool success;                 /**< set as true only for success iteration */
+        bool is_step;                 /**< set as true only if iterator is on a step given in solver */
+        std::size_t number_of_stages; /**< number of stages of method */
+        std::size_t number_of_eval;   /**< number of evaluation of function */
+        value_t tolerance;            /** tolerance for the method (for adaptive time step method) */
 
+        /**
+         * @brief Construct a new iteration info object
+         *
+         * @param tol tolerance for adaptive time step method
+         */
         iteration_info( value_t tol = static_cast<value_t>( 0 ) )
             : error( static_cast<value_t>( 0 ) )
             , success( true )
