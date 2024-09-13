@@ -73,3 +73,18 @@ Helper function for time_iterator
 .. doxygenstruct:: ponio::current_solution
    :project: ponio
    :members:
+
+
+Iteration information class
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you need information on current iteration, ponio provides a :cpp:struct:`ponio::iteration_info` class to access to some information on algorithm:
+
+* number of stages,
+* number of evaluation of function (also count evaluation in Newton method for implicit methods),
+* a boolean to test if iterator is on a step given to :cpp:func:`ponio::make_solver_range` (:cpp:var:`t_span`),
+* tolerance, error and a boolean to test if the iteration is succeed for adaptive time step methods.
+
+.. doxygenstruct:: ponio::iteration_info
+   :project: ponio
+   :members:
