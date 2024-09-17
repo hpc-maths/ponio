@@ -120,7 +120,10 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
                       - dt * butcher.A[I][I] * pb.f_t( tn + butcher.c[I] * dt );
             auto rhs = ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt );
 
-            ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_i, ui, rhs );
+            std::size_t n_eval = 0;
+            ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_i, ui, rhs, n_eval );
+
+            info.number_of_eval += n_eval + 1;
 
             return pb.f( tn + butcher.c[I] * dt, ui );
         }
