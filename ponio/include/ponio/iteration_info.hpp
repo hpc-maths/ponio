@@ -78,8 +78,7 @@ namespace ponio
         std::size_t number_of_eval;   /**< number of evaluation of function */
         value_t tolerance;            /**< tolerance for the method (for adaptive time step method) */
 
-        // UN POINTEUR VERS LA MÉTHODE POUR RÉCUPÉRER LE Ième iteration_info DE LA MÉTHODE DE SPLITTING !!!!!!
-        tuple_t* ptr_methods;
+        tuple_t* ptr_methods; /**< pointer to tuple of methods to access to iteration_info of each substep */
 
         iteration_info( tuple_t& methods, value_t tol = static_cast<value_t>( 0 ) )
             : error( static_cast<value_t>( 0 ) )
@@ -92,10 +91,17 @@ namespace ponio
         {
         }
 
+        /**
+         * @brief get information on substep algorithm for splitting method
+         *
+         * @tparam I    rank of substep
+         * @return auto
+         */
         template <std::size_t I>
         auto
         get()
         {
+            return std::get<I>( *ptr_methods ).info;
         }
     };
 
