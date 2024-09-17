@@ -12,6 +12,7 @@
 #include <tuple>
 #include <utility>
 
+#include "../iteration_info.hpp"
 #include "detail.hpp"
 
 namespace ponio::splitting::lie
@@ -22,24 +23,38 @@ namespace ponio::splitting::lie
     /** @class lie
      *  Lie splitting method
      *  @tparam value_t   type of time steps
-     *  @tparam Methods_t list of methods to solve each sub-problem
+     *  @tparam methods_t list of methods to solve each sub-problem
      */
-    template <typename value_t, typename... Methods_t>
-    struct lie
+    template <typename _value_t, typename... methods_t>
+    struct lie : detail::splitting_base<_value_t, methods_t...>
     {
-        static constexpr std::size_t order        = 1;
-        static constexpr bool is_splitting_method = true;
-        static constexpr std::string_view id      = "lie";
+        using value_t = _value_t;
+        using base_t  = detail::splitting_base<value_t, methods_t...>;
 
-        std::tuple<Methods_t...> methods;
-        std::array<value_t, sizeof...( Methods_t )> time_steps;
+        using base_t::splitting_base;
 
-        lie( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts );
+        using base_t::is_splitting_method;
+        using base_t::N_methods;
+
+        using base_t::methods;
+        using base_t::time_steps;
+
+        static constexpr std::size_t order   = 1;
+        static constexpr std::string_view id = "lie";
+        static constexpr std::size_t N_steps = N_methods;
+
+        iteration_info<lie> info;
+
+        lie( std::tuple<methods_t...> const& meths, std::array<value_t, N_methods> const& dts )
+            : base_t( meths, dts )
+            , info( methods )
+        {
+        }
 
         // _call_inc can not be outside the class definition due to llvm bug
         // (see https://github.com/llvm/llvm-project/issues/56482)
         template <std::size_t I = 0, typename Problem_t, typename state_t>
-            requires( I == sizeof...( Methods_t ) )
+            requires( I == N_steps )
         void _call_inc( Problem_t&, value_t, state_t&, value_t )
         {
         }
@@ -54,7 +69,7 @@ namespace ponio::splitting::lie
          * @details The parameter @p ui is update to \f$\phi_{\Delta t}^{[f_i]}(t^n,\texttt{ui})\f$
          */
         template <std::size_t I = 0, typename Problem_t, typename state_t>
-            requires( I < sizeof...( Methods_t ) )
+            requires( I < N_steps )
         void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
             ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
@@ -67,26 +82,16 @@ namespace ponio::splitting::lie
     };
 
     /**
-     * constructor of \ref lie from a tuple
-     */
-    template <typename value_t, typename... Methods_t>
-    lie<value_t, Methods_t...>::lie( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
-        : methods( meths )
-        , time_steps( dts )
-    {
-    }
-
-    /**
      * call operator to initiate Lie splitting recursion
      * @param f  \ref problem to solve
      * @param tn current time \f$t^n\f$
      * @param un current solution \f$u^n \approx u(t^n)\f$
      * @param dt time step \f$\Delta t\f$
      */
-    template <typename value_t, typename... Methods_t>
+    template <typename value_t, typename... methods_t>
     template <typename Problem_t, typename state_t>
     auto
-    lie<value_t, Methods_t...>::operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
+    lie<value_t, methods_t...>::operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
     {
         state_t ui = un;
         _call_inc( f, tn, ui, dt );
@@ -99,15 +104,15 @@ namespace ponio::splitting::lie
      * a helper factory for @ref ponio::splitting::detail::splitting_tuple from a tuple of algorithms to build a Lie method
      *
      * @tparam value_t      type of coefficients
-     * @tparam Algorithms_t variadic list of types of algorithms
+     * @tparam algorithms_t variadic list of types of algorithms
      * @param args          variadic list of pairs of algorithm and time step
      * @return a @ref ponio::splitting::detail::splitting_tuple object build from the tuple of methods
      */
-    template <typename value_t, typename... Algorithms_t>
+    template <typename value_t, typename... algorithms_t>
     auto
-    make_lie_tuple( std::pair<Algorithms_t, value_t>&&... args )
+    make_lie_tuple( std::pair<algorithms_t, value_t>&&... args )
     {
-        return detail::splitting_tuple<lie, value_t, void, Algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
+        return detail::splitting_tuple<lie, value_t, void, algorithms_t...>( std::forward_as_tuple( ( args.first )... ), { args.second... } );
     }
 
 } // namespace ponio::splitting::lie

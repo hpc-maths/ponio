@@ -241,8 +241,10 @@ namespace ponio
         {
             return splitting::detail::make_splitting_from_tuple<_splitting_method_t>( methods, algos.time_steps, algos.optional_arguments );
         }
-
-        return splitting::detail::make_splitting_from_tuple<_splitting_method_t>( methods, algos.time_steps );
+        else
+        {
+            return splitting::detail::make_splitting_from_tuple<_splitting_method_t>( methods, algos.time_steps );
+        }
     }
 
 } // namespace ponio

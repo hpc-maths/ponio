@@ -6,10 +6,12 @@
 
 #pragma once
 
-#include "../ponio_config.hpp"
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <tuple>
+
+#include "../ponio_config.hpp"
 
 namespace ponio::splitting::detail
 {
@@ -124,6 +126,45 @@ namespace ponio::splitting::detail
                 return _splitting_method_t<value_t, Methods_t...>( meths, dts, args... );
             },
             optional_args );
+    }
+
+    // ---- class splitting_base -----------------------------------
+
+    /**
+     * @brief parent class of splitting methods, store list of methods and time steps
+     *
+     * @tparam _value_t  type of coefficients and time steps
+     * @tparam methods_t list of types of methods to solve each sub-problem
+     */
+    template <typename _value_t, typename... methods_t>
+    struct splitting_base
+    {
+        using value_t = _value_t;
+        using tuple_t = std::tuple<methods_t...>;
+
+        static constexpr bool is_splitting_method = true;
+        static constexpr std::size_t N_methods    = sizeof...( methods_t );
+
+        tuple_t methods;
+        std::array<value_t, N_methods> time_steps;
+
+        splitting_base( std::tuple<methods_t...> const& meths, std::array<value_t, sizeof...( methods_t )> const& dts );
+    };
+
+    /**
+     * @brief Construct a new splitting base<value t, methods t...>::splitting base object
+     *
+     * @tparam value_t   type of coefficients and time steps
+     * @tparam methods_t list of types of methods to solve each sub-problem
+     * @param meths      list of methods to solve each sub-problem
+     * @param dts        list of time step to solve each sub-problem (to iterate on each sub-step)
+     */
+    template <typename value_t, typename... methods_t>
+    splitting_base<value_t, methods_t...>::splitting_base( std::tuple<methods_t...> const& meths,
+        std::array<value_t, sizeof...( methods_t )> const& dts )
+        : methods( meths )
+        , time_steps( dts )
+    {
     }
 
 } // namespace ponio::splitting::detail
