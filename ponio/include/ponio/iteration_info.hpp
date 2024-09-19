@@ -89,7 +89,7 @@ namespace ponio
             , success( true )
             , is_step( false )
             , number_of_steps( splitting_t::N_steps )
-            , number_of_eval( detail::init_fill_array<splitting_t::N_methods>( 0 ) )
+            , number_of_eval( ::detail::init_fill_array<splitting_t::N_methods, std::size_t>( 0 ) )
             , tolerance( tol )
             , ptr_methods( &methods )
         {
