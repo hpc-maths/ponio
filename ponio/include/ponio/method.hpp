@@ -149,6 +149,24 @@ namespace ponio
             alg.info.success = true;
             return std::make_tuple( tn + dt, kis[Algorithm_t::N_stages], new_dt );
         }
+
+        /**
+         * @brief returns iteration_info object on algorithm
+         */
+        auto&
+        info()
+        {
+            return alg.info;
+        }
+
+        /**
+         * @brief returns iteration_info object on algorithm
+         */
+        auto const&
+        info() const
+        {
+            return alg.info;
+        }
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -175,6 +193,24 @@ namespace ponio
         operator()( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
             return alg( f, tn, un, kis, dt );
+        }
+
+        /**
+         * @brief returns iteration_info object on algorithm
+         */
+        auto&
+        info()
+        {
+            return alg.info;
+        }
+
+        /**
+         * @brief returns iteration_info object on algorithm
+         */
+        auto const&
+        info() const
+        {
+            return alg.info;
         }
     };
 

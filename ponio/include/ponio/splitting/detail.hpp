@@ -28,9 +28,9 @@ namespace ponio::splitting::detail
      * @param tf   final time
      * @param dt   time step
      */
-    template <std::size_t I, typename Problem_t, typename Method_t, typename state_t, typename value_t>
+    template <std::size_t I, typename Problem_t, typename Method_t, typename state_t, typename value_t, typename iteration_info_t>
     state_t
-    _split_solve( Problem_t& pb, Method_t& meth, state_t& ui, value_t ti, value_t tf, value_t dt )
+    _split_solve( Problem_t& pb, Method_t& meth, state_t& ui, value_t ti, value_t tf, value_t dt, iteration_info_t& info )
     {
         value_t current_dt   = std::min( dt, tf - ti );
         value_t current_time = ti;
@@ -41,6 +41,8 @@ namespace ponio::splitting::detail
             {
                 current_dt = tf - current_time;
             }
+
+            info.number_of_eval[I] += std::get<I>( meth ).info().number_of_eval;
         }
         return ui;
     }

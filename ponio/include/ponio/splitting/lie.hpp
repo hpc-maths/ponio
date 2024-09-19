@@ -43,11 +43,11 @@ namespace ponio::splitting::lie
         static constexpr std::string_view id = "lie";
         static constexpr std::size_t N_steps = N_methods;
 
-        iteration_info<lie> info;
+        iteration_info<lie> _info;
 
         lie( std::tuple<methods_t...> const& meths, std::array<value_t, N_methods> const& dts )
             : base_t( meths, dts )
-            , info( methods )
+            , _info( methods )
         {
         }
 
@@ -72,13 +72,30 @@ namespace ponio::splitting::lie
             requires( I < N_steps )
         void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
+            if constexpr ( I == 0 )
+            {
+                _info.reset_eval();
+            }
+
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
             _call_inc<I + 1>( f, tn, ui, dt );
         }
 
         template <typename Problem_t, typename state_t>
         auto
         operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt );
+
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        auto const&
+        info() const
+        {
+            return _info;
+        }
     };
 
     /**
