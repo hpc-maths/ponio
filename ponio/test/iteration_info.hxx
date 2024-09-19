@@ -108,6 +108,41 @@ TEST_CASE( "number_of_eval::exponential_runge_kutta" )
     CHECK( cumulative_counter == manual_counter );
 }
 
+TEST_CASE( "number_of_eval::diagonal_implicit_runge_kutta" )
+{
+    std::size_t manual_counter = 0;
+
+    double const k = 50;
+    auto f         = [&, k]( double t, double y )
+    {
+        ++manual_counter;
+        return k * ( y + std::cos( t ) );
+    };
+
+    auto df = [=]( double, double )
+    {
+        return -k;
+    };
+
+    double y_0 = 2.0;
+
+    ponio::time_span<double> const t_span = { 0., 2. };
+    double const dt                       = 0.05;
+
+    auto curtiss_hirschfelder = ponio::make_implicit_problem( f, df );
+    auto sol_range            = ponio::make_solver_range( curtiss_hirschfelder, ponio::runge_kutta::dirk34(), y_0, t_span, dt );
+    auto it_sol               = sol_range.begin();
+
+    std::size_t cumulative_counter = 0;
+    while ( it_sol->time < t_span.back() )
+    {
+        ++it_sol;
+        cumulative_counter += it_sol.info().number_of_eval;
+    }
+
+    CHECK( cumulative_counter == manual_counter );
+}
+
 // TEST_CASE("number_of_eval::rock")
 // {
 

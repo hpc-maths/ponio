@@ -60,6 +60,16 @@ namespace ponio
             , tolerance( tol )
         {
         }
+
+        /**
+         * @brief reset number of evaluations to zero
+         *
+         */
+        void
+        reset_eval()
+        {
+            number_of_eval = 0;
+        }
     };
 
     template <typename splitting_t>

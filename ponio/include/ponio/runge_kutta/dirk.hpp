@@ -115,6 +115,11 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         state_t
         stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
         {
+            if constexpr ( I == 0 )
+            {
+                info.reset_eval();
+            }
+
             state_t ui = un;
             auto op_i  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un )
                       - dt * butcher.A[I][I] * pb.f_t( tn + butcher.c[I] * dt );
@@ -133,6 +138,11 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         state_t
         stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
         {
+            if constexpr ( I == 0 )
+            {
+                info.reset_eval();
+            }
+
             using matrix_t = decltype( pb.df( tn, un ) );
 
             auto identity = [&]( state_t const& u )
