@@ -16,7 +16,6 @@
 #include "../detail.hpp"
 #include "../ponio_config.hpp"
 #include "detail.hpp"
-#include "lie.hpp"
 
 namespace ponio::splitting::strang
 {
@@ -60,11 +59,6 @@ namespace ponio::splitting::strang
             requires( I == N_methods - 1 )
         void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
-            if constexpr ( I == 0 )
-            {
-                _info.reset_eval();
-            }
-
             ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
             _call_dec<I - 1>( f, tn, ui, dt );
         }
@@ -82,11 +76,6 @@ namespace ponio::splitting::strang
             requires( I < N_methods - 1 )
         void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
-            if constexpr ( I == 0 )
-            {
-                _info.reset_eval();
-            }
-
             ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I], _info );
             _call_inc<I + 1>( f, tn, ui, dt );
         }
@@ -156,6 +145,8 @@ namespace ponio::splitting::strang
     auto
     strang<value_t, methods_t...>::operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
     {
+        _info.reset_eval();
+
         state_t ui = un;
         _call_inc( f, tn, ui, dt );
         return std::make_tuple( tn + dt, ui, dt );
@@ -260,6 +251,8 @@ namespace ponio::splitting::strang
         auto
         operator()( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
+            _info.reset_eval();
+
             state_t u_np1_ref   = un;
             state_t u_np1_shift = un;
 
