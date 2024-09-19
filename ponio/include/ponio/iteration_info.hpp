@@ -9,6 +9,7 @@
 #include <tuple>
 
 #include "butcher_tableau.hpp"
+#include "detail.hpp"
 #include "stage.hpp"
 
 namespace ponio
@@ -88,6 +89,7 @@ namespace ponio
             , success( true )
             , is_step( false )
             , number_of_steps( splitting_t::N_steps )
+            , number_of_eval( detail::init_fill_array<splitting_t::N_methods>( 0 ) )
             , tolerance( tol )
             , ptr_methods( &methods )
         {
@@ -113,10 +115,7 @@ namespace ponio
         void
         reset_eval()
         {
-            for ( auto& n_eval_i : number_of_eval )
-            {
-                n_eval_i = 0;
-            }
+            number_of_eval.fill( 0 );
         }
     };
 
