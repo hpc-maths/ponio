@@ -195,7 +195,8 @@ namespace ponio::runge_kutta::rock
             }
 
             /**
-             * @brief computes number of stages needed to stabilized spectral radius of \f$f\f$
+             * @brief computes number of stages needed to stabilized spectral radius of \f$f\f$ and returns also number of evaluation of
+             * function \f$f\f$
              *
              * @tparam eig_computer_t type of computer of spectral radius
              * @tparam problem_t      type of operator \f$f\f$
@@ -207,10 +208,17 @@ namespace ponio::runge_kutta::rock
              * @param dt           current time step
              */
             template <typename eig_computer_t, typename problem_t, typename state_t>
-            static std::size_t
+            static std::tuple<std::size_t, std::size_t>
             compute_n_stages( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt, std::size_t s_min )
             {
-                double eigmax = std::forward<eig_computer_t>( eig_computer )( f, tn, un, dt );
+                std::size_t n_eval = 0;
+                auto f_counter     = [&n_eval, &f]( value_t t, state_t& u )
+                {
+                    ++n_eval;
+                    return f( t, u );
+                };
+
+                double eigmax = std::forward<eig_computer_t>( eig_computer )( f_counter, tn, un, dt );
                 auto mdeg     = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
                 if ( mdeg > 200 )
                 {
@@ -218,7 +226,7 @@ namespace ponio::runge_kutta::rock
                     dt   = 0.8 * ( static_cast<double>( mdeg * mdeg ) * 0.811 - 1.5 ) / eigmax;
                 }
                 mdeg = std::max( mdeg, s_min ) - 2;
-                return mdeg;
+                return { mdeg, n_eval };
             }
 
             /**
@@ -236,7 +244,7 @@ namespace ponio::runge_kutta::rock
              * stages, shift index of ROCK stages
              */
             template <typename eig_computer_t, typename problem_t, typename state_t>
-            static std::tuple<std::size_t, std::size_t, std::size_t>
+            static std::tuple<std::size_t, std::size_t, std::size_t, std::size_t>
             compute_n_stages_optimal_degree( eig_computer_t&& eig_computer,
                 problem_t& f,
                 value_t tn,
@@ -244,10 +252,10 @@ namespace ponio::runge_kutta::rock
                 value_t& dt,
                 std::size_t s_min = 3 )
             {
-                std::size_t mdeg = compute_n_stages( std::forward<eig_computer_t>( eig_computer ), f, tn, un, dt, s_min );
-                auto [mz, mr]    = optimal_degree( mdeg );
+                auto [mdeg, n_eval] = compute_n_stages( std::forward<eig_computer_t>( eig_computer ), f, tn, un, dt, s_min );
+                auto [mz, mr]       = optimal_degree( mdeg );
 
-                return { mdeg, mz, mr };
+                return { mdeg, mz, mr, n_eval };
             }
         };
     } // namespace detail
@@ -361,10 +369,12 @@ namespace ponio::runge_kutta::rock
         std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
-            auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
+            info.reset_eval();
+
+            auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
 
             info.number_of_stages = mdeg + 2;
-            info.number_of_eval   = mdeg + 2;
+            info.number_of_eval   = n_eval + mdeg + 2;
 
             auto& uj   = G[0];
             auto& ujm1 = G[1];
@@ -579,10 +589,12 @@ namespace ponio::runge_kutta::rock
         std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
-            auto [mdeg, deg_index, start_index] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
+            info.reset_eval();
+
+            auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
 
             info.number_of_stages = mdeg + 4;
-            info.number_of_eval   = mdeg + 4;
+            info.number_of_eval   = n_eval + mdeg + 4;
 
             auto& uj   = G[0];
             auto& ujm1 = G[1];

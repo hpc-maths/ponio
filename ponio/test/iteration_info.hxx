@@ -143,15 +143,106 @@ TEST_CASE( "number_of_eval::diagonal_implicit_runge_kutta" )
     CHECK( cumulative_counter == manual_counter );
 }
 
-// TEST_CASE("number_of_eval::rock")
-// {
+TEST_CASE( "number_of_eval::rock2" )
+{
+    std::size_t manual_counter = 0;
 
-// }
+    double const k            = 50;
+    auto curtiss_hirschfelder = [&, k]( double t, double y )
+    {
+        ++manual_counter;
+        return k * ( y + std::cos( t ) );
+    };
 
-// TEST_CASE("number_of_eval::pirock")
-// {
+    double y_0 = 2.0;
 
-// }
+    ponio::time_span<double> const t_span = { 0., 2. };
+    double const dt                       = 0.05;
+
+    auto sol_range = ponio::make_solver_range( curtiss_hirschfelder, ponio::runge_kutta::rock::rock2(), y_0, t_span, dt );
+    auto it_sol    = sol_range.begin();
+
+    std::size_t cumulative_counter = 0;
+    while ( it_sol->time < t_span.back() )
+    {
+        ++it_sol;
+        cumulative_counter += it_sol.info().number_of_eval;
+    }
+
+    CHECK( cumulative_counter == manual_counter );
+}
+
+TEST_CASE( "number_of_eval::rock4" )
+{
+    std::size_t manual_counter = 0;
+
+    double const k            = 50;
+    auto curtiss_hirschfelder = [&, k]( double t, double y )
+    {
+        ++manual_counter;
+        return k * ( y + std::cos( t ) );
+    };
+
+    double y_0 = 2.0;
+
+    ponio::time_span<double> const t_span = { 0., 2. };
+    double const dt                       = 0.05;
+
+    auto sol_range = ponio::make_solver_range( curtiss_hirschfelder, ponio::runge_kutta::rock::rock4(), y_0, t_span, dt );
+    auto it_sol    = sol_range.begin();
+
+    std::size_t cumulative_counter = 0;
+    while ( it_sol->time < t_span.back() )
+    {
+        ++it_sol;
+        cumulative_counter += it_sol.info().number_of_eval;
+    }
+
+    CHECK( cumulative_counter == manual_counter );
+}
+
+TEST_CASE( "number_of_eval::pirock" )
+{
+    std::size_t manual_counter_im = 0;
+    std::size_t manual_counter_ex = 0;
+
+    double const k = 50;
+    auto f_im      = [&]( double, double y )
+    {
+        ++manual_counter_im;
+        return k * y;
+    };
+    auto df_im = [&]( double, double )
+    {
+        return -k;
+    };
+    auto f_ex = [&, k]( double t, double )
+    {
+        ++manual_counter_ex;
+        return k * std::cos( t );
+    };
+
+    double y_0 = 2.0;
+
+    ponio::time_span<double> const t_span = { 0., 2. };
+    double const dt                       = 0.05;
+
+    auto curtiss_hirschfelder = ponio::make_imex_jacobian_problem( f_ex, f_im, df_im );
+    auto sol_range            = ponio::make_solver_range( curtiss_hirschfelder, ponio::runge_kutta::pirock::pirock<1>(), y_0, t_span, dt );
+    auto it_sol               = sol_range.begin();
+
+    std::size_t cumulative_counter_ex = 0;
+    std::size_t cumulative_counter_im = 0;
+    while ( it_sol->time < t_span.back() )
+    {
+        ++it_sol;
+        cumulative_counter_ex += it_sol.info().number_of_eval[0];
+        cumulative_counter_im += it_sol.info().number_of_eval[1];
+    }
+
+    CHECK( cumulative_counter_im == manual_counter_im );
+    CHECK( cumulative_counter_ex == manual_counter_ex );
+}
 
 TEST_CASE( "number_of_eval::splitting_lie" )
 {

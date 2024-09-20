@@ -72,6 +72,60 @@ namespace ponio
         }
     };
 
+    template <typename tableaus_t>
+        requires tableaus_t::is_imex_method
+    struct iteration_info<tableaus_t>
+    {
+        /**
+         * @brief type of coefficient of Butcher tableau, same type to store error and tolerance
+         *
+         */
+        using value_t = typename tableaus_t::value_t;
+
+        value_t error;                                                   /**< error makes on time iteration for adaptive time step method */
+        bool success;                                                    /**< sets as true only for success iteration */
+        bool is_step;                                                    /**< sets as true only if iterator is on a step given in solver */
+        std::size_t number_of_stages;                                    /**< number of stages of method */
+        std::array<std::size_t, tableaus_t::N_operators> number_of_eval; /**< number of evaluation of function */
+        value_t tolerance;                                               /**< tolerance for the method (for adaptive time step method) */
+
+        /**
+         * @brief Construct a new iteration info object
+         *
+         * @param tol tolerance for adaptive time step method
+         */
+        iteration_info( value_t tol = static_cast<value_t>( 0 ) )
+            : error( static_cast<value_t>( 0 ) )
+            , success( true )
+            , is_step( false )
+            , number_of_stages( 0 )
+            , number_of_eval( ::detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
+            , tolerance( tol )
+        {
+        }
+
+        iteration_info( value_t tol = static_cast<value_t>( 0 ) )
+            requires stages::has_static_number_of_stages<tableaus_t>
+            : error( static_cast<value_t>( 0 ) )
+            , success( true )
+            , is_step( false )
+            , number_of_stages( tableaus_t::N_stages )
+            , number_of_eval( ::detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
+            , tolerance( tol )
+        {
+        }
+
+        /**
+         * @brief reset number of evaluations to zero
+         *
+         */
+        void
+        reset_eval()
+        {
+            number_of_eval.fill( 0 );
+        }
+    };
+
     template <typename splitting_t>
         requires splitting_t::is_splitting_method
     struct iteration_info<splitting_t>
