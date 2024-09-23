@@ -103,6 +103,20 @@ namespace ponio::splitting::strang
         {
             return _info;
         }
+
+        template <std::size_t I>
+        auto&
+        stages()
+        {
+            return std::get<I>( methods ).stages();
+        }
+
+        template <std::size_t I>
+        auto const&
+        stages() const
+        {
+            return std::get<I>( methods ).stages();
+        }
     };
 
     // end of decremental recursion, end of recursion
@@ -287,6 +301,20 @@ namespace ponio::splitting::strang
         info() const
         {
             return _info;
+        }
+
+        template <std::size_t I>
+        auto&
+        stages()
+        {
+            return std::get<I>( methods ).stages();
+        }
+
+        template <std::size_t I>
+        auto const&
+        stages() const
+        {
+            return std::get<I>( methods ).stages();
         }
     };
 

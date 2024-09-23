@@ -167,6 +167,28 @@ namespace ponio
         {
             return alg.info;
         }
+
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto&
+         */
+        auto&
+        stages()
+        {
+            return kis;
+        }
+
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto const&
+         */
+        auto const&
+        stages() const
+        {
+            return kis;
+        }
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -211,6 +233,28 @@ namespace ponio
         info() const
         {
             return alg.info;
+        }
+
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto&
+         */
+        auto&
+        stages()
+        {
+            return kis;
+        }
+
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto const&
+         */
+        auto const&
+        stages() const
+        {
+            return kis;
         }
     };
 

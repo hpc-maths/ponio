@@ -96,6 +96,20 @@ namespace ponio::splitting::lie
         {
             return _info;
         }
+
+        template <std::size_t I>
+        auto&
+        stages()
+        {
+            return std::get<I>( methods ).stages();
+        }
+
+        template <std::size_t I>
+        auto const&
+        stages() const
+        {
+            return std::get<I>( methods ).stages();
+        }
     };
 
     /**

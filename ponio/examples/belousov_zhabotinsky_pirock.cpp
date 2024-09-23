@@ -293,8 +293,7 @@ main( int argc, char** argv )
     while ( it_sol->time < t_end )
     {
         samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0., 0., 0. );
-        //  TODO: add a callback function to make this before each iteration
-        for ( auto& ki : it_sol.meth.kis )
+        for ( auto& ki : it_sol.stages() )
         {
             ki.resize();
             ki.fill( 0. );

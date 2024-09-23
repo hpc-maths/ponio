@@ -194,7 +194,7 @@ TEST_CASE( "samurai::order::pirock" )
                 auto it_sol = sol_range.begin();
                 while ( it_sol->time < t_end )
                 {
-                    for ( auto& ki : it_sol.meth.kis )
+                    for ( auto& ki : it_sol.stages() )
                     {
                         ki.resize();
                         ki.fill( 0. );
