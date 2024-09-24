@@ -53,8 +53,8 @@ extensions = [
 ]
 
 breathe_projects = {'ponio': '../xml'}
-
 bibtex_bibfiles = ['bibliography.bib']
+plantuml = 'java -jar plantuml.jar'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
