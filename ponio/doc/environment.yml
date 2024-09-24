@@ -22,3 +22,4 @@ dependencies:
   - pydata-sphinx-theme
   - sphinxcontrib-bibtex
   - sphinxcontrib-plantuml
+  - openjdk
