@@ -178,7 +178,7 @@ The full example can be found in :download:`lotka_volterra_uobs.cpp <../_static/
     Solution in phase space :math:`(x, y)`
 
 
-We can compute from previous simulation the invariant :math:`V`, or display it with out user-defined observer. We forget to force precision in the last output, so we get steps in the output.
+We can compute from previous simulation the invariant :math:`V`, or display it with out user-defined observer. We don't change the default precision in C++ which is set to 6 by default (see `std::ios_base::precision <https://en.cppreference.com/w/cpp/io/ios_base/precision>`_), in ponio observers the precision is set to the maximum of precision of given type.
 
 .. figure:: ../_static/cpp/lotka_volterra.png
     :width: 500 px

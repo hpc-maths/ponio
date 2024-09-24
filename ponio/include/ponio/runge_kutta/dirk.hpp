@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// IWYU pragma: private, include "../runge_kutta.h"
+// IWYU pragma: private, include "../runge_kutta.hpp"
 
 #pragma once
 
@@ -17,6 +17,7 @@
 
 #include "../butcher_tableau.hpp"
 #include "../detail.hpp"
+#include "../iteration_info.hpp"
 #include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
@@ -80,6 +81,8 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             bool, // just a small valid type
             lin_alg_t>;
 
+        using value_t = typename tableau_t::value_t;
+
         template <typename>
         diagonal_implicit_rk_butcher( double tol_, std::size_t max_iter_ )
             : butcher()
@@ -107,26 +110,39 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         {
         }
 
-        template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, std::size_t I>
+        template <typename problem_t, typename state_t, typename array_ki_t, std::size_t I>
             requires detail::problem_operator<problem_t, value_t>
         state_t
         stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
         {
+            if constexpr ( I == 0 )
+            {
+                info.reset_eval();
+            }
+
             state_t ui = un;
             auto op_i  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un )
                       - dt * butcher.A[I][I] * pb.f_t( tn + butcher.c[I] * dt );
             auto rhs = ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt );
 
-            ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_i, ui, rhs );
+            std::size_t n_eval = 0;
+            ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_i, ui, rhs, n_eval );
+
+            info.number_of_eval += n_eval + 1;
 
             return pb.f( tn + butcher.c[I] * dt, ui );
         }
 
-        template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, std::size_t I>
+        template <typename problem_t, typename state_t, typename array_ki_t, std::size_t I>
             requires detail::problem_jacobian<problem_t, value_t, state_t>
         state_t
         stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
         {
+            if constexpr ( I == 0 )
+            {
+                info.reset_eval();
+            }
+
             using matrix_t = decltype( pb.df( tn, un ) );
 
             auto identity = [&]( state_t const& u )
@@ -151,6 +167,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             // $$
             auto g = [&]( state_t const& k ) -> state_t
             {
+                info.number_of_eval += 1;
                 return k
                      - pb.f( tn + butcher.c[I] * dt, ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt ) + dt * butcher.A[I][I] * k );
             };
@@ -186,7 +203,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             }
         }
 
-        template <typename problem_t, typename state_t, typename value_t, typename array_ki_t>
+        template <typename problem_t, typename state_t, typename array_ki_t>
         state_t
         stage( Stage<N_stages>, problem_t&, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
         {
@@ -197,7 +214,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             return ::detail::tpl_inner_product<N_stages>( butcher.b, Ki, un, dt );
         }
 
-        template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, typename tab_t = tableau_t>
+        template <typename problem_t, typename state_t, typename array_ki_t, typename tab_t = tableau_t>
             requires std::same_as<tab_t, tableau_t> && is_embedded
         state_t
         stage( Stage<N_stages + 1>, problem_t&, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
@@ -209,6 +226,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         std::size_t max_iter = ponio::default_config::newton_max_iterations; // max iterations of Newton method
 
         linear_algebra_t linalg;
+        iteration_info<tableau_t> info;
     };
 
     // ---- *helper* ----

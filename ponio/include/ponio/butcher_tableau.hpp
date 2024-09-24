@@ -10,6 +10,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "detail.hpp"
+
 namespace ponio::runge_kutta::butcher
 {
 
@@ -66,4 +68,52 @@ namespace ponio::runge_kutta::butcher
                                   } -> std::same_as<std::true_type>;
                           };
 
-} // namespace ponio::butcher
+    template <typename Tableau>
+    concept is_exprk_tableau = requires( Tableau t ) {
+                                   typename Tableau::value_t;
+                                   typename Tableau::linear_t;
+                                   typename Tableau::func_t;
+                                   {
+                                       t.a
+                                   };
+                                   {
+                                       t.b
+                                   };
+                                   {
+                                       t.c
+                                   };
+                               };
+
+    template <typename Tableau>
+    constexpr bool
+    is_explicit_impl()
+    {
+        if constexpr ( is_exprk_tableau<Tableau> )
+        {
+            return true;
+        }
+        else
+        {
+            using value_t       = typename Tableau::value_t;
+            value_t partial_sum = 0;
+
+            for ( std::size_t i = 0ul; i < Tableau::N_stages; ++i )
+            {
+                for ( std::size_t j = 0ul; j < Tableau::N_stages; ++j )
+                {
+                    partial_sum += detail::power<2>( Tableau::A[i][j] );
+                }
+            }
+
+            return partial_sum == static_cast<value_t>( 0. );
+        }
+    }
+
+    template <typename Tableau>
+    concept is_explicit = requires( Tableau t ) {
+                              {
+                                  std::bool_constant<is_explicit_impl<Tableau>()>()
+                                  } -> std::same_as<std::true_type>;
+                          };
+
+} // namespace ponio::runge_kutta::butcher
