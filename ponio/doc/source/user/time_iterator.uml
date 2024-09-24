@@ -1,0 +1,45 @@
+#highlight ** / "type"
+{
+  "type": "time_iterator",
+  "sol": "<math>(t^n, u^n, Delta t^n)</math>",
+  "meth": {
+    "type": "method",
+    "is_embedded": false,
+    "alg": {
+      "type": "explicit_runge_kutta",
+      "butcher": {
+        "type": "butcher_tableau",
+        "A": [
+          "<math>[ [0, 0, 0], [1/2, 0, 0], [-1, 2, 0] ]</math>"
+        ],
+        "b": [
+          "<math>[ 1/6, 2/3, 1/6 ]</math>"
+        ],
+        "c": [
+          "<math>[ 0, 1/2, 1 ]</math>"
+        ]
+      },
+      "info": {
+        "type": "iteration_info",
+        "error": 0.0,
+        "success": true,
+        "is_step": false,
+        "number_of_stages": 3,
+        "number_of_eval": 3,
+        "tolerance": 1e-5
+      }
+    },
+    "kis": [
+      "<math>k_1</math>",
+      "<math>k_2</math>",
+      "<math>k_3</math>"
+    ]
+  },
+  "pb": "<math>f : (t,u) |-> f(t,u)</math>",
+  "t_span": [
+    0.0,
+    2.0
+  ],
+  "it_next_time": 2.0,
+  "dt_reference": 0.01
+}
