@@ -21,3 +21,5 @@ dependencies:
   - breathe
   - pydata-sphinx-theme
   - sphinxcontrib-bibtex
+  - sphinxcontrib-plantuml
+  - openjdk

@@ -24,6 +24,10 @@ echo "make run"
 export CONDA_PREFIX=$(dirname $(which doxygen))/..
 make -C ponio/doc/source/_static/cpp run
 
+# download PlantUML
+URL_PlantUML="https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar"
+wget $URL_PlantUML -O ponio/doc/source/plantuml.jar
+
 pushd ponio/doc/source/_static/cpp
 python figures.py
 popd

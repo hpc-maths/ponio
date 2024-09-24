@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// IWYU pragma: private, include "../splitting.h"
+// IWYU pragma: private, include "../splitting.hpp"
 
 #pragma once
 
-#include "../ponio_config.hpp"
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <tuple>
+
+#include "../ponio_config.hpp"
 
 namespace ponio::splitting::detail
 {
@@ -26,9 +28,9 @@ namespace ponio::splitting::detail
      * @param tf   final time
      * @param dt   time step
      */
-    template <std::size_t I, typename Problem_t, typename Method_t, typename state_t, typename value_t>
+    template <std::size_t I, typename Problem_t, typename Method_t, typename state_t, typename value_t, typename iteration_info_t>
     state_t
-    _split_solve( Problem_t& pb, Method_t& meth, state_t& ui, value_t ti, value_t tf, value_t dt )
+    _split_solve( Problem_t& pb, Method_t& meth, state_t& ui, value_t ti, value_t tf, value_t dt, iteration_info_t& info )
     {
         value_t current_dt   = std::min( dt, tf - ti );
         value_t current_time = ti;
@@ -39,6 +41,8 @@ namespace ponio::splitting::detail
             {
                 current_dt = tf - current_time;
             }
+
+            info.number_of_eval[I] += std::get<I>( meth ).info().number_of_eval;
         }
         return ui;
     }
@@ -124,6 +128,45 @@ namespace ponio::splitting::detail
                 return _splitting_method_t<value_t, Methods_t...>( meths, dts, args... );
             },
             optional_args );
+    }
+
+    // ---- class splitting_base -----------------------------------
+
+    /**
+     * @brief parent class of splitting methods, store list of methods and time steps
+     *
+     * @tparam _value_t  type of coefficients and time steps
+     * @tparam methods_t list of types of methods to solve each sub-problem
+     */
+    template <typename _value_t, typename... methods_t>
+    struct splitting_base
+    {
+        using value_t = _value_t;
+        using tuple_t = std::tuple<methods_t...>;
+
+        static constexpr bool is_splitting_method = true;
+        static constexpr std::size_t N_methods    = sizeof...( methods_t );
+
+        tuple_t methods;
+        std::array<value_t, N_methods> time_steps;
+
+        splitting_base( std::tuple<methods_t...> const& meths, std::array<value_t, sizeof...( methods_t )> const& dts );
+    };
+
+    /**
+     * @brief Construct a new splitting base<value t, methods t...>::splitting base object
+     *
+     * @tparam value_t   type of coefficients and time steps
+     * @tparam methods_t list of types of methods to solve each sub-problem
+     * @param meths      list of methods to solve each sub-problem
+     * @param dts        list of time step to solve each sub-problem (to iterate on each sub-step)
+     */
+    template <typename value_t, typename... methods_t>
+    splitting_base<value_t, methods_t...>::splitting_base( std::tuple<methods_t...> const& meths,
+        std::array<value_t, sizeof...( methods_t )> const& dts )
+        : methods( meths )
+        , time_steps( dts )
+    {
     }
 
 } // namespace ponio::splitting::detail

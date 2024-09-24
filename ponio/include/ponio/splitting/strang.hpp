@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// IWYU pragma: private, include "../splitting.h"
+// IWYU pragma: private, include "../splitting.hpp"
 
 #pragma once
 
@@ -16,7 +16,6 @@
 #include "../detail.hpp"
 #include "../ponio_config.hpp"
 #include "detail.hpp"
-#include "lie.hpp"
 
 namespace ponio::splitting::strang
 {
@@ -25,27 +24,42 @@ namespace ponio::splitting::strang
 
     /** @class strang
      *  Strang splitting method
-     *  @tparam Methods_t list of methods to solve each sub-problem
+     *  @tparam methods_t list of methods to solve each sub-problem
      */
-    template <typename value_t, typename... Methods_t>
-    struct strang : lie::lie<value_t, Methods_t...>
+    template <typename _value_t, typename... methods_t>
+    struct strang : detail::splitting_base<_value_t, methods_t...>
     {
-        using lie::lie<value_t, Methods_t...>::lie;
-        using lie::lie<value_t, Methods_t...>::methods;
-        using lie::lie<value_t, Methods_t...>::time_steps;
+        using value_t = _value_t;
+        using base_t  = detail::splitting_base<value_t, methods_t...>;
 
-        static constexpr std::size_t order        = 2;
-        static constexpr bool is_splitting_method = true;
-        static constexpr std::string_view id      = "strang";
+        using base_t::splitting_base;
+
+        using base_t::is_splitting_method;
+        using base_t::N_methods;
+
+        using base_t::methods;
+        using base_t::time_steps;
+
+        static constexpr std::size_t order   = 2;
+        static constexpr std::string_view id = "strang";
+        static constexpr std::size_t N_steps = 2 * N_methods - 1;
+
+        iteration_info<strang> _info;
+
+        strang( std::tuple<methods_t...> const& meths, std::array<value_t, N_methods> const& dts )
+            : base_t( meths, dts )
+            , _info( methods )
+        {
+        }
 
         // end of incremental recursion, start of decremental recursion
         // _call_inc can not be outside the class definition due to llvm bug
         // (see https://github.com/llvm/llvm-project/issues/56482)
         template <std::size_t I = 0, typename Problem_t, typename state_t>
-            requires( I == sizeof...( Methods_t ) - 1 )
+            requires( I == N_methods - 1 )
         void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
             _call_dec<I - 1>( f, tn, ui, dt );
         }
 
@@ -59,33 +73,59 @@ namespace ponio::splitting::strang
          * @details The parameter @p ui is update to \f$\phi_{^{\Delta t}/_2}^{[f_i]}(t^n,\texttt{ui})\f$
          */
         template <std::size_t I = 0, typename Problem_t, typename state_t>
-            requires( I < sizeof...( Methods_t ) - 1 )
+            requires( I < N_methods - 1 )
         void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I] );
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I], _info );
             _call_inc<I + 1>( f, tn, ui, dt );
         }
 
-        template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
+        template <std::size_t I = N_methods - 1, typename Problem_t, typename state_t>
             requires( I == 0 )
         void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt );
 
-        template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
+        template <std::size_t I = N_methods - 1, typename Problem_t, typename state_t>
             requires( I > 0 )
         void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt );
 
         template <typename Problem_t, typename state_t>
         auto
         operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt );
+
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        auto const&
+        info() const
+        {
+            return _info;
+        }
+
+        template <std::size_t I>
+        auto&
+        stages()
+        {
+            return std::get<I>( methods ).stages();
+        }
+
+        template <std::size_t I>
+        auto const&
+        stages() const
+        {
+            return std::get<I>( methods ).stages();
+        }
     };
 
     // end of decremental recursion, end of recursion
-    template <typename value_t, typename... Methods_t>
+    template <typename value_t, typename... methods_t>
     template <std::size_t I, typename Problem_t, typename state_t>
         requires( I == 0 )
-    inline void strang<value_t, Methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+    inline void strang<value_t, methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
     {
-        ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I] );
+        ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], _info );
     }
 
     /**
@@ -98,12 +138,12 @@ namespace ponio::splitting::strang
      * @param dt         time step \f$\Delta t\f$
      * @details The parameter @p ui is update to \f$\phi_{^{\Delta t}/_2}^{[f_i]}(t^n,\texttt{ui})\f$
      */
-    template <typename value_t, typename... Methods_t>
+    template <typename value_t, typename... methods_t>
     template <std::size_t I, typename Problem_t, typename state_t>
         requires( I > 0 )
-    inline void strang<value_t, Methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+    inline void strang<value_t, methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
     {
-        ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I] );
+        ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], _info );
         _call_dec<I - 1>( f, tn, ui, dt );
     }
 
@@ -114,11 +154,13 @@ namespace ponio::splitting::strang
      * @param un current solution \f$u^n \approx u(t^n)\f$
      * @param dt time step \f$\Delta t\f$
      */
-    template <typename value_t, typename... Methods_t>
+    template <typename value_t, typename... methods_t>
     template <typename Problem_t, typename state_t>
     auto
-    strang<value_t, Methods_t...>::operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
+    strang<value_t, methods_t...>::operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
     {
+        _info.reset_eval();
+
         state_t ui = un;
         _call_inc( f, tn, ui, dt );
         return std::make_tuple( tn + dt, ui, dt );
@@ -146,46 +188,53 @@ namespace ponio::splitting::strang
 
     /** @class adaptive_strang
      *  adaptive time step Strang splitting method
-     *  @tparam Methods_t list of methods to solve each sub-problem
+     *  @tparam methods_t list of methods to solve each sub-problem
      */
-    template <typename value_t, typename... Methods_t>
-    struct adaptive_strang : strang<value_t, Methods_t...>
+    template <typename _value_t, typename... methods_t>
+    struct adaptive_strang : detail::splitting_base<_value_t, methods_t...>
     {
-        using strang<value_t, Methods_t...>::strang;
-        using strang<value_t, Methods_t...>::methods;
-        using strang<value_t, Methods_t...>::time_steps;
+        using value_t = _value_t;
+        using base_t  = detail::splitting_base<value_t, methods_t...>;
 
-        static constexpr std::size_t order        = 2;
-        static constexpr bool is_splitting_method = true;
-        static constexpr bool is_embedded         = true;
-        static constexpr std::string_view id      = "adaptive_strang";
+        using base_t::splitting_base;
+
+        using base_t::is_splitting_method;
+        using base_t::N_methods;
+
+        using base_t::methods;
+        using base_t::time_steps;
+
+        static constexpr std::size_t order   = 1;
+        static constexpr std::string_view id = "adaptive_strang";
+        static constexpr std::size_t N_steps = 2 * N_methods - 1;
+        static constexpr bool is_embedded    = true;
 
         value_t delta;
-        value_t tol;
+        iteration_info<adaptive_strang> _info;
 
-        adaptive_strang( std::tuple<Methods_t...> const& meths,
-            std::array<value_t, sizeof...( Methods_t )> const& dts,
+        adaptive_strang( std::tuple<methods_t...> const& meths,
+            std::array<value_t, N_methods> const& dts,
             value_t _delta,
-            value_t _tol = default_config::tol )
-            : strang<value_t, Methods_t...>( meths, dts )
+            value_t tol = default_config::tol )
+            : base_t( meths, dts )
             , delta( _delta )
-            , tol( _tol )
+            , _info( methods, tol )
         {
         }
 
         template <std::size_t I = 0, typename Problem_t, typename state_t>
-            requires( I == sizeof...( Methods_t ) - 1 )
+            requires( I == N_methods - 1 )
         void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I] );
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
             _call_dec<I - 1>( f, tn, ui, dt, shift );
         }
 
         template <std::size_t I = 0, typename Problem_t, typename state_t>
-            requires( 0 < I && I < sizeof...( Methods_t ) - 1 )
+            requires( 0 < I && I < N_methods - 1 )
         void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I] );
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I], _info );
             _call_inc<I + 1>( f, tn, ui, dt, shift );
         }
 
@@ -193,29 +242,31 @@ namespace ponio::splitting::strang
             requires( I == 0 )
         void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + ( 0.5 + shift ) * dt, time_steps[I] );
+            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + ( 0.5 + shift ) * dt, time_steps[I], _info );
             _call_inc<I + 1>( f, tn, ui, dt, shift );
         }
 
-        template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
+        template <std::size_t I = N_methods - 1, typename Problem_t, typename state_t>
             requires( I > 0 )
         void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I] );
+            ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], _info );
             _call_dec<I - 1>( f, tn, ui, dt, shift );
         }
 
-        template <std::size_t I = sizeof...( Methods_t ) - 1, typename Problem_t, typename state_t>
+        template <std::size_t I = N_methods - 1, typename Problem_t, typename state_t>
             requires( I == 0 )
         void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn + ( 0.5 + shift ) * dt, tn + dt, time_steps[I] );
+            ui = detail::_split_solve<I>( f, methods, ui, tn + ( 0.5 + shift ) * dt, tn + dt, time_steps[I], _info );
         }
 
         template <typename Problem_t, typename state_t>
         auto
         operator()( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
+            _info.reset_eval();
+
             state_t u_np1_ref   = un;
             state_t u_np1_shift = un;
 
@@ -226,16 +277,44 @@ namespace ponio::splitting::strang
             _call_inc( f, tn, u_np1_ref, dt, 0. );
             _call_inc( f, tn, u_np1_shift, dt, delta );
 
-            auto error = ::detail::error_estimate( un, u_np1_ref, u_np1_shift );
+            _info.error = ::detail::error_estimate( un, u_np1_ref, u_np1_shift );
 
-            value_t new_dt = 0.9 * std::sqrt( tol / error ) * dt;
+            value_t new_dt = 0.9 * std::sqrt( _info.tolerance / _info.error ) * dt;
             new_dt         = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
 
-            if ( error > tol )
+            _info.success = _info.error < _info.tolerance;
+
+            if ( !_info.success )
             {
                 return std::make_tuple( tn, un, new_dt );
             }
             return std::make_tuple( tn + dt, u_np1_ref, new_dt );
+        }
+
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        auto const&
+        info() const
+        {
+            return _info;
+        }
+
+        template <std::size_t I>
+        auto&
+        stages()
+        {
+            return std::get<I>( methods ).stages();
+        }
+
+        template <std::size_t I>
+        auto const&
+        stages() const
+        {
+            return std::get<I>( methods ).stages();
         }
     };
 

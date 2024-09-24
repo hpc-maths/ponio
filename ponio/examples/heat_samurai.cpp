@@ -126,10 +126,10 @@ main( int argc, char** argv )
     auto sol_range = ponio::make_solver_range( pb, ponio::runge_kutta::rock::rock4<true>( eigmax_computer ), un_ini, { 0., Tf }, dt );
 
     auto it_sol = sol_range.begin();
+    samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
 
     // Prepare MR for solution on iterator
     auto MRadaptation = samurai::make_MRAdapt( it_sol->state );
-    samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
     MRadaptation( mr_epsilon, mr_regularity );
     samurai::update_ghost_mr( it_sol->state );
 
@@ -139,9 +139,9 @@ main( int argc, char** argv )
     std::cerr << "> time loop" << std::endl;
     while ( it_sol->time < Tf )
     {
-        // samurai::make_bc<samurai::Neumann>( it_sol->state, 0. );
-        //  TODO: add a callback function to make this before each iteration
-        for ( auto& ki : it_sol.meth.kis )
+        // samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
+
+        for ( auto& ki : it_sol.stages() )
         {
             ki.resize();
             ki.fill( 0. );
@@ -149,7 +149,8 @@ main( int argc, char** argv )
 
         ++it_sol;
 
-        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ")\r";
+        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ")  "
+                  << "N stages:" << it_sol.info().number_of_stages << "   \r";
 
         MRadaptation( mr_epsilon, mr_regularity );
         samurai::update_ghost_mr( it_sol->state );

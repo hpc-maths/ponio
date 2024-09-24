@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// IWYU pragma: private, include "../runge_kutta.h"
+// IWYU pragma: private, include "../runge_kutta.hpp"
 
 #pragma once
 
@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "../butcher_tableau.hpp"
+#include "../iteration_info.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
 
@@ -95,12 +96,15 @@ namespace ponio::runge_kutta::exponential_runge_kutta
         static constexpr std::size_t order    = tableau_t::order;
         static constexpr std::string_view id  = tableau_t::id;
 
-        double tol;
+        using value_t = typename tableau_t::value_t;
 
-        explicit_exp_rk_butcher( double tol_ = ponio::default_config::tol )
+        iteration_info<tableau_t> info;
+
+        explicit_exp_rk_butcher( double tolerance = ponio::default_config::tol )
             : butcher()
-            , tol( tol_ )
+            , info( tolerance )
         {
+            info.number_of_eval = N_stages;
         }
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, std::size_t i>

@@ -31,9 +31,25 @@ namespace ponio::linear_algebra
 
         template <typename operator_t, typename state_t, typename rhs_t>
         static void
-        solve( operator_t const& op, state_t& u, rhs_t& rhs )
+        solve( operator_t const& op, state_t& u, rhs_t& rhs, std::size_t& n_eval )
         {
-            ::samurai::petsc::solve( op, u, rhs );
+            auto solver = samurai::petsc::make_solver( op );
+            solver.solve( u, rhs );
+
+            if constexpr ( operator_t::cfg_t::scheme_type == samurai::SchemeType::NonLinear )
+            {
+                int i_n_eval = 0;
+                SNESGetNumberFunctionEvals( solver.Snes(), &i_n_eval );
+
+                n_eval = static_cast<std::size_t>( i_n_eval );
+            }
+            else
+            {
+                // linear solver, no evaluation of function
+                n_eval = 0;
+            }
+
+            //::samurai::petsc::solve( op, u, rhs );
         }
     };
 

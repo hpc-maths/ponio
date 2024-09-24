@@ -48,12 +48,15 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.graphviz',
     'breathe',
-    'sphinxcontrib.bibtex'
+    'sphinxcontrib.bibtex',
+    'sphinxcontrib.plantuml'
 ]
 
 breathe_projects = {'ponio': '../xml'}
-
 bibtex_bibfiles = ['bibliography.bib']
+
+plantuml_jar = os.path.join(os.path.abspath(os.getcwd()), 'plantuml.jar')
+plantuml = f"java -jar {plantuml_jar}"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

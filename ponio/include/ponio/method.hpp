@@ -135,16 +135,59 @@ namespace ponio
         std::tuple<value_t, state_t, value_t>
         _return( value_t tn, state_t const& un, value_t dt )
         {
-            auto error = ::detail::error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
+            alg.info.error = ::detail::error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
 
-            value_t new_dt = 0.9 * std::pow( alg.tol / error, 1. / static_cast<value_t>( Algorithm_t::order ) ) * dt;
+            value_t new_dt = 0.9 * std::pow( alg.info.tolerance / alg.info.error, 1. / static_cast<value_t>( Algorithm_t::order ) ) * dt;
             new_dt         = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
 
-            if ( error > alg.tol )
+            if ( alg.info.error > alg.info.tolerance )
             {
+                alg.info.success = false;
                 return std::make_tuple( tn, un, new_dt );
             }
+
+            alg.info.success = true;
             return std::make_tuple( tn + dt, kis[Algorithm_t::N_stages], new_dt );
+        }
+
+        /**
+         * @brief returns iteration_info object on algorithm
+         */
+        auto&
+        info()
+        {
+            return alg.info;
+        }
+
+        /**
+         * @brief returns iteration_info object on algorithm
+         */
+        auto const&
+        info() const
+        {
+            return alg.info;
+        }
+
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto&
+         */
+        auto&
+        stages()
+        {
+            return kis;
+        }
+
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto const&
+         */
+        auto const&
+        stages() const
+        {
+            return kis;
         }
     };
 
@@ -172,6 +215,46 @@ namespace ponio
         operator()( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
             return alg( f, tn, un, kis, dt );
+        }
+
+        /**
+         * @brief returns iteration_info object on algorithm
+         */
+        auto&
+        info()
+        {
+            return alg.info;
+        }
+
+        /**
+         * @brief returns iteration_info object on algorithm
+         */
+        auto const&
+        info() const
+        {
+            return alg.info;
+        }
+
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto&
+         */
+        auto&
+        stages()
+        {
+            return kis;
+        }
+
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto const&
+         */
+        auto const&
+        stages() const
+        {
+            return kis;
         }
     };
 
@@ -238,8 +321,10 @@ namespace ponio
         {
             return splitting::detail::make_splitting_from_tuple<_splitting_method_t>( methods, algos.time_steps, algos.optional_arguments );
         }
-
-        return splitting::detail::make_splitting_from_tuple<_splitting_method_t>( methods, algos.time_steps );
+        else
+        {
+            return splitting::detail::make_splitting_from_tuple<_splitting_method_t>( methods, algos.time_steps );
+        }
     }
 
 } // namespace ponio

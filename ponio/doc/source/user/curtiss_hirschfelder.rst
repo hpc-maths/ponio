@@ -67,7 +67,10 @@ This object is range in C++20 meaning, so we can iterate on it with a :cpp:class
   :lineno-start: 30
   :linenos:
 
-This kind of iterator can be incremented (:code:`++it_sol`), and we can access to its stored data with :code:`*` operator (:code:`*it_sol`) and get a tuple with :math:`(t^n, y^n, \Delta t^n)`. We can also access with :code:`->` operator with :code:`it_sol->time` for :math:`t^n`, :code:`it_sol->state` for :math:`y^n` and :code:`it_sol->time_step` for :math:`\Delta t^n`.
+This kind of iterator can be incremented (:code:`++it_sol`), and we can access to its stored data with :code:`*` operator (:code:`*it_sol`) and get a tuple with :math:`(t^n, y^n, \Delta t^n)`. We can also access with :code:`->` operator with :code:`it_sol->time` for :math:`t^n`, :code:`it_sol->state` for :math:`y^n` and :code:`it_sol->time_step` for :math:`\Delta t^n`. All information contains in this iterator is summarized in the following diagram:
+
+.. uml:: time_iterator.uml
+  :caption: Summarize of :code:`time_iterator` class
 
 To manage the time loop we write a while loop
 

@@ -289,6 +289,50 @@ namespace ponio
         {
             return &sol;
         }
+
+        /**
+         * @brief accessor to informations on iteration with algorithm
+         *
+         * @return auto&
+         */
+        auto&
+        info() // cppcheck-suppress unusedFunction
+        {
+            return meth.info();
+        }
+
+        /**
+         * @brief accessor to informations on iteration with algorithm
+         *
+         * @return auto const&
+         */
+        auto const&
+        info() const // cppcheck-suppress unusedFunction
+        {
+            return meth.info();
+        }
+
+        /**
+         * @brief returns stages if need to access to them to resize or change condition on them
+         *
+         * @return auto&
+         */
+        auto&
+        stages() // cppcheck-suppress unusedFunction
+        {
+            return meth.stages();
+        }
+
+        /**
+         * @brief returns stages if need to access to them
+         *
+         * @return auto const&
+         */
+        auto const&
+        stages() const // cppcheck-suppress unusedFunction
+        {
+            return meth.stages();
+        }
     };
 
     /**
