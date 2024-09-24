@@ -1,3 +1,4 @@
+@startjson
 #highlight ** / "type"
 {
   "type": "time_iterator",
@@ -43,3 +44,4 @@
   "it_next_time": 2.0,
   "dt_reference": 0.01
 }
+@endjson
