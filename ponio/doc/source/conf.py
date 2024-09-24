@@ -48,7 +48,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.graphviz',
     'breathe',
-    'sphinxcontrib.bibtex'
+    'sphinxcontrib.bibtex',
+    'sphinxcontrib.plantuml'
 ]
 
 breathe_projects = {'ponio': '../xml'}
