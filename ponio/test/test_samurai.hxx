@@ -46,7 +46,7 @@ static_for( lambda_t&& f )
 TEST_CASE( "samurai::order::pirock" )
 {
     int argc                = 1;
-    std::vector<char*> argv = { "ponio_tests" };
+    std::vector<char*> argv = { (char*)"ponio_tests" };
     char** argv_c           = argv.data();
 
     PetscInitialize( &argc, &argv_c, 0, nullptr );
