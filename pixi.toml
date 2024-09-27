@@ -40,6 +40,8 @@ cppcheck = { cmd = "cppcheck --enable=all --check-level=exhaustive -q --project=
   "build_debug",
 ] }
 
+analysis_json = { cmd = "python analysis/analysis.py -o html/api -v -s database/*.json" }
+
 [target.win-64.tasks]
 configure = { cmd = "cmake . -G 'Visual Studio 17 2022' -B ./build" }
 configure_test = { cmd = "cmake . -G 'Visual Studio 17 2022' -B ./build -DBUILD_TESTS=ON" }
