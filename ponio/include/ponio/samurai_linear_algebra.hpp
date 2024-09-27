@@ -18,6 +18,8 @@
 
 namespace ponio::linear_algebra
 {
+    template <typename solver_t>
+    concept has_Snes_method = std::is_member_function_pointer_v<decltype( &solver_t::Snes )>;
 
     template <class mesh_t, class value_t, std::size_t size, bool SOA>
     struct operator_algebra<::samurai::Field<mesh_t, value_t, size, SOA>>
@@ -36,7 +38,7 @@ namespace ponio::linear_algebra
             auto solver = samurai::petsc::make_solver( op );
             solver.solve( u, rhs );
 
-            if constexpr ( operator_t::cfg_t::scheme_type == samurai::SchemeType::NonLinear )
+            if constexpr ( operator_t::cfg_t::scheme_type == samurai::SchemeType::NonLinear && has_Snes_method<decltype( solver )> )
             {
                 int i_n_eval = 0;
                 SNESGetNumberFunctionEvals( solver.Snes(), &i_n_eval );
