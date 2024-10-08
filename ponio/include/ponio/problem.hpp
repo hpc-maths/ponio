@@ -326,6 +326,14 @@ namespace ponio
         state_t
         operator()( value_t t, state_t& u );
 
+        template <std::size_t I, typename value_t, typename state_t>
+        state_t
+        operator()( std::integral_constant<std::size_t, I>, value_t t, state_t&& u );
+
+        template <std::size_t I, typename value_t, typename state_t>
+        state_t
+        operator()( std::integral_constant<std::size_t, I>, value_t t, state_t& u );
+
         template <std::size_t Index, typename value_t, typename state_t>
         state_t
         call( value_t t, state_t&& u );
@@ -388,6 +396,30 @@ namespace ponio
     problem<Callables_t...>::operator()( value_t t, state_t& u )
     {
         return _sum_components_impl( t, u, std::make_index_sequence<size>{} );
+    }
+
+    /**
+     * call operator for the I operator in Callables_t
+     *
+     * @tparam I  Index index of tuple of sub-problems to call
+     * @param t   time \f$t\f$
+     * @param u   time \f$u(t)\f$
+     * @return    returns \f$f_i(t,u)\f$
+     */
+    template <typename... Callables_t>
+    template <std::size_t I, typename value_t, typename state_t>
+    inline state_t
+    problem<Callables_t...>::operator()( std::integral_constant<std::size_t, I>, value_t t, state_t&& u )
+    {
+        return call<I>( t, std::forward<state_t>( u ) );
+    }
+
+    template <typename... Callables_t>
+    template <std::size_t I, typename value_t, typename state_t>
+    inline state_t
+    problem<Callables_t...>::operator()( std::integral_constant<std::size_t, I>, value_t t, state_t& u )
+    {
+        return call<I>( t, u );
     }
 
     /**

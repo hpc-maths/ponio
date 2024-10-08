@@ -704,21 +704,23 @@ namespace ponio::runge_kutta::pirock
             // 0: reaction operator
             // 1: diffusion operator
             // 2: advection operator
-            static constexpr std::size_t reaction_op  = 0;
-            static constexpr std::size_t diffusion_op = 1;
-            static constexpr std::size_t advection_op = 2;
+            using reaction_op  = std::integral_constant<std::size_t, 0>;
+            using diffusion_op = std::integral_constant<std::size_t, 1>;
+            using advection_op = std::integral_constant<std::size_t, 2>;
 
-            static_assert( detail::problem_operator<std::tuple_element_t<reaction_op, decltype( pb.system )>, value_t>
-                               || detail::problem_jacobian<std::tuple_element_t<reaction_op, decltype( pb.system )>, value_t, state_t>,
+            static_assert( detail::problem_operator<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t>
+                               || detail::problem_jacobian<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t, state_t>,
                 "This kind of problem is not inversible in ponio" );
 
             info.reset_eval();
 
-            auto [mdeg,
-                deg_index,
-                start_index,
-                n_eval] = degree_computer::compute_n_stages_optimal_degree( eig_computer, std::get<diffusion_op>( pb.system ), tn, un, dt, 4 );
-            std::size_t s = mdeg + 2;
+            auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( eig_computer,
+                std::get<diffusion_op::value>( pb.system ),
+                tn,
+                un,
+                dt,
+                4 );
+            std::size_t s                               = mdeg + 2;
 
             info.number_of_stages  = s + l + 5;
             info.number_of_eval[0] = n_eval + s + l + 4; // explicit evaluation
@@ -742,7 +744,7 @@ namespace ponio::runge_kutta::pirock
             value_t t_jm3 = tn;
 
             // u_1 =u^n + \alpha \mu_1 \Delta F_D( u^n )
-            u_jm1 = un + alpha * dt * mu_1 * pb.template call<diffusion_op>( tn, un );
+            u_jm1 = un + alpha * dt * mu_1 * pb( diffusion_op(), tn, un );
 
             if ( mdeg < 2 )
             {
@@ -756,7 +758,7 @@ namespace ponio::runge_kutta::pirock
                 value_t const nu_j    = -1.0 - kappa_j;
 
                 // u_{j} = \alpha \mu_j \Delta t F_D( u_{j-2} ) - \nu_j u_{j-1} - \kappa_j u_{j-2}
-                u_j = alpha * mu_j * dt * pb.template call<diffusion_op>( t_jm1, u_jm1 ) - nu_j * u_jm1 - kappa_j * u_jm2;
+                u_j = alpha * mu_j * dt * pb( diffusion_op(), t_jm1, u_jm1 ) - nu_j * u_jm1 - kappa_j * u_jm2;
 
                 t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
 
@@ -788,11 +790,11 @@ namespace ponio::runge_kutta::pirock
 
             // u_{*s-1} = u_{s-2} + \sigma_\alpha \Delta t  F_D( u_{s-2} )
             auto& us_sm1 = U[4];
-            us_sm1       = u_sm2 + sigma_a * dt * pb.template call<diffusion_op>( t_jm1, u_sm2 );
+            us_sm1       = u_sm2 + sigma_a * dt * pb( diffusion_op(), t_jm1, u_sm2 );
 
             // u_{*s} = u_{*s-1} + \sigma_\alpha \Delta t  F_D( u_{*s-1} )
             auto& us_s = U[5];
-            us_s       = us_sm1 + sigma_a * dt * pb.template call<diffusion_op>( t_jm1, us_sm1 );
+            us_s       = us_sm1 + sigma_a * dt * pb( diffusion_op(), t_jm1, us_sm1 );
 
             // u_{s-2+l} = u_j
             auto& u_sm2pl = u_j;
@@ -807,15 +809,15 @@ namespace ponio::runge_kutta::pirock
             u_sp2       = un;
 
             auto& Fa_u_sp1 = U[8];
-            Fa_u_sp1       = pb.template call<advection_op>( tn, u_sp1 );
+            Fa_u_sp1       = pb( advection_op(), tn, u_sp1 );
 
-            if constexpr ( detail::problem_operator<std::tuple_element_t<reaction_op, decltype( pb.system )>, value_t> )
+            if constexpr ( detail::problem_operator<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t> )
             {
                 std::size_t n_eval_sp1 = 0;
 
                 // I - \gamma \Delta t F_R
                 auto op_sp1 = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un )
-                            - gamma * dt * std::get<reaction_op>( pb.system ).f_t( tn );
+                            - gamma * dt * std::get<reaction_op::value>( pb.system ).f_t( tn );
                 // u^{(s-2+\ell)}
                 auto rhs_sp1 = u_sm2pl;
 
@@ -825,10 +827,10 @@ namespace ponio::runge_kutta::pirock
 
                 // I - \gamma \Delta t F_R
                 auto op_sp2 = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un )
-                            - gamma * dt * std::get<reaction_op>( pb.system ).f_t( tn );
+                            - gamma * dt * std::get<reaction_op::value>( pb.system ).f_t( tn );
                 // u^{(s-2+\ell)} + \beta \Delta t F_D(u^{(s+1)}) + \Delta t F_A(u^{(s+1)}) + (1-2\gamma)\Delta t F_R(u^{(s+1)})
-                auto rhs_sp2 = static_cast<state_t>( u_sm2pl + beta * dt * pb.template call<diffusion_op>( tn, u_sp1 ) + dt * Fa_u_sp1
-                                                     + ( 1. - 2. * gamma ) * dt * pb.template call<reaction_op>( tn, u_sp1 ) );
+                auto rhs_sp2 = static_cast<state_t>( u_sm2pl + beta * dt * pb( diffusion_op(), tn, u_sp1 ) + dt * Fa_u_sp1
+                                                     + ( 1. - 2. * gamma ) * dt * pb( reaction_op(), tn, u_sp1 ) );
 
                 ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2, n_eval_sp2 );
 
@@ -836,7 +838,7 @@ namespace ponio::runge_kutta::pirock
             }
             else
             {
-                using matrix_t = decltype( std::get<reaction_op>( pb.system ).df( tn, un ) );
+                using matrix_t = decltype( std::get<reaction_op::value>( pb.system ).df( tn, un ) );
 
                 auto identity = ::ponio::linear_algebra::linear_algebra<matrix_t>::identity( un );
                 auto g_sp1    = [&]( state_t const& u ) -> state_t
@@ -844,13 +846,13 @@ namespace ponio::runge_kutta::pirock
                     info.number_of_eval[1] += 1;
 
                     // u - \gamma \Delta t F_R(u) - u^{(s-2+\ell)}
-                    return u - gamma * dt * pb.template call<reaction_op>( tn, u ) - u_sm2pl;
+                    return u - gamma * dt * pb( reaction_op(), tn, u ) - u_sm2pl;
                 };
                 auto dg = [&]( state_t const& u ) -> matrix_t
                 {
                     // Jacobian of g
                     // I - \gamma \Delta t \partial_u F_R(u)
-                    return identity - gamma * dt * std::get<reaction_op>( pb.system ).df( tn, u );
+                    return identity - gamma * dt * std::get<reaction_op::value>( pb.system ).df( tn, u );
                 };
                 u_sp1 = diagonal_implicit_runge_kutta::newton<value_t>( g_sp1,
                     dg,
@@ -866,9 +868,9 @@ namespace ponio::runge_kutta::pirock
 
                     // u - \gamma \Delta t F_R(u) - (u^{(s-2+\ell)} + \beta \Delta t F_D(u^{(s+1)}) + \Delta t F_A(u^{(s+1)}) +
                     // (1-2\gamma)\Delta t F_R(u^{(s+1)}))
-                    return u - gamma * dt * pb.template call<reaction_op>( tn, u )
-                         - ( u_sm2pl + beta * dt * pb.template call<diffusion_op>( tn, u_sp1 ) + dt * Fa_u_sp1
-                             + ( 1. - 2. * gamma ) * dt * pb.template call<reaction_op>( tn, u_sp1 ) );
+                    return u - gamma * dt * pb( reaction_op(), tn, u )
+                         - ( u_sm2pl + beta * dt * pb( diffusion_op(), tn, u_sp1 ) + dt * Fa_u_sp1
+                             + ( 1. - 2. * gamma ) * dt * pb( reaction_op(), tn, u_sp1 ) );
                 };
                 u_sp2 = diagonal_implicit_runge_kutta::newton<value_t>( g_sp2,
                     dg,
@@ -882,7 +884,7 @@ namespace ponio::runge_kutta::pirock
 
             // u^{(s+3)} = u^{(s-2+\ell)} + (1-2\gamma)\Delta t F_A(u^{(s+1)}) + (1-\gamma)\Delta t F_R(u^{(s+1)})
             auto& u_sp3 = U[9];
-            u_sp3       = u_sm2pl + ( 1. - 2. * gamma ) * dt * Fa_u_sp1 + ( 1. - gamma ) * dt * pb.template call<reaction_op>( tn, u_sp1 );
+            u_sp3       = u_sm2pl + ( 1. - 2. * gamma ) * dt * Fa_u_sp1 + ( 1. - gamma ) * dt * pb( reaction_op(), tn, u_sp1 );
 
             // u^{(s+4)} = u^{(s+2-\ell)} + 1/3 \Delta t F_A(u^{(s+1)})
             auto& u_sp4 = U[10];
@@ -895,31 +897,28 @@ namespace ponio::runge_kutta::pirock
             auto& u_sp5 = U[11];
 
             if constexpr ( shampine_trick_enable
-                           && detail::problem_operator<std::tuple_element_t<reaction_op, decltype( pb.system )>, value_t> )
+                           && detail::problem_operator<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t> )
             {
                 auto& shampine_element = U[13]; // solution of (I - \gamma \Delta t \partial_u F_R ) X = F_A(u^{(s+4)})
                 auto& f_A_u            = U[14];
                 auto& u_tmp            = U[15];
 
-                f_A_u = dt * pb.template call<advection_op>( tn, u_sp4 );
+                f_A_u = dt * pb( advection_op(), tn, u_sp4 );
 
                 shampine_trick_caller.template operator()<1>( gamma * dt,
-                    std::get<reaction_op>( pb.system ).f_t( tn ),
+                    std::get<reaction_op::value>( pb.system ).f_t( tn ),
                     u_sm2pl,
                     f_A_u,
                     u_tmp,
                     shampine_element );
 
-                u_sp5 = u_sm2pl + 2. / 3. * beta * dt * pb.template call<diffusion_op>( tn, u_sp1 ) + 2. / 3. * shampine_element
-                      + ( 2. / 3. - gamma ) * dt * pb.template call<reaction_op>( tn, u_sp1 )
-                      + 2. / 3. * gamma * dt * pb.template call<reaction_op>( u_sp2 );
+                u_sp5 = u_sm2pl + 2. / 3. * beta * dt * pb( diffusion_op(), tn, u_sp1 ) + 2. / 3. * shampine_element
+                      + ( 2. / 3. - gamma ) * dt * pb( reaction_op(), tn, u_sp1 ) + 2. / 3. * gamma * dt * pb( reaction_op(), u_sp2 );
             }
             else
             {
-                u_sp5 = u_sm2pl + 2. / 3. * beta * dt * pb.template call<diffusion_op>( tn, u_sp1 )
-                      + 2. / 3. * dt * pb.template call<advection_op>( tn, u_sp4 )
-                      + ( 2. / 3. - gamma ) * dt * pb.template call<reaction_op>( tn, u_sp1 )
-                      + 2. / 3. * gamma * dt * pb.template call<reaction_op>( tn, u_sp2 );
+                u_sp5 = u_sm2pl + 2. / 3. * beta * dt * pb( diffusion_op(), tn, u_sp1 ) + 2. / 3. * dt * pb( advection_op(), tn, u_sp4 )
+                      + ( 2. / 3. - gamma ) * dt * pb( reaction_op(), tn, u_sp1 ) + 2. / 3. * gamma * dt * pb( reaction_op(), tn, u_sp2 );
             }
 
             value_t tau   = sigma * rock_coeff::fp2[deg_index - 1] + sigma * sigma;
@@ -928,7 +927,7 @@ namespace ponio::runge_kutta::pirock
             auto& u_np1 = U[12];
 
             if constexpr ( shampine_trick_enable
-                           && detail::problem_operator<std::tuple_element_t<reaction_op, decltype( pb.system )>, value_t> )
+                           && detail::problem_operator<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t> )
             {
                 auto& shampine_element = U[13];
                 auto& f_D_u            = U[14];
@@ -939,12 +938,12 @@ namespace ponio::runge_kutta::pirock
 
                 // $err_D = \sigma_\alpha(1-\tau_a/\sigma_a^2)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)}))$
                 err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
-                      * ( pb.template call<diffusion_op>( tn, us_sm1 ) - pb.template call<diffusion_op>( tn, u_sm2 ) );
+                      * ( pb( diffusion_op(), tn, us_sm1 ) - pb( diffusion_op(), tn, u_sm2 ) );
 
-                f_D_u = static_cast<state_t>( pb.template call<diffusion_op>( tn, u_sp3 ) - pb.template call<diffusion_op>( tn, u_sp1 ) );
+                f_D_u = static_cast<state_t>( pb( diffusion_op(), tn, u_sp3 ) - pb( diffusion_op(), tn, u_sp1 ) );
 
                 shampine_trick_caller.template operator()<l>( gamma * dt,
-                    std::get<reaction_op>( pb.system ).f_t( tn ),
+                    std::get<reaction_op::value>( pb.system ).f_t( tn ),
                     u_sm2pl,
                     f_D_u,
                     u_tmp,
@@ -957,13 +956,17 @@ namespace ponio::runge_kutta::pirock
 
                     info.number_of_eval[1] += 2;
 
-                    rhs_R = dt * ( pb.template call<reaction_op>( tn, u_sp1 ) - pb.template call<reaction_op>( tn, u_sp2 ) ) / 6.;
+                    rhs_R = dt * ( pb( reaction_op(), tn, u_sp1 ) - pb( reaction_op(), tn, u_sp2 ) ) / 6.;
 
                     // $err_R = J_R^{-1} \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
                     // to compute it, get $rhs_R = \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
                     // then solve $J_R err_R = rhs_R$ (that what Shampine's trick does, it build $J_R$ and solve it)
-                    shampine_trick_caller
-                        .template operator()<1>( gamma * dt, std::get<reaction_op>( pb.system ).f_t( tn ), u_sm2pl, rhs_R, u_tmp, err_R );
+                    shampine_trick_caller.template operator()<1>( gamma * dt,
+                        std::get<reaction_op::value>( pb.system ).f_t( tn ),
+                        u_sm2pl,
+                        rhs_R,
+                        u_tmp,
+                        err_R );
 
                     // TODO: this couple of lines works only with samurai (because of err_D.array())
                     auto err = std::max( std::accumulate( err_D.array().begin(),
@@ -992,22 +995,21 @@ namespace ponio::runge_kutta::pirock
                         return { tn, un, new_dt };
                     }
 
-                    u_np1 = us_s - err_D + 0.5 * dt * pb.template call<reaction_op>( tn, u_sp1 )
-                          + 0.5 * dt * pb.template call<reaction_op>( tn, u_sp2 ) + 1.0 / ( 2. - 4. * gamma ) * shampine_element;
+                    u_np1 = us_s - err_D + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp2 )
+                          + 1.0 / ( 2. - 4. * gamma ) * shampine_element;
                     return { tn + dt, u_np1, new_dt };
                 }
 
-                u_np1 = us_s - err_D + 0.5 * dt * pb.template call<reaction_op>( tn, u_sp1 )
-                      + 0.5 * dt * pb.template call<reaction_op>( tn, u_sp2 ) + dt / ( 2. - 4. * gamma ) * shampine_element;
+                u_np1 = us_s - err_D + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp2 )
+                      + dt / ( 2. - 4. * gamma ) * shampine_element;
             }
             else
             {
                 u_np1 = us_s
                       - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
-                            * ( pb.template call<diffusion_op>( tn, us_sm1 ) - pb.template call<diffusion_op>( tn, u_sm2 ) )
-                      + 0.5 * dt * pb.template call<reaction_op>( tn, u_sp1 ) + 0.5 * dt * pb.template call<reaction_op>( tn, u_sp2 )
-                      + dt / ( 2. - 4. * gamma )
-                            * ( pb.template call<diffusion_op>( tn, u_sp3 ) - pb.template call<diffusion_op>( tn, u_sp1 ) );
+                            * ( pb( diffusion_op(), tn, us_sm1 ) - pb( diffusion_op(), tn, u_sm2 ) )
+                      + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp2 )
+                      + dt / ( 2. - 4. * gamma ) * ( pb( diffusion_op(), tn, u_sp3 ) - pb( diffusion_op(), tn, u_sp1 ) );
             }
 
             return { tn + dt, u_np1, dt };
