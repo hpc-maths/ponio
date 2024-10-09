@@ -268,3 +268,73 @@ namespace additive_method
     }
 
 } // namespace additive_method
+
+namespace RDA_method
+{
+    template <typename Algorithm_t, typename T = double>
+    auto
+    solve_exp( Algorithm_t& algo, T dt, T Tf, T lambda )
+    {
+        using state_t = T;
+
+        auto pb = ponio::make_problem(
+            ponio::make_implicit_problem(
+                [=]( T, state_t y ) -> state_t
+                {
+                    return 0.125 * lambda * y;
+                },
+                [=]( T, state_t ) -> state_t
+                {
+                    return 0.125 * lambda;
+                } ),
+            [=]( T, state_t y ) -> state_t
+            {
+                return 0.375 * lambda * y;
+            },
+            [=]( T, state_t y ) -> state_t
+            {
+                return ( 1. - 0.5 * lambda ) * y;
+            } );
+
+        state_t y0                 = 1.0;
+        ponio::time_span<T> t_span = { 0., Tf };
+
+        auto obs = []( T, state_t, T ) {};
+        return ::ponio::solve( pb, algo, y0, t_span, dt, obs );
+    }
+
+    template <typename Algorithm_t, typename T = double>
+    T
+    short_time_check_order( Algorithm_t algo = Algorithm_t(), T lambda = 0.33 )
+    {
+        using state_t = T;
+
+        std::vector<T> errors;
+        std::vector<T> dts;
+
+        T Tf = 1.0;
+
+        state_t u_exa = std::exp( Tf );
+
+        for ( auto n_iter : { 50, 25, 20, 15, 10 } )
+        {
+            T dt          = Tf / n_iter;
+            state_t u_sol = solve_exp( algo, dt, Tf, lambda );
+            auto e        = error( u_exa, u_sol );
+            errors.push_back( std::log( e ) );
+            dts.push_back( std::log( dt ) );
+        }
+
+        auto [a, b] = mayor_method( dts, errors );
+
+        return a;
+    }
+
+    template <typename Algorithm_t, typename T = double>
+    T
+    check_order( Algorithm_t algo = Algorithm_t(), T lambda = 0.33 )
+    {
+        return short_time_check_order( algo, lambda );
+    }
+
+} // namespace RDA_method
