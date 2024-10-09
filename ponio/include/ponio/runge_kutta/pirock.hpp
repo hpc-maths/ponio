@@ -808,8 +808,8 @@ namespace ponio::runge_kutta::pirock
             auto& u_sp2 = U[7];
             u_sp2       = un;
 
+            // store F_A(u^{(s+1)})
             auto& Fa_u_sp1 = U[8];
-            Fa_u_sp1       = pb( advection_op(), tn, u_sp1 );
 
             if constexpr ( detail::problem_operator<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t> )
             {
@@ -822,6 +822,8 @@ namespace ponio::runge_kutta::pirock
                 auto rhs_sp1 = u_sm2pl;
 
                 ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp1, u_sp1, rhs_sp1, n_eval_sp1 );
+
+                Fa_u_sp1 = pb( advection_op(), tn, u_sp1 );
 
                 std::size_t n_eval_sp2 = 0;
 
@@ -860,6 +862,8 @@ namespace ponio::runge_kutta::pirock
                     ::ponio::linear_algebra::linear_algebra<matrix_t>::solver,
                     ponio::default_config::newton_tolerance,
                     ponio::default_config::newton_max_iterations );
+
+                Fa_u_sp1 = pb( advection_op(), tn, u_sp1 );
 
                 auto g_sp2 = [&]( state_t const& u ) -> state_t
                 {
@@ -995,20 +999,23 @@ namespace ponio::runge_kutta::pirock
                         return { tn, un, new_dt };
                     }
 
-                    u_np1 = us_s - err_D + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp2 )
-                          + 1.0 / ( 2. - 4. * gamma ) * shampine_element;
+                    u_np1 = us_s - err_D + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.25 * dt * Fa_u_sp1
+                          + 0.75 * dt * pb( advection_op(), tn, u_sp5 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp1 )
+                          + 0.5 * dt * pb( reaction_op(), tn, u_sp2 ) + 1.0 / ( 2. - 4. * gamma ) * shampine_element;
                     return { tn + dt, u_np1, new_dt };
                 }
 
-                u_np1 = us_s - err_D + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp2 )
-                      + dt / ( 2. - 4. * gamma ) * shampine_element;
+                u_np1 = us_s - err_D + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.25 * dt * Fa_u_sp1
+                      + 0.75 * dt * pb( advection_op(), tn, u_sp5 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp1 )
+                      + 0.5 * dt * pb( reaction_op(), tn, u_sp2 ) + dt / ( 2. - 4. * gamma ) * shampine_element;
             }
             else
             {
                 u_np1 = us_s
                       - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
                             * ( pb( diffusion_op(), tn, us_sm1 ) - pb( diffusion_op(), tn, u_sm2 ) )
-                      + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp2 )
+                      + 0.25 * dt * Fa_u_sp1 + 0.75 * dt * pb( advection_op(), tn, u_sp5 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp1 )
+                      + 0.5 * dt * pb( reaction_op(), tn, u_sp2 )
                       + dt / ( 2. - 4. * gamma ) * ( pb( diffusion_op(), tn, u_sp3 ) - pb( diffusion_op(), tn, u_sp1 ) );
             }
 
