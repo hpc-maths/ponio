@@ -1,4 +1,4 @@
-set(demos arenstorf brownian brusselator brusselator_dirk exp heat heat_rock pendulum lorenz lorenz_tuto lotka_volterra curtiss_hirschfelder curtiss_hirschfelder_exprk nagumo lorenz_all)
+set(demos arenstorf brownian brusselator brusselator_dirk exp exp_splitting heat heat_rock pendulum lorenz lorenz_tuto lotka_volterra curtiss_hirschfelder curtiss_hirschfelder_exprk nagumo lorenz_all)
 set(demos_eigen brusselator_dirk lorenz_tuto lorenz_all)
 set(demos_cli11 brownian lotka_volterra)
 
