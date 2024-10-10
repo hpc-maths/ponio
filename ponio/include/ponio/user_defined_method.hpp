@@ -37,11 +37,17 @@ namespace ponio
         }
     };
 
+    template <typename user_function_t>
+    auto
+    make_user_defined_method( user_function_t& f )
+    {
+        return user_defined_method<user_function_t>( f );
+    }
+
     template <typename _value_t, typename _user_function_t>
     struct user_defined_algorithm
     {
         static constexpr bool is_user_defined_method = true;
-        static constexpr std::size_t N_stages        = 0;
         static constexpr bool is_embedded            = false;
         static constexpr std::size_t order           = std::numeric_limits<std::size_t>::infinity();
         static constexpr std::string_view id         = "user_defined";
@@ -55,14 +61,14 @@ namespace ponio
 
         user_defined_algorithm() = default;
 
-        user_defined_algorithm( user_defined_method<user_function_t>&& u_method )
+        user_defined_algorithm( user_defined_method<user_function_t> const& u_method )
             : user_function( u_method.user_function )
         {
         }
 
-        template <typename problem_t, typename state_t, typename array_k0_t>
+        template <typename problem_t, typename state_t>
         std::tuple<value_t, state_t, value_t>
-        operator()( problem_t& f, value_t& tn, state_t& un, array_k0_t&, value_t& dt )
+        operator()( problem_t& f, value_t& tn, state_t& un, value_t& dt )
         {
             return ( *user_function )( f, tn, un, dt );
         }
@@ -70,7 +76,7 @@ namespace ponio
 
     template <typename value_t, typename user_defined_method_t>
     auto
-    make_user_defined_algorithm( user_defined_method_t&& u_meth )
+    make_user_defined_algorithm( user_defined_method_t const& u_meth )
     {
         return user_defined_algorithm<value_t, typename user_defined_method_t::user_function_t>( u_meth );
     }

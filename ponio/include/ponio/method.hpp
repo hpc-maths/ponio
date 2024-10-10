@@ -261,16 +261,19 @@ namespace ponio
 
     ///////////////////////////////////////////////////////////////////////////
     // method defined by user
+
+    template <typename user_defined_algorithm_t>
+    concept is_user_method = is_user_defined_method<user_defined_algorithm_t>;
+
     template <typename user_defined_algorithm_t, typename state_t>
-        requires is_user_defined_method<user_defined_algorithm_t>
+        requires is_user_method<user_defined_algorithm_t>
     struct method<user_defined_algorithm_t, state_t>
     {
         static constexpr bool is_embedded = false;
 
         user_defined_algorithm_t alg;
 
-        template <typename value_t>
-        method( user_defined_algorithm_t const& user_defined_algorithm, state_t const&, value_t )
+        method( user_defined_algorithm_t const& user_defined_algorithm, state_t const& )
             : alg( user_defined_algorithm )
         {
         }
@@ -393,9 +396,8 @@ namespace ponio
     }
 
     template <typename value_t, typename user_defined_method_t, typename state_t>
-        requires is_user_defined_method<user_defined_method_t>
     auto
-    make_method( user_defined_method_t&& u_meth, state_t const& shadow_of_u0 )
+    make_method( user_defined_method_t const& u_meth, state_t const& shadow_of_u0 )
     {
         auto algo = make_user_defined_algorithm<value_t>( u_meth );
         return method<decltype( algo ), state_t>( algo, shadow_of_u0 );
