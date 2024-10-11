@@ -331,6 +331,7 @@ namespace ponio
     /**
      *  generic factory to build a method from an algoritm, it only reuses `method`
      *  constructor
+     *  @tparam value_t type of coefficients
      *  @param algo         a `Algorithm_t` objet with predifined stages of the method
      *  @param shadow_of_u0 an object with the same size of computed value for allocation
      */
@@ -395,6 +396,15 @@ namespace ponio
         }
     }
 
+    /**
+     * @brief helper function to build a method from a `user_defined_method`
+     *
+     * @tparam value_t               type of coefficients
+     * @tparam user_defined_method_t type of user defined method
+     * @tparam state_t               type of current state
+     * @param u_meth       user defined method with the underlying user function
+     * @param shadow_of_u0 an object with the same sixe of computed value for allocation
+     */
     template <typename value_t, typename user_defined_method_t, typename state_t>
     auto
     make_method( user_defined_method_t const& u_meth, state_t const& shadow_of_u0 )

@@ -13,6 +13,9 @@
 namespace ponio
 {
 
+    /**
+     * @brief test if method or algorithm is defined by user by testing `is_user_defined_method` static attribut
+     */
     template <typename u_method_t>
     concept is_user_defined_method = requires( u_method_t u_method ) {
                                          {
@@ -37,13 +40,26 @@ namespace ponio
         }
     };
 
+    /**
+     * @brief helper function to build a user_defined_method
+     *
+     * @tparam user_function_t type of function (lambda, function or functor)
+     * @param algo     function that takes $(f, t^n, u^n, \Delta t)$ (could be by reference) and returns a tuple $(t^{n+1}, u^{n+1}, \Delta
+     * t)$
+     */
     template <typename user_function_t>
     auto
-    make_user_defined_method( user_function_t& f )
+    make_user_defined_method( user_function_t& algo )
     {
-        return user_defined_method<user_function_t>( f );
+        return user_defined_method<user_function_t>( algo );
     }
 
+    /** @class user_defined_algorithm
+     * @brief algorithm in term of ponio with the function provides by user
+     *
+     * @tparam _value_t         type of coefficients and values in provides info
+     * @tparam _user_function_t type of user_defined_method with the underlying function provides by user
+     */
     template <typename _value_t, typename _user_function_t>
     struct user_defined_algorithm
     {
@@ -74,6 +90,13 @@ namespace ponio
         }
     };
 
+    /**
+     * @brief helper function to build a `user_defined_algorithm`
+     *
+     * @tparam value_t               type of coefficients
+     * @tparam user_defined_method_t type of `user_defined_method` with the underlying user function
+     * @param u_meth `user_defined_method` with the underlying user function
+     */
     template <typename value_t, typename user_defined_method_t>
     auto
     make_user_defined_algorithm( user_defined_method_t const& u_meth )
