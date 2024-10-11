@@ -696,6 +696,18 @@ namespace ponio::runge_kutta::pirock
         {
         }
 
+        /**
+         * @brief iteration of PIROCK_RDA method
+         *
+         * @tparam problem_t  type of \f$f\f$
+         * @tparam state_t    type of current state
+         * @tparam array_ki_t type of temporary stages (13 or 18 stages needed)
+         * @param pb problem with 3 operators: \f$F_R\f$, \f$F_D\f$ and \f$F_A\f$
+         * @param tn current time
+         * @param un current state
+         * @param U  array of temporary stages
+         * @param dt current time step
+         */
         template <typename problem_t, typename state_t, typename array_ki_t>
         std::tuple<value_t, state_t, value_t>
         operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt )
