@@ -309,51 +309,51 @@ The method is divided into 5 steps:
 
 #. Diffusion stabilization procedure (modified ROCK2 method)
 
-.. math::
+    .. math::
 
-    \begin{aligned}
-      u^{(0)} &= u^n \\
-      u^{(1)} &= u^n + \alpha \mu_1 \Delta t F_D(u^n) \\
-      u^{(j)} &= \alpha \mu_j \Delta t F_D(u^{(j-1)}) - \nu_j u^{(j-1)} - \kappa_j u^{(j-2)},\quad j=2,\dots, s-2+\ell
-    \end{aligned}
+        \begin{aligned}
+          u^{(0)} &= u^n \\
+          u^{(1)} &= u^n + \alpha \mu_1 \Delta t F_D(u^n) \\
+          u^{(j)} &= \alpha \mu_j \Delta t F_D(u^{(j-1)}) - \nu_j u^{(j-1)} - \kappa_j u^{(j-2)},\quad j=2,\dots, s-2+\ell
+        \end{aligned}
 
 #. Finishing procedure for diffusion
 
-  .. math::
+    .. math::
 
-      \begin{aligned}
-        u^{*(s-1)} &= u^{(s-2)} + \sigma_\alpha \Delta t F_D(u^{(s-2)}) \\
-        u^{*(s)} &= u^{*(s-1)} + \sigma_\alpha \Delta t F_D(u^{*(s-1)})
-      \end{aligned}
+        \begin{aligned}
+          u^{*(s-1)} &= u^{(s-2)} + \sigma_\alpha \Delta t F_D(u^{(s-2)}) \\
+          u^{*(s)} &= u^{*(s-1)} + \sigma_\alpha \Delta t F_D(u^{*(s-1)})
+        \end{aligned}
 
 #. Starting value for advection-reaction
 
-  .. math::
+    .. math::
 
-      U = u^{(s-2+\ell)}
+        U = u^{(s-2+\ell)}
 
 #. Finishing procedure for advection-reaction coupling
 
-  .. math::
+    .. math::
 
-      \begin{aligned}
-        u^{(s+1)} &= u^{(s-2+\ell)} + \gamma \Delta t F_R(u^{(s+1)}) \\
-        u^{(s+2)} &= u^{(s-2+\ell)} + \beta \Delta t F_D(u^{(s+1)}) + \Delta t F_A(u^{(s+1)}) + (1-2\gamma)\Delta t F_R(u^{(s+1)}) + \gamma \Delta t F_R(u^{(s+2)}) \\
-        u^{(s+3)} &= u^{(s-2+\ell)} + (1-2\gamma)\Delta t F_A(u^{(s+1)}) + (1-\gamma)\Delta t F_R(u^{(s+1)}) \\
-        u^{(s+4)} &= u^{(s-2+\ell)} + \frac{1}{3}\Delta t F_A(u^{(s+1)}) \\
-        u^{(s+5)} &= u^{(s-2+\ell)} + \frac{2\beta}{3} \Delta t F_D(u^{(s+1)}) + \frac{2}{3}\Delta t J_R^{-1} F_A(u^{(s+4)}) + \left(\frac{2}{3} - \gamma\right) \Delta t F_R(u^{(s+1)}) + \frac{2\gamma}{3}\Delta t F_R(u^{(s+2)})
-      \end{aligned}
+        \begin{aligned}
+          u^{(s+1)} &= u^{(s-2+\ell)} + \gamma \Delta t F_R(u^{(s+1)}) \\
+          u^{(s+2)} &= u^{(s-2+\ell)} + \beta \Delta t F_D(u^{(s+1)}) + \Delta t F_A(u^{(s+1)}) + (1-2\gamma)\Delta t F_R(u^{(s+1)}) + \gamma \Delta t F_R(u^{(s+2)}) \\
+          u^{(s+3)} &= u^{(s-2+\ell)} + (1-2\gamma)\Delta t F_A(u^{(s+1)}) + (1-\gamma)\Delta t F_R(u^{(s+1)}) \\
+          u^{(s+4)} &= u^{(s-2+\ell)} + \frac{1}{3}\Delta t F_A(u^{(s+1)}) \\
+          u^{(s+5)} &= u^{(s-2+\ell)} + \frac{2\beta}{3} \Delta t F_D(u^{(s+1)}) + \frac{2}{3}\Delta t J_R^{-1} F_A(u^{(s+4)}) + \left(\frac{2}{3} - \gamma\right) \Delta t F_R(u^{(s+1)}) + \frac{2\gamma}{3}\Delta t F_R(u^{(s+2)})
+        \end{aligned}
 
 #. Computation of the integration step
 
-  .. math::
+    .. math::
 
-      \begin{aligned}
-        u^{n+1} =& u^{*(s)} \\
-                    & - \sigma_\alpha\left( 1 - \frac{\tau_\alpha}{\sigma_\alpha^2}\right)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)})) \\
-                    & + \frac{1}{4}\Delta t F_A(u^{(s+1)}) + \frac{3}{4}\Delta t F_A(u^{(s+5)}) \\
-                    & + \frac{1}{2}\Delta t F_R(u^{(s+1)}) + \frac{1}{2}\Delta t F_R(u^{(s+2)}) \\
-                    & + \frac{J_R^{-\ell}}{2-4\gamma}\Delta t t(F_D(u^{(s+3)}) - F_D(u^{(s+1)}))
+        \begin{aligned}
+          u^{n+1} =& u^{*(s)} \\
+                      & - \sigma_\alpha\left( 1 - \frac{\tau_\alpha}{\sigma_\alpha^2}\right)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)})) \\
+                      & + \frac{1}{4}\Delta t F_A(u^{(s+1)}) + \frac{3}{4}\Delta t F_A(u^{(s+5)}) \\
+                      & + \frac{1}{2}\Delta t F_R(u^{(s+1)}) + \frac{1}{2}\Delta t F_R(u^{(s+2)}) \\
+                      & + \frac{J_R^{-\ell}}{2-4\gamma}\Delta t t(F_D(u^{(s+3)}) - F_D(u^{(s+1)}))
       \end{aligned}
 
 where :math:`\mu_j`, :math:`\nu_j`, :math:`\kappa_j` are the same coefficients as for the standard ROCK2 method and:
