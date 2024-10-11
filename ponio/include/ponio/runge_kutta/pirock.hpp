@@ -957,6 +957,7 @@ namespace ponio::runge_kutta::pirock
                 {
                     auto& rhs_R = U[16];
                     auto& err_R = U[17];
+                    auto& err_A = U[18];
 
                     info.number_of_eval[1] += 2;
 
@@ -972,21 +973,33 @@ namespace ponio::runge_kutta::pirock
                         u_tmp,
                         err_R );
 
+                    // err_A = -3/20 \Delta t F_A(u^{(s+1)}) + 3/10 \Delta t F_A(u^{(s+4)}) - 3/20 \Delta t F_A(u^{(s+5)})
+                    err_A = -0.15 * dt * Fa_u_sp1 + 0.3 * dt * pb( advection_op(), tn, u_sp4 ) - 0.15 * dt * pb( advection_op(), tn, u_sp5 );
+
+                    auto scalar_error_D = std::accumulate( err_D.array().begin(),
+                        err_D.array().end(),
+                        static_cast<value_t>( 0. ),
+                        []( value_t const& acc, value_t const xi )
+                        {
+                            return acc + std::abs( xi );
+                        } );
+                    auto scalar_error_R = std::accumulate( err_R.array().begin(),
+                        err_R.array().end(),
+                        static_cast<value_t>( 0. ),
+                        []( value_t const& acc, value_t const xi )
+                        {
+                            return acc + std::abs( xi );
+                        } );
+                    auto scalar_error_A = std::accumulate( err_A.array().begin(),
+                        err_A.array().end(),
+                        static_cast<value_t>( 0. ),
+                        []( value_t const& acc, value_t const xi )
+                        {
+                            return acc + std::abs( xi );
+                        } );
+
                     // TODO: this couple of lines works only with samurai (because of err_D.array())
-                    auto err = std::max( std::accumulate( err_D.array().begin(),
-                                             err_D.array().end(),
-                                             static_cast<value_t>( 0. ),
-                                             []( value_t const& acc, value_t const xi )
-                                             {
-                                                 return acc + std::abs( xi );
-                                             } ),
-                        std::accumulate( err_R.array().begin(),
-                            err_R.array().end(),
-                            static_cast<value_t>( 0. ),
-                            []( value_t const& acc, value_t const xi )
-                            {
-                                return acc + std::abs( xi );
-                            } ) );
+                    auto err = std::max( scalar_error_D, scalar_error_R, std::pow( scalar_error_A, 2. / 3. ) );
 
                     value_t new_dt = dt;
                     if ( err > 0. )
