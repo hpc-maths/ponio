@@ -406,6 +406,7 @@ namespace ponio
      * @param shadow_of_u0 an object with the same sixe of computed value for allocation
      */
     template <typename value_t, typename user_defined_method_t, typename state_t>
+        requires is_user_defined_method<user_defined_method_t>
     auto
     make_method( user_defined_method_t const& u_meth, state_t const& shadow_of_u0 )
     {

@@ -31,6 +31,8 @@ namespace ponio
     template <typename _user_function_t>
     struct user_defined_method
     {
+        static constexpr bool is_user_defined_method = true;
+
         using user_function_t = _user_function_t;
         user_function_t* user_function;
 
