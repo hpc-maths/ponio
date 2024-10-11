@@ -382,7 +382,7 @@ PIROC for reaction-diffusion problem
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&)
   :project: ponio
 
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&)
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(eig_computer_t&&)
   :project: ponio
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock()
@@ -414,7 +414,7 @@ PIROC for reaction-diffusion-advection problem
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&)
   :project: ponio
 
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&)
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(eig_computer_t&&)
   :project: ponio
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA()
