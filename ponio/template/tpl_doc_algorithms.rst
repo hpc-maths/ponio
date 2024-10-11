@@ -294,8 +294,9 @@ where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from
   :project: ponio
 
 
-PIROCK method
-~~~~~~~~~~~~~
+
+IMEX stabilized methods
+-----------------------
 
 The PIROCK method is introduce in :cite:`abdulle:2013`, the complete scheme is a IMEX scheme that allows for solving an equation of the following form (with 3 operators):
 
@@ -370,7 +371,7 @@ Still keep two free parameters :math:`\ell` and :math:`\alpha`, ponio provides t
 * :math:`\ell=1` and :math:`\alpha = \frac{1}{2P'_{s-2+\ell}(0)}`, so :math:`\beta=0` to minimized computation cost
 
 PIROC for reaction-diffusion problem
-""""""""""""""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. doxygenclass:: ponio::runge_kutta::pirock::pirock_impl
    :project: ponio
@@ -402,7 +403,7 @@ PIROC for reaction-diffusion problem
 
 
 PIROC for reaction-diffusion-advection problem
-""""""""""""""""""""""""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. doxygenclass:: ponio::runge_kutta::pirock::pirock_RDA_impl
    :project: ponio
