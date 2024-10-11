@@ -133,6 +133,7 @@ namespace ponio::runge_kutta::pirock
     // --- PIROCK REACTION-DIFFUSION ------------------------------------------
 
     /**
+     * @class pirock_impl
      * @brief implementation of PIROCK method
      *
      * @tparam _l                       Number of augmented stages (l = 1, 2)
@@ -613,6 +614,7 @@ namespace ponio::runge_kutta::pirock
     // --- PIROCK REACTION-DIFFUSION-ADVECTION --------------------------------
 
     /**
+     * @class pirock_RDA_impl
      * @brief implementation of PIROCK method for reaction-diffusion-advection problem
      *
      * @tparam _l                       Number of augmented stages (l = 1, 2)
