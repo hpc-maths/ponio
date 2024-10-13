@@ -75,7 +75,7 @@ namespace ponio
 
         iteration_info<user_defined_algorithm> info;
 
-        user_function_t* user_function;
+        user_function_t* user_function = nullptr;
 
         user_defined_algorithm() = default;
 
