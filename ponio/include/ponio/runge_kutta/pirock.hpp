@@ -640,7 +640,7 @@ namespace ponio::runge_kutta::pirock
         static constexpr std::size_t N_operators = 3;
         static constexpr std::size_t N_stages    = stages::dynamic;
         static constexpr std::size_t N_storage   = std::
-            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 18>, std::integral_constant<std::size_t, 13>>::value;
+            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 20>, std::integral_constant<std::size_t, 13>>::value;
         static constexpr std::size_t order   = 2;
         static constexpr std::string_view id = "PIROCK";
 
@@ -952,7 +952,7 @@ namespace ponio::runge_kutta::pirock
                 auto& u_tmp            = U[15];
 
                 // for embedded method
-                auto& err_D = U[19];
+                auto& err_D = U[16];
 
                 // $err_D = \sigma_\alpha(1-\tau_a/\sigma_a^2)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)}))$
                 err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
@@ -969,9 +969,9 @@ namespace ponio::runge_kutta::pirock
 
                 if constexpr ( is_embedded )
                 {
-                    auto& rhs_R = U[16];
-                    auto& err_R = U[17];
-                    auto& err_A = U[18];
+                    auto& rhs_R = U[17];
+                    auto& err_R = U[18];
+                    auto& err_A = U[19];
 
                     info.number_of_eval[1] += 2;
 

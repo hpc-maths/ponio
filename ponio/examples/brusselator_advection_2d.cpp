@@ -219,8 +219,9 @@ main( int argc, char** argv )
 
     // advection terme
     std::array<samurai::VelocityVector<dim>, 2> velocities = { mu * U, mu * V };
-    auto conv                                              = samurai::make_multi_convection_weno5<decltype( uv_ini )>( velocities );
-    auto fa                                                = [&]( double /* t */, auto&& uv )
+
+    auto conv = samurai::make_multi_convection_weno5<decltype( uv_ini )>( velocities );
+    auto fa   = [&]( double /* t */, auto&& uv )
     {
         samurai::update_ghost_mr( uv );
         return -conv( uv );
@@ -237,7 +238,12 @@ main( int argc, char** argv )
 
     auto pb = ponio::make_problem( fr_pb, fd, fa );
 
-    auto method = ponio::runge_kutta::pirock::pirock_RDA<1>( ponio::runge_kutta::pirock::beta_0<double>(), eigmax_computer );
+    auto pirock_b0    = ponio::runge_kutta::pirock::pirock_RDA<1>( ponio::runge_kutta::pirock::beta_0<double>(), eigmax_computer );
+    auto pirock_b0_st = ponio::runge_kutta::pirock::pirock_RDA<1>( ponio::runge_kutta::pirock::beta_0<double>(),
+        eigmax_computer,
+        ponio::shampine_trick::shampine_trick<decltype( uv_ini )>() );
+
+    auto& method = pirock_b0_st;
 
     // time loop  -------------------------------------------------------------
     auto sol_range = ponio::make_solver_range( pb, method, uv_ini, t_span, dt );
