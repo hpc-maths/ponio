@@ -87,12 +87,20 @@ namespace ponio::shampine_trick
         void
         operator()( value_t alpha, operator_t&& op_reac, state_t& initial_guess, state_t& rhs, state_t& u_tmp, state_t& shampine_result )
         {
+            bool constexpr is_local_operator = operator_t::cfg_t::stencil_size == 1;
+
             auto id = ::samurai::make_identity<state_t>();
             // matrix assembly
             auto J_R_op = id - alpha * op_reac;
 
             auto assembly = samurai::petsc::make_assembly( J_R_op );
             assembly.set_unknown( initial_guess );
+
+            if ( is_local_operator )
+            {
+                assembly.include_bc( false );
+            }
+
             Mat J_R;
             assembly.create_matrix( J_R );
             assembly.assemble_matrix( J_R );
