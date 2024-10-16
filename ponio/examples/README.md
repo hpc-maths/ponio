@@ -11,6 +11,7 @@ The following table gives an overview over all examples.
 | [Curtiss-Hirschfelder equation](#curtiss-hirschfelder-equation)                                     | This example shows how to use range and iterators on solution      | [curtiss_hirschfelder.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/curtiss_hirschfelder.cpp)             |
 | [Curtiss-Hirschfelder equation with expRK method](#curtiss-hirschfelder-equation-with-exprk-method) | This example shows how to use exponential Runge-Kutta methods      | [curtiss_hirschfelder_exprk.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/curtiss_hirschfelder_exprk.cpp) |
 | [Exponential function](#exponential-function)                                                       | This example is the simplest example                               | [exp.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/exp.cpp)                                               |
+| [Exponential function with exact solver](#exponential-function-with-exact-solver)                   | An example of splitting and exact solver                           | [exp_splitting.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/exp_splitting.cpp)                           |
 | [Heat model](#heat-model)                                                                           | The classical heat equation solving with RKC2 method               | [heat.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat.cpp)                                             |
 | [ROCK method](#rock-method)                                                                         | This example shows how to use ROCK2 and ROCK4 methods              | [heat_rock.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat_rock.cpp)                                   |
 | [Samurai is hot](#samurai-is-hot)                                                                   | This example shows how to coupling ponio and samurai               | [heat_samurai.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat_samurai.cpp)                             |
@@ -288,6 +289,30 @@ All example in [exp.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/exam
 
 ```
   make exp_visu
+```
+
+## Exponential function with exact solver
+
+In this example we solve the simplest differential equation:
+
+$$
+  \dot{y} = \lambda y + (1-\lambda )y
+$$
+
+with $y(0) = 1$ and $\lambda = 0.3$. In this example we solve this equation with:
+
+* a Strang splitting method with $f_1:(t,y)\mapsto \lambda y$ (which is solved exactly), and $f_2:(t,y)\mapsto (1-\lambda)y$ (which is solved with a RK(2,2) Raslton).
+* an exact solver $\phi:(f,t,u,\Delta t)\mapsto e^{\Delta t}u$.
+* a RK(2,2) Ralston method.
+
+| Exponential function                              |
+|---------------------------------------------------|
+| ![Exponential function](img/exp_splitting/01.png) |
+
+All example in [exp_splitting.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/exp_splitting.cpp), and run
+
+```
+  make exp_splitting_visu
 ```
 
 ## Heat model

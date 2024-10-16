@@ -15,6 +15,7 @@
 #include "detail.hpp"
 #include "splitting.hpp"
 #include "stage.hpp"
+#include "user_defined_method.hpp"
 
 namespace ponio
 {
@@ -259,14 +260,82 @@ namespace ponio
     };
 
     ///////////////////////////////////////////////////////////////////////////
+    // method defined by user
+
+    template <typename user_defined_algorithm_t>
+    concept is_user_method = is_user_defined_method<user_defined_algorithm_t>;
+
+    template <typename user_defined_algorithm_t, typename state_t>
+        requires is_user_method<user_defined_algorithm_t>
+    struct method<user_defined_algorithm_t, state_t>
+    {
+        static constexpr bool is_embedded = false;
+
+        user_defined_algorithm_t alg;
+
+        method( user_defined_algorithm_t const& user_defined_algorithm, state_t const& )
+            : alg( user_defined_algorithm )
+        {
+        }
+
+        template <typename Problem_t, typename value_t>
+        std::tuple<value_t, state_t, value_t>
+        operator()( Problem_t& f, value_t tn, state_t& un, value_t dt )
+        {
+            return alg( f, tn, un, dt );
+        }
+
+        /**
+         * @brief returns iteration_info object on algorithm
+         */
+        auto&
+        info()
+        {
+            return alg.info;
+        }
+
+        /**
+         * @brief returns iteration_info object on algorithm
+         */
+        auto const&
+        info() const
+        {
+            return alg.info;
+        }
+
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto&
+         */
+        auto&
+        stages()
+        {
+            return std::array<state_t, 0>{};
+        }
+
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto const&
+         */
+        auto const&
+        stages() const
+        {
+            return std::array<state_t, 0>{};
+        }
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      *  generic factory to build a method from an algoritm, it only reuses `method`
      *  constructor
+     *  @tparam value_t type of coefficients
      *  @param algo         a `Algorithm_t` objet with predifined stages of the method
      *  @param shadow_of_u0 an object with the same size of computed value for allocation
      */
-    template <typename Algorithm_t, typename state_t>
+    template <typename value_t, typename Algorithm_t, typename state_t>
         requires is_implemented_method<Algorithm_t>
     auto
     make_method( Algorithm_t const& algo, state_t const& shadow_of_u0 )
@@ -281,7 +350,7 @@ namespace ponio
      * @details this factory is to prevent duplucation of code in factory of methods for
      * splitting methods (Lie or Strang method).
      */
-    template <typename state_t, typename... Algorithms_t>
+    template <typename value_t, typename state_t, typename... Algorithms_t>
     auto
     make_tuple_methods( std::tuple<Algorithms_t...> const& algos, state_t const& shadow_of_u0 )
     {
@@ -290,7 +359,7 @@ namespace ponio
             {
                 auto maker = [&]( auto const& arg )
                 {
-                    return make_method( arg, shadow_of_u0 ); // maybe should use std::bind
+                    return make_method<value_t>( arg, shadow_of_u0 ); // maybe should use std::bind
                 };
                 return std::make_tuple( maker( args )... );
             },
@@ -308,14 +377,14 @@ namespace ponio
      * @param algos        tuple of algorithms and splitting method
      * @param shadow_of_u0 an object with the same sixe of computed value for allocation
      */
-    template <template <typename, typename...> typename _splitting_method_t, typename value_t, typename state_t, typename optional_args_t, typename... Algorithms_t>
+    template <typename value_t, template <typename, typename...> typename _splitting_method_t, typename state_t, typename optional_args_t, typename... Algorithms_t>
     auto
     make_method( splitting::detail::splitting_tuple<_splitting_method_t, value_t, optional_args_t, Algorithms_t...> const& algos,
         state_t const& shadow_of_u0 )
     {
         using splitting_tuple = splitting::detail::splitting_tuple<_splitting_method_t, value_t, optional_args_t, Algorithms_t...>;
 
-        auto methods = make_tuple_methods( algos.algos, shadow_of_u0 );
+        auto methods = make_tuple_methods<value_t>( algos.algos, shadow_of_u0 );
 
         if constexpr ( splitting_tuple::has_optional_args )
         {
@@ -325,6 +394,24 @@ namespace ponio
         {
             return splitting::detail::make_splitting_from_tuple<_splitting_method_t>( methods, algos.time_steps );
         }
+    }
+
+    /**
+     * @brief helper function to build a method from a `user_defined_method`
+     *
+     * @tparam value_t               type of coefficients
+     * @tparam user_defined_method_t type of user defined method
+     * @tparam state_t               type of current state
+     * @param u_meth       user defined method with the underlying user function
+     * @param shadow_of_u0 an object with the same sixe of computed value for allocation
+     */
+    template <typename value_t, typename user_defined_method_t, typename state_t>
+        requires is_user_defined_method<user_defined_method_t>
+    auto
+    make_method( user_defined_method_t const& u_meth, state_t const& shadow_of_u0 )
+    {
+        auto algo = make_user_defined_algorithm<value_t>( u_meth );
+        return method<decltype( algo ), state_t>( algo, shadow_of_u0 );
     }
 
 } // namespace ponio
