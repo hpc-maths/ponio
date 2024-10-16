@@ -170,7 +170,7 @@ Get only sources to run a project
 * [Github repository](https://github.com/hpc-maths/ponio)
 * [Examples](https://github.com/hpc-maths/ponio/tree/main/ponio/examples)
 * [Notebooks examples](https://github.com/hpc-maths/ponio/tree/main/ponio/notebooks)
-* [List of methods and their analysis](http://jmassot.perso.math.cnrs.fr/ponio/) (personal webpage of main developer)
+* [List of methods and their analysis](https://hpc-maths.github.io/ponio/)
 
 ## How to contribute
 
