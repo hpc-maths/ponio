@@ -109,7 +109,7 @@ html_theme_options = {"icon_links": [
     {
         "name": "GitHub",
         "url": "https://github.com/hpc-maths/ponio",
-        "icon": "fa-brands fa-square-github",
+        "icon": "fa-brands fa-github",
         "type": "fontawesome",
     },
 ],
