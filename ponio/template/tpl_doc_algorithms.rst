@@ -293,6 +293,148 @@ where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from
 .. doxygenfunction:: ponio::runge_kutta::rock::rock4()
   :project: ponio
 
+
+
+IMEX stabilized methods
+-----------------------
+
+The PIROCK method is introduce in :cite:`abdulle:2013`, the complete scheme is a IMEX scheme that allows for solving an equation of the following form (with 3 operators):
+
+.. math::
+
+  \dot{u} = F_R(u) + F_D(u) + F_A(u)
+
+with :math:`F_R` a reaction operator (solved implicitly), :math:`F_D` a diffusion operator (solved explicitly by a modified ROCK2 method) and :math:`F_A` an advection operator (solved with an explicit RK3 method). The first implementation of PIROCK scheme in ponio makes to solve only reaction-diffusion problem (e.g. :math:`F_A = 0`), the second one to solve a complet reaction-diffusion-advection problem.
+
+The method is divided into 5 steps:
+
+#. Diffusion stabilization procedure (modified ROCK2 method)
+
+    .. math::
+
+        \begin{aligned}
+          u^{(0)} &= u^n \\
+          u^{(1)} &= u^n + \alpha \mu_1 \Delta t F_D(u^n) \\
+          u^{(j)} &= \alpha \mu_j \Delta t F_D(u^{(j-1)}) - \nu_j u^{(j-1)} - \kappa_j u^{(j-2)},\quad j=2,\dots, s-2+\ell
+        \end{aligned}
+
+#. Finishing procedure for diffusion
+
+    .. math::
+
+        \begin{aligned}
+          u^{*(s-1)} &= u^{(s-2)} + \sigma_\alpha \Delta t F_D(u^{(s-2)}) \\
+          u^{*(s)} &= u^{*(s-1)} + \sigma_\alpha \Delta t F_D(u^{*(s-1)})
+        \end{aligned}
+
+#. Starting value for advection-reaction
+
+    .. math::
+
+        U = u^{(s-2+\ell)}
+
+#. Finishing procedure for advection-reaction coupling
+
+    .. math::
+
+        \begin{aligned}
+          u^{(s+1)} &= u^{(s-2+\ell)} + \gamma \Delta t F_R(u^{(s+1)}) \\
+          u^{(s+2)} &= u^{(s-2+\ell)} + \beta \Delta t F_D(u^{(s+1)}) + \Delta t F_A(u^{(s+1)}) + (1-2\gamma)\Delta t F_R(u^{(s+1)}) + \gamma \Delta t F_R(u^{(s+2)}) \\
+          u^{(s+3)} &= u^{(s-2+\ell)} + (1-2\gamma)\Delta t F_A(u^{(s+1)}) + (1-\gamma)\Delta t F_R(u^{(s+1)}) \\
+          u^{(s+4)} &= u^{(s-2+\ell)} + \frac{1}{3}\Delta t F_A(u^{(s+1)}) \\
+          u^{(s+5)} &= u^{(s-2+\ell)} + \frac{2\beta}{3} \Delta t F_D(u^{(s+1)}) + \frac{2}{3}\Delta t J_R^{-1} F_A(u^{(s+4)}) + \left(\frac{2}{3} - \gamma\right) \Delta t F_R(u^{(s+1)}) + \frac{2\gamma}{3}\Delta t F_R(u^{(s+2)})
+        \end{aligned}
+
+#. Computation of the integration step
+
+    .. math::
+
+        \begin{aligned}
+          u^{n+1} =& u^{*(s)} \\
+                      & - \sigma_\alpha\left( 1 - \frac{\tau_\alpha}{\sigma_\alpha^2}\right)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)})) \\
+                      & + \frac{1}{4}\Delta t F_A(u^{(s+1)}) + \frac{3}{4}\Delta t F_A(u^{(s+5)}) \\
+                      & + \frac{1}{2}\Delta t F_R(u^{(s+1)}) + \frac{1}{2}\Delta t F_R(u^{(s+2)}) \\
+                      & + \frac{J_R^{-\ell}}{2-4\gamma}\Delta t t(F_D(u^{(s+3)}) - F_D(u^{(s+1)}))
+      \end{aligned}
+
+where :math:`\mu_j`, :math:`\nu_j`, :math:`\kappa_j` are the same coefficients as for the standard ROCK2 method and:
+
+* :math:`\gamma = 1-\frac{\sqrt{2}}{2}`
+* :math:`\beta = 1-2\alpha P'_{s-2+\ell}(0)` where :math:`P'_{s-2+\ell}` is the stability polynomial of the underlying ROCK2 method
+* :math:`J_R = I - \gamma \Delta t \frac{\partial F_R}{\partial u}(u^{(s-2+\ell)})`
+* :math:`\sigma_\alpha = \frac{1-\alpha}{2} + \alpha \sigma`, where :math:`\sigma` coming from the underlying ROCK2 method
+* :math:`\tau_\alpha = \frac{(\alpha-1)^2}{2} + 2\alpha(1-\alpha)\sigma + \alpha^2\tau`, where :math:`\sigma` and :math:`\tau` coming from the underlying ROCK2 method
+
+Still keep two free parameters :math:`\ell` and :math:`\alpha`, ponio provides two choices for this parameters:
+
+* :math:`\ell=2` and :math:`\alpha=1`, in this case, if :math:`F_A=0` and :math:`F_R=0` we have the standard ROCK2 method
+* :math:`\ell=1` and :math:`\alpha = \frac{1}{2P'_{s-2+\ell}(0)}`, so :math:`\beta=0` to minimized computation cost
+
+PIROC for reaction-diffusion problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. doxygenclass:: ponio::runge_kutta::pirock::pirock_impl
+   :project: ponio
+   :members:
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(eig_computer_t&&)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock()
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_a1(eig_computer_t&&)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_a1()
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_b0(eig_computer_t&&)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_b0()
+  :project: ponio
+
+
+PIROC for reaction-diffusion-advection problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. doxygenclass:: ponio::runge_kutta::pirock::pirock_RDA_impl
+   :project: ponio
+   :members:
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(eig_computer_t&&)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA()
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_a1(eig_computer_t&&)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_a1()
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_b0(eig_computer_t&&)
+  :project: ponio
+
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_b0()
+  :project: ponio
+
+
+
 Bibliography
 ------------
 

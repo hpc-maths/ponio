@@ -72,8 +72,8 @@ main( int argc, char** argv )
     constexpr double t_end     = 35.;
 
     // multiresolution parameters
-    std::size_t min_level = 0;
-    std::size_t max_level = 6;
+    std::size_t min_level = 7;
+    std::size_t max_level = 7;
     double mr_epsilon     = 1e-5; // Threshold used by multiresolution
     double mr_regularity  = 1.;   // Regularity guess for multiresolution
 
@@ -107,7 +107,7 @@ main( int argc, char** argv )
         {
             u_ini[cell] = exact_solution( cell.center( 0 ), 0 );
         } );
-    samurai::make_bc<samurai::Neumann>( u_ini, 0. );
+    samurai::make_bc<samurai::Neumann<1>>( u_ini, 0. );
 
     // define problem ---------------------------------------------------------
 
@@ -115,13 +115,13 @@ main( int argc, char** argv )
     auto diff = samurai::make_diffusion_order2<decltype( u_ini )>( d );
     auto fd   = [&]( double /* t */, auto&& u )
     {
-        samurai::make_bc<samurai::Neumann>( u, 0. );
+        samurai::make_bc<samurai::Neumann<1>>( u, 0. );
         samurai::update_ghost_mr( u );
         return -diff( u );
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, 1, decltype( u_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::size, decltype( u_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
@@ -142,7 +142,7 @@ main( int argc, char** argv )
     };
     auto fr = [&]( double t, auto&& u )
     {
-        samurai::make_bc<samurai::Neumann>( u, 0. );
+        samurai::make_bc<samurai::Neumann<1>>( u, 0. );
         samurai::update_ghost_mr( u );
         return fr_t( t )( u );
     };
@@ -159,19 +159,17 @@ main( int argc, char** argv )
     };
 
     // time loop  -------------------------------------------------------------
-    auto sol_range = ponio::make_solver_range( pb,
-        ponio::runge_kutta::pirock::pirock<1>( ponio::runge_kutta::pirock::beta_0<double>(),
-            eigmax_computer,
-            ponio::shampine_trick::shampine_trick<decltype( u_ini )>() ),
-        u_ini,
-        tspan,
-        dt );
+    auto pirock = ponio::runge_kutta::pirock::pirock<1>( ponio::runge_kutta::pirock::beta_0<double>(),
+        eigmax_computer,
+        ponio::shampine_trick::shampine_trick<decltype( u_ini )>() );
+
+    auto sol_range = ponio::make_solver_range( pb, pirock, u_ini, tspan, dt );
 
     auto it_sol = sol_range.begin();
 
     // preapre MR for solution on iterator
     auto mr_adaptation = samurai::make_MRAdapt( it_sol->state );
-    samurai::make_bc<samurai::Neumann>( it_sol->state, 0. );
+    samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
     mr_adaptation( mr_epsilon, mr_regularity );
     samurai::update_ghost_mr( it_sol->state );
 
@@ -180,7 +178,9 @@ main( int argc, char** argv )
 
     while ( it_sol->time < t_end )
     {
-        // samurai::make_bc<samurai::Neumann>( it_sol->state, 0. );
+        samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
+        samurai::update_ghost_mr( it_sol->state );
+
         for ( auto& ki : it_sol.stages() )
         {
             ki.resize();

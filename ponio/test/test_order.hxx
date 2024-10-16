@@ -18,7 +18,8 @@ enum struct class_method
     explicit_method,
     diagonal_implicit_method,
     exponential_method,
-    additive_method
+    additive_method,
+    RDA_method
 };
 
 template <class_method type>
@@ -45,12 +46,24 @@ struct test_order
         }
         else if constexpr ( type == class_method::additive_method )
         {
+            // In additive Runge-Kutta method, one of method could be higher order than other (so we don't test equality)
             INFO( "test order of ", rk_t::id );
-            WARN( additive_method::check_order( rk_t(), 0.5 ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
-            WARN( additive_method::check_order( rk_t(), 1. / 3. ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
-            WARN( additive_method::check_order( rk_t(), 2. / 3. ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
-            WARN( additive_method::check_order( rk_t(), 1. ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
-            WARN( additive_method::check_order( rk_t(), 0. ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( additive_method::check_order( rk_t(), 0.5 ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( additive_method::check_order( rk_t(), 1. / 3. ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( additive_method::check_order( rk_t(), 2. / 3. ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( additive_method::check_order( rk_t(), 1. ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( additive_method::check_order( rk_t(), 0. ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+        }
+        else if constexpr ( type == class_method::RDA_method )
+        {
+            // In additive Runge-Kutta method, one of method could be higher order than other (so we don't test equality)
+            INFO( "test order of ", rk_t::id );
+            WARN( RDA_method::check_order( rk_t(), 1. ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( RDA_method::check_order( rk_t(), 2. / 3. ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( RDA_method::check_order( rk_t(), 1. / 3. ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( RDA_method::check_order( rk_t(), 0.5 ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( RDA_method::check_order( rk_t(), 0.25 ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( RDA_method::check_order( rk_t(), 0. ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
         }
         else
         {
@@ -95,6 +108,15 @@ TEST_CASE( "order::pirock" )
         ponio::runge_kutta::pirock::pirock_b0() );
 
     test_order<class_method::additive_method>::on<decltype( pirock_methods )>();
+}
+
+TEST_CASE( "order::pirock_RDA" )
+{
+    auto pirock_methods = std::make_tuple( ponio::runge_kutta::pirock::pirock_RDA(),
+        ponio::runge_kutta::pirock::pirock_RDA_a1(),
+        ponio::runge_kutta::pirock::pirock_RDA_b0() );
+
+    test_order<class_method::RDA_method>::on<decltype( pirock_methods )>();
 }
 
 // TEST_CASE( "order::lawson_runge_kutta" )
