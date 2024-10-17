@@ -62,7 +62,7 @@ struct butcher_{{ rk.id }} : public butcher::{{ "adaptive_" if 'b2' in rk else "
  * @brief {{ rk.label }} method
  * @tparam value_t type of coefficient (``double``by default)
  *
- * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
+ * @details see more on [ponio](https://hpc-maths.github.io/ponio/#{{ rk.id }})
  *
  * This method is based on the following Butcher tableau:
  *
@@ -100,7 +100,7 @@ using {{ rk.id }} = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id 
  * @param exp_ exponential function for the Lawson method
  * @param tol  tolerance (only for adaptive time step methods)
  *
- * @details see more on [ponio](https://josselin.massot.gitlab.labos.polytechnique.fr/ponio/viewer.html#{{ rk.id }})
+ * @details see more on [ponio](https://hpc-maths.github.io/ponio/#{{ rk.id }})
  *
  * + **stages:** {{ rk.A|length }}
  * + **order:** {{ rk.order }}

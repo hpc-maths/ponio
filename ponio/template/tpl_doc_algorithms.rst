@@ -354,7 +354,7 @@ The method is divided into 5 steps:
                       & - \sigma_\alpha\left( 1 - \frac{\tau_\alpha}{\sigma_\alpha^2}\right)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)})) \\
                       & + \frac{1}{4}\Delta t F_A(u^{(s+1)}) + \frac{3}{4}\Delta t F_A(u^{(s+5)}) \\
                       & + \frac{1}{2}\Delta t F_R(u^{(s+1)}) + \frac{1}{2}\Delta t F_R(u^{(s+2)}) \\
-                      & + \frac{J_R^{-\ell}}{2-4\gamma}\Delta t t(F_D(u^{(s+3)}) - F_D(u^{(s+1)}))
+                      & + \frac{J_R^{-\ell}}{2-4\gamma}\Delta t (F_D(u^{(s+3)}) - F_D(u^{(s+1)}))
       \end{aligned}
 
 where :math:`\mu_j`, :math:`\nu_j`, :math:`\kappa_j` are the same coefficients as for the standard ROCK2 method and:
