@@ -527,7 +527,7 @@ namespace ponio
 
         value_t last_time = t_span.back();
 
-        auto meth = make_method<value_t>( std::forward<Algorithm_t>( algo ), un );
+        auto meth = make_method<value_t>( std::forward<Algorithm_t>( algo ), u0 );
 
         obs( current_time, un, dt );
 

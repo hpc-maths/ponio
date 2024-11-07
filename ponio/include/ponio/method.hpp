@@ -58,7 +58,7 @@ namespace ponio
          */
         method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
             : alg( alg_ )
-            , kis( ::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
+            , kis( ::detail::init_fill_array<std::tuple_size_v<step_storage_t>>( shadow_of_u0 ) )
         {
         }
 
@@ -207,7 +207,7 @@ namespace ponio
 
         method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
             : alg( alg_ )
-            , kis( ::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
+            , kis( ::detail::init_fill_array<std::tuple_size_v<step_storage_t>>( shadow_of_u0 ) )
         {
         }
 

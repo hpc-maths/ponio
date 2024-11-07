@@ -26,11 +26,11 @@ namespace ponio
         simple_problem( Callable_t&& f_ );
 
         template <typename state_t, typename value_t>
-        state_t
+        auto
         operator()( value_t t, state_t&& u );
 
         template <typename state_t, typename value_t>
-        state_t
+        auto
         operator()( value_t t, state_t& u );
     };
 
@@ -52,7 +52,7 @@ namespace ponio
      */
     template <typename Callable_t>
     template <typename state_t, typename value_t>
-    inline state_t
+    inline auto
     simple_problem<Callable_t>::operator()( value_t t, state_t&& u )
     {
         return f( t, std::forward<state_t>( u ) );
@@ -60,7 +60,7 @@ namespace ponio
 
     template <typename Callable_t>
     template <typename state_t, typename value_t>
-    inline state_t
+    inline auto
     simple_problem<Callable_t>::operator()( value_t t, state_t& u )
     {
         return f( t, u );
@@ -175,14 +175,14 @@ namespace ponio
         imex_problem( Callable_explicit_t&& f_explicit, Implicit_problem_t&& pb_implicit );
 
         template <typename state_t, typename value_t>
-        state_t
+        auto
         operator()( value_t t, state_t&& u )
         {
             return explicit_part( t, std::forward<state_t>( u ) ) + implicit_part( t, std::forward<state_t>( u ) );
         }
 
         template <typename state_t, typename value_t>
-        state_t
+        auto
         operator()( value_t t, state_t& u )
         {
             return explicit_part( t, u ) + implicit_part( t, u );
@@ -254,7 +254,7 @@ namespace ponio
         lawson_problem( Linear_t&& l_, Nonlinear_t&& n_ );
 
         template <typename state_t, typename value_t>
-        state_t
+        auto
         operator()( value_t t, state_t&& u );
     };
 
@@ -278,7 +278,7 @@ namespace ponio
      */
     template <typename Linear_t, typename Nonlinear_t>
     template <typename state_t, typename value_t>
-    state_t
+    auto
     lawson_problem<Linear_t, Nonlinear_t>::operator()( value_t t, state_t&& u )
     {
         return l * u + n( t, std::forward<state_t>( u ) );
@@ -311,35 +311,35 @@ namespace ponio
         problem( Callables_t... args );
 
         template <typename value_t, typename state_t, std::size_t... Is>
-        state_t
+        auto
         _sum_components_impl( value_t t, state_t&& u, std::index_sequence<Is...> );
 
         template <typename value_t, typename state_t, std::size_t... Is>
-        state_t
+        auto
         _sum_components_impl( value_t t, state_t& u, std::index_sequence<Is...> );
 
         template <typename value_t, typename state_t>
-        state_t
+        auto
         operator()( value_t t, state_t&& u );
 
         template <typename value_t, typename state_t>
-        state_t
+        auto
         operator()( value_t t, state_t& u );
 
         template <std::size_t I, typename value_t, typename state_t>
-        state_t
+        auto
         operator()( std::integral_constant<std::size_t, I>, value_t t, state_t&& u );
 
         template <std::size_t I, typename value_t, typename state_t>
-        state_t
+        auto
         operator()( std::integral_constant<std::size_t, I>, value_t t, state_t& u );
 
         template <std::size_t Index, typename value_t, typename state_t>
-        state_t
+        auto
         call( value_t t, state_t&& u );
 
         template <std::size_t Index, typename value_t, typename state_t>
-        state_t
+        auto
         call( value_t t, state_t& u );
     };
 
@@ -362,7 +362,7 @@ namespace ponio
      */
     template <typename... Callables_t>
     template <typename value_t, typename state_t, std::size_t... Is>
-    inline state_t
+    inline auto
     problem<Callables_t...>::_sum_components_impl( value_t t, state_t&& u, std::index_sequence<Is...> )
     {
         return ( call<Is>( t, std::forward<state_t>( u ) ) + ... );
@@ -370,7 +370,7 @@ namespace ponio
 
     template <typename... Callables_t>
     template <typename value_t, typename state_t, std::size_t... Is>
-    inline state_t
+    inline auto
     problem<Callables_t...>::_sum_components_impl( value_t t, state_t& u, std::index_sequence<Is...> )
     {
         return ( call<Is>( t, u ) + ... );
@@ -384,7 +384,7 @@ namespace ponio
      */
     template <typename... Callables_t>
     template <typename value_t, typename state_t>
-    inline state_t
+    inline auto
     problem<Callables_t...>::operator()( value_t t, state_t&& u )
     {
         return _sum_components_impl( t, std::forward<state_t>( u ), std::make_index_sequence<size>{} );
@@ -392,7 +392,7 @@ namespace ponio
 
     template <typename... Callables_t>
     template <typename value_t, typename state_t>
-    inline state_t
+    inline auto
     problem<Callables_t...>::operator()( value_t t, state_t& u )
     {
         return _sum_components_impl( t, u, std::make_index_sequence<size>{} );
@@ -408,7 +408,7 @@ namespace ponio
      */
     template <typename... Callables_t>
     template <std::size_t I, typename value_t, typename state_t>
-    inline state_t
+    inline auto
     problem<Callables_t...>::operator()( std::integral_constant<std::size_t, I>, value_t t, state_t&& u )
     {
         return call<I>( t, std::forward<state_t>( u ) );
@@ -416,7 +416,7 @@ namespace ponio
 
     template <typename... Callables_t>
     template <std::size_t I, typename value_t, typename state_t>
-    inline state_t
+    inline auto
     problem<Callables_t...>::operator()( std::integral_constant<std::size_t, I>, value_t t, state_t& u )
     {
         return call<I>( t, u );
@@ -431,7 +431,7 @@ namespace ponio
      */
     template <typename... Callables_t>
     template <std::size_t Index, typename value_t, typename state_t>
-    inline state_t
+    inline auto
     problem<Callables_t...>::call( value_t t, state_t&& u )
     {
         return std::get<Index>( system )( t, std::forward<state_t>( u ) );
@@ -439,7 +439,7 @@ namespace ponio
 
     template <typename... Callables_t>
     template <std::size_t Index, typename value_t, typename state_t>
-    inline state_t
+    inline auto
     problem<Callables_t...>::call( value_t t, state_t& u )
     {
         return std::get<Index>( system )( t, u );

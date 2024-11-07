@@ -141,20 +141,10 @@ namespace explicit_method
         T gamma = 1.;
         T delta = 1.;
 
-        // make a problem that can be use also for splitting (in 3 parts) methods
-        auto pb = ponio::make_problem(
-            [=]( T, state_t&& u ) -> state_t
-            {
-                return { alpha * u[0] - beta * u[0] * u[1], 0. };
-            },
-            [=]( T, state_t&& u ) -> state_t
-            {
-                return { 0., delta * u[0] * u[1] };
-            },
-            [=]( T, state_t&& u ) -> state_t
-            {
-                return { 0., -gamma * u[1] };
-            } );
+        auto pb = [=]( T, auto&& u ) -> state_t
+        {
+            return { alpha * u[0] - beta * u[0] * u[1], delta * u[0] * u[1] - gamma * u[1] };
+        };
 
         // invariant calculator
         auto V = [=]( state_t const& u ) -> T
@@ -338,3 +328,67 @@ namespace RDA_method
     }
 
 } // namespace RDA_method
+
+namespace splitting_method
+{
+
+    template <typename Algorithm_t, typename T = double>
+    auto
+    long_time_check_order( Algorithm_t& algo )
+    {
+        using state_t = std::valarray<T>;
+
+        T alpha = 2. / 3.;
+        T beta  = 4. / 3.;
+        T gamma = 1.;
+        T delta = 1.;
+
+        auto pb = ponio::make_problem(
+            [=]( T, auto&& u ) -> state_t
+            {
+                return { alpha * u[0] - beta * u[0] * u[1], 0. };
+            },
+            [=]( T, auto&& u ) -> state_t
+            {
+                return { 0., delta * u[0] * u[1] };
+            },
+            [=]( T, auto&& u ) -> state_t
+            {
+                return { 0., -gamma * u[1] };
+            } );
+
+        // invariant calculator
+        auto V = [=]( state_t const& u ) -> T
+        {
+            return delta * u[0] - gamma * std::log( u[0] ) + beta * u[1] - alpha * std::log( u[1] );
+        };
+
+        T x0          = 1.9;
+        state_t u_ini = { x0, x0 };
+        T V_ini       = V( u_ini );
+
+        ponio::time_span<T> t_span = { 0., 1000. };
+        std::vector<T> dts         = { 0.25, 0.125, 0.1, 0.075, 0.05 }; // find a way to adapt this range to the method
+        std::vector<T> relative_errors;
+        std::vector<T> log_dts;
+
+        for ( auto dt : dts )
+        {
+            state_t u_end = ::ponio::solve( pb, algo, u_ini, t_span, dt, []( T, state_t const&, T ) {} );
+            relative_errors.push_back( std::log10( relative_error( V_ini, V( u_end ) ) ) );
+            log_dts.push_back( std::log10( dt ) );
+        }
+
+        auto [a, b] = mayor_method( log_dts, relative_errors );
+
+        return a;
+    }
+
+    template <typename Algorithm_t, typename T = double>
+    T
+    check_order( Algorithm_t algo = Algorithm_t() )
+    {
+        return long_time_check_order( algo );
+    }
+
+} // splitting_method
