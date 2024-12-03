@@ -273,7 +273,7 @@ namespace ponio
         }
 
         /**
-         * @brief accessor to current solution data member
+         * @brief getter to current solution data member
          */
         pointer
         operator->()
@@ -282,7 +282,7 @@ namespace ponio
         }
 
         /**
-         * @brief accessor to current solution data member
+         * @brief getter to current solution data member
          */
         const_pointer
         operator->() const
@@ -291,7 +291,7 @@ namespace ponio
         }
 
         /**
-         * @brief accessor to informations on iteration with algorithm
+         * @brief getter to informations on iteration with algorithm
          *
          * @return auto&
          */
@@ -302,7 +302,7 @@ namespace ponio
         }
 
         /**
-         * @brief accessor to informations on iteration with algorithm
+         * @brief getter to informations on iteration with algorithm
          *
          * @return auto const&
          */
