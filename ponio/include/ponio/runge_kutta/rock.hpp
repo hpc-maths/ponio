@@ -24,7 +24,8 @@
 
 namespace ponio::runge_kutta::rock
 {
-
+    enum rock_order {rock_2, rock_4};
+  
     namespace detail
     {
         template <typename state_t>
@@ -172,10 +173,11 @@ namespace ponio::runge_kutta::rock
                 std::size_t mz = 1;
                 std::size_t mr = 1;
 
-                if ( mdeg < 2 )
-                {
-                    return { mz, mr };
-                }
+                // TODO : verifier si ce test est utile     
+                // if ( mdeg < 2 )
+                // {
+                //     return { mz, mr };
+                // }
 
                 std::size_t i = 1;
                 for ( auto ms_i : rock_coeff::ms )
@@ -209,7 +211,7 @@ namespace ponio::runge_kutta::rock
              */
             template <typename eig_computer_t, typename problem_t, typename state_t>
             static std::tuple<std::size_t, std::size_t>
-            compute_n_stages( eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt, std::size_t s_min )
+            compute_n_stages( rock_order ro, eig_computer_t&& eig_computer, problem_t& f, value_t tn, state_t& un, value_t& dt, std::size_t s_min )
             {
                 std::size_t n_eval = 0;
                 auto f_counter     = [&n_eval, &f]( value_t t, state_t& u )
@@ -219,13 +221,31 @@ namespace ponio::runge_kutta::rock
                 };
 
                 double eigmax = std::forward<eig_computer_t>( eig_computer )( f_counter, tn, un, dt );
-                auto mdeg     = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
-                if ( mdeg > 200 )
+                auto mdeg = s_min;
+                if (ro == rock_order::rock_2)
                 {
-                    mdeg = 200;
-                    dt   = 0.8 * ( static_cast<double>( mdeg * mdeg ) * 0.811 - 1.5 ) / eigmax;
+
+                    mdeg     = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
+                    if ( mdeg > 200 )
+                    {
+                        mdeg = 200;
+                        dt   = 0.8 * ( static_cast<double>( mdeg * mdeg ) * 0.811 - 1.5 ) / eigmax;
+                    }
+
+                    mdeg = std::max( mdeg, s_min ) - 2;
                 }
-                mdeg = std::max( mdeg, s_min ) - 2;
+                else 
+                {
+                    mdeg     = static_cast<std::size_t>( ( std::sqrt( ( 3.0 + dt * eigmax ) / 0.353 ) ) ) + 1;
+                    if ( mdeg > 152 )
+                    {
+                        mdeg = 152;
+                        dt   = 0.8 * ( static_cast<double>( mdeg * mdeg ) * 0.353 - 3.0 ) / eigmax;
+                    }
+
+                    mdeg = std::max( mdeg, s_min ) - 4;
+                }
+
                 return { mdeg, n_eval };
             }
 
@@ -245,14 +265,14 @@ namespace ponio::runge_kutta::rock
              */
             template <typename eig_computer_t, typename problem_t, typename state_t>
             static std::tuple<std::size_t, std::size_t, std::size_t, std::size_t>
-            compute_n_stages_optimal_degree( eig_computer_t&& eig_computer,
+            compute_n_stages_optimal_degree( rock_order ro, eig_computer_t&& eig_computer,
                 problem_t& f,
                 value_t tn,
                 state_t& un,
                 value_t& dt,
                 std::size_t s_min = 3 )
             {
-                auto [mdeg, n_eval] = compute_n_stages( std::forward<eig_computer_t>( eig_computer ), f, tn, un, dt, s_min );
+                auto [mdeg, n_eval] = compute_n_stages( ro, std::forward<eig_computer_t>( eig_computer ), f, tn, un, dt, s_min );
                 auto [mz, mr]       = optimal_degree( mdeg );
 
                 return { mdeg, mz, mr, n_eval };
@@ -371,7 +391,7 @@ namespace ponio::runge_kutta::rock
         {
             info.reset_eval();
 
-            auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
+            auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( rock_order::rock_2, eig_computer, f, tn, un, dt );
 
             info.number_of_stages = mdeg + 2;
             info.number_of_eval   = n_eval + mdeg + 2;
@@ -435,6 +455,7 @@ namespace ponio::runge_kutta::rock
 
                 info.error   = error( uj, un, tmp );
                 info.success = info.error < 1.0;
+                info.number_of_eval += 1;
 
                 value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / info.error ) ) );
                 value_t new_dt = 0.8 * fac * dt;
@@ -591,7 +612,7 @@ namespace ponio::runge_kutta::rock
         {
             info.reset_eval();
 
-            auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( eig_computer, f, tn, un, dt );
+            auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( rock_order::rock_4, eig_computer, f, tn, un, dt, 5 );
 
             info.number_of_stages = mdeg + 4;
             info.number_of_eval   = n_eval + mdeg + 4;
@@ -611,8 +632,6 @@ namespace ponio::runge_kutta::rock
             value_t t_jm3     = tn;
 
             ujm1 = un + mu1 * f( tn, un );
-
-            // std::cout << "rock2::op() " << mdeg << " " << tn << " " << dt << " " << start_index << " . " << deg_index << "\n";
 
             if ( mdeg < 2 )
             {
@@ -683,13 +702,16 @@ namespace ponio::runge_kutta::rock
                 tmp = f( t_jm2, ujm4 );
                 uj  = uj + b_1 * ujm1 + b_2 * ujm2 + b_3 * ujm3 + b_4 * tmp;
 
-                tmp = bh_1 * ujm1 + bh_2 * ujm2 + bh_3 * ujm3 + bh_4 * tmp + bh_5 * ujm4;
+                tmp = bh_1 * ujm1 + bh_2 * ujm2 + bh_3 * ujm3 + bh_4 * tmp + bh_5 * f( t_jm2, uj );
 
                 info.error   = error( uj, tmp );
                 info.success = info.error < 1.0;
+                info.number_of_eval += 1; // one of two evaluations already count
 
-                value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / info.error ) ) );
-                value_t new_dt = 0.8 * fac * dt;
+                value_t fac    = std::pow((1./info.error), 0.25);
+                fac = std::min(5., std::max(0.1, 0.8*fac));
+
+                value_t new_dt = fac * dt;
 
                 // accepted step
                 if ( info.success )
