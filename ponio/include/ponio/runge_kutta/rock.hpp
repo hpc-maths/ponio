@@ -24,6 +24,10 @@
 
 namespace ponio::runge_kutta::rock
 {
+    /**
+     * @brief selectors with types
+     *
+     */
     namespace rock_order
     {
         struct rock_2
@@ -209,6 +213,7 @@ namespace ponio::runge_kutta::rock
              * @brief computes number of stages needed to stabilized spectral radius of \f$f\f$ and returns also number of evaluation of
              * function \f$f\f$
              *
+             * @tparam rock_method    type selector for ROCK2 or ROCK4 method (with `rock_order::rock_2` or `rock_order::rock_4`)
              * @tparam eig_computer_t type of computer of spectral radius
              * @tparam problem_t      type of operator \f$f\f$
              * @tparam state_t        type of state
@@ -217,6 +222,7 @@ namespace ponio::runge_kutta::rock
              * @param tn           current time
              * @param un           current state
              * @param dt           current time step
+             * @param s_min        minimal number of stages (3 for ROCK2, 5 for ROCK4)
              */
             template <typename rock_method, typename eig_computer_t, typename problem_t, typename state_t>
             static std::tuple<std::size_t, std::size_t>
@@ -264,6 +270,7 @@ namespace ponio::runge_kutta::rock
             /**
              * @brief complete procedure to compute number of stages of ROCK method and shift indexes to read ROCK coefficients
              *
+             * @tparam rock_method    type selector for ROCK2 or ROCK4 method (with `rock_order::rock_2` or `rock_order::rock_4`)
              * @tparam eig_computer_t type of computer of spectral radius
              * @tparam problem_t      type of operator \f$f\f$
              * @tparam state_t        type of state
@@ -272,6 +279,7 @@ namespace ponio::runge_kutta::rock
              * @param tn           current time
              * @param un           current state
              * @param dt           current time step
+             * @param s_min        minimal number of stages (3 for ROCK2, 5 for ROCK4)
              * @return std::tuple<std::size_t, std::size_t, std::size_t> tuple with number of stages of ROCK method, shift index for last
              * stages, shift index of ROCK stages
              */
