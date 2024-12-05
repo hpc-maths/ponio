@@ -38,23 +38,23 @@ namespace ponio::runge_kutta::explicit_runge_kutta
         }
 
         template <typename problem_t, typename state_t, typename array_ki_t, std::size_t I>
-        state_t
-        stage( Stage<I>, problem_t& f, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
+        auto
+        stage( Stage<I>, problem_t& f, value_t const& tn, state_t& un, array_ki_t const& Ki, value_t const& dt )
         {
             return f( tn + butcher.c[I] * dt, ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt ) );
         }
 
         template <typename problem_t, typename state_t, typename array_ki_t>
-        state_t
-        stage( Stage<N_stages>, problem_t&, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
+        auto
+        stage( Stage<N_stages>, problem_t&, value_t const&, state_t& un, array_ki_t const& Ki, value_t const& dt )
         {
             return ::detail::tpl_inner_product<N_stages>( butcher.b, Ki, un, dt );
         }
 
         template <typename problem_t, typename state_t, typename array_ki_t, typename tab_t = tableau_t>
             requires std::same_as<tab_t, tableau_t> && is_embedded
-        state_t
-        stage( Stage<N_stages + 1>, problem_t&, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
+        auto
+        stage( Stage<N_stages + 1>, problem_t&, value_t const&, state_t& un, array_ki_t const& Ki, value_t const& dt )
         {
             return ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
         }

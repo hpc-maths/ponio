@@ -11,6 +11,13 @@
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
 
+template <std::size_t I, typename array_coeff_t>
+auto
+f( std::valarray<double> const& x, std::valarray<double> const& y, double const& a, array_coeff_t const& coeff )
+{
+    return x + a * coeff * y;
+}
+
 int
 main( int, char** )
 {
@@ -24,7 +31,7 @@ main( int, char** )
     double const rho   = 28.;
     double const beta  = 8. / 3.;
 
-    auto lorenz = [=]( double, state_t const& u ) -> state_t
+    auto lorenz = [=]( double, auto const& u ) -> state_t
     {
         auto du1 = sigma * ( u[1] - u[0] );
         auto du2 = rho * u[0] - u[1] - u[0] * u[2];

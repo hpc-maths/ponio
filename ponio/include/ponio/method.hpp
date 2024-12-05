@@ -58,7 +58,7 @@ namespace ponio
          */
         method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
             : alg( alg_ )
-            , kis( ::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
+            , kis( ::detail::init_fill_array<std::tuple_size_v<step_storage_t>>( shadow_of_u0 ) )
         {
         }
 
@@ -128,7 +128,7 @@ namespace ponio
         std::tuple<value_t, state_t, value_t>
         _return( value_t tn, [[maybe_unused]] state_t const& un, value_t dt )
         {
-            return std::make_tuple( tn + dt, kis.back(), dt );
+            return std::forward_as_tuple( tn + dt, kis.back(), dt );
         }
 
         template <typename value_t, typename Algo_t = Algorithm_t>
@@ -144,11 +144,11 @@ namespace ponio
             if ( alg.info.error > alg.info.tolerance )
             {
                 alg.info.success = false;
-                return std::make_tuple( tn, un, new_dt );
+                return std::forward_as_tuple( tn, un, new_dt );
             }
 
             alg.info.success = true;
-            return std::make_tuple( tn + dt, kis[Algorithm_t::N_stages], new_dt );
+            return std::forward_as_tuple( tn + dt, kis[Algorithm_t::N_stages], new_dt );
         }
 
         /**
@@ -207,7 +207,7 @@ namespace ponio
 
         method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
             : alg( alg_ )
-            , kis( ::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
+            , kis( ::detail::init_fill_array<std::tuple_size_v<step_storage_t>>( shadow_of_u0 ) )
         {
         }
 

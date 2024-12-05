@@ -273,7 +273,7 @@ namespace ponio
         }
 
         /**
-         * @brief accessor to current solution data member
+         * @brief getter to current solution data member
          */
         pointer
         operator->()
@@ -282,7 +282,7 @@ namespace ponio
         }
 
         /**
-         * @brief accessor to current solution data member
+         * @brief getter to current solution data member
          */
         const_pointer
         operator->() const
@@ -291,7 +291,7 @@ namespace ponio
         }
 
         /**
-         * @brief accessor to informations on iteration with algorithm
+         * @brief getter to informations on iteration with algorithm
          *
          * @return auto&
          */
@@ -302,7 +302,7 @@ namespace ponio
         }
 
         /**
-         * @brief accessor to informations on iteration with algorithm
+         * @brief getter to informations on iteration with algorithm
          *
          * @return auto const&
          */
@@ -527,7 +527,7 @@ namespace ponio
 
         value_t last_time = t_span.back();
 
-        auto meth = make_method<value_t>( std::forward<Algorithm_t>( algo ), un );
+        auto meth = make_method<value_t>( std::forward<Algorithm_t>( algo ), u0 );
 
         obs( current_time, un, dt );
 

@@ -59,14 +59,14 @@ namespace detail
 
     /* tpl_inner_product */
     template <typename state_t, typename value_t, typename ArrayA_t, typename ArrayB_t, std::size_t... Is>
-    constexpr state_t
+    inline constexpr auto
     tpl_inner_product_impl( ArrayA_t const& a,
         ArrayB_t const& b,
         state_t const& init,
-        [[maybe_unused]] value_t mul_coeff,
+        [[maybe_unused]] value_t const& mul_coeff,
         std::index_sequence<Is...> )
     {
-        return ( init + ... + ( mul_coeff * a[Is] * b[Is] ) );
+        return ( init + ... + ( mul_coeff * ( a[Is] * b[Is] ) ) );
     }
 
     /**
@@ -86,8 +86,8 @@ namespace detail
      * @details This function compute \f$\texttt{init} + \sum_{i=0}^N \texttt{mul_coeff}a_ib_i\f$ without loop thanks to template.
      */
     template <std::size_t N, typename state_t, typename value_t, typename ArrayA_t, typename ArrayB_t>
-    constexpr state_t
-    tpl_inner_product( ArrayA_t const& a, ArrayB_t const& b, state_t const& init, value_t mul_coeff = value_t{ 1.0 } )
+    inline constexpr auto
+    tpl_inner_product( ArrayA_t const& a, ArrayB_t const& b, state_t const& init, value_t const& mul_coeff )
     {
         return tpl_inner_product_impl( a, b, init, mul_coeff, std::make_index_sequence<N>() );
     }

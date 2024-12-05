@@ -487,16 +487,16 @@ namespace ponio::runge_kutta::rock
                 // accepted step
                 if ( info.success )
                 {
-                    return { tn + dt, uj, new_dt };
+                    return std::forward_as_tuple( tn + dt, uj, new_dt );
                 }
 
-                return { tn, un, new_dt };
+                return std::forward_as_tuple( tn, un, new_dt );
             }
             else
             {
                 uj = ujm1 + ( delta_t_1 + delta_t_2 ) * f( t_jm1, ujm1 ) - delta_t_2 * ujm2;
 
-                return { tn + dt, uj, dt };
+                return std::forward_as_tuple( tn + dt, uj, dt );
             }
         }
     };
@@ -743,16 +743,16 @@ namespace ponio::runge_kutta::rock
                 // accepted step
                 if ( info.success )
                 {
-                    return { tn + dt, uj, new_dt };
+                    return std::forward_as_tuple( tn + dt, uj, new_dt );
                 }
 
-                return { tn, un, new_dt };
+                return std::forward_as_tuple( tn, un, new_dt );
             }
             else
             {
                 uj = uj + b_1 * ujm1 + b_2 * ujm2 + b_3 * ujm3 + b_4 * f( t_jm2, ujm4 );
 
-                return { tn + dt, uj, dt };
+                return std::forward_as_tuple( tn + dt, uj, dt );
             }
         }
     };
