@@ -227,11 +227,14 @@ namespace ponio::runge_kutta::pirock
 
             info.reset_eval();
 
-            auto [mdeg,
-                deg_index,
-                start_index,
-                n_eval]   = degree_computer::compute_n_stages_optimal_degree( eig_computer, pb.explicit_part, tn, un, dt, 4 );
-            std::size_t s = mdeg + 2;
+            auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( rock::rock_order::rock_2(),
+                eig_computer,
+                pb.explicit_part,
+                tn,
+                un,
+                dt,
+                4 );
+            std::size_t s                               = mdeg + 2;
 
             info.number_of_stages  = s + l + 3;
             info.number_of_eval[0] = n_eval + s + l + 4; // explicit evaluation
@@ -728,7 +731,8 @@ namespace ponio::runge_kutta::pirock
 
             info.reset_eval();
 
-            auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( eig_computer,
+            auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( rock::rock_order::rock_2(),
+                eig_computer,
                 std::get<diffusion_op::value>( pb.system ),
                 tn,
                 un,
