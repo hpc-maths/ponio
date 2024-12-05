@@ -38,8 +38,8 @@ struct test_order
         }
         else if constexpr ( type == class_method::diagonal_implicit_method )
         {
-            INFO( "not implemented test for DIRK method" );
-            WARN( false );
+            INFO( "test order of ", rk_t::id );
+            WARN( diagonal_implicit_method::check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
         }
         else if constexpr ( type == class_method::exponential_method )
         {
