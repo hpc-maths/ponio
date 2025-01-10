@@ -122,6 +122,9 @@ namespace ponio::shampine_trick
             // Solve the system
             Vec rhs_petsc   = samurai::petsc::create_petsc_vector_from( rhs );
             Vec u_tmp_petsc = samurai::petsc::create_petsc_vector_from( result_l1 );
+
+            assembly.set_0_for_all_ghosts( rhs_petsc );
+
             KSPSolve( ksp, rhs_petsc, u_tmp_petsc );
             KSPConvergedReason reason_code;
             KSPGetConvergedReason( ksp, &reason_code );
@@ -137,8 +140,18 @@ namespace ponio::shampine_trick
             if constexpr ( l == 2 )
             {
                 Vec result_petsc = samurai::petsc::create_petsc_vector_from( shampine_result );
+
+                assembly.set_0_for_all_ghosts( u_tmp_petsc );
+
                 KSPSolve( ksp, u_tmp_petsc, result_petsc );
+
+                VecDestroy( &result_petsc );
             }
+
+            VecDestroy( &u_tmp_petsc );
+            VecDestroy( &rhs_petsc );
+            KSPDestroy( &ksp );
+            MatDestroy( &J_R );
         }
     };
 
