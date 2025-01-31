@@ -59,12 +59,18 @@ namespace ponio::runge_kutta::explicit_runge_kutta
             return ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
         }
 
+        /**
+         * @brief gets `iteration_info` object
+         */
         auto&
         info()
         {
             return _info;
         }
 
+        /**
+         * @brief gets `iteration_info` object (constant version)
+         */
         auto const&
         info() const
         {

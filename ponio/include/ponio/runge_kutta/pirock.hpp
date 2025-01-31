@@ -461,12 +461,18 @@ namespace ponio::runge_kutta::pirock
             return { tn + dt, u_np1, dt };
         }
 
+        /**
+         * @brief gets `iteration_info` object
+         */
         auto&
         info()
         {
             return _info;
         }
 
+        /**
+         * @brief gets `iteration_info` object (constant version)
+         */
         auto const&
         info() const
         {
@@ -1065,12 +1071,18 @@ namespace ponio::runge_kutta::pirock
             return { tn + dt, u_np1, dt };
         }
 
+        /**
+         * @brief gets `iteration_info` object
+         */
         auto&
         info()
         {
             return _info;
         }
 
+        /**
+         * @brief gets `iteration_info` object (constant version)
+         */
         auto const&
         info() const
         {

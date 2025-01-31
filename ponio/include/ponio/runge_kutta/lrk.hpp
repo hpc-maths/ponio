@@ -75,12 +75,18 @@ namespace ponio::runge_kutta::lawson_runge_kutta
             return m_exp( dt * pb.l ) * ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
         }
 
+        /**
+         * @brief gets `iteration_info` object
+         */
         auto&
         info()
         {
             return _info;
         }
 
+        /**
+         * @brief gets `iteration_info` object (constant version)
+         */
         auto const&
         info() const
         {

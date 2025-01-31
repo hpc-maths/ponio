@@ -768,12 +768,18 @@ namespace ponio::runge_kutta::rock
             }
         }
 
+        /**
+         * @brief gets `iteration_info` object
+         */
         auto&
         info()
         {
             return _info;
         }
 
+        /**
+         * @brief gets `iteration_info` object (constant version)
+         */
         auto const&
         info() const
         {

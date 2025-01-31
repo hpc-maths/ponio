@@ -92,28 +92,44 @@ namespace ponio::splitting::strang
         auto
         operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt );
 
+        /**
+         * @brief gets `iteration_info` object
+         */
         auto&
         info()
         {
             return _info;
         }
 
+        /**
+         * @brief gets `iteration_info` object (constant version)
+         */
         auto const&
         info() const
         {
             return _info;
         }
 
+        /**
+         * @brief gets array of stages of the Ith method
+         *
+         * @tparam I index of step method
+         */
         template <std::size_t I>
         auto&
-        stages()
+        stages( std::integral_constant<std::size_t, I> )
         {
             return std::get<I>( methods ).stages();
         }
 
+        /**
+         * @brief gets array of stages of the Ith method (constant version)
+         *
+         * @tparam I index of step method
+         */
         template <std::size_t I>
         auto const&
-        stages() const
+        stages( std::integral_constant<std::size_t, I> ) const
         {
             return std::get<I>( methods ).stages();
         }
@@ -291,28 +307,44 @@ namespace ponio::splitting::strang
             return std::make_tuple( tn + dt, u_np1_ref, new_dt );
         }
 
+        /**
+         * @brief gets `iteration_info` object
+         */
         auto&
         info()
         {
             return _info;
         }
 
+        /**
+         * @brief gets `iteration_info` object (constant version)
+         */
         auto const&
         info() const
         {
             return _info;
         }
 
+        /**
+         * @brief gets array of stages of the Ith method
+         *
+         * @tparam I index of step method
+         */
         template <std::size_t I>
         auto&
-        stages()
+        stages( std::integral_constant<std::size_t, I> )
         {
             return std::get<I>( methods ).stages();
         }
 
+        /**
+         * @brief gets array of stages of the Ith method (constant version)
+         *
+         * @tparam I index of step method
+         */
         template <std::size_t I>
         auto const&
-        stages() const
+        stages( std::integral_constant<std::size_t, I> ) const
         {
             return std::get<I>( methods ).stages();
         }
