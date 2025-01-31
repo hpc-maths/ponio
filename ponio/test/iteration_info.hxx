@@ -324,8 +324,8 @@ TEST_CASE( "number_of_eval::pirock" )
     while ( it_sol->time < t_span.back() )
     {
         ++it_sol;
-        cumulative_counter_ex += it_sol.info().number_of_eval[0];
-        cumulative_counter_im += it_sol.info().number_of_eval[1];
+        cumulative_counter_ex += std::get<0>( it_sol.info().number_of_eval );
+        cumulative_counter_im += std::get<1>( it_sol.info().number_of_eval );
     }
 
     CHECK( cumulative_counter_im == manual_counter_im );
@@ -384,8 +384,8 @@ TEST_CASE( "number_of_eval::splitting_lie" )
     while ( it_sol->time < t_span.back() )
     {
         ++it_sol;
-        cumulative_counter_1 += it_sol.info().number_of_eval[0];
-        cumulative_counter_2 += it_sol.info().number_of_eval[1];
+        cumulative_counter_1 += std::get<0>( it_sol.info().number_of_eval );
+        cumulative_counter_2 += std::get<1>( it_sol.info().number_of_eval );
     }
 
     CHECK( cumulative_counter_1 == manual_counter_1 );
@@ -425,8 +425,8 @@ TEST_CASE( "number_of_eval::splitting_strang" )
     while ( it_sol->time < t_span.back() )
     {
         ++it_sol;
-        cumulative_counter_1 += it_sol.info().number_of_eval[0];
-        cumulative_counter_2 += it_sol.info().number_of_eval[1];
+        cumulative_counter_1 += std::get<0>( it_sol.info().number_of_eval );
+        cumulative_counter_2 += std::get<1>( it_sol.info().number_of_eval );
     }
 
     CHECK( cumulative_counter_1 == manual_counter_1 );
@@ -471,8 +471,8 @@ TEST_CASE( "number_of_eval::splitting_adaptive_strang" )
     while ( it_sol->time < t_span.back() )
     {
         ++it_sol;
-        cumulative_counter_1 += it_sol.info().number_of_eval[0];
-        cumulative_counter_2 += it_sol.info().number_of_eval[1];
+        cumulative_counter_1 += std::get<0>( it_sol.info().number_of_eval );
+        cumulative_counter_2 += std::get<1>( it_sol.info().number_of_eval );
     }
 
     CHECK( cumulative_counter_1 == manual_counter_1 );

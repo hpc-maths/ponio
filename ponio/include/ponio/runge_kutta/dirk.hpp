@@ -117,7 +117,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         {
             if constexpr ( I == 0 )
             {
-                info.reset_eval();
+                _info.reset_eval();
             }
 
             state_t ui = un;
@@ -128,7 +128,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             std::size_t n_eval = 0;
             ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_i, ui, rhs, n_eval );
 
-            info.number_of_eval += n_eval + 1;
+            _info.number_of_eval += n_eval + 1;
 
             return pb.f( tn + butcher.c[I] * dt, ui );
         }
@@ -140,7 +140,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         {
             if constexpr ( I == 0 )
             {
-                info.reset_eval();
+                _info.reset_eval();
             }
 
             using matrix_t = decltype( pb.df( tn, un ) );
@@ -167,7 +167,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             // $$
             auto g = [&]( state_t const& k ) -> state_t
             {
-                info.number_of_eval += 1;
+                _info.number_of_eval += 1;
                 return k
                      - pb.f( tn + butcher.c[I] * dt, ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt ) + dt * butcher.A[I][I] * k );
             };
@@ -222,11 +222,29 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             return ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
         }
 
+        /**
+         * @brief gets `iteration_info` object
+         */
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        /**
+         * @brief gets `iteration_info` object (constant version)
+         */
+        auto const&
+        info() const
+        {
+            return _info;
+        }
+
         double tol           = ponio::default_config::newton_tolerance;      // tolerance of Newton method
         std::size_t max_iter = ponio::default_config::newton_max_iterations; // max iterations of Newton method
 
         linear_algebra_t linalg;
-        iteration_info<tableau_t> info;
+        iteration_info<tableau_t> _info;
     };
 
     // ---- *helper* ----

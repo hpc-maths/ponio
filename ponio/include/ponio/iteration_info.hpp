@@ -6,6 +6,7 @@
 
 #include <array>
 #include <cstddef>
+#include <ranges>
 #include <tuple>
 
 #include "butcher_tableau.hpp"
@@ -126,6 +127,60 @@ namespace ponio
         }
     };
 
+    namespace details
+    {
+        template <typename tuple_t, std::size_t... I>
+        constexpr auto
+        tuple_of_number_of_eval_impl( std::index_sequence<I...> )
+        {
+            // for each type elements of a tuple, get a `iteration_info` on this type, get a `number_of_element` instance to get its type
+            return std::make_tuple( decltype( std::declval<std::tuple_element_t<I, tuple_t>>().info().number_of_eval )()... );
+        }
+
+        template <typename tuple_t>
+        struct tuple_of_number_of_eval
+        {
+            using type = decltype( tuple_of_number_of_eval_impl<tuple_t>( std::make_index_sequence<std::tuple_size<tuple_t>{}>{} ) );
+        };
+
+        template <typename tuple_t>
+        using tuple_of_number_of_eval_t = typename tuple_of_number_of_eval<tuple_t>::type;
+
+        template <typename T>
+        void
+        set_to_zero( T& x )
+        {
+            x = 0;
+        }
+
+        template <typename T>
+            requires std::ranges::range<T>
+        void
+        set_to_zero( T& x )
+        {
+            x.fill( 0 );
+        }
+
+        template <typename T>
+        void
+        increment( T& x, T const& y )
+        {
+            x += y;
+        }
+
+        template <typename T>
+            requires std::ranges::range<T>
+        void
+        increment( T& x, T const& y )
+        {
+            for ( std::size_t i = 0; i < x.size(); ++i )
+            {
+                x[i] += y[i];
+            }
+        }
+
+    } // namespace details
+
     template <typename splitting_t>
         requires splitting_t::is_splitting_method
     struct iteration_info<splitting_t>
@@ -141,8 +196,8 @@ namespace ponio
         bool success;  /**< sets as true only for success iteration */
         bool is_step;  /**< sets as true only if iterator is on a step given in solver */
 
-        std::size_t number_of_steps;                                    /**< number of stages of method */
-        std::array<std::size_t, splitting_t::N_methods> number_of_eval; /**< number of evaluation of function */
+        std::size_t number_of_steps;                                /**< number of stages of method */
+        details::tuple_of_number_of_eval_t<tuple_t> number_of_eval; /**< number of evaluation of function */
 
         value_t tolerance; /**< tolerance for the method (for adaptive time step method) */
 
@@ -153,7 +208,6 @@ namespace ponio
             , success( true )
             , is_step( false )
             , number_of_steps( splitting_t::N_steps )
-            , number_of_eval( ::detail::init_fill_array<splitting_t::N_methods, std::size_t>( 0 ) )
             , tolerance( tol )
             , ptr_methods( &methods )
         {
@@ -167,9 +221,16 @@ namespace ponio
          */
         template <std::size_t I>
         auto
-        get()
+        get( std::integral_constant<std::size_t, I> )
         {
             return std::get<I>( *ptr_methods ).info();
+        }
+
+        template <std::size_t... Is>
+        void
+        reset_eval_impl( std::index_sequence<Is...> )
+        {
+            [[maybe_unused]] auto l = { ( details::set_to_zero( std::get<Is>( number_of_eval ) ), 0 )... };
         }
 
         /**
@@ -179,7 +240,18 @@ namespace ponio
         void
         reset_eval()
         {
-            number_of_eval.fill( 0 );
+            reset_eval_impl( std::make_index_sequence<std::tuple_size<tuple_t>{}>{} );
+        }
+
+        /**
+         * @brief increment number of evaluations of operator I
+         *
+         */
+        template <std::size_t I, typename evaluations_t>
+        void
+        increment( evaluations_t const& evals )
+        {
+            details::increment( std::get<I>( number_of_eval ), evals );
         }
     };
 
