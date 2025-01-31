@@ -324,7 +324,7 @@ namespace ponio::runge_kutta::rock
         value_t a_tol; // absolute tolerance
         value_t r_tol; // relative tolerance
 
-        iteration_info<rock2_impl> info;
+        iteration_info<rock2_impl> _info;
 
         eig_computer_t eig_computer;
 
@@ -410,15 +410,15 @@ namespace ponio::runge_kutta::rock
         std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
-            info.reset_eval();
+            _info.reset_eval();
 
             auto [mdeg,
                 deg_index,
                 start_index,
                 n_eval] = degree_computer::compute_n_stages_optimal_degree( rock_order::rock_2(), eig_computer, f, tn, un, dt );
 
-            info.number_of_stages = mdeg + 2;
-            info.number_of_eval   = n_eval + mdeg + 2;
+            _info.number_of_stages = mdeg + 2;
+            _info.number_of_eval   = n_eval + mdeg + 2;
 
             auto& uj   = G[0];
             auto& ujm1 = G[1];
@@ -477,15 +477,15 @@ namespace ponio::runge_kutta::rock
 
                 uj = ujm1 + delta_t_1 * uj + tmp;
 
-                info.error   = error( uj, un, tmp );
-                info.success = info.error < 1.0;
-                info.number_of_eval += 1;
+                _info.error   = error( uj, un, tmp );
+                _info.success = _info.error < 1.0;
+                _info.number_of_eval += 1;
 
-                value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / info.error ) ) );
+                value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / _info.error ) ) );
                 value_t new_dt = 0.8 * fac * dt;
 
                 // accepted step
-                if ( info.success )
+                if ( _info.success )
                 {
                     return { tn + dt, uj, new_dt };
                 }
@@ -498,6 +498,18 @@ namespace ponio::runge_kutta::rock
 
                 return { tn + dt, uj, dt };
             }
+        }
+
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        auto const&
+        info() const
+        {
+            return _info;
         }
     };
 
@@ -552,7 +564,7 @@ namespace ponio::runge_kutta::rock
         value_t a_tol; // absolute tolerance
         value_t r_tol; // relative tolerance
 
-        iteration_info<rock4_impl> info;
+        iteration_info<rock4_impl> _info;
 
         eig_computer_t eig_computer;
 
@@ -634,15 +646,15 @@ namespace ponio::runge_kutta::rock
         std::tuple<value_t, state_t, value_t>
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
         {
-            info.reset_eval();
+            _info.reset_eval();
 
             auto [mdeg,
                 deg_index,
                 start_index,
                 n_eval] = degree_computer::compute_n_stages_optimal_degree( rock_order::rock_4(), eig_computer, f, tn, un, dt, 5 );
 
-            info.number_of_stages = mdeg + 4;
-            info.number_of_eval   = n_eval + mdeg + 4;
+            _info.number_of_stages = mdeg + 4;
+            _info.number_of_eval   = n_eval + mdeg + 4;
 
             auto& uj   = G[0];
             auto& ujm1 = G[1];
@@ -731,17 +743,17 @@ namespace ponio::runge_kutta::rock
 
                 tmp = bh_1 * ujm1 + bh_2 * ujm2 + bh_3 * ujm3 + bh_4 * tmp + bh_5 * f( t_jm2, uj );
 
-                info.error   = error( uj, tmp );
-                info.success = info.error < 1.0;
-                info.number_of_eval += 1; // one of two evaluations already count
+                _info.error   = error( uj, tmp );
+                _info.success = _info.error < 1.0;
+                _info.number_of_eval += 1; // one of two evaluations already count
 
-                value_t fac = std::pow( ( 1. / info.error ), 0.25 );
+                value_t fac = std::pow( ( 1. / _info.error ), 0.25 );
                 fac         = std::min( 5., std::max( 0.1, 0.8 * fac ) );
 
                 value_t new_dt = fac * dt;
 
                 // accepted step
-                if ( info.success )
+                if ( _info.success )
                 {
                     return { tn + dt, uj, new_dt };
                 }
@@ -754,6 +766,18 @@ namespace ponio::runge_kutta::rock
 
                 return { tn + dt, uj, dt };
             }
+        }
+
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        auto const&
+        info() const
+        {
+            return _info;
         }
     };
 

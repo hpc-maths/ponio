@@ -173,7 +173,7 @@ namespace ponio::runge_kutta::pirock
         shampine_trick_caller_t shampine_trick_caller;
         value_t tolerance;
 
-        iteration_info<pirock_impl> info;
+        iteration_info<pirock_impl> _info;
 
         /**
          * @brief Construct a new pirock impl object
@@ -225,7 +225,7 @@ namespace ponio::runge_kutta::pirock
                                || detail::problem_jacobian<decltype( pb.implicit_part ), value_t, state_t>,
                 "This kind of problem is not inversible in ponio" );
 
-            info.reset_eval();
+            _info.reset_eval();
 
             auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( rock::rock_order::rock_2(),
                 eig_computer,
@@ -236,8 +236,8 @@ namespace ponio::runge_kutta::pirock
                 4 );
             std::size_t s                               = mdeg + 2;
 
-            info.number_of_stages  = s + l + 3;
-            info.number_of_eval[0] = n_eval + s + l + 4; // explicit evaluation
+            _info.number_of_stages  = s + l + 3;
+            _info.number_of_eval[0] = n_eval + s + l + 4; // explicit evaluation
 
             value_t const alpha = alpha_beta_computer.alpha( s, l );
             value_t const beta  = alpha_beta_computer.beta( s, l );
@@ -334,7 +334,7 @@ namespace ponio::runge_kutta::pirock
                     u_sm2pl + beta * dt * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
                 ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2, n_eval_sp2 );
 
-                info.number_of_eval[1] += n_eval_sp1 + n_eval_sp2 + 1;
+                _info.number_of_eval[1] += n_eval_sp1 + n_eval_sp2 + 1;
             }
             else
             {
@@ -343,7 +343,7 @@ namespace ponio::runge_kutta::pirock
                 auto identity = ::ponio::linear_algebra::linear_algebra<matrix_t>::identity( un );
                 auto g_sp1    = [&]( state_t const& u ) -> state_t
                 {
-                    info.number_of_eval[1] += 1;
+                    _info.number_of_eval[1] += 1;
                     return u - gamma * dt * pb.implicit_part.f( tn, u ) - u_sm2pl;
                 };
                 auto dg = [&]( state_t const& u ) -> matrix_t
@@ -359,8 +359,8 @@ namespace ponio::runge_kutta::pirock
 
                 auto g_sp2 = [&]( state_t const& u ) -> state_t
                 {
-                    info.number_of_eval[0] += 1;
-                    info.number_of_eval[1] += 2;
+                    _info.number_of_eval[0] += 1;
+                    _info.number_of_eval[1] += 2;
 
                     return u - gamma * dt * pb.implicit_part.f( tn, u )
                          - ( u_sm2pl + beta * dt * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
@@ -373,7 +373,7 @@ namespace ponio::runge_kutta::pirock
                     ponio::default_config::newton_max_iterations );
             }
 
-            info.number_of_eval[1] += 3;
+            _info.number_of_eval[1] += 3;
 
             auto& u_sp3 = U[8];
             u_sp3       = u_sm2pl + ( 1. - gamma ) * dt * pb.implicit_part( tn, u_sp1 );
@@ -405,7 +405,7 @@ namespace ponio::runge_kutta::pirock
                     auto& rhs_R = U[14];
                     auto& err_R = U[15];
 
-                    info.number_of_eval[1] += 2;
+                    _info.number_of_eval[1] += 2;
 
                     rhs_R = dt * ( pb.implicit_part( tn, u_sp1 ) - pb.implicit_part( tn, u_sp2 ) ) / 6.;
 
@@ -459,6 +459,18 @@ namespace ponio::runge_kutta::pirock
             }
 
             return { tn + dt, u_np1, dt };
+        }
+
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        auto const&
+        info() const
+        {
+            return _info;
         }
     };
 
@@ -657,7 +669,7 @@ namespace ponio::runge_kutta::pirock
         shampine_trick_caller_t shampine_trick_caller;
         value_t tolerance;
 
-        iteration_info<pirock_RDA_impl> info;
+        iteration_info<pirock_RDA_impl> _info;
 
         /**
          * @brief Construct a new pirock_RDA_impl object
@@ -729,7 +741,7 @@ namespace ponio::runge_kutta::pirock
                                || detail::problem_jacobian<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t, state_t>,
                 "This kind of problem is not inversible in ponio" );
 
-            info.reset_eval();
+            _info.reset_eval();
 
             auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( rock::rock_order::rock_2(),
                 eig_computer,
@@ -740,8 +752,8 @@ namespace ponio::runge_kutta::pirock
                 4 );
             std::size_t s                               = mdeg + 2;
 
-            info.number_of_stages  = s + l + 5;
-            info.number_of_eval[0] = n_eval + s + l + 4; // explicit evaluation
+            _info.number_of_stages  = s + l + 5;
+            _info.number_of_eval[0] = n_eval + s + l + 4; // explicit evaluation
 
             value_t const alpha = alpha_beta_computer.alpha( s, l );
             value_t const beta  = alpha_beta_computer.beta( s, l );
@@ -854,7 +866,7 @@ namespace ponio::runge_kutta::pirock
 
                 ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2, n_eval_sp2 );
 
-                info.number_of_eval[1] += n_eval_sp1 + n_eval_sp2 + 1;
+                _info.number_of_eval[1] += n_eval_sp1 + n_eval_sp2 + 1;
             }
             else
             {
@@ -863,7 +875,7 @@ namespace ponio::runge_kutta::pirock
                 auto identity = ::ponio::linear_algebra::linear_algebra<matrix_t>::identity( un );
                 auto g_sp1    = [&]( state_t const& u ) -> state_t
                 {
-                    info.number_of_eval[1] += 1;
+                    _info.number_of_eval[1] += 1;
 
                     // u - \gamma \Delta t F_R(u) - u^{(s-2+\ell)}
                     return u - gamma * dt * pb( reaction_op(), tn, u ) - u_sm2pl;
@@ -885,8 +897,8 @@ namespace ponio::runge_kutta::pirock
 
                 auto g_sp2 = [&]( state_t const& u ) -> state_t
                 {
-                    info.number_of_eval[0] += 1;
-                    info.number_of_eval[1] += 2;
+                    _info.number_of_eval[0] += 1;
+                    _info.number_of_eval[1] += 2;
 
                     // u - \gamma \Delta t F_R(u) - (u^{(s-2+\ell)} + \beta \Delta t F_D(u^{(s+1)}) + \Delta t F_A(u^{(s+1)}) +
                     // (1-2\gamma)\Delta t F_R(u^{(s+1)}))
@@ -902,7 +914,7 @@ namespace ponio::runge_kutta::pirock
                     ponio::default_config::newton_max_iterations );
             }
 
-            info.number_of_eval[1] += 3;
+            _info.number_of_eval[1] += 3;
 
             // u^{(s+3)} = u^{(s-2+\ell)} + (1-2\gamma)\Delta t F_A(u^{(s+1)}) + (1-\gamma)\Delta t F_R(u^{(s+1)})
             auto& u_sp3 = U[9];
@@ -977,7 +989,7 @@ namespace ponio::runge_kutta::pirock
                     auto& err_R = U[18];
                     auto& err_A = U[19];
 
-                    info.number_of_eval[1] += 2;
+                    _info.number_of_eval[1] += 2;
 
                     rhs_R = dt * ( pb( reaction_op(), tn, u_sp1 ) - pb( reaction_op(), tn, u_sp2 ) ) / 6.;
 
@@ -1051,6 +1063,18 @@ namespace ponio::runge_kutta::pirock
             }
 
             return { tn + dt, u_np1, dt };
+        }
+
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        auto const&
+        info() const
+        {
+            return _info;
         }
     };
 

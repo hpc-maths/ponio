@@ -42,7 +42,7 @@ namespace ponio::splitting::detail
                 current_dt = tf - current_time;
             }
 
-            info.number_of_eval[I] += std::get<I>( meth ).info().number_of_eval;
+            info.template increment<I>( std::get<I>( meth ).info().number_of_eval );
         }
         return ui;
     }

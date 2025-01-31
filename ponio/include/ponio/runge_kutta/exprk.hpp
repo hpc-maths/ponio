@@ -98,13 +98,13 @@ namespace ponio::runge_kutta::exponential_runge_kutta
 
         using value_t = typename tableau_t::value_t;
 
-        iteration_info<tableau_t> info;
+        iteration_info<tableau_t> _info;
 
         explicit_exp_rk_butcher( double tolerance = ponio::default_config::tol )
             : butcher()
-            , info( tolerance )
+            , _info( tolerance )
         {
-            info.number_of_eval = N_stages;
+            _info.number_of_eval = N_stages;
         }
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, std::size_t i>
@@ -127,6 +127,18 @@ namespace ponio::runge_kutta::exponential_runge_kutta
         stage( Stage<N_stages + 1>, problem_t& pb, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
         {
             return detail::tpl_inner_product_b<N_stages>( butcher.b2, Ki, un, pb.l, dt );
+        }
+
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        auto const&
+        info() const
+        {
+            return _info;
         }
     };
 

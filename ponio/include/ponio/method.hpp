@@ -136,18 +136,18 @@ namespace ponio
         std::tuple<value_t, state_t, value_t>
         _return( value_t tn, state_t const& un, value_t dt )
         {
-            alg.info.error = ::detail::error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
+            alg.info().error = ::detail::error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
 
-            value_t new_dt = 0.9 * std::pow( alg.info.tolerance / alg.info.error, 1. / static_cast<value_t>( Algorithm_t::order ) ) * dt;
-            new_dt         = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
+            value_t new_dt = 0.9 * std::pow( alg.info().tolerance / alg.info().error, 1. / static_cast<value_t>( Algorithm_t::order ) ) * dt;
+            new_dt = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
 
-            if ( alg.info.error > alg.info.tolerance )
+            if ( alg.info().error > alg.info().tolerance )
             {
-                alg.info.success = false;
+                alg.info().success = false;
                 return std::make_tuple( tn, un, new_dt );
             }
 
-            alg.info.success = true;
+            alg.info().success = true;
             return std::make_tuple( tn + dt, kis[Algorithm_t::N_stages], new_dt );
         }
 
@@ -157,7 +157,7 @@ namespace ponio
         auto&
         info()
         {
-            return alg.info;
+            return alg.info();
         }
 
         /**
@@ -166,7 +166,7 @@ namespace ponio
         auto const&
         info() const
         {
-            return alg.info;
+            return alg.info();
         }
 
         /**
@@ -224,7 +224,7 @@ namespace ponio
         auto&
         info()
         {
-            return alg.info;
+            return alg.info();
         }
 
         /**
@@ -233,7 +233,7 @@ namespace ponio
         auto const&
         info() const
         {
-            return alg.info;
+            return alg.info();
         }
 
         /**
@@ -291,7 +291,7 @@ namespace ponio
         auto&
         info()
         {
-            return alg.info;
+            return alg.info();
         }
 
         /**
@@ -300,7 +300,7 @@ namespace ponio
         auto const&
         info() const
         {
-            return alg.info;
+            return alg.info();
         }
 
         /**

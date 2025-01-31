@@ -32,9 +32,9 @@ namespace ponio::runge_kutta::explicit_runge_kutta
 
         explicit_runge_kutta( double tolerance = default_config::tol )
             : butcher()
-            , info( tolerance )
+            , _info( tolerance )
         {
-            info.number_of_eval = N_stages;
+            _info.number_of_eval = N_stages;
         }
 
         template <typename problem_t, typename state_t, typename array_ki_t, std::size_t I>
@@ -59,7 +59,19 @@ namespace ponio::runge_kutta::explicit_runge_kutta
             return ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
         }
 
-        iteration_info<tableau_t> info;
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        auto const&
+        info() const
+        {
+            return _info;
+        }
+
+        iteration_info<tableau_t> _info;
     };
 
 } // namespace ponio::runge_kutta::explicit_runge_kutta

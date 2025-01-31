@@ -10,6 +10,7 @@
 #include <string_view>
 
 #include "../detail.hpp"
+#include "../iteration_info.hpp"
 #include "../stage.hpp"
 
 namespace ponio::runge_kutta::chebyshev
@@ -116,7 +117,7 @@ namespace ponio::runge_kutta::chebyshev
      *  @tparam N_stages_ number of stages
      *  @tparam value_t type of coefficients
      */
-    template <std::size_t N_stages_, typename value_t = double>
+    template <std::size_t N_stages_, typename _value_t = double>
     struct explicit_rkc2
     {
         static_assert( N_stages_ > 1, "Number of stages should be at least 2 in eRKC2" );
@@ -124,9 +125,11 @@ namespace ponio::runge_kutta::chebyshev
         static constexpr std::size_t order    = 2;
         static constexpr std::string_view id  = "RKC2";
         static constexpr bool is_embedded     = false;
+        using value_t                         = _value_t;
 
         value_t w0;
         value_t w1;
+        iteration_info<explicit_rkc2> _info;
 
         /**
          * @brief computes \f$b_j = \f$ coefficients with following formula: \f$b_0=b_2\f$, \f$b_1=\frac{1}{\omega_0}\f$, \f$b_j =
@@ -157,7 +160,9 @@ namespace ponio::runge_kutta::chebyshev
         explicit_rkc2( value_t eps = 2. / 13. )
             : w0( 1. + eps / ( N_stages * N_stages ) )
             , w1( dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) )
+            , _info()
         {
+            _info.number_of_eval = N_stages;
         }
 
         /**
@@ -258,6 +263,18 @@ namespace ponio::runge_kutta::chebyshev
             value_t g2t = -( 1. - b<1>( w0 ) * T<1>( w0 ) ) * m2t;
 
             return ( 1. - m2 - n2 ) * yn + m2 * Yi[1] + n2 * yn + m2t * dt * f( tn + c1 * dt, Yi[1] ) + g2t * dt * Yi[0];
+        }
+
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        auto const&
+        info() const
+        {
+            return _info;
         }
     };
 
