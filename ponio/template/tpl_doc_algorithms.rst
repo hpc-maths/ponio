@@ -320,7 +320,7 @@ with coefficients given by
 
 where :math:`s` is the number of stages of the method.
 
-.. doxygenclass:: ponio::runge_kutta::legendre::explicit_rkc1
+.. doxygenclass:: ponio::runge_kutta::legendre::explicit_rkl1
    :project: ponio
    :members:
 
@@ -365,7 +365,7 @@ and
 
 where :math:`s` is the number of stages of the method
 
-.. doxygenclass:: ponio::runge_kutta::legendre::explicit_rkc2
+.. doxygenclass:: ponio::runge_kutta::legendre::explicit_rkl2
    :project: ponio
    :members:
 
