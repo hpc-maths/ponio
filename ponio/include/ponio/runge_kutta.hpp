@@ -9,6 +9,7 @@
 #include "runge_kutta/exprk.hpp"
 #include "runge_kutta/lrk.hpp"
 #include "runge_kutta/rkc.hpp"
+#include "runge_kutta/rkl.hpp"
 
 namespace ponio::runge_kutta
 {
@@ -21,6 +22,9 @@ namespace ponio::runge_kutta
     // using lawson_runge_kutta::make_lawson;
 
     using chebyshev::explicit_rkc2; // NOLINT(misc-unused-using-decls): using to improve interface
+
+    using legendre::explicit_rkl1; // NOLINT(misc-unused-using-decls): using to improve interface
+    using legendre::explicit_rkl2; // NOLINT(misc-unused-using-decls): using to improve interface
 
 } // namespace ponio::runge_kutta
 

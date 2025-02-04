@@ -179,7 +179,7 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
 Explicit stabilized Runge-Kutta methods
 ---------------------------------------
 
-Some problems, like heat equation, require methods stabilized on the negative real axis. The ponio library provides a Runge-Kutta Chebyshev method of order 2, ROCK2 method (of order 2) and ROCK4 method (of order 4).
+Some problems, like heat equation, require methods stabilized on the negative real axis. The ponio library provides a Runge-Kutta Chebyshev method of order 2, ROCK2 method (of order 2), ROCK4 method (of order 4) and a Runge-Kutta Legendre method of order 1 or 2.
 
 Runge-Kutta Chebyshev method
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -294,6 +294,80 @@ where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from
   :project: ponio
 
 
+Runge-Kutta Legendre method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The algorithm of RKL1 is the following:
+
+.. math::
+
+   \begin{aligned}
+      y^{(0)} &= y^n \\
+      y^{(1)} &= y^n + \tilde{\mu}_1\Delta t f(t^n, y^n) \\
+      y^{(j)} &= \mu_jy^{(j-1)} + \nu_j y^{(j-2)} + \tilde{\mu}_j\Delta t f(t^n, y^{(j-1)}), \quad j=2,\dots, s
+      y^{(n+1)} &= y^{(s)}
+   \end{aligned}
+
+with coefficients given by
+
+.. math::
+
+  \mu_j = \frac{2j-1}{j}, \qquad \nu_j = \frac{1-j}{j}
+
+.. math::
+
+  \tilde{\mu}_j = \frac{2j-1}{j}\frac{2}{s^2 + s}
+
+where :math:`s` is the number of stages of the method.
+
+.. doxygenclass:: ponio::runge_kutta::legendre::explicit_rkc1
+   :project: ponio
+   :members:
+
+
+The algorithm of RKL2 is the following:
+
+.. math::
+
+   \begin{aligned}
+      y^{(0)} &= y^n \\
+      y^{(1)} &= y^{(0)} + \tilde{\mu}_1\Delta t f(t^n, y^{(0)}) \\
+      y^{(j)} &= \mu_jy^{(j-1)} + \nu_j y^{(j-2)} + (1-\mu_j-\nu_j)y^{(0)} + \tilde{\mu}_j\Delta t f(t^n, y^{(j-1)}) + \tilde{\gamma}_j\Delta tf(t^n, y^{(0)}), \quad j=2,\dots, s
+      y^{(n+1)} &= y^{(s)}
+   \end{aligned}
+
+with coefficients given by
+
+.. math::
+
+  \mu_j = \frac{2j-1}{j}\frac{b_j}{b_{j-1}}, \qquad \nu_j = -\frac{j-1}{j}\frac{b_j}{b_{j-2}}
+
+.. math::
+
+  \tilde{\mu}_j = \mu_j w_1,\ 1<j \qquad  \tilde{\mu}_1 = b_1 w_1
+
+.. math::
+
+  \tilde{\gamma}_j = -a_{j-1}\tilde{\mu}_j
+
+where
+
+.. math::
+
+  b_0 = b_1 = b_2 = \frac{1}{3},\qquad b_j = \frac{j^2 + j - 2}{2j(j+1)},\ 2\leq j
+
+and
+
+.. math::
+
+  a_j = 1 - b_j, \qquad w_1 = \frac{4}{s^2 + s - 2}
+
+
+where :math:`s` is the number of stages of the method
+
+.. doxygenclass:: ponio::runge_kutta::legendre::explicit_rkc2
+   :project: ponio
+   :members:
 
 IMEX stabilized methods
 -----------------------
