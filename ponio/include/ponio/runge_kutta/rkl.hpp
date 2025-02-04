@@ -16,7 +16,7 @@
 namespace ponio::runge_kutta::legendre
 {
 
-    /**
+    /** @class explicit_rkl1
      * @brief define RKL1 (Runge-Kutta-Legendre method of ordre 1) with user defined number of stages
      *
      * @tparam N_stages_ number of stages
@@ -211,7 +211,7 @@ namespace ponio::runge_kutta::legendre
         };
     } // namespace details
 
-    /**
+    /** @class explicit_rkl2
      * @brief define RKL2 (Runge-Kutta-Legendre method of ordre 2) with user defined number of stages
      *
      * @tparam N_stages_ number of stages
