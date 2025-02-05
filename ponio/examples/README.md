@@ -22,6 +22,7 @@ The following table gives an overview over all examples.
 | [Nagumo equation](#nagumo-equation)                                                                 | Example of a traveling wave                                        | [nagumo.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/nagumo.cpp)                                         |
 | [Pendulum equation](#pendulum-equation)                                                             | The classical pendulum equation                                    | [pendulum.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/pendulum.cpp)                                     |
 | [Belousov Zhabotinsky](#belousov-zhabotinsky)                                                       | Solves Belousov-Zhabotinsky equations with PIROCK method           | [belousov_zhabotinsky_pirock.cpp](belousov_zhabotinsky_pirock.cpp)                                                           |
+| [Belousov Zhabotinsky in 2D](#belousov-zhabotinsky-in-2D)                                           | Solves Belousov-Zhabotinsky equations with PIROCK method in 2D     | [bz_2d_pirock.cpp](bz_2d_pirock.cpp)                                                                                         |
 
 To lunch examples, in the main directory of ponio run:
 
@@ -586,4 +587,42 @@ All example in [`belousov_zhabotinsky_pirock.cpp`](belousov_zhabotinsky_pirock.c
 
 ```
   make belousov_zhabotinsky_pirock_visu
+```
+
+# Belousov Zhabotinsky in 2D
+
+> This example needs to activate `-DBUILD_SAMURAI_DEMOS=ON`
+
+The Belousov Zhabotinsky reaction is a chemical periodic reaction, in this example we look at a 1D reduction model given by
+
+$$
+  \begin{cases}
+    \partial_t a &= D_a \Delta a + \frac{1}{\mu}(-qa -ab + fc) \\
+    \partial_t b &= D_b \Delta b + \frac{1}{\epsilon}(qa - ab + b(1-b)) \\
+    \partial_t c &= D_c \Delta c + b -c \\
+  \end{cases}
+$$
+
+with parameter
+
+$$
+  \epsilon = 10^{-2},\quad \mu = 10^{-5},\quad f=1.6,\quad q = 2\cdot 10^{-3}
+$$
+
+and diffusion coefficients
+
+$$
+  D_a = 2.5\cdot 10^{-3},\quad D_b = 2.5\cdot 10^{-3},\quad D_c = 1.5\cdot 10^{-3}
+$$
+
+In this example we coupling the mesh refinement library [samurai](https://github.com/hpc-maths/samurai) with ponio, and the system is solved by PIROCK method.
+
+| Solution $b$ and $c$                         | Levels of adapted mesh on solution                             |
+|----------------------------------------------|----------------------------------------------------------------|
+| ![Solution b and c](img/bz_2d_pirock/01.png) | ![Levels of adapted mesh on solution](img/bz_2d_pirock/02.png) |
+
+All example in [`bz_2d_pirock.cpp`](bz_2d_pirock.cpp), and run
+
+```
+  make bz_2d_pirock_visu
 ```

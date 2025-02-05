@@ -79,7 +79,7 @@ main( int argc, char** argv )
 
     // multiresolution parameters
     std::size_t min_level = 2;
-    std::size_t max_level = 8;
+    std::size_t max_level = 6;
     double mr_epsilon     = 1e-3; // Threshold used by multiresolution
     double mr_regularity  = 1.;   // Regularity guess for multiresolution
 
@@ -255,7 +255,7 @@ main( int argc, char** argv )
         }
 
         ++it_sol;
-        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << ++n_save << "\n";
+        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << ++n_save << "\r";
 
         samurai::for_each_interval( mesh,
             [&]( auto level, auto& i, auto& idx )
@@ -266,7 +266,7 @@ main( int argc, char** argv )
         mr_adaptation( mr_epsilon, mr_regularity, it_sol->state );
         samurai::update_ghost_mr( it_sol->state );
 
-        save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save ) );
+        // save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save ) );
     }
     std::cout << std::endl;
     save( path, filename, it_sol->state, fmt::format( "_final", n_save++ ) );
