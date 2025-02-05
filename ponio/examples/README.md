@@ -551,7 +551,7 @@ All example in [pendulum.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio
   make pendulum_visu
 ```
 
-# Belousov Zhabotinsky
+## Belousov Zhabotinsky
 
 > This example needs to activate `-DBUILD_SAMURAI_DEMOS=ON`
 
@@ -589,7 +589,7 @@ All example in [`belousov_zhabotinsky_pirock.cpp`](belousov_zhabotinsky_pirock.c
   make belousov_zhabotinsky_pirock_visu
 ```
 
-# Belousov Zhabotinsky in 2D
+## Belousov Zhabotinsky in 2D
 
 > This example needs to activate `-DBUILD_SAMURAI_DEMOS=ON`
 
