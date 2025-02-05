@@ -2,26 +2,27 @@
 
 The following table gives an overview over all examples.
 
-| Section                                                                                             | Brief Description                                                  | File                                                                                                                         |
-|-----------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
-| [Arenstorf orbit](#arenstorf-orbit)                                                                 | This example shows how to use multiple adaptive time step methods  | [arenstorf.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/arenstorf.cpp)                                   |
-| [Brownian movement](#brownian-movement)                                                             | This example shows how to use random in an ODE                     | [brownian.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/brownian.cpp)                                     |
-| [Brusselator equations](#brusselator-equations)                                                     | The chemistry example of Brusselator (2 equations model)           | [brusselator.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/brusselator.cpp)                               |
-| [Brusselator equations with DIRK method](#brusselator-equations-with-dirk-method)                   | This example shows hos to use DIRK methods                         | [brusselator_dirk.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/brusselator_dirk.cpp)                     |
-| [Curtiss-Hirschfelder equation](#curtiss-hirschfelder-equation)                                     | This example shows how to use range and iterators on solution      | [curtiss_hirschfelder.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/curtiss_hirschfelder.cpp)             |
-| [Curtiss-Hirschfelder equation with expRK method](#curtiss-hirschfelder-equation-with-exprk-method) | This example shows how to use exponential Runge-Kutta methods      | [curtiss_hirschfelder_exprk.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/curtiss_hirschfelder_exprk.cpp) |
-| [Exponential function](#exponential-function)                                                       | This example is the simplest example                               | [exp.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/exp.cpp)                                               |
-| [Exponential function with exact solver](#exponential-function-with-exact-solver)                   | An example of splitting and exact solver                           | [exp_splitting.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/exp_splitting.cpp)                           |
-| [Heat model](#heat-model)                                                                           | The classical heat equation solving with RKC2 method               | [heat.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat.cpp)                                             |
-| [ROCK method](#rock-method)                                                                         | This example shows how to use ROCK2 and ROCK4 methods              | [heat_rock.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat_rock.cpp)                                   |
-| [Samurai is hot](#samurai-is-hot)                                                                   | This example shows how to coupling ponio and samurai               | [heat_samurai.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat_samurai.cpp)                             |
-| [Lorenz equations](#lorenz-equations)                                                               | The chaotic system example of Lorenz equations                     | [lorenz.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz.cpp)                                         |
-| [Lorenz equations with multiple methods](#lorenz-equations-with-multiple-methods)                   | This example shows how to use splitting methods and Lawson methods | [lorenz_tuto.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz_tuto.cpp)                               |
-| [Lorenz equations with all methods](#lorenz-equations-with-all-methods)                             | This example shows how to use all methods (except expRK)           | [lorenz_all.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz_all.cpp)                                 |
-| [Lotka-Volterra model](#lotka-volterra-model)                                                       | The classical predator–prey model of Lotka-Volterra                | [lotka_volterra.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lotka_volterra.cpp)                         |
-| [Nagumo equation](#nagumo-equation)                                                                 | Example of a traveling wave                                        | [nagumo.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/nagumo.cpp)                                         |
-| [Pendulum equation](#pendulum-equation)                                                             | The classical pendulum equation                                    | [pendulum.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/pendulum.cpp)                                     |
-| [Belousov Zhabotinsky](#belousov-zhabotinsky)                                                       | Solves Belousov-Zhabotinsky equations with PIROCK method           | [belousov_zhabotinsky_pirock.cpp](belousov_zhabotinsky_pirock.cpp)                                                           |
+| Section                                                                                             | Brief Description                                                  | File                                                                                                                           |
+|-----------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| [Arenstorf orbit](#arenstorf-orbit)                                                                 | This example shows how to use multiple adaptive time step methods  | [arenstorf.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/arenstorf.cpp)                                     |
+| [Brownian movement](#brownian-movement)                                                             | This example shows how to use random in an ODE                     | [brownian.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/brownian.cpp)                                       |
+| [Brusselator equations](#brusselator-equations)                                                     | The chemistry example of Brusselator (2 equations model)           | [brusselator.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/brusselator.cpp)                                 |
+| [Brusselator equations with DIRK method](#brusselator-equations-with-dirk-method)                   | This example shows hos to use DIRK methods                         | [brusselator_dirk.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/brusselator_dirk.cpp)                       |
+| [Curtiss-Hirschfelder equation](#curtiss-hirschfelder-equation)                                     | This example shows how to use range and iterators on solution      | [curtiss_hirschfelder.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/curtiss_hirschfelder.cpp)               |
+| [Curtiss-Hirschfelder equation with expRK method](#curtiss-hirschfelder-equation-with-exprk-method) | This example shows how to use exponential Runge-Kutta methods      | [curtiss_hirschfelder_exprk.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/curtiss_hirschfelder_exprk.cpp)   |
+| [Exponential function](#exponential-function)                                                       | This example is the simplest example                               | [exp.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/exp.cpp)                                                 |
+| [Exponential function with exact solver](#exponential-function-with-exact-solver)                   | An example of splitting and exact solver                           | [exp_splitting.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/exp_splitting.cpp)                             |
+| [Heat model](#heat-model)                                                                           | The classical heat equation solving with RKC2 method               | [heat.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat.cpp)                                               |
+| [ROCK method](#rock-method)                                                                         | This example shows how to use ROCK2 and ROCK4 methods              | [heat_rock.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat_rock.cpp)                                     |
+| [Samurai is hot](#samurai-is-hot)                                                                   | This example shows how to coupling ponio and samurai               | [heat_samurai.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat_samurai.cpp)                               |
+| [Lorenz equations](#lorenz-equations)                                                               | The chaotic system example of Lorenz equations                     | [lorenz.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz.cpp)                                           |
+| [Lorenz equations with multiple methods](#lorenz-equations-with-multiple-methods)                   | This example shows how to use splitting methods and Lawson methods | [lorenz_tuto.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz_tuto.cpp)                                 |
+| [Lorenz equations with all methods](#lorenz-equations-with-all-methods)                             | This example shows how to use all methods (except expRK)           | [lorenz_all.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz_all.cpp)                                   |
+| [Lotka-Volterra model](#lotka-volterra-model)                                                       | The classical predator–prey model of Lotka-Volterra                | [lotka_volterra.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lotka_volterra.cpp)                           |
+| [Nagumo equation](#nagumo-equation)                                                                 | Example of a traveling wave                                        | [nagumo.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/nagumo.cpp)                                           |
+| [Pendulum equation](#pendulum-equation)                                                             | The classical pendulum equation                                    | [pendulum.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/pendulum.cpp)                                       |
+| [Belousov Zhabotinsky](#belousov-zhabotinsky)                                                       | Solves Belousov-Zhabotinsky equations with PIROCK method           | [belousov_zhabotinsky_pirock.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/belousov_zhabotinsky_pirock.cpp) |
+| [Belousov Zhabotinsky in 2D](#belousov-zhabotinsky-in-2D)                                           | Solves Belousov-Zhabotinsky equations with PIROCK method in 2D     | [bz_2d_pirock.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/bz_2d_pirock.cpp)                               |
 
 To lunch examples, in the main directory of ponio run:
 
@@ -550,7 +551,7 @@ All example in [pendulum.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio
   make pendulum_visu
 ```
 
-# Belousov Zhabotinsky
+## Belousov Zhabotinsky
 
 > This example needs to activate `-DBUILD_SAMURAI_DEMOS=ON`
 
@@ -582,8 +583,46 @@ In this example we coupling the mesh refinement library [samurai](https://github
 |------------------------------------------------------------------------------------------------|
 | ![Belousov Zhabotinsky system solved by PIROCK method](img/belousov_zhabotinsky_pirock/01.png) |
 
-All example in [`belousov_zhabotinsky_pirock.cpp`](belousov_zhabotinsky_pirock.cpp), and run
+All example in [belousov_zhabotinsky_pirock.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/belousov_zhabotinsky_pirock.cpp), and run
 
 ```
   make belousov_zhabotinsky_pirock_visu
+```
+
+## Belousov Zhabotinsky in 2D
+
+> This example needs to activate `-DBUILD_SAMURAI_DEMOS=ON`
+
+The Belousov Zhabotinsky reaction is a chemical periodic reaction, in this example we look at a 1D reduction model given by
+
+$$
+  \begin{cases}
+    \partial_t a &= D_a \Delta a + \frac{1}{\mu}(-qa -ab + fc) \\
+    \partial_t b &= D_b \Delta b + \frac{1}{\epsilon}(qa - ab + b(1-b)) \\
+    \partial_t c &= D_c \Delta c + b -c \\
+  \end{cases}
+$$
+
+with parameter
+
+$$
+  \epsilon = 10^{-2},\quad \mu = 10^{-5},\quad f=1.6,\quad q = 2\cdot 10^{-3}
+$$
+
+and diffusion coefficients
+
+$$
+  D_a = 2.5\cdot 10^{-3},\quad D_b = 2.5\cdot 10^{-3},\quad D_c = 1.5\cdot 10^{-3}
+$$
+
+In this example we coupling the mesh refinement library [samurai](https://github.com/hpc-maths/samurai) with ponio, and the system is solved by PIROCK method.
+
+| Solution $b$ and $c$                         | Levels of adapted mesh on solution                             |
+|----------------------------------------------|----------------------------------------------------------------|
+| ![Solution b and c](img/bz_2d_pirock/01.png) | ![Levels of adapted mesh on solution](img/bz_2d_pirock/02.png) |
+
+All example in [bz_2d_pirock.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/bz_2d_pirock.cpp), and run
+
+```
+  make bz_2d_pirock_visu
 ```

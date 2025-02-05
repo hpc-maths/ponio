@@ -407,7 +407,7 @@ namespace ponio::runge_kutta::pirock
 
                     _info.number_of_eval[1] += 2;
 
-                    rhs_R = dt * ( pb.implicit_part( tn, u_sp1 ) - pb.implicit_part( tn, u_sp2 ) ) / 6.;
+                    rhs_R = static_cast<state_t>( dt * ( pb.implicit_part( tn, u_sp1 ) - pb.implicit_part( tn, u_sp2 ) ) / 6. );
 
                     // $err_R = J_R^{-1} \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
                     // to compute it, get $rhs_R = \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
@@ -442,7 +442,7 @@ namespace ponio::runge_kutta::pirock
                     }
 
                     u_np1 = us_s - err_D + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
-                          + 1.0 / ( 2. - 4. * gamma ) * shampine_element;
+                          + dt / ( 2. - 4. * gamma ) * shampine_element;
                     return { tn + dt, u_np1, new_dt };
                 }
 

@@ -101,6 +101,15 @@ TEST_CASE( "order::chebychev_runge_kutta" )
     test_order<class_method::explicit_method>::on<decltype( rkc_methods )>();
 }
 
+TEST_CASE( "order::legendre_runge_kutta" )
+{
+    auto rkl_methods = std::make_tuple( ponio::runge_kutta::legendre::explicit_rkl2<10>(),
+        ponio::runge_kutta::legendre::explicit_rkl2<5>(),
+        ponio::runge_kutta::legendre::explicit_rkl1<10>() );
+
+    test_order<class_method::explicit_method>::on<decltype( rkl_methods )>();
+}
+
 TEST_CASE( "order::pirock" )
 {
     auto pirock_methods = std::make_tuple( ponio::runge_kutta::pirock::pirock(),
