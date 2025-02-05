@@ -21,6 +21,8 @@ namespace ponio::runge_kutta::legendre
      *
      * @tparam N_stages_ number of stages
      * @tparam _value_t type of coefficients
+     *
+     * @warning the method is only presented with an autonomous problem, ie \f$\dot{y} = f(y)\f$
      */
     template <std::size_t N_stages_, typename _value_t = double>
     struct explicit_rkl1
@@ -278,7 +280,7 @@ namespace ponio::runge_kutta::legendre
          *
          * @tparam j       index \f$j\f$
          *
-         * @details \f\tilde{$mu}_j = \mu_j w_1\f$ for \f$1<j\f$, \f$\tilde{\mu}_1 - b_1w_1\f$
+         * @details \f$\tilde{\mu}_j = \mu_j w_1\f$ for \f$1<j\f$, \f$\tilde{\mu}_1 - b_1w_1\f$
          */
         template <std::size_t j>
         static constexpr value_t
@@ -315,7 +317,6 @@ namespace ponio::runge_kutta::legendre
 
         /**
          * @brief compute stage \f$j\f$ of RKL2 method
-         *
          *
          * @tparam problem_t  type of operator \f$f\f$
          * @tparam state_t    type of current state
