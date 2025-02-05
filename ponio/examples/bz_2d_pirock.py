@@ -71,8 +71,8 @@ ax.tricontour(data.x(), data.y(), data.z(
 ax.tricontourf(data.x(), data.y(), data.z(
     "u_2"), levels=200, cmap="RdBu_r")
 
-ax.plot(np.inf, np.inf, "-", linewidth=0.5, color='k', label="$b$")
-ax.plot(np.inf, np.inf, "s", color='red', alpha=0.75, label="$c$")
+ax.plot(np.inf, np.inf, "s", color='red', alpha=0.75, label="$b$")
+ax.plot(np.inf, np.inf, "-", linewidth=0.5, color='k', label="$c$")
 ax.legend()
 ax.set_xlabel("$x$")
 ax.set_ylabel("$y$")
