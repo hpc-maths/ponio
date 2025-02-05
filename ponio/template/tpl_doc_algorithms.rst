@@ -74,7 +74,7 @@ When the matrix :math:`A` is lower triangular with a diagonal, the Runge-Kutta m
 Lawson methods
 --------------
 
-Lawson methods was initialy propose into :cite:`Lawson:1967`. Lawson methods are build to solve a problem with a linear and nonlinear part, to solve exactly the problem when the nonlinear part goes to zero. This class of problem can be write as
+Lawson methods was initialy propose into :cite:`lawson:1967`. Lawson methods are build to solve a problem with a linear and nonlinear part, to solve exactly the problem when the nonlinear part goes to zero. This class of problem can be write as
 
 .. math::
 
@@ -297,6 +297,8 @@ where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from
 Runge-Kutta Legendre method
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+An other way to get a stabilized Runge-Kutta method is to use Legendre polynomials, we follow presentation in :cite:`meyer:2014`.
+
 The algorithm of RKL1 is the following:
 
 .. math::
@@ -304,7 +306,7 @@ The algorithm of RKL1 is the following:
    \begin{aligned}
       y^{(0)} &= y^n \\
       y^{(1)} &= y^n + \tilde{\mu}_1\Delta t f(t^n, y^n) \\
-      y^{(j)} &= \mu_jy^{(j-1)} + \nu_j y^{(j-2)} + \tilde{\mu}_j\Delta t f(t^n, y^{(j-1)}), \quad j=2,\dots, s
+      y^{(j)} &= \mu_jy^{(j-1)} + \nu_j y^{(j-2)} + \tilde{\mu}_j\Delta t f(t^n, y^{(j-1)}), \quad j=2,\dots, s \\
       y^{(n+1)} &= y^{(s)}
    \end{aligned}
 
@@ -332,7 +334,7 @@ The algorithm of RKL2 is the following:
    \begin{aligned}
       y^{(0)} &= y^n \\
       y^{(1)} &= y^{(0)} + \tilde{\mu}_1\Delta t f(t^n, y^{(0)}) \\
-      y^{(j)} &= \mu_jy^{(j-1)} + \nu_j y^{(j-2)} + (1-\mu_j-\nu_j)y^{(0)} + \tilde{\mu}_j\Delta t f(t^n, y^{(j-1)}) + \tilde{\gamma}_j\Delta tf(t^n, y^{(0)}), \quad j=2,\dots, s
+      y^{(j)} &= \mu_jy^{(j-1)} + \nu_j y^{(j-2)} + (1-\mu_j-\nu_j)y^{(0)} + \tilde{\mu}_j\Delta t f(t^n, y^{(j-1)}) + \tilde{\gamma}_j\Delta tf(t^n, y^{(0)}), \quad j=2,\dots, s \\
       y^{(n+1)} &= y^{(s)}
    \end{aligned}
 
