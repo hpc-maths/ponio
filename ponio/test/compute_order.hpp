@@ -10,7 +10,7 @@
 #include <valarray>
 #include <vector>
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 
@@ -108,7 +108,7 @@ namespace explicit_method
         std::ofstream f( "debug_info/" + std::string( Algorithm_t::id ) + "/errors.dat"s );
 #endif
 
-        for ( auto n_iter : { 50, 25, 20, 15, 10 } )
+        for ( auto n_iter : { 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30 } )
         {
             T dt          = Tf / n_iter;
             state_t u_sol = solve_exp( algo, dt, Tf );
@@ -191,7 +191,7 @@ namespace explicit_method
         {
             return Algorithm_t::order;
         }
-        else if constexpr ( Algorithm_t::order >= 5 || ponio::splitting::is_splitting_method<Algorithm_t> )
+        else if constexpr ( Algorithm_t::order >= 8 || ponio::splitting::is_splitting_method<Algorithm_t> )
         {
             return long_time_check_order( algo );
         }

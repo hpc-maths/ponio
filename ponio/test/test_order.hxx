@@ -32,7 +32,10 @@ struct test_order
         if constexpr ( type == class_method::explicit_method )
         {
             INFO( "test order of ", rk_t::id );
-            WARN( explicit_method::check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            auto computed_order = explicit_method::check_order( rk_t() );
+
+            CHECK( computed_order >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            WARN( computed_order == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
         }
         else if constexpr ( type == class_method::diagonal_implicit_method )
         {
