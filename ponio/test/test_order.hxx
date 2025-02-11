@@ -19,7 +19,8 @@ enum struct class_method
     diagonal_implicit_method,
     exponential_method,
     additive_method,
-    RDA_method
+    RDA_method,
+    splitting_method
 };
 
 template <class_method type>
@@ -40,7 +41,7 @@ struct test_order
         else if constexpr ( type == class_method::diagonal_implicit_method )
         {
             INFO( "not implemented test for DIRK method" );
-            WARN( false );
+            WARN( diagonal_implicit_method::check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
         }
         else if constexpr ( type == class_method::exponential_method )
         {
@@ -67,6 +68,11 @@ struct test_order
             WARN( RDA_method::check_order( rk_t(), 0.5 ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
             WARN( RDA_method::check_order( rk_t(), 0.25 ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
             WARN( RDA_method::check_order( rk_t(), 0. ) >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+        }
+        else if constexpr ( type == class_method::splitting_method )
+        {
+            INFO( "test order of ", rk_t::id );
+            WARN( splitting_method::check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.125 ) );
         }
         else
         {
@@ -129,6 +135,19 @@ TEST_CASE( "order::pirock_RDA" )
         ponio::runge_kutta::pirock::pirock_RDA_b0() );
 
     test_order<class_method::RDA_method>::on<decltype( pirock_methods )>();
+}
+
+TEST_CASE( "order::splitting" )
+{
+    auto lie_splitting    = ponio::splitting::make_lie_tuple( std::make_pair( ponio::runge_kutta::rk_33(), .1 ),
+        std::make_pair( ponio::runge_kutta::rk_33(), .1 ),
+        std::make_pair( ponio::runge_kutta::rk_33(), .1 ) );
+    auto strang_splitting = ponio::splitting::make_strang_tuple( std::make_pair( ponio::runge_kutta::rk_33(), .1 ),
+        std::make_pair( ponio::runge_kutta::rk_44(), .1 ),
+        std::make_pair( ponio::runge_kutta::rk_44(), .1 ) );
+
+    WARN( splitting_method::check_order( lie_splitting ) == doctest::Approx( lie_splitting.order ).epsilon( 0.125 ) );
+    WARN( splitting_method::check_order( strang_splitting ) == doctest::Approx( strang_splitting.order ).epsilon( 0.125 ) );
 }
 
 // TEST_CASE( "order::lawson_runge_kutta" )
