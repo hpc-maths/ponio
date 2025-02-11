@@ -191,7 +191,7 @@ namespace explicit_method
         {
             return Algorithm_t::order;
         }
-        else if constexpr ( Algorithm_t::order >= 8 || ponio::splitting::is_splitting_method<Algorithm_t> )
+        else if constexpr ( Algorithm_t::order >= 5 || ponio::splitting::is_splitting_method<Algorithm_t> )
         {
             return long_time_check_order( algo );
         }
