@@ -77,7 +77,7 @@ class rk_butcher:
         if self._order is None:
             self._order = 0
             z = sp.symbols("z")
-            r = 0.25
+            r = 0.1
             Z = r*np.exp(1j*np.linspace(0., 2.*np.pi))
             tmp = sp.lambdify(
                 z, sp.Abs(self.order_star_function())-1, 'numpy')(Z)

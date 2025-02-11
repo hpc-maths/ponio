@@ -10,7 +10,7 @@
 #include <valarray>
 #include <vector>
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 
@@ -108,7 +108,7 @@ namespace explicit_method
         std::ofstream f( "debug_info/" + std::string( Algorithm_t::id ) + "/errors.dat"s );
 #endif
 
-        for ( auto n_iter : { 50, 25, 20, 15, 10 } )
+        for ( auto n_iter : { 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30 } )
         {
             T dt          = Tf / n_iter;
             state_t u_sol = solve_exp( algo, dt, Tf );
@@ -141,20 +141,10 @@ namespace explicit_method
         T gamma = 1.;
         T delta = 1.;
 
-        // make a problem that can be use also for splitting (in 3 parts) methods
-        auto pb = ponio::make_problem(
-            [=]( T, state_t&& u ) -> state_t
-            {
-                return { alpha * u[0] - beta * u[0] * u[1], 0. };
-            },
-            [=]( T, state_t&& u ) -> state_t
-            {
-                return { 0., delta * u[0] * u[1] };
-            },
-            [=]( T, state_t&& u ) -> state_t
-            {
-                return { 0., -gamma * u[1] };
-            } );
+        auto pb = [=]( T, auto&& u ) -> state_t
+        {
+            return { alpha * u[0] - beta * u[0] * u[1], delta * u[0] * u[1] - gamma * u[1] };
+        };
 
         // invariant calculator
         auto V = [=]( state_t const& u ) -> T
@@ -338,3 +328,129 @@ namespace RDA_method
     }
 
 } // namespace RDA_method
+
+namespace splitting_method
+{
+
+    template <typename Algorithm_t, typename T = double>
+    auto
+    long_time_check_order( Algorithm_t& algo )
+    {
+        using state_t = std::valarray<T>;
+
+        T alpha = 2. / 3.;
+        T beta  = 4. / 3.;
+        T gamma = 1.;
+        T delta = 1.;
+
+        auto pb = ponio::make_problem(
+            [=]( T, auto&& u ) -> state_t
+            {
+                return { alpha * u[0] - beta * u[0] * u[1], 0. };
+            },
+            [=]( T, auto&& u ) -> state_t
+            {
+                return { 0., delta * u[0] * u[1] };
+            },
+            [=]( T, auto&& u ) -> state_t
+            {
+                return { 0., -gamma * u[1] };
+            } );
+
+        // invariant calculator
+        auto V = [=]( state_t const& u ) -> T
+        {
+            return delta * u[0] - gamma * std::log( u[0] ) + beta * u[1] - alpha * std::log( u[1] );
+        };
+
+        T x0          = 1.9;
+        state_t u_ini = { x0, x0 };
+        T V_ini       = V( u_ini );
+
+        ponio::time_span<T> t_span = { 0., 1000. };
+        std::vector<T> dts         = { 0.25, 0.125, 0.1, 0.075, 0.05 }; // find a way to adapt this range to the method
+        std::vector<T> relative_errors;
+        std::vector<T> log_dts;
+
+        for ( auto dt : dts )
+        {
+            state_t u_end = ::ponio::solve( pb, algo, u_ini, t_span, dt, []( T, state_t const&, T ) {} );
+            relative_errors.push_back( std::log10( relative_error( V_ini, V( u_end ) ) ) );
+            log_dts.push_back( std::log10( dt ) );
+        }
+
+        auto [a, b] = mayor_method( log_dts, relative_errors );
+
+        return a;
+    }
+
+    template <typename Algorithm_t, typename T = double>
+    T
+    check_order( Algorithm_t algo = Algorithm_t() )
+    {
+        return long_time_check_order( algo );
+    }
+
+} // splitting_method
+
+namespace diagonal_implicit_method
+{
+
+    template <typename Algorithm_t, typename T = double>
+    auto
+    solve_exp( Algorithm_t& algo, T dt, T Tf )
+    {
+        using state_t = T;
+
+        auto pb = ponio::make_implicit_problem(
+            [=]( T, state_t y ) -> state_t
+            {
+                return y;
+            },
+            [=]( T, state_t ) -> state_t
+            {
+                return 1.;
+            } );
+
+        state_t y0                 = 1.0;
+        ponio::time_span<T> t_span = { 0., Tf };
+
+        auto obs = []( T, state_t, T ) {};
+        return ::ponio::solve( pb, algo, y0, t_span, dt, obs );
+    }
+
+    template <typename Algorithm_t, typename T = double>
+    T
+    short_time_check_order( Algorithm_t algo = Algorithm_t() )
+    {
+        using state_t = T;
+
+        std::vector<T> errors;
+        std::vector<T> dts;
+
+        T Tf = 1.0;
+
+        state_t u_exa = std::exp( Tf );
+
+        for ( auto n_iter : { 50, 25, 20, 15, 10 } )
+        {
+            T dt          = Tf / n_iter;
+            state_t u_sol = solve_exp( algo, dt, Tf );
+            auto e        = error( u_exa, u_sol );
+            errors.push_back( std::log( e ) );
+            dts.push_back( std::log( dt ) );
+        }
+
+        auto [a, b] = mayor_method( dts, errors );
+
+        return a;
+    }
+
+    template <typename Algorithm_t, typename T = double>
+    T
+    check_order( Algorithm_t algo = Algorithm_t() )
+    {
+        return short_time_check_order( algo );
+    }
+
+} // namespace diagonal_implicit_method
