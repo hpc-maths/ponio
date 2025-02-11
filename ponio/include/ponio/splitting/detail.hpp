@@ -65,8 +65,8 @@ namespace ponio::splitting::detail
         static constexpr bool is_splitting_method = true;
         static constexpr std::string_view id      = splitting_method_t::id;
 
-        static constexpr bool has_optional_args = !std::is_void<optional_args_t>::value;
-        using optional_args_container           = typename std::conditional<has_optional_args, optional_args_t, bool>::type;
+        static constexpr bool has_optional_args = !std::is_void_v<optional_args_t>;
+        using optional_args_container           = typename std::conditional_t<has_optional_args, optional_args_t, bool>;
 
         std::tuple<Algorithms_t...> algos;
         std::array<value_t, sizeof...( Algorithms_t )> time_steps;
