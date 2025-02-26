@@ -88,3 +88,15 @@ If you need information on current iteration, ponio provides a :cpp:struct:`poni
 .. doxygenstruct:: ponio::iteration_info
    :project: ponio
    :members:
+
+.. doxygenstruct:: ponio::iteration_info< tableaus_t >
+   :project: ponio
+   :members:
+
+.. doxygenstruct:: ponio::iteration_info< splitting_t >
+   :project: ponio
+   :members:
+
+.. doxygenstruct:: ponio::iteration_info< user_defined_method_t >
+   :project: ponio
+   :members:
