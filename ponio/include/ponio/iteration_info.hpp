@@ -192,6 +192,7 @@ namespace ponio
         using value_t = typename splitting_t::value_t;
         using tuple_t = typename splitting_t::tuple_t;
 
+        value_t delta; /**< parameter of shifting for adaptive time step method */
         value_t error; /**< error makes on time iteration for adaptive time step method */
         bool success;  /**< sets as true only for success iteration */
         bool is_step;  /**< sets as true only if iterator is on a step given in solver */
@@ -203,8 +204,9 @@ namespace ponio
 
         tuple_t* ptr_methods; /**< pointer to tuple of methods to access to iteration_info of each substep */
 
-        iteration_info( tuple_t& methods, value_t tol = static_cast<value_t>( 0 ) )
-            : error( static_cast<value_t>( 0 ) )
+        iteration_info( tuple_t& methods, value_t delta_ = static_cast<value_t>( 0 ), value_t tol = static_cast<value_t>( 0 ) )
+            : delta( delta_ )
+            , error( static_cast<value_t>( 0 ) )
             , success( true )
             , is_step( false )
             , number_of_steps( splitting_t::N_steps )

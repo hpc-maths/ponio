@@ -473,6 +473,8 @@ TEST_CASE( "number_of_eval::splitting_adaptive_strang" )
         ++it_sol;
         cumulative_counter_1 += std::get<0>( it_sol.info().number_of_eval );
         cumulative_counter_2 += std::get<1>( it_sol.info().number_of_eval );
+
+        it_sol.info().delta *= 0.99; // test access to delta parameter
     }
 
     CHECK( cumulative_counter_1 == manual_counter_1 );
