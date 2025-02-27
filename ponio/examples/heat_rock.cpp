@@ -115,7 +115,7 @@ main()
         } );
 
     auto pb_heat         = heat_model( dx, xmin, xmax );
-    auto eigmax_computer = [=]( heat_model&, double, std::valarray<double>&, double )
+    auto eigmax_computer = [=]( auto&, double, std::valarray<double>&, double )
     {
         return 4. / ( dx * dx );
     };

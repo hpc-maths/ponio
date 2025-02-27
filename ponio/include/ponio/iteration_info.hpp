@@ -73,6 +73,11 @@ namespace ponio
         }
     };
 
+    /**
+     * @brief template specialization of iteration_info for IMEX methods
+     *
+     * @tparam tableaus_t type of IMEX method
+     */
     template <typename tableaus_t>
         requires tableaus_t::is_imex_method
     struct iteration_info<tableaus_t>
@@ -118,7 +123,6 @@ namespace ponio
 
         /**
          * @brief reset number of evaluations to zero
-         *
          */
         void
         reset_eval()
@@ -181,17 +185,22 @@ namespace ponio
 
     } // namespace details
 
+    /**
+     * @brief template specialization of iteration_info for splitting methods
+     *
+     * @tparam splitting_t type of splitting method
+     */
     template <typename splitting_t>
         requires splitting_t::is_splitting_method
     struct iteration_info<splitting_t>
     {
         /**
          * @brief type of coefficient of Butcher tableau, same type to store error and tolerance
-         *
          */
         using value_t = typename splitting_t::value_t;
         using tuple_t = typename splitting_t::tuple_t;
 
+        value_t delta; /**< parameter of shifting for adaptive time step method */
         value_t error; /**< error makes on time iteration for adaptive time step method */
         bool success;  /**< sets as true only for success iteration */
         bool is_step;  /**< sets as true only if iterator is on a step given in solver */
@@ -203,8 +212,9 @@ namespace ponio
 
         tuple_t* ptr_methods; /**< pointer to tuple of methods to access to iteration_info of each substep */
 
-        iteration_info( tuple_t& methods, value_t tol = static_cast<value_t>( 0 ) )
-            : error( static_cast<value_t>( 0 ) )
+        iteration_info( tuple_t& methods, value_t delta_ = static_cast<value_t>( 0 ), value_t tol = static_cast<value_t>( 0 ) )
+            : delta( delta_ )
+            , error( static_cast<value_t>( 0 ) )
             , success( true )
             , is_step( false )
             , number_of_steps( splitting_t::N_steps )
@@ -235,7 +245,6 @@ namespace ponio
 
         /**
          * @brief reset number of evaluations to zero
-         *
          */
         void
         reset_eval()
@@ -245,7 +254,6 @@ namespace ponio
 
         /**
          * @brief increment number of evaluations of operator I
-         *
          */
         template <std::size_t I, typename evaluations_t>
         void
@@ -255,13 +263,17 @@ namespace ponio
         }
     };
 
+    /**
+     * @brief template specialization of iteration_info for external method provide by user
+     *
+     * @tparam user_defined_method_t type of user method
+     */
     template <typename user_defined_method_t>
         requires user_defined_method_t::is_user_defined_method
     struct iteration_info<user_defined_method_t>
     {
         /**
          * @brief type of coefficient of Butcher tableau, same type to store error and tolerance
-         *
          */
         using value_t = typename user_defined_method_t::value_t;
 
@@ -289,7 +301,6 @@ namespace ponio
 
         /**
          * @brief reset number of evaluations to zero
-         *
          */
         void
         reset_eval()

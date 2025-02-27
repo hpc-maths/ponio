@@ -152,9 +152,9 @@ main( int argc, char** argv )
     ponio::time_span<double> const tspan = { t_ini, t_end };
     double dt                            = ( t_end - t_ini ) / 2000;
 
-    auto eigmax_computer = [=]( auto&, double, auto&, double )
+    auto eigmax_computer = [&]( auto&, double, auto&, double )
     {
-        double dx = samurai::cell_length( max_level );
+        double dx = mesh.cell_length( mesh.max_level() );
         return 4. / ( dx * dx );
     };
 
