@@ -72,7 +72,6 @@ main( int argc, char** argv )
     // Simulation parameters
     double const left_box  = -5;
     double const right_box = 5;
-    bool const is_periodic = false;
     double const Tf        = 0.5;
     double const cfl       = 0.5;
 
@@ -89,7 +88,7 @@ main( int argc, char** argv )
 
     // Define mesh
     samurai::Box<double, dim> const box( { left_box }, { right_box } );
-    samurai::MRMesh<Config> mesh( box, min_level, max_level, { is_periodic } );
+    samurai::MRMesh<Config> mesh( box, min_level, max_level );
 
     // Initial condition
     auto un_ini = init( mesh );
@@ -112,12 +111,12 @@ main( int argc, char** argv )
     auto pb = ponio::make_implicit_operator_problem( f, f_t );
 
     // Time step
-    double dt = cfl * samurai::cell_length( max_level ) * samurai::cell_length( max_level );
+    double dx_min = mesh.cell_length( mesh.max_level() );
+    double dt     = cfl * dx_min * dx_min;
 
     auto eigmax_computer = [=]( auto&, double, auto&, double )
     {
-        double dx = samurai::cell_length( max_level );
-        return 4. / ( dx * dx );
+        return 4. / ( dx_min * dx_min );
     };
 
     // Range to iterate over solution

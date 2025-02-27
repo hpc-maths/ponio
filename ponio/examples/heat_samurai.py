@@ -16,12 +16,12 @@ import h5py
 name = "heat_samurai"
 data_dir = name+"_data"
 
-# make = subprocess.Popen(["make", name])
-# make.wait()
+make = subprocess.Popen(["make", name])
+make.wait()
 
-# args = [os.path.join(".", name)]
-# process = subprocess.Popen(args)
-# process.wait()
+args = [os.path.join(".", name)]
+process = subprocess.Popen(args)
+process.wait()
 
 
 def read_file(filename: str):

@@ -230,16 +230,17 @@ main( int argc, char** argv )
     ponio::time_span<double> const t_span = { t_ini, t_end };
     double dt                             = ( t_end - t_ini ) / 500;
 
-    auto eigmax_computer = [=]( auto&, double, auto&, double )
+    auto eigmax_computer = [&]( auto&, double, auto&, double )
     {
-        double dx = samurai::cell_length( max_level );
+        double dx = mesh.cell_length( mesh.max_level() );
         return nu * 4. / ( dx * dx );
     };
 
     auto pb = ponio::make_problem( fr_pb, fd, fa );
 
-    auto pirock_b0    = ponio::runge_kutta::pirock::pirock_RDA<1>( ponio::runge_kutta::pirock::beta_0<double>(), eigmax_computer );
-    auto pirock_b0_st = ponio::runge_kutta::pirock::pirock_RDA<1>( ponio::runge_kutta::pirock::beta_0<double>(),
+    [[maybe_unused]] auto pirock_b0    = ponio::runge_kutta::pirock::pirock_RDA<1>( ponio::runge_kutta::pirock::beta_0<double>(),
+        eigmax_computer );
+    [[maybe_unused]] auto pirock_b0_st = ponio::runge_kutta::pirock::pirock_RDA<1>( ponio::runge_kutta::pirock::beta_0<double>(),
         eigmax_computer,
         ponio::shampine_trick::shampine_trick<decltype( uv_ini )>() );
 
