@@ -42,7 +42,11 @@ foreach(demo IN LISTS demos)
     target_link_libraries(${demo} ponio)
 endforeach()
 
+set(visu_list "")
 foreach(demo IN LISTS demos)
     add_custom_target(visu_${demo} python ${CMAKE_SOURCE_DIR}/ponio/examples/${demo}.py)
     add_custom_target(${demo}_visu make visu_${demo})
+    list(APPEND visu_list visu_${demo})
 endforeach()
+
+add_custom_target(visu DEPENDS ${visu_list})
