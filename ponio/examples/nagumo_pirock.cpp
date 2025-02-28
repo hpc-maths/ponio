@@ -63,8 +63,9 @@ main( int argc, char** argv )
     using point_t             = typename box_t::point_t;
 
     // simulation parameters --------------------------------------------------
-    constexpr double d = .1;
-    constexpr double k = 1. / d;
+    constexpr double d  = .1;
+    constexpr double k  = 1. / d;
+    constexpr double x0 = -25.;
 
     constexpr double left_box  = -40;
     constexpr double right_box = 10;
@@ -95,7 +96,6 @@ main( int argc, char** argv )
 
     auto exact_solution = [&]( double x, double t )
     {
-        double x0  = -25.;
         double v   = ( 1. / std::sqrt( 2. ) ) * std::sqrt( k * d );
         double cst = -( 1. / std::sqrt( 2. ) ) * std::sqrt( k / d );
         double e   = std::exp( cst * ( x - x0 - v * t ) );
@@ -152,9 +152,9 @@ main( int argc, char** argv )
     ponio::time_span<double> const tspan = { t_ini, t_end };
     double dt                            = ( t_end - t_ini ) / 2000;
 
-    auto eigmax_computer = [=]( auto&, double, auto&, double )
+    auto eigmax_computer = [&]( auto&, double, auto&, double )
     {
-        double dx = samurai::cell_length( max_level );
+        double dx = mesh.cell_length( mesh.max_level() );
         return 4. / ( dx * dx );
     };
 

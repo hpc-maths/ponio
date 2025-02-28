@@ -165,11 +165,11 @@ main( int argc, char** argv )
     samurai::for_each_cell( mesh,
         [&]( auto& cell )
         {
-            auto x1 = cell.center()[0];
-            auto x2 = cell.center()[1];
+            auto x = cell.center()[0];
+            auto y = cell.center()[1];
 
-            uv_ini[cell]( 0 ) = 22. * x2 * std::pow( 1 - x2, 1.5 );
-            uv_ini[cell]( 1 ) = 27. * x1 * std::pow( 1 - x1, 1.5 );
+            uv_ini[cell]( 0 ) = 22. * y * std::pow( 1 - y, 1.5 );
+            uv_ini[cell]( 1 ) = 27. * x * std::pow( 1 - x, 1.5 );
         } );
 
     // define problem ---------------------------------------------------------
@@ -230,16 +230,17 @@ main( int argc, char** argv )
     ponio::time_span<double> const t_span = { t_ini, t_end };
     double dt                             = ( t_end - t_ini ) / 500;
 
-    auto eigmax_computer = [=]( auto&, double, auto&, double )
+    auto eigmax_computer = [&]( auto&, double, auto&, double )
     {
-        double dx = samurai::cell_length( max_level );
+        double dx = mesh.cell_length( mesh.max_level() );
         return nu * 4. / ( dx * dx );
     };
 
     auto pb = ponio::make_problem( fr_pb, fd, fa );
 
-    auto pirock_b0    = ponio::runge_kutta::pirock::pirock_RDA<1>( ponio::runge_kutta::pirock::beta_0<double>(), eigmax_computer );
-    auto pirock_b0_st = ponio::runge_kutta::pirock::pirock_RDA<1>( ponio::runge_kutta::pirock::beta_0<double>(),
+    [[maybe_unused]] auto pirock_b0    = ponio::runge_kutta::pirock::pirock_RDA<1>( ponio::runge_kutta::pirock::beta_0<double>(),
+        eigmax_computer );
+    [[maybe_unused]] auto pirock_b0_st = ponio::runge_kutta::pirock::pirock_RDA<1>( ponio::runge_kutta::pirock::beta_0<double>(),
         eigmax_computer,
         ponio::shampine_trick::shampine_trick<decltype( uv_ini )>() );
 
@@ -267,7 +268,7 @@ main( int argc, char** argv )
         }
 
         ++it_sol;
-        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << ++n_save << "\n";
+        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << ++n_save << "\r";
 
         // mr_adaptation( mr_epsilon, mr_regularity );
         samurai::update_ghost_mr( it_sol->state );

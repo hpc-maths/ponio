@@ -74,7 +74,7 @@ namespace ponio
         using value_t         = _value_t;
         using user_function_t = _user_function_t;
 
-        iteration_info<user_defined_algorithm> info;
+        iteration_info<user_defined_algorithm> _info;
 
         user_function_t* user_function = nullptr;
 
@@ -90,6 +90,24 @@ namespace ponio
         operator()( problem_t& f, value_t& tn, state_t& un, value_t& dt )
         {
             return ( *user_function )( f, tn, un, dt );
+        }
+
+        /**
+         * @brief gets `iteration_info` object
+         */
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        /**
+         * @brief gets `iteration_info` object (constant version)
+         */
+        auto const&
+        info() const
+        {
+            return _info;
         }
     };
 

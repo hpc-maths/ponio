@@ -225,16 +225,14 @@ namespace ponio::splitting::strang
         static constexpr std::size_t N_steps = 2 * N_methods - 1;
         static constexpr bool is_embedded    = true;
 
-        value_t delta;
         iteration_info<adaptive_strang> _info;
 
         adaptive_strang( std::tuple<methods_t...> const& meths,
             std::array<value_t, N_methods> const& dts,
-            value_t _delta,
+            value_t delta,
             value_t tol = default_config::tol )
             : base_t( meths, dts )
-            , delta( _delta )
-            , _info( methods, tol )
+            , _info( methods, delta, tol )
         {
         }
 
@@ -291,7 +289,7 @@ namespace ponio::splitting::strang
             // avec std::thread
             // mais j'ai eu une erreur, donc à corriger plus tard
             _call_inc( f, tn, u_np1_ref, dt, 0. );
-            _call_inc( f, tn, u_np1_shift, dt, delta );
+            _call_inc( f, tn, u_np1_shift, dt, _info.delta );
 
             _info.error = ::detail::error_estimate( un, u_np1_ref, u_np1_shift );
 
