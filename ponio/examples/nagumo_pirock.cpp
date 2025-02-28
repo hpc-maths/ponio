@@ -63,8 +63,9 @@ main( int argc, char** argv )
     using point_t             = typename box_t::point_t;
 
     // simulation parameters --------------------------------------------------
-    constexpr double d = .1;
-    constexpr double k = 1. / d;
+    constexpr double d  = .1;
+    constexpr double k  = 1. / d;
+    constexpr double x0 = -25.;
 
     constexpr double left_box  = -40;
     constexpr double right_box = 10;
@@ -95,7 +96,6 @@ main( int argc, char** argv )
 
     auto exact_solution = [&]( double x, double t )
     {
-        double x0  = -25.;
         double v   = ( 1. / std::sqrt( 2. ) ) * std::sqrt( k * d );
         double cst = -( 1. / std::sqrt( 2. ) ) * std::sqrt( k / d );
         double e   = std::exp( cst * ( x - x0 - v * t ) );
