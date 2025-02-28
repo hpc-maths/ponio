@@ -165,11 +165,11 @@ main( int argc, char** argv )
     samurai::for_each_cell( mesh,
         [&]( auto& cell )
         {
-            auto x1 = cell.center()[0];
-            auto x2 = cell.center()[1];
+            auto x = cell.center()[0];
+            auto y = cell.center()[1];
 
-            uv_ini[cell]( 0 ) = 22. * x2 * std::pow( 1 - x2, 1.5 );
-            uv_ini[cell]( 1 ) = 27. * x1 * std::pow( 1 - x1, 1.5 );
+            uv_ini[cell]( 0 ) = 22. * y * std::pow( 1 - y, 1.5 );
+            uv_ini[cell]( 1 ) = 27. * x * std::pow( 1 - x, 1.5 );
         } );
 
     // define problem ---------------------------------------------------------
@@ -268,7 +268,7 @@ main( int argc, char** argv )
         }
 
         ++it_sol;
-        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << ++n_save << "\n";
+        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << ++n_save << "\r";
 
         // mr_adaptation( mr_epsilon, mr_regularity );
         samurai::update_ghost_mr( it_sol->state );
