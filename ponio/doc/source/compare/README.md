@@ -7,3 +7,5 @@ This section is the comparison with some ODE solvers, we present the same exampl
 * [GSL - GNU Scientific Library](gsl/README.md)
 * [odeint](odeint/README.md)
 * [SciPy](scipy/README.md)
+
+![Lorenz attractor](lorenz.png)
