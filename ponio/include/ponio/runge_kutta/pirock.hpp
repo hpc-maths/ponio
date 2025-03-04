@@ -88,6 +88,7 @@ namespace ponio::runge_kutta::pirock
     } // namespace polynomial
 
     /**
+     * @class alpha_fixed
      * @brief Computer of \f$\alpha\f$ and \f$\beta\f$ parameters with fixed value of \f$\alpha\f$
      *
      * @tparam value_t
@@ -125,6 +126,7 @@ namespace ponio::runge_kutta::pirock
     };
 
     /**
+     * @class beta_0
      * @brief Computer of \f$\alpha\f$ and \f$\beta\f$ parameters with fixed value of \f$\beta\f$ to 0
      *
      * @tparam value_t
@@ -242,6 +244,18 @@ namespace ponio::runge_kutta::pirock
         {
         }
 
+        /**
+         * @brief iteration of PIROCK method
+         *
+         * @tparam problem_t  type of \f$f\f$
+         * @tparam state_t    type of current state
+         * @tparam array_ki_t type of temporary stages (only 3 needed for ROCK2)
+         * @param pb problem \f$(F_D, F_R)\f$ and the Jacibian of reaction part \f$\frac{\partial F_R}{\partial u}\f$
+         * @param tn current time
+         * @param un current state
+         * @param U  array of temporary stages
+         * @param dt current time step
+         */
         template <typename problem_t, typename state_t, typename array_ki_t>
         std::tuple<value_t, state_t, value_t>
         operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt )
