@@ -409,7 +409,7 @@ The method is divided into 5 steps:
 
     U = u^{(s-2+\ell)}
 
-#. Finishing procedure for advection-reaction coupling
+4. Finishing procedure for advection-reaction coupling
 
     .. math::
 
@@ -463,7 +463,15 @@ with the following error norm:
 
   \|\cdot\| : err \mapsto \sum_i \left( \frac{err_i}{a_{tol} + \max(y^{n+1}_i, y^n_i) } \right)^2
 
-where :math:`y^n` and :math:`y^{n+1}` are estimation of the solution respectively at time :math:`t^n` and after an iteration :math:`t^{n+1}=t^n+\Delta t`.
+where :math:`y^n` and :math:`y^{n+1}` are estimation of the solution respectively at time :math:`t^n` and after an iteration :math:`t^{n+1}=t^n+\Delta t`, and :math:`a_{tol}` and :math:`r_{tol}` respectively absolute and relative tolerances. This norm give a normalized error, so its compare to :math:`1` and new time step is computed as:
+
+.. math::
+
+  \Delta t_{new} = \sqrt{\frac{1}{err}} \Delta t
+
+.. note::
+
+  As in a lot of adaptive time step method, the new time step stays in :math:`\Delta t_{new} \in [0.5\Delta t, 2 \Delta t]` set and there is a safety factor, so the new time step is multiply by :math:`0.8`.
 
 .. warning::
 
