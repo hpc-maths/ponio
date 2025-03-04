@@ -20,11 +20,13 @@ This library aims to be the easiest to use without compromising on performance.
 
 .. toctree::
    :caption: User Documentation
+   :maxdepth: 1
 
    user/user
 
 .. toctree::
    :caption: Developer Documentation
+   :maxdepth: 2
    :glob:
 
    api/api
