@@ -32,9 +32,10 @@ ax.yaxis.pane.set_edgecolor('w')
 ax.zaxis.pane.set_edgecolor('w')
 
 for d in dirs_compare:
+    print(f"extract data from: {d}")
     data = np.loadtxt(os.path.join(d, "lorenz.txt"))
     t, x, y, z = data[:, 0], data[:, 1], data[:, 2], data[:, 3]
     ax.plot(x, y, z, linewidth=0.5, label=ode_lib[d])
 
 plt.legend()
-plt.show()
+plt.savefig(os.path.join("lorenz.png"))
