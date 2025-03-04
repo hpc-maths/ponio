@@ -557,11 +557,15 @@ Helper functions
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA()
   :project: ponio
 
+Following functions are useful for to build a PIROCK method with :math:`\ell=2` and :math:`\alpha = 1` (with :cpp:class:`ponio::runge_kutta::pirock::alpha_fixed` computer).
+
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_a1(eig_computer_t&&)
   :project: ponio
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_a1()
   :project: ponio
+
+Following functions are useful for to build a PIROCK method with :math:`\ell=1` and :math:`\beta = 0` (with :cpp:class:`ponio::runge_kutta::pirock::beta_0` computer).
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_b0(eig_computer_t&&)
   :project: ponio
