@@ -20,6 +20,7 @@ dependencies:
   - graphviz
   - doxygen
   - breathe
+  - myst-parser
   - pydata-sphinx-theme
   - sphinxcontrib-bibtex
   - sphinxcontrib-plantuml
