@@ -446,8 +446,19 @@ Still keep two free parameters :math:`\ell` and :math:`\alpha`, ponio provides t
 * :math:`\ell=2` and :math:`\alpha=1`, in this case, if :math:`F_A=0` and :math:`F_R=0` we have the standard ROCK2 method
 * :math:`\ell=1` and :math:`\alpha = \frac{1}{2P'_{s-2+\ell}(0)}`, so :math:`\beta=0` to minimized computation cost
 
-PIROC for reaction-diffusion problem
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The parameter :math:`\ell` is a template parameter, ponio provides two computers for :math:`\alpha` and :math:`\beta`:
+
+.. doxygenclass:: ponio::runge_kutta::pirock::alpha_fixed
+   :project: ponio
+   :members:
+
+.. doxygenclass:: ponio::runge_kutta::pirock::beta_0
+   :project: ponio
+   :members:
+
+
+PIROCK for reaction-diffusion problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. doxygenclass:: ponio::runge_kutta::pirock::pirock_impl
    :project: ponio
@@ -478,8 +489,8 @@ PIROC for reaction-diffusion problem
   :project: ponio
 
 
-PIROC for reaction-diffusion-advection problem
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PIROCK for reaction-diffusion-advection problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. doxygenclass:: ponio::runge_kutta::pirock::pirock_RDA_impl
    :project: ponio
