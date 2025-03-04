@@ -10,6 +10,7 @@ dependencies:
   - jinja2
   - matplotlib
   - cxx-compiler
+  - c-compiler
   - cmake
   - ninja
   - pkg-config
