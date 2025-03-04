@@ -102,12 +102,21 @@ namespace ponio::runge_kutta::pirock
         {
         }
 
+        /**
+         * @brief Return \f$\alpha\f$ (given value in constructor)
+         */
         value_t
         alpha( std::size_t, std::size_t ) const
         {
             return _alpha;
         }
 
+        /**
+         * @brief Return \f$\beta = 1 - 2\alphaP'_{s-2+\ell}(0)$\f
+         *
+         * @param s number of stages
+         * @param l choosen parameter \f$\ell\f$
+         */
         value_t
         beta( std::size_t s, std::size_t l ) const
         {
@@ -123,12 +132,18 @@ namespace ponio::runge_kutta::pirock
     template <typename value_t = double>
     struct beta_0
     {
+        /**
+         * @brief Return \f$\alpha = \frac{1}{2P'_{s-2+\ell}(0)}\f$ such \f$\beta = 0\f$
+         */
         value_t
         alpha( std::size_t s, std::size_t l ) const
         {
             return 1. / ( 2. * polynomial::Pp_sm2pl_0<value_t>( s, l ) );
         }
 
+        /**
+         * @brief Return \f$\beta = 0\f$
+         */
         value_t
         beta( std::size_t, std::size_t ) const
         {
@@ -428,13 +443,6 @@ namespace ponio::runge_kutta::pirock
                     u_np1 = us_s - err_D + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
                           + dt / ( 2. - 4. * gamma ) * shampine_element;
 
-                    // err_R.name() = "err_R";
-                    // err_D.name() = "err_D";
-                    // samurai::save( "err_R", un.mesh(), err_R, err_D );
-
-                    _info.absolute_tolerance = 1e-4;
-                    _info.relative_tolerance = 1e-4;
-
                     auto accumulator_error_gen = []( auto const& yn, auto const& ynp1, value_t a_tol, value_t r_tol )
                     {
                         return [=, it_yn = yn.begin(), it_ynp1 = ynp1.begin()]( value_t const& acc, value_t const err_i ) mutable
@@ -453,8 +461,6 @@ namespace ponio::runge_kutta::pirock
                         err_D.array().end(),
                         static_cast<value_t>( 0. ),
                         accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
-
-                    // std::cout << "err_D = " << err_D_scalar << " err_R = " << err_R_scalar << std::endl;
 
                     _info.error   = std::max( err_D_scalar, err_R_scalar );
                     _info.success = _info.error < 1.0;
