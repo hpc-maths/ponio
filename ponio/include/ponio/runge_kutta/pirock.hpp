@@ -113,7 +113,7 @@ namespace ponio::runge_kutta::pirock
         }
 
         /**
-         * @brief Return \f$\beta = 1 - 2\alphaP'_{s-2+\ell}(0)\f$
+         * @brief Return \f$\beta = 1 - 2\alpha P'_{s-2+\ell}(0)\f$
          *
          * @param s number of stages
          * @param l choosen parameter \f$\ell\f$
