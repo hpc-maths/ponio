@@ -244,7 +244,8 @@ namespace ponio::runge_kutta::pirock
                 un,
                 dt,
                 4 );
-            std::size_t s                               = mdeg + 2;
+
+            std::size_t s = mdeg + 2;
 
             _info.number_of_stages  = s + l + 3;
             _info.number_of_eval[0] = n_eval + s + l + 4; // explicit evaluation
@@ -417,43 +418,56 @@ namespace ponio::runge_kutta::pirock
 
                     _info.number_of_eval[1] += 2;
 
-                    rhs_R = static_cast<state_t>( dt * ( pb.implicit_part( tn, u_sp1 ) - pb.implicit_part( tn, u_sp2 ) ) / 6. );
+                    rhs_R = static_cast<state_t>( dt / 6. * ( pb.implicit_part( tn, u_sp1 ) - pb.implicit_part( tn, u_sp2 ) ) );
 
                     // $err_R = J_R^{-1} \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
                     // to compute it, get $rhs_R = \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
                     // then solve $J_R err_R = rhs_R$ (that what Shampine's trick does, it build $J_R$ and solve it)
                     shampine_trick_caller.template operator()<1>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, rhs_R, u_tmp, err_R );
 
-                    // TODO: this couple of lines works only with samurai (because of err_D.array())
-                    auto err = std::max( std::accumulate( err_D.array().begin(),
-                                             err_D.array().end(),
-                                             static_cast<value_t>( 0. ),
-                                             []( value_t const& acc, value_t const xi )
-                                             {
-                                                 return acc + std::abs( xi );
-                                             } ),
-                        std::accumulate( err_R.array().begin(),
-                            err_R.array().end(),
-                            static_cast<value_t>( 0. ),
-                            []( value_t const& acc, value_t const xi )
-                            {
-                                return acc + std::abs( xi );
-                            } ) );
-
-                    value_t new_dt = dt;
-                    if ( err > 0. )
-                    {
-                        new_dt = 0.8 * std::sqrt( tolerance / err ) * dt;
-                    }
-
-                    if ( err > tolerance )
-                    {
-                        return { tn, un, new_dt };
-                    }
-
                     u_np1 = us_s - err_D + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
                           + dt / ( 2. - 4. * gamma ) * shampine_element;
-                    return { tn + dt, u_np1, new_dt };
+
+                    err_R.name() = "err_R";
+                    err_D.name() = "err_D";
+                    samurai::save( "err_R", un.mesh(), err_R, err_D );
+
+                    _info.absolute_tolerance = 1e-4;
+                    _info.relative_tolerance = 1e-4;
+
+                    auto accumulator_error_gen = []( auto const& yn, auto const& ynp1, value_t a_tol, value_t r_tol )
+                    {
+                        return [=, it_yn = yn.begin(), it_ynp1 = ynp1.begin()]( value_t const& acc, value_t const err_i ) mutable
+                        {
+                            return acc
+                                 + detail::power<2>( err_i / ( a_tol + r_tol * std::max( std::abs( *it_yn++ ), std::abs( *it_ynp1++ ) ) ) );
+                        };
+                    };
+
+                    // TODO: this couple of lines works only with samurai (because of err_D.array())
+                    value_t err_R_scalar = std::accumulate( err_R.array().begin(),
+                        err_R.array().end(),
+                        static_cast<value_t>( 0. ),
+                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
+                    value_t err_D_scalar = std::accumulate( err_D.array().begin(),
+                        err_D.array().end(),
+                        static_cast<value_t>( 0. ),
+                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
+
+                    std::cout << "err_D = " << err_D_scalar << " err_R = " << err_R_scalar << std::endl;
+                    _info.error   = std::max( err_D_scalar, err_R_scalar );
+                    _info.success = _info.error < 1.0;
+
+                    value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / _info.error ) ) );
+                    value_t new_dt = 0.8 * fac * dt;
+
+                    // accepted step
+                    if ( _info.success )
+                    {
+                        return { tn + dt, u_np1, new_dt };
+                    }
+
+                    return { tn, un, new_dt };
                 }
 
                 u_np1 = us_s - err_D + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
