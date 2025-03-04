@@ -506,6 +506,8 @@ In this section we present the implementation of PIROCK method for only reaction
 Helper functions
 """"""""""""""""
 
+User interface functions to build a PIROCK method.
+
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t)
   :project: ponio
 
@@ -538,12 +540,16 @@ Following functions are useful for to build a PIROCK method with :math:`\ell=1` 
 PIROCK for reaction-diffusion-advection problem
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+In this section we present the implementation of complet PIROCK method (i.e. for reaction-diffusion-advection problem).
+
 .. doxygenclass:: ponio::runge_kutta::pirock::pirock_RDA_impl
    :project: ponio
    :members:
 
 Helper functions
 """"""""""""""""
+
+User interface functions to build a PIROCK method.
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t)
   :project: ponio
