@@ -497,9 +497,14 @@ ponio provides two computers for :math:`\alpha` and :math:`\beta` values.
 PIROCK for reaction-diffusion problem
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+In this section we present the implementation of PIROCK method for only reaction-diffusion problem (i.e. :math:`F_A = 0`).
+
 .. doxygenclass:: ponio::runge_kutta::pirock::pirock_impl
    :project: ponio
    :members:
+
+Helper functions
+""""""""""""""""
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t)
   :project: ponio
@@ -513,11 +518,15 @@ PIROCK for reaction-diffusion problem
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock()
   :project: ponio
 
+Following functions are useful for to build a PIROCK method with :math:`\ell=2` and :math:`\alpha = 1` (with :cpp:class:`ponio::runge_kutta::pirock::alpha_fixed` computer).
+
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_a1(eig_computer_t&&)
   :project: ponio
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_a1()
   :project: ponio
+
+Following functions are useful for to build a PIROCK method with :math:`\ell=1` and :math:`\beta = 0` (with :cpp:class:`ponio::runge_kutta::pirock::beta_0` computer).
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_b0(eig_computer_t&&)
   :project: ponio
@@ -532,6 +541,9 @@ PIROCK for reaction-diffusion-advection problem
 .. doxygenclass:: ponio::runge_kutta::pirock::pirock_RDA_impl
    :project: ponio
    :members:
+
+Helper functions
+""""""""""""""""
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t)
   :project: ponio
