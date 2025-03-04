@@ -405,9 +405,9 @@ The method is divided into 5 steps:
 
 #. Starting value for advection-reaction
 
-    .. math::
+.. math::
 
-        U = u^{(s-2+\ell)}
+    U = u^{(s-2+\ell)}
 
 #. Finishing procedure for advection-reaction coupling
 
@@ -440,6 +440,35 @@ where :math:`\mu_j`, :math:`\nu_j`, :math:`\kappa_j` are the same coefficients a
 * :math:`J_R = I - \gamma \Delta t \frac{\partial F_R}{\partial u}(u^{(s-2+\ell)})`
 * :math:`\sigma_\alpha = \frac{1-\alpha}{2} + \alpha \sigma`, where :math:`\sigma` coming from the underlying ROCK2 method
 * :math:`\tau_\alpha = \frac{(\alpha-1)^2}{2} + 2\alpha(1-\alpha)\sigma + \alpha^2\tau`, where :math:`\sigma` and :math:`\tau` coming from the underlying ROCK2 method
+
+For adaptive time step method, need to compute one error by operator and take the maximum value
+
+.. math::
+
+    \begin{aligned}
+      err_D &= \sigma_\alpha \Delta t \left( 1 - \frac{\tau_\alpha}{\sigma_\alpha^2} \right) ( F_D( u^{*(s-1)} - u^{(s-2)} )) \\
+      err_R &= \Delta t J_R^{-1}\left( \frac{1}{6}F_R(u^{(s+1)}) - \frac{1}{6}F_R(u^{(s+2)}) \right)
+      err_A &= -\frac{3}{20}\Delta t F_A(u^{(s+1)}) + \frac{3}{10}\Delta t F_A(u^{(s+4)}) - \frac{3}{20}\Delta t F_A(u^{(s+5)})
+    \end{aligned}
+
+The error is computed with the maximum:
+
+.. math::
+
+  err = \max\left( \|err_D\|, \|err_R\|, \|err_A\|^{2/3} \right)
+
+with the following error norm:
+
+.. math::
+
+  \|\cdot\| : err \mapsto \sum_i \left( \frac{err_i}{a_{tol} + \max(y^{n+1}_i, y^n_i) } \right)^2
+
+where :math:`y^n` and :math:`y^{n+1}` are estimation of the solution respectively at time :math:`t^n` and after an iteration :math:`t^{n+1}=t^n+\Delta t`.
+
+.. warning::
+
+  Adaptive time step method is not yet implemented for complet PIROCK :cpp:class:`ponio::runge_kutta::pirock::pirock_RDA_impl`.
+
 
 Still keep two free parameters :math:`\ell` and :math:`\alpha`, ponio provides two choices for this parameters:
 
