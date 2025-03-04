@@ -421,7 +421,7 @@ The method is divided into 5 steps:
       u^{(s+5)} &= u^{(s-2+\ell)} + \frac{2\beta}{3} \Delta t F_D(u^{(s+1)}) + \frac{2}{3}\Delta t J_R^{-1} F_A(u^{(s+4)}) + \left(\frac{2}{3} - \gamma\right) \Delta t F_R(u^{(s+1)}) + \frac{2\gamma}{3}\Delta t F_R(u^{(s+2)})
     \end{aligned}
 
-4. Computation of the integration step
+5. Computation of the integration step
 
 .. math::
 
@@ -478,12 +478,12 @@ where :math:`y^n` and :math:`y^{n+1}` are estimation of the solution respectivel
   Adaptive time step method is not yet implemented for complet PIROCK :cpp:class:`ponio::runge_kutta::pirock::pirock_RDA_impl`.
 
 
-Still keep two free parameters :math:`\ell` and :math:`\alpha`, ponio provides two choices for this parameters:
+Still keep two free parameters :math:`\ell` and :math:`\alpha` given free to user, ponio provides two choices for this parameters:
 
 * :math:`\ell=2` and :math:`\alpha=1`, in this case, if :math:`F_A=0` and :math:`F_R=0` we have the standard ROCK2 method;
 * :math:`\ell=1` and :math:`\alpha = \frac{1}{2P'_{s-2+\ell}(0)}`, so :math:`\beta=0` to minimized computation cost.
 
-The parameter :math:`\ell` is a template parameter, ponio provides two computers for :math:`\alpha` and :math:`\beta` values.
+ponio provides two computers for :math:`\alpha` and :math:`\beta` values.
 
 .. doxygenclass:: ponio::runge_kutta::pirock::alpha_fixed
    :project: ponio

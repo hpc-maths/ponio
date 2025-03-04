@@ -91,7 +91,7 @@ namespace ponio::runge_kutta::pirock
      * @class alpha_fixed
      * @brief Computer of \f$\alpha\f$ and \f$\beta\f$ parameters with fixed value of \f$\alpha\f$
      *
-     * @tparam value_t
+     * @tparam value_t Type of coefficients
      */
     template <typename value_t = double>
     struct alpha_fixed
@@ -113,7 +113,7 @@ namespace ponio::runge_kutta::pirock
         }
 
         /**
-         * @brief Return \f$\beta = 1 - 2\alphaP'_{s-2+\ell}(0)$\f
+         * @brief Return \f$\beta = 1 - 2\alphaP'_{s-2+\ell}(0)\f$
          *
          * @param s number of stages
          * @param l choosen parameter \f$\ell\f$
@@ -129,7 +129,7 @@ namespace ponio::runge_kutta::pirock
      * @class beta_0
      * @brief Computer of \f$\alpha\f$ and \f$\beta\f$ parameters with fixed value of \f$\beta\f$ to 0
      *
-     * @tparam value_t
+     * @tparam value_t Type of coefficients
      */
     template <typename value_t = double>
     struct beta_0
