@@ -25,3 +25,7 @@ dependencies:
   - sphinxcontrib-bibtex
   - sphinxcontrib-plantuml
   - openjdk
+  - julia
+  - boost-cpp
+  - gsl
+  - scipy
