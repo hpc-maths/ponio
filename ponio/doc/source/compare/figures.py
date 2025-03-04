@@ -31,7 +31,8 @@ ax.xaxis.pane.set_edgecolor('w')
 ax.yaxis.pane.set_edgecolor('w')
 ax.zaxis.pane.set_edgecolor('w')
 
-for d in dirs_compare:
+# for d in dirs_compare:
+for d in ode_lib.keys():
     print(f"extract data from: {d}")
     data = np.loadtxt(os.path.join(d, "lorenz.txt"))
     t, x, y, z = data[:, 0], data[:, 1], data[:, 2], data[:, 3]
