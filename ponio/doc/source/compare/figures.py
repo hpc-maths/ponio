@@ -6,7 +6,7 @@ dirs_compare = next(os.walk("."))[1]
 
 ode_lib = {
     "ascent": "Ascent",
-    "diffeq": "DifferentialEquations.jl",
+    # "diffeq": "DifferentialEquations.jl",
     "gsl": "GSL",
     "odeint": "Boost::odeint",
     "ponio": "ponio",
