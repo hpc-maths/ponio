@@ -4,7 +4,7 @@ all: lorenz.txt
 	./$<
 
 %.out: %.o
-	${LD} -rpath=${CONDA_PREFIX}/lib -L ${CONDA_PREFIX}/lib $< -lgsl -lgslcblas -lm -o $@
+	${CC} -Wl,-rpath,${CONDA_PREFIX}/lib -L ${CONDA_PREFIX}/lib $< -lgsl -lgslcblas -lm -o $@
 
 %.o: %.c
 	${CC} -I ${CONDA_PREFIX}/include -c $<
