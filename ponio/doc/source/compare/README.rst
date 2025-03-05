@@ -39,12 +39,12 @@ with parameter :math:`\sigma = 10`, :math:`\rho = 28` and :math:`\beta = \frac{8
 
 This method is pretty much always in library with various name:
 
-* ``RK4`` in :doc:`Ascent <ascent/README.md>`
+* ``RK4`` in :doc:`Ascent <ascent/README>`
 * ``RK4`` in :doc:`DifferentialEquations.jl <diffeq/README>`
 * ``gsl_odeiv2_step_rk4`` in :doc:`GSL <gsl/README>`
 * ``runge_kutta4`` in :doc:`odeint <odeint/README>`
 * ``rk_44`` in :doc:`ponio <ponio/README>`
 
- except in :doc:`SciPy <scipy/README>` where we need to add this.
+except in :doc:`SciPy <scipy/README>` where we need to add this.
 
 .. image:: lorenz.png
