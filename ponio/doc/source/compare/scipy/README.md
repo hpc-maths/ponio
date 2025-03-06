@@ -14,7 +14,7 @@
 To solve Lorenz equations with a classical 4th order Runge-Kutta RK(4,4) we need to define it:
 
 ```{literalinclude} lorenz.py
-  :lines: 6-18
+  :lines: 6-17
 ```
 
 and now call it with `scipy.integrate.solve_ivp` function:
