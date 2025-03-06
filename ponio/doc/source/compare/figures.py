@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import plotly.graph_objects as go
 
 dirs_compare = next(os.walk("."))[1]
 
