@@ -40,3 +40,29 @@ for d in ode_lib.keys():
 
 plt.legend()
 plt.savefig(os.path.join("lorenz.png"))
+
+# plotly version
+colors = [
+    "#FEA47F", "#25CCF7", "#EAB543", "#55E6C1", "#B33771", "#3B3B98", "#FD7272", "#9AECDB", "#D6A2E8"
+]
+
+fig = go.Figure()
+for d in ode_lib.keys():
+    print(f"extract data from: {d}")
+    data = np.loadtxt(os.path.join(d, "lorenz.txt"))
+    fig.add_trace(go.Scatter3d(
+        x=data[:, 1], y=data[:, 2], z=data[:, 3],
+        marker=dict(size=1),
+        line=dict(
+            color=colors[i],
+            width=2
+        ),
+        name=ode_lib[d]
+    ))
+
+fig.update_layout(
+    autosize=False,
+    width=800,
+    height=800
+)
+fig.write_html("lorenz.html")

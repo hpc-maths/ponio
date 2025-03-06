@@ -9,6 +9,7 @@ dependencies:
   - numpy
   - jinja2
   - matplotlib
+  - plotly
   - cxx-compiler
   - c-compiler
   - cmake
