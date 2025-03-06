@@ -4,6 +4,7 @@ Comparison
 This section is the comparison with some ODE solvers, we present the same example writing with other ODE solvers to show choices of interface in ponio.
 
 .. toctree::
+    :maxdepth: 1
 
     ascent/README
     diffeq/README
