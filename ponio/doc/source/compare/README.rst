@@ -48,7 +48,5 @@ This method is pretty much always in library with various name:
 
 except in :doc:`SciPy <scipy/README>` where we need to add this.
 
-.. image:: lorenz.png
-
-.. raw::
+.. raw:: html
     :file: lorenz.html
