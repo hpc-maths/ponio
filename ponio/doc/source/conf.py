@@ -94,6 +94,8 @@ language = 'en'
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+html_extra_path = ["compare/lorenz.html"]
+
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
