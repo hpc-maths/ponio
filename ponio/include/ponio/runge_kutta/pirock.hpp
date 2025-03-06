@@ -194,7 +194,6 @@ namespace ponio::runge_kutta::pirock
         alpha_beta_computer_t alpha_beta_computer;
         eig_computer_t eig_computer;
         shampine_trick_caller_t shampine_trick_caller;
-        value_t tolerance;
 
         iteration_info<pirock_impl> _info;
 
@@ -216,7 +215,6 @@ namespace ponio::runge_kutta::pirock
             : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
             , shampine_trick_caller( false )
-            , tolerance( 0. )
             , _info()
         {
         }
@@ -227,7 +225,8 @@ namespace ponio::runge_kutta::pirock
          * @param _alpha_beta_computer   alpha and beta computer object
          * @param _eig_computer          eigenvalue computer functor
          * @param _shampine_trick_caller Shampine's trick functor
-         * @param tol                    tolerance
+         * @param a_tol                  absolute tolerance
+         * @param r_tol                  relative tolerance
          */
         template <typename _shampine_trick_caller_t_>
             requires std::same_as<_shampine_trick_caller_t_, shampine_trick_caller_t>
@@ -235,12 +234,12 @@ namespace ponio::runge_kutta::pirock
         pirock_impl( alpha_beta_computer_t&& _alpha_beta_computer,
             eig_computer_t&& _eig_computer,
             _shampine_trick_caller_t_&& _shampine_trick_caller,
-            value_t tol = default_config::tol )
+            value_t a_tol = default_config::tol,
+            value_t r_tol = default_config::tol )
             : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
             , shampine_trick_caller( std::forward<_shampine_trick_caller_t_>( _shampine_trick_caller ) )
-            , tolerance( tol )
-            , _info()
+            , _info( a_tol, r_tol )
         {
         }
 
@@ -479,6 +478,10 @@ namespace ponio::runge_kutta::pirock
                     _info.error   = std::max( err_D_scalar, err_R_scalar );
                     _info.success = _info.error < 1.0;
 
+                    // std::cout << "tn " << tn << " dt " << dt << " mdeg " << mdeg << "\n";
+                    // std::cout << "err_D " << err_D_scalar << " err_R " << err_R_scalar << "\n";
+                    // std::cout << "a_tol " << _info.absolute_tolerance << " r_tol " << _info.relative_tolerance << "\n";
+
                     value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / _info.error ) ) );
                     value_t new_dt = 0.8 * fac * dt;
 
@@ -539,20 +542,23 @@ namespace ponio::runge_kutta::pirock
      * @param alpha_beta_computer      \f$\alpha\f$ and \f$\beta\f$ computer object
      * @param eig_computer             Eigenvalue computer of explicit part of the problem
      * @param shampine_trick_caller    Shampine's trick computer
-     * @param tolerance                Tolerance for adaptive time step method (default: ponio::default_config::tol)
+     * @param absolute_tolerance       Absolute tolerance for adaptive time step method (default: ponio::default_config::tol)
+     * @param relative_tolerance       Relative tolerance for adaptive time step method (default: ponio::default_config::tol)
      */
     template <std::size_t l = 1, bool is_embedded = false, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t, typename shampine_trick_caller_t>
     auto
     pirock( alpha_beta_computer_t&& alpha_beta_computer,
         eig_computer_t&& eig_computer,
         shampine_trick_caller_t&& shampine_trick_caller,
-        value_t tolerance = default_config::tol )
+        value_t absolute_tolerance = default_config::tol,
+        value_t relative_tolerance = default_config::tol )
     {
         return pirock_impl<l, alpha_beta_computer_t, eig_computer_t, shampine_trick_caller_t, is_embedded, value_t>(
             std::forward<alpha_beta_computer_t>( alpha_beta_computer ),
             std::forward<eig_computer_t>( eig_computer ),
             std::forward<shampine_trick_caller_t>( shampine_trick_caller ),
-            tolerance );
+            absolute_tolerance,
+            relative_tolerance );
     }
 
     /**
@@ -718,7 +724,6 @@ namespace ponio::runge_kutta::pirock
         alpha_beta_computer_t alpha_beta_computer;
         eig_computer_t eig_computer;
         shampine_trick_caller_t shampine_trick_caller;
-        value_t tolerance;
 
         iteration_info<pirock_RDA_impl> _info;
 
@@ -740,7 +745,6 @@ namespace ponio::runge_kutta::pirock
             : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
             , shampine_trick_caller( false )
-            , tolerance( 0. )
             , _info()
         {
         }
@@ -751,7 +755,8 @@ namespace ponio::runge_kutta::pirock
          * @param _alpha_beta_computer   alpha and beta computer object
          * @param _eig_computer          eigenvalue computer functor
          * @param _shampine_trick_caller Shampine's trick functor
-         * @param tol                    tolerance
+         * @param a_tol                  absolute tolerance
+         * @param r_tol                  relative tolerance
          */
         template <typename _shampine_trick_caller_t_>
             requires std::same_as<_shampine_trick_caller_t_, shampine_trick_caller_t>
@@ -759,12 +764,12 @@ namespace ponio::runge_kutta::pirock
         pirock_RDA_impl( alpha_beta_computer_t&& _alpha_beta_computer,
             eig_computer_t&& _eig_computer,
             _shampine_trick_caller_t_&& _shampine_trick_caller,
-            value_t tol = default_config::tol )
+            value_t a_tol = default_config::tol,
+            value_t r_tol = default_config::tol )
             : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
             , shampine_trick_caller( std::forward<_shampine_trick_caller_t_>( _shampine_trick_caller ) )
-            , tolerance( tol )
-            , _info()
+            , _info( a_tol, r_tol )
         {
         }
 
@@ -1061,46 +1066,46 @@ namespace ponio::runge_kutta::pirock
                     // err_A = -3/20 \Delta t F_A(u^{(s+1)}) + 3/10 \Delta t F_A(u^{(s+4)}) - 3/20 \Delta t F_A(u^{(s+5)})
                     err_A = -0.15 * dt * Fa_u_sp1 + 0.3 * dt * pb( advection_op(), tn, u_sp4 ) - 0.15 * dt * pb( advection_op(), tn, u_sp5 );
 
-                    auto scalar_error_D = std::accumulate( err_D.array().begin(),
-                        err_D.array().end(),
-                        static_cast<value_t>( 0. ),
-                        []( value_t const& acc, value_t const xi )
-                        {
-                            return acc + std::abs( xi );
-                        } );
-                    auto scalar_error_R = std::accumulate( err_R.array().begin(),
-                        err_R.array().end(),
-                        static_cast<value_t>( 0. ),
-                        []( value_t const& acc, value_t const xi )
-                        {
-                            return acc + std::abs( xi );
-                        } );
-                    auto scalar_error_A = std::accumulate( err_A.array().begin(),
-                        err_A.array().end(),
-                        static_cast<value_t>( 0. ),
-                        []( value_t const& acc, value_t const xi )
-                        {
-                            return acc + std::abs( xi );
-                        } );
-
-                    // TODO: this couple of lines works only with samurai (because of err_D.array())
-                    auto err = std::max( scalar_error_D, scalar_error_R, std::pow( scalar_error_A, 2. / 3. ) );
-
-                    value_t new_dt = dt;
-                    if ( err > 0. )
-                    {
-                        new_dt = 0.8 * std::sqrt( tolerance / err ) * dt;
-                    }
-
-                    if ( err > tolerance )
-                    {
-                        return { tn, un, new_dt };
-                    }
-
                     u_np1 = us_s - err_D + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.25 * dt * Fa_u_sp1
                           + 0.75 * dt * pb( advection_op(), tn, u_sp5 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp1 )
                           + 0.5 * dt * pb( reaction_op(), tn, u_sp2 ) + 1.0 / ( 2. - 4. * gamma ) * shampine_element;
-                    return { tn + dt, u_np1, new_dt };
+
+                    auto accumulator_error_gen = []( auto const& yn, auto const& ynp1, value_t a_tol, value_t r_tol )
+                    {
+                        return [=, it_yn = yn.begin(), it_ynp1 = ynp1.begin()]( value_t const& acc, value_t const err_i ) mutable
+                        {
+                            return acc
+                                 + detail::power<2>( err_i / ( a_tol + r_tol * std::max( std::abs( *it_yn++ ), std::abs( *it_ynp1++ ) ) ) );
+                        };
+                    };
+
+                    // TODO: this couple of lines works only with samurai (because of err_D.array())
+                    value_t err_R_scalar = std::accumulate( err_R.array().begin(),
+                        err_R.array().end(),
+                        static_cast<value_t>( 0. ),
+                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
+                    value_t err_D_scalar = std::accumulate( err_D.array().begin(),
+                        err_D.array().end(),
+                        static_cast<value_t>( 0. ),
+                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
+                    value_t err_A_scalar = std::accumulate( err_A.array().begin(),
+                        err_A.array().end(),
+                        static_cast<value_t>( 0. ),
+                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
+
+                    _info.error   = std::max( err_D_scalar, err_R_scalar, std::pow( err_A_scalar, 2. / 3. ) );
+                    _info.success = _info.error < 1.0;
+
+                    value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / _info.error ) ) );
+                    value_t new_dt = 0.8 * fac * dt;
+
+                    // accepted step
+                    if ( _info.success )
+                    {
+                        return { tn + dt, u_np1, new_dt };
+                    }
+
+                    return { tn, un, new_dt };
                 }
 
                 u_np1 = us_s - err_D + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.25 * dt * Fa_u_sp1
