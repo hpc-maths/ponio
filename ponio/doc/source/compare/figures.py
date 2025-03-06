@@ -48,7 +48,7 @@ colors = [
 ]
 
 fig = go.Figure()
-for d in ode_lib.keys():
+for i, d in enumerate(ode_lib.keys()):
     print(f"extract data from: {d}")
     data = np.loadtxt(os.path.join(d, "lorenz.txt"))
     fig.add_trace(go.Scatter3d(
