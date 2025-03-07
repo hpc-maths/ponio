@@ -508,7 +508,7 @@ Helper functions
 
 User interface functions to build a PIROCK method.
 
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t)
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t, value_t)
   :project: ponio
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&)
@@ -551,7 +551,7 @@ Helper functions
 
 User interface functions to build a PIROCK method.
 
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t)
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t, value_t)
   :project: ponio
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&)

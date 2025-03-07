@@ -1158,20 +1158,23 @@ namespace ponio::runge_kutta::pirock
      * @param alpha_beta_computer      \f$\alpha\f$ and \f$\beta\f$ computer object
      * @param eig_computer             Eigenvalue computer of explicit part of the problem
      * @param shampine_trick_caller    Shampine's trick computer
-     * @param tolerance                Tolerance for adaptive time step method (default: ponio::default_config::tol)
+     * @param absolute_tolerance       Absolute tolerance for adaptive time step method (default: ponio::default_config::tol)
+     * @param relatove_tolerance       Relative tolerance for adaptive time step method (default: ponio::default_config::tol)
      */
     template <std::size_t l = 1, bool is_embedded = false, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t, typename shampine_trick_caller_t>
     auto
     pirock_RDA( alpha_beta_computer_t&& alpha_beta_computer,
         eig_computer_t&& eig_computer,
         shampine_trick_caller_t&& shampine_trick_caller,
-        value_t tolerance = default_config::tol )
+        value_t absolute_tolerance = default_config::tol,
+        value_t relative_tolerance = default_config::tol )
     {
         return pirock_RDA_impl<l, alpha_beta_computer_t, eig_computer_t, shampine_trick_caller_t, is_embedded, value_t>(
             std::forward<alpha_beta_computer_t>( alpha_beta_computer ),
             std::forward<eig_computer_t>( eig_computer ),
             std::forward<shampine_trick_caller_t>( shampine_trick_caller ),
-            tolerance );
+            absolute_tolerance,
+            relative_tolerance );
     }
 
     /**
