@@ -105,7 +105,7 @@ namespace ponio
             , success( true )
             , is_step( false )
             , number_of_stages( 0 )
-            , number_of_eval( ::detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
+            , number_of_eval( detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
             , tolerance( tol )
         {
         }
@@ -116,7 +116,7 @@ namespace ponio
             , success( true )
             , is_step( false )
             , number_of_stages( tableaus_t::N_stages )
-            , number_of_eval( ::detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
+            , number_of_eval( detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
             , tolerance( tol )
         {
         }

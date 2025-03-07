@@ -148,7 +148,7 @@ namespace ponio::runge_kutta::chebyshev
             }
             else
             {
-                return ddT<J>( x ) / ( ::detail::power<2>( dT<J>( x ) ) );
+                return ddT<J>( x ) / ( detail::power<2>( dT<J>( x ) ) );
             }
         }
 

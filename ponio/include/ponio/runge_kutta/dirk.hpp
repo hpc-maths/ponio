@@ -123,7 +123,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             state_t ui = un;
             auto op_i  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un )
                       - dt * butcher.A[I][I] * pb.f_t( tn + butcher.c[I] * dt );
-            auto rhs = ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt );
+            auto rhs = detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt );
 
             std::size_t n_eval = 0;
             ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_i, ui, rhs, n_eval );
@@ -169,14 +169,14 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             {
                 _info.number_of_eval += 1;
                 return k
-                     - pb.f( tn + butcher.c[I] * dt, ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt ) + dt * butcher.A[I][I] * k );
+                     - pb.f( tn + butcher.c[I] * dt, detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt ) + dt * butcher.A[I][I] * k );
             };
             auto dg = [&]( state_t const& k ) -> matrix_t
             {
                 return identity
                      - butcher.A[I][I] * dt
                            * pb.df( tn + butcher.c[I] * dt,
-                               ::detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt ) + dt * butcher.A[I][I] * k );
+                               detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt ) + dt * butcher.A[I][I] * k );
             };
 
             // call newton method
@@ -211,7 +211,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             // $$
             //   u^{n+1} = u^n + \Delta t \sum_{i} b_i k_i
             // $$
-            return ::detail::tpl_inner_product<N_stages>( butcher.b, Ki, un, dt );
+            return detail::tpl_inner_product<N_stages>( butcher.b, Ki, un, dt );
         }
 
         template <typename problem_t, typename state_t, typename array_ki_t, typename tab_t = tableau_t>
@@ -219,7 +219,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         state_t
         stage( Stage<N_stages + 1>, problem_t&, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
         {
-            return ::detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
+            return detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
         }
 
         /**

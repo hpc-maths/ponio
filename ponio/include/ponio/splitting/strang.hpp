@@ -291,7 +291,7 @@ namespace ponio::splitting::strang
             _call_inc( f, tn, u_np1_ref, dt, 0. );
             _call_inc( f, tn, u_np1_shift, dt, _info.delta );
 
-            _info.error = ::detail::error_estimate( un, u_np1_ref, u_np1_shift );
+            _info.error = ::ponio::detail::error_estimate( un, u_np1_ref, u_np1_shift );
 
             value_t new_dt = 0.9 * std::sqrt( _info.tolerance / _info.error ) * dt;
             new_dt         = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
