@@ -13,7 +13,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace detail
+namespace ponio::detail
 {
     template <typename state_t>
     auto
@@ -111,13 +111,13 @@ namespace detail
      *
      * @code{,cpp}
      *   int i = 42;
-     *   const std::array<int,8> arr = detail::init_fill_array<8>( i ); // all values of `arr` are `42`
+     *   const std::array<int,8> arr = ponio::detail::init_fill_array<8>( i ); // all values of `arr` are `42`
      * @endcode
      *
      * @details `value` can also be an invokable object that take an unsigned integer and return type stored in array `T`.
      *
      * @code{,cpp}
-     *   const std::array<int,8> arr = detail::init_fill_array<8>([](int i){ return i*i; }); // get {0,1,4,9,16,25,36,49}
+     *   const std::array<int,8> arr = ponio::detail::init_fill_array<8>([](int i){ return i*i; }); // get {0,1,4,9,16,25,36,49}
      * @endcode
      *
      */
@@ -167,7 +167,7 @@ namespace detail
      * @param args arguments of function `f`
      *
      * @code{,cpp}
-     *   const std::array<int,8> arr = detail::init_fill_array<3>([](int i){ return i*i; }, 2); // get {4,4,4}
+     *   const std::array<int,8> arr = ponio::detail::init_fill_array<3>([](int i){ return i*i; }, 2); // get {4,4,4}
      * @endcode
      */
     template <std::size_t N, typename Function_t, typename... Args>
@@ -228,4 +228,4 @@ namespace detail
     template <typename state_t>
     concept has_array_range = requires( state_t u ) { requires std::ranges::range<decltype( u.array() )>; };
 
-} // namespace detail
+} // namespace ponio::detail

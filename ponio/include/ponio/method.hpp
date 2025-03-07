@@ -58,7 +58,7 @@ namespace ponio
          */
         method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
             : alg( alg_ )
-            , kis( ::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
+            , kis( ::ponio::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
         {
         }
 
@@ -136,7 +136,7 @@ namespace ponio
         std::tuple<value_t, state_t, value_t>
         _return( value_t tn, state_t const& un, value_t dt )
         {
-            alg.info().error = ::detail::error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
+            alg.info().error = ::ponio::detail::error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
 
             value_t new_dt = 0.9 * std::pow( alg.info().tolerance / alg.info().error, 1. / static_cast<value_t>( Algorithm_t::order ) ) * dt;
             new_dt = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
@@ -207,7 +207,7 @@ namespace ponio
 
         method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
             : alg( alg_ )
-            , kis( ::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
+            , kis( ::ponio::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
         {
         }
 

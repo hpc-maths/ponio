@@ -64,7 +64,7 @@ namespace ponio::runge_kutta::rock
                 0.,
                 []( auto sum, auto x )
                 {
-                    return sum + ::detail::power<2>( std::abs( x ) );
+                    return sum + ::ponio::detail::power<2>( std::abs( x ) );
                 } ) );
         }
 
@@ -380,14 +380,14 @@ namespace ponio::runge_kutta::rock
                                   0.,
                                   [&]( auto sum, auto unp1_i )
                                   {
-                                      return sum + ::detail::power<2>( error( unp1_i, *it_un++, *it_tmp++ ) );
+                                      return sum + ::ponio::detail::power<2>( error( unp1_i, *it_un++, *it_tmp++ ) );
                                   } )
                               / static_cast<value_t>( std::size( unp1 ) ) );
         }
 
         // same with something which contains a range
         template <typename state_t>
-            requires ::detail::has_array_range<state_t>
+            requires ::ponio::detail::has_array_range<state_t>
         auto
         error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
@@ -616,14 +616,14 @@ namespace ponio::runge_kutta::rock
                                   0.,
                                   [&]( auto sum, auto unp1_i )
                                   {
-                                      return sum + ::detail::power<2>( error( unp1_i, *it_tmp++ ) );
+                                      return sum + ::ponio::detail::power<2>( error( unp1_i, *it_tmp++ ) );
                                   } )
                               / static_cast<value_t>( std::size( unp1 ) ) );
         }
 
         // same with something which contains a range
         template <typename state_t>
-            requires ::detail::has_array_range<state_t>
+            requires ::ponio::detail::has_array_range<state_t>
         auto
         error( state_t const& unp1, state_t const& tmp )
         {

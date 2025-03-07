@@ -101,7 +101,7 @@ namespace ponio::runge_kutta::butcher
             {
                 for ( std::size_t j = 0ul; j < Tableau::N_stages; ++j )
                 {
-                    partial_sum += detail::power<2>( Tableau::A[i][j] );
+                    partial_sum += ponio::detail::power<2>( Tableau::A[i][j] );
                 }
             }
 
