@@ -10,6 +10,7 @@ This section is the comparison with some ODE solvers, we present the same exampl
     diffeq/README
     gsl/README
     odeint/README
+    petsc/README
     scipy/README
 
 Lorenz equations
@@ -44,6 +45,7 @@ This method is pretty much always in library with various name:
 * ``RK4`` in :doc:`DifferentialEquations.jl <diffeq/README>`
 * ``gsl_odeiv2_step_rk4`` in :doc:`GSL <gsl/README>`
 * ``runge_kutta4`` in :doc:`odeint <odeint/README>`
+* ``TSRK4`` in :doc:`petsc <petsc/README>`
 * ``rk_44`` in :doc:`ponio <ponio/README>`
 
 except in :doc:`SciPy <scipy/README>` where we need to add this.
