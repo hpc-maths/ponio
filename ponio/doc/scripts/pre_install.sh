@@ -36,7 +36,7 @@ wget $URL_PlantUML -O ponio/doc/source/plantuml.jar
 pushd ponio/doc/source/compare
 
 # exclude diffeq from compare because it takes to much memory to install on RTD builder
-compare=("ascent" "gsl" "odeint" "ponio" "scipy")
+compare=("ascent" "gsl" "odeint" "petsc" "ponio" "scipy")
 for dir in "${compare[@]}"; do
   make -C ${dir}
 done
