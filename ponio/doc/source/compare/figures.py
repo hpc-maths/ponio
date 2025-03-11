@@ -11,6 +11,7 @@ ode_lib = {
     # "diffeq": "DifferentialEquations.jl",
     "gsl": "GSL",
     "odeint": "Boost::odeint",
+    "petsc": "PETSc",
     "ponio": "ponio",
     "scipy": "SciPy"
 }
