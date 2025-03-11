@@ -31,3 +31,4 @@ dependencies:
   - boost-cpp
   - gsl
   - scipy
+  - petsc
