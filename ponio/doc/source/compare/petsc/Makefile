@@ -4,10 +4,10 @@ all: lorenz.txt
 	./$<
 
 %.out: %.o
-	${CC} -O0 -g -pg -Wl,-rpath,${CONDA_PREFIX}/lib -L ${CONDA_PREFIX}/lib $< -lpetsc -lm -o $@
+	${CC} -Wl,-rpath,${CONDA_PREFIX}/lib -L ${CONDA_PREFIX}/lib $< -lpetsc -lm -fPIE -o $@
 
 %.o: %.c
-	${CC} -O0 -g -pg -I ${CONDA_PREFIX}/include -c $<
+	${CC} -I ${CONDA_PREFIX}/include -c $<
 
 clean:
 	rm -f *.out *.o *.txt
