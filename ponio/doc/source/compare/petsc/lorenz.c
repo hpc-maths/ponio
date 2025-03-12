@@ -31,7 +31,7 @@ main(int argc, char** argv)
   double y0[3] = {1.0, 1.0, 1.0};
   double t0 = 0.0;
   double tf = 20.0;
-  double dt = 0.05;
+  double dt = 0.01;
 
   int n_sol = (tf-t0)/dt;
   double ** sol = (double **)malloc(n_sol*sizeof(double[4]));

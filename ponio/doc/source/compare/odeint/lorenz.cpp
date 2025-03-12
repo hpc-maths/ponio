@@ -32,7 +32,7 @@ main()
     };
     double t0 = 0.;
     double tf = 20.0;
-    double dt = 0.05;
+    double dt = 0.01;
 
     auto rk4 = boost::numeric::odeint::runge_kutta4<state_t>();
     boost::numeric::odeint::integrate_const( rk4, lorenz, y0, t0, tf, dt, vec_observer );

@@ -30,7 +30,7 @@ main()
     };
     double t0 = 0.;
     double tf = 20.0;
-    double dt = 0.05;
+    double dt = 0.01;
 
     asc::RK4 integrator;
 

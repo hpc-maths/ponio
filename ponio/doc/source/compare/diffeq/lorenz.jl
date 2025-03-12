@@ -14,7 +14,7 @@ end
 y0 = [1.0; 1.0; 1.0]
 p = [10.0, 28.0, 8.0 / 3.0]
 t_span = (0.0, 20.0)
-dt = 0.05
+dt = 0.01
 
 lorenz_pb = ODEProblem(lorenz!, y0, t_span, p)
 sol = solve(lorenz_pb, RK4(), adaptive=false, dt=dt)

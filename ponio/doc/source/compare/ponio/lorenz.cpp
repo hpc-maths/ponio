@@ -25,7 +25,7 @@ main()
         {1., 1., 1.}
     };
     ponio::time_span<double> t_span = { 0., 20.0 };
-    double dt                       = 0.05;
+    double dt                       = 0.01;
 
     ponio::solve( lorenz, ponio::runge_kutta::rk_44(), y0, t_span, dt, observer::file_observer( "lorenz.txt" ) );
 
