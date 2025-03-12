@@ -67,6 +67,9 @@ for i, d in enumerate(ode_lib.keys()):
 
 fig.update_layout(
     scene=dict(aspectmode='cube'),
+    scene_camera=dict(
+        eye=dict(x=1.4, y=-1.1, z=0.6),
+    ),
     autosize=False,
     width=600,
     height=600,
