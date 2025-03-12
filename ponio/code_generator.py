@@ -322,11 +322,14 @@ parser.add_argument('-d', '--doc', required=False, action='store_true',
                     help="generate also Sphinx documentation (api/algorithm.rst file)")
 parser.add_argument('-do', '--doc-output', type=str, required=False,
                     help="Name of output RST file")
-parser.add_argument('--offline', required=False, action='store_false',
+parser.add_argument('--offline', required=False, action='store_true',
                     help="make an offline generation (without bibliography research in Doxygen comments)")
 
 if __name__ == '__main__':
     args = parser.parse_args()
+
+    if args.offline:
+        doi_bib = doi_bib_offline
 
     list_erk, list_exprk, list_dirk, list_irk = multisplit_list(
         4)(extract_method(args.FILE), tag_id)
