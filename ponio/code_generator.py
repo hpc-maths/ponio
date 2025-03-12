@@ -22,12 +22,15 @@ options:
 
 import sympy as sp
 import numpy as np
-import itertools
 
 import json
 import os
 import sys
 import argparse
+
+# type hints
+from typing import Any
+from collections.abc import Callable
 
 
 def phi(i, j=None, c=None):
@@ -68,13 +71,13 @@ def phi(i, j=None, c=None):
     )
 
 
-def is_lower_matrix(M: sp.Matrix):
+def is_lower_matrix(M: sp.Matrix) -> bool:
     return sum([
         sp.Abs(M[i, j]) for i, j in zip(*np.triu_indices(M.cols, 1))
     ]) == 0
 
 
-def is_strictly_lower_matrix(M: sp.Matrix):
+def is_strictly_lower_matrix(M: sp.Matrix) -> bool:
     return sum([
         sp.Abs(M[i, j]) for i, j in zip(*np.triu_indices(M.cols))
     ]) == 0
@@ -143,7 +146,7 @@ class multisplit_list:
     def __init__(self, n: int):
         self.n = n
 
-    def __call__(self, seq: list, condition):
+    def __call__(self, seq: list, condition: Callable[[Any], int]):
         r = [[] for _ in range(self.n)]
         for x in seq:
             r[condition(x)].append(x)
@@ -160,7 +163,10 @@ def tag_id(rk):
     return select[rk['tag']]
 
 
-def doi_bib(doi: str):
+def doi_bib_crossref(doi: str):
+    """
+        return bibliography reference from doi with a request to `api.crossref.org`
+    """
     import urllib.request
 
     with urllib.request.urlopen(f"https://api.crossref.org/works/{doi}") as response:
@@ -177,6 +183,20 @@ def doi_bib(doi: str):
         'url': message['URL'],
         'bib': f"{author}, *{title}*, {pubdate}, {publisher}"
     }
+
+
+def doi_bib_offline(doi: str):
+    """
+        return bibliography reference as doi and url to doi website
+    """
+    return {
+        'url': f'https://doi.org/{doi}',
+        'bib': doi
+    }
+
+
+# make a request to get bibliography by default
+doi_bib = doi_bib_crossref
 
 
 def expRK_code_skeleton(X: list, c: list):
@@ -298,12 +318,18 @@ parser.add_argument('-o', '--output', type=str,
                     help="Name of output file header C++")
 parser.add_argument('--Ndigit', type=int, default=36, required=False,
                     help="number of digit in output Butcher tableau [default: 36]")
-parser.add_argument('-d', '--doc', required=False, action='store_true')
+parser.add_argument('-d', '--doc', required=False, action='store_true',
+                    help="generate also Sphinx documentation (api/algorithm.rst file)")
 parser.add_argument('-do', '--doc-output', type=str, required=False,
                     help="Name of output RST file")
+parser.add_argument('--offline', required=False, action='store_true',
+                    help="make an offline generation (without bibliography research in Doxygen comments)")
 
 if __name__ == '__main__':
     args = parser.parse_args()
+
+    if args.offline:
+        doi_bib = doi_bib_offline
 
     list_erk, list_exprk, list_dirk, list_irk = multisplit_list(
         4)(extract_method(args.FILE), tag_id)
