@@ -24,7 +24,7 @@ main()
   double y0[3] = {1.0, 1.0, 1.0};
   double t0 = 0.0;
   double tf = 20.0;
-  double dt = 0.05;
+  double dt = 0.01;
 
   gsl_odeiv2_system lorenz_pb = {lorenz, NULL, 3, &params};
   gsl_odeiv2_driver * meth = gsl_odeiv2_driver_alloc_y_new (&lorenz_pb, gsl_odeiv2_step_rk4, dt, 1e-6, 0.0);
