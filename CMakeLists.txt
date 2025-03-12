@@ -94,12 +94,19 @@ if (BUILD_DOC)
   set(DOC_ALGO_CMD -d -do ${DOC_ALGO_RST})
 endif()
 
+option(BUILD_OFFLINE "build offline (without references to methods)" OFF)
+set(BUILD_OFFLINE_OPT "")
+if(BUILD_OFFLINE)
+  set(BUILD_OFFLINE_OPT --offline)
+endif()
+
 add_custom_command(
     OUTPUT ${BUTCHER_METHODS} ${DOC_ALGO_RST}
     COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/ponio/code_generator.py ${json_files}
                 -o ${BUTCHER_METHODS}
                 --Ndigit=${Ndigit}
                 ${DOC_ALGO_CMD}
+                ${BUILD_OFFLINE_OPT}
     COMMENT "Generating code..."
     VERBATIM
 )
