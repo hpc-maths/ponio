@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # generate ponio/runge_kutta/butcher_methods.hpp file
-cmake . -B ./build -G "Ninja Multi-Config" -DBUILD_DOC=ON
+cmake . -B ./build -G "Ninja Multi-Config" -DBUILD_DOC=ON -DBUILD_OFFLINE=OFF
 cmake --build ./build --config Release
 
 # convert notebooks into rst files for documentation

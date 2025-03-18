@@ -94,7 +94,7 @@ if (BUILD_DOC)
   set(DOC_ALGO_CMD -d -do ${DOC_ALGO_RST})
 endif()
 
-option(BUILD_OFFLINE "build offline (without references to methods)" OFF)
+option(BUILD_OFFLINE "build offline (without references to methods)" ON)
 set(BUILD_OFFLINE_OPT "")
 if(BUILD_OFFLINE)
   set(BUILD_OFFLINE_OPT --offline)
