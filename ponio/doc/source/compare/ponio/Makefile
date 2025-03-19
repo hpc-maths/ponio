@@ -1,6 +1,6 @@
 PONIO_include = ../../../../include
 
-all: lorenz.txt
+all: lorenz.txt transport.txt
 
 %.txt: %.out
 	./$<
