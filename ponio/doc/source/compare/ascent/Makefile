@@ -1,7 +1,7 @@
 GIT_repository = https://github.com/AnyarInc/Ascent.git
 ASCENT_include = Ascent
 
-all: lorenz.txt
+all: lorenz.txt transport.txt
 
 
 %.txt: %.out

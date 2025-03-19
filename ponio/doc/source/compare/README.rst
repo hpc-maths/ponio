@@ -52,3 +52,31 @@ except in :doc:`SciPy <scipy/README>` where we need to add this.
 
 .. raw:: html
     :file: lorenz.html
+
+
+Transport equation
+------------------
+
+In this example we would like to solve the following PDE:
+
+.. math::
+
+    \partial_t u + a \partial_x u = 0
+
+with :math:`t>0`, on the torus :math:`x\in [0, 1)`, a velocity :math:`a=1` and with the initial condition given by:
+
+.. math::
+
+    u(0, x) = \begin{cases}
+        x - 0.25  & \text{if } x\in[0.25, 0.5[ \\
+        -x + 0.75 & \text{if } x\in[0.5, 0.75[ \\
+        0         & \text{else}
+    \end{cases}
+
+We choose  centred differences of order 2 to estimate the :math:`x` derivative:
+
+.. math::
+
+    \partial_x u(t^n, x_i) \approx \frac{u^n_{i+1} - u^n_{i-1}}{2\Delta x}
+
+.. image:: transport.png
