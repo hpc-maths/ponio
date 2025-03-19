@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <valarray>
 #include <vector>
@@ -18,7 +19,8 @@ main()
     double dt       = 0.01;
 
     std::valarray<double> x( n_x );
-    std::ranges::generate( x,
+    std::generate( std::begin( x ),
+        std::end( x ),
         [i = 0, n_x]() mutable
         {
             return static_cast<double>( i++ ) / static_cast<double>( n_x );
