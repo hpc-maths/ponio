@@ -63,12 +63,12 @@ x_0 = -25.
 
 os.makedirs(data_dir, exist_ok=True)
 
-# make = subprocess.Popen(["make", name])
-# make.wait()
+make = subprocess.Popen(["make", name])
+make.wait()
 
-# args = [os.path.join(".", name)]
-# process = subprocess.Popen(args)
-# process.wait()
+args = [os.path.join(".", name)]
+process = subprocess.Popen(args)
+process.wait()
 
 # assume we want read all h5 files in this directory and they all finish with `***_n.h5` with `n` the number of iteration
 # 1. list all "*.h5" files in given directory
