@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <cmath>
 #include <filesystem>
 #include <string>
@@ -9,6 +11,8 @@
 #include <ponio/observer.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 /*
 solve Curtiss and Hirschfelder problem:

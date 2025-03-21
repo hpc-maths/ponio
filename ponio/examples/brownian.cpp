@@ -60,7 +60,7 @@ main( int argc, char* argv[] )
 
     std::size_t n = 10;
     app.add_option( "N", n, "Number of brownian motion" );
-    CLI11_PARSE( app, argc, argv );
+    CLI11_PARSE( app, argc, argv ); // NOLINT(misc-include-cleaner)
 
     using state_t = std::valarray<double>;
 

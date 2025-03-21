@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <iostream>
 #include <valarray>
 
@@ -19,6 +21,8 @@
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 // Heat
 class heat_model
