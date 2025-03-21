@@ -35,7 +35,7 @@ This system is solved by RK(11,8) Runge-Kutta method with time step $\Delta t=0.
  */
 
 int
-main( int argc, char* argv[] )
+main( int argc, char** argv )
 {
     CLI::App app{ "Launch Lotka-Volerra equation simulation solved by RK(11,8) method" };
 

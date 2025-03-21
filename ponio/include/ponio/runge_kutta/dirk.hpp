@@ -88,6 +88,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             : butcher()
             , tol( tol_ )
             , max_iter( max_iter_ )
+            , linalg( false )
         {
         }
 

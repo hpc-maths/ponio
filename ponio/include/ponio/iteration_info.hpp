@@ -207,7 +207,6 @@ namespace ponio
             : delta( delta_ )
             , error( static_cast<value_t>( 0 ) )
             , number_of_steps( splitting_t::N_steps )
-            , number_of_eval()
             , tolerance( tol )
             , ptr_methods( &methods )
         {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// NOLINT(misc-include-cleaner)
+// NOLINTBEGIN(misc-include-cleaner)
 
 #include <algorithm>
 #include <cmath>
@@ -23,7 +23,7 @@
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
 
-// NOLINT(misc-include-cleaner)
+// NOLINTEND(misc-include-cleaner)
 
 // Heat
 class heat_model
