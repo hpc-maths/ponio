@@ -19,10 +19,12 @@ Checks: "*,
         -hicpp-named-parameter,
         -cppcoreguidelines-avoid-magic-numbers,
         -cppcoreguidelines-init-variables,
+        -hicpp-uppercase-literal-suffix,
+        -readability-uppercase-literal-suffix
 "
 WarningsAsErrors: '*'
-HeaderFilterRegex: ''
-FormatStyle:     none
+HeaderFilterRegex: 'ponio/include/ponio/*.hpp'
+FormatStyle: none
 CheckOptions:
  - key: hicpp-signed-bitwise.IgnorePositiveIntegerLiterals
    value: true
