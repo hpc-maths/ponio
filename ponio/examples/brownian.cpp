@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
+#include <cstdint>
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
@@ -17,9 +20,11 @@
 
 #include <CLI/CLI.hpp>
 
+// NOLINTEND(misc-include-cleaner)
+
 struct C_random_device
 {
-    using result_type = unsigned int;
+    using result_type = std::uint_fast32_t;
 
     static constexpr result_type
     min()
@@ -80,7 +85,7 @@ main( int argc, char* argv[] )
         std::stringstream ssfilename;
         ssfilename << "brownian_" << i << ".dat";
         auto filename = std::filesystem::path( dirname ) / ssfilename.str();
-        observer::file_observer fobs( filename );
+        ponio::observer::file_observer fobs( filename );
         ponio::solve( brownian_pb, ponio::runge_kutta::rk_33(), yini, { 0., 10. }, dt, fobs );
     }
 

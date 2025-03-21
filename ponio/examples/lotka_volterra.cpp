@@ -47,7 +47,7 @@ main( int argc, char* argv[] )
     app.add_option( "x0", x0, "initial condition (x,y)(t=0) = (x0,x0)" );
     CLI11_PARSE( app, argc, argv );
 
-    observer::file_observer fobs( filename );
+    ponio::observer::file_observer fobs( filename );
 
     // parameters
     double const alpha = 2. / 3.;

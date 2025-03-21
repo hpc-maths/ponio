@@ -16,7 +16,7 @@ main( int, char** )
 {
     std::string const dirname = "lorenz_data";
     auto filename             = std::filesystem::path( dirname ) / "lorenz.dat";
-    observer::file_observer fobs( filename );
+    ponio::observer::file_observer fobs( filename );
 
     using state_t = std::valarray<double>;
 

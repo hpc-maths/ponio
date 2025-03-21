@@ -7,9 +7,8 @@
 #include <array>
 #include <cstddef>
 #include <ranges>
-#include <tuple>
+#include <tuple> // NOLINT(misc-include-cleaner)
 
-#include "butcher_tableau.hpp"
 #include "detail.hpp"
 #include "stage.hpp"
 
@@ -30,8 +29,8 @@ namespace ponio
         using value_t = typename tableau_t::value_t;
 
         value_t error;                /**< error makes on time iteration for adaptive time step method */
-        bool success;                 /**< sets as true only for success iteration */
-        bool is_step;                 /**< sets as true only if iterator is on a step given in solver */
+        bool success = true;          /**< sets as true only for success iteration */
+        bool is_step = false;         /**< sets as true only if iterator is on a step given in solver */
         std::size_t number_of_stages; /**< number of stages of method */
         std::size_t number_of_eval;   /**< number of evaluation of function */
         value_t tolerance;            /**< tolerance for the method (for adaptive time step method) */
@@ -43,8 +42,6 @@ namespace ponio
          */
         iteration_info( value_t tol = static_cast<value_t>( 0 ) )
             : error( static_cast<value_t>( 0 ) )
-            , success( true )
-            , is_step( false )
             , number_of_stages( 0 )
             , number_of_eval( 0 )
             , tolerance( tol )
@@ -54,8 +51,6 @@ namespace ponio
         iteration_info( value_t tol = static_cast<value_t>( 0 ) )
             requires stages::has_static_number_of_stages<tableau_t>
             : error( static_cast<value_t>( 0 ) )
-            , success( true )
-            , is_step( false )
             , number_of_stages( tableau_t::N_stages )
             , number_of_eval( 0 )
             , tolerance( tol )
@@ -89,8 +84,8 @@ namespace ponio
         using value_t = typename tableaus_t::value_t;
 
         value_t error;                                                   /**< error makes on time iteration for adaptive time step method */
-        bool success;                                                    /**< sets as true only for success iteration */
-        bool is_step;                                                    /**< sets as true only if iterator is on a step given in solver */
+        bool success = true;                                             /**< sets as true only for success iteration */
+        bool is_step = false;                                            /**< sets as true only if iterator is on a step given in solver */
         std::size_t number_of_stages;                                    /**< number of stages of method */
         std::array<std::size_t, tableaus_t::N_operators> number_of_eval; /**< number of evaluation of function */
         value_t tolerance;                                               /**< tolerance for the method (for adaptive time step method) */
@@ -102,8 +97,6 @@ namespace ponio
          */
         iteration_info( value_t tol = static_cast<value_t>( 0 ) )
             : error( static_cast<value_t>( 0 ) )
-            , success( true )
-            , is_step( false )
             , number_of_stages( 0 )
             , number_of_eval( detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
             , tolerance( tol )
@@ -113,8 +106,6 @@ namespace ponio
         iteration_info( value_t tol = static_cast<value_t>( 0 ) )
             requires stages::has_static_number_of_stages<tableaus_t>
             : error( static_cast<value_t>( 0 ) )
-            , success( true )
-            , is_step( false )
             , number_of_stages( tableaus_t::N_stages )
             , number_of_eval( detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
             , tolerance( tol )
@@ -200,10 +191,10 @@ namespace ponio
         using value_t = typename splitting_t::value_t;
         using tuple_t = typename splitting_t::tuple_t;
 
-        value_t delta; /**< parameter of shifting for adaptive time step method */
-        value_t error; /**< error makes on time iteration for adaptive time step method */
-        bool success;  /**< sets as true only for success iteration */
-        bool is_step;  /**< sets as true only if iterator is on a step given in solver */
+        value_t delta;        /**< parameter of shifting for adaptive time step method */
+        value_t error;        /**< error makes on time iteration for adaptive time step method */
+        bool success = true;  /**< sets as true only for success iteration */
+        bool is_step = false; /**< sets as true only if iterator is on a step given in solver */
 
         std::size_t number_of_steps;                                /**< number of stages of method */
         details::tuple_of_number_of_eval_t<tuple_t> number_of_eval; /**< number of evaluation of function */
@@ -215,12 +206,12 @@ namespace ponio
         iteration_info( tuple_t& methods, value_t delta_ = static_cast<value_t>( 0 ), value_t tol = static_cast<value_t>( 0 ) )
             : delta( delta_ )
             , error( static_cast<value_t>( 0 ) )
-            , success( true )
-            , is_step( false )
             , number_of_steps( splitting_t::N_steps )
+            , number_of_eval()
             , tolerance( tol )
             , ptr_methods( &methods )
         {
+            reset_eval();
         }
 
         /**
@@ -277,12 +268,12 @@ namespace ponio
          */
         using value_t = typename user_defined_method_t::value_t;
 
-        value_t error;                /**< error makes on time iteration for adaptive time step method */
-        bool success;                 /**< sets as true only for success iteration */
-        bool is_step;                 /**< sets as true only if iterator is on a step given in solver */
-        std::size_t number_of_stages; /**< number of stages of method */
-        std::size_t number_of_eval;   /**< number of evaluation of function */
-        value_t tolerance;            /**< tolerance for the method (for adaptive time step method) */
+        value_t error;                        /**< error makes on time iteration for adaptive time step method */
+        bool success                 = true;  /**< sets as true only for success iteration */
+        bool is_step                 = false; /**< sets as true only if iterator is on a step given in solver */
+        std::size_t number_of_stages = 0;     /**< number of stages of method */
+        std::size_t number_of_eval   = 1;     /**< number of evaluation of function */
+        value_t tolerance;                    /**< tolerance for the method (for adaptive time step method) */
 
         /**
          * @brief Construct a new iteration info object
@@ -291,10 +282,6 @@ namespace ponio
          */
         iteration_info( value_t tol = static_cast<value_t>( 0 ) )
             : error( static_cast<value_t>( 0 ) )
-            , success( true )
-            , is_step( false )
-            , number_of_stages( 0 )
-            , number_of_eval( 1 )
             , tolerance( tol )
         {
         }

@@ -35,7 +35,7 @@ The next sections specify how to define the observer :code:`obs`, to write into 
 The file observer
 -----------------
 
-In this example we export data into a file with :cpp:class:`observer::file_observer` class. The ponio library provides this output for simple types and containers (thanks concepts). The output is formate as following
+In this example we export data into a file with :cpp:class:`ponio::observer::file_observer` class. The ponio library provides this output for simple types and containers (thanks concepts). The output is formate as following
 
 .. literalinclude:: ../_static/cpp/lotka_volterra_fobs.txt
   :language: text
@@ -43,7 +43,7 @@ In this example we export data into a file with :cpp:class:`observer::file_obser
 
 First column is the current time, the last one is the current time step, and between we get the multiple values of current state. Other observers provide by ponio have the same format.
 
-The :cpp:class:`observer::file_observer` class can be build with a `std::string <https://en.cppreference.com/w/cpp/string/basic_string>`_ or a `std::filesystem::path <https://en.cppreference.com/w/cpp/filesystem/path>`_. The constructor makes necessary directory if needed.
+The :cpp:class:`ponio::observer::file_observer` class can be build with a `std::string <https://en.cppreference.com/w/cpp/string/basic_string>`_ or a `std::filesystem::path <https://en.cppreference.com/w/cpp/filesystem/path>`_. The constructor makes necessary directory if needed.
 
 .. literalinclude:: ../_static/cpp/lotka_volterra_fobs.cpp
   :language: cpp
@@ -57,7 +57,7 @@ The :cpp:class:`observer::file_observer` class can be build with a `std::string 
 
   .. code-block:: cpp
 
-    using namespace observer;
+    using namespace ponio::observer;
 
     auto obs = "output.txt"_fobs;
 
@@ -78,7 +78,7 @@ The full example can be found in :download:`lotka_volterra_fobs.cpp <../_static/
 The :code:`cout` observer
 -------------------------
 
-In this example we export data into the standard output with :cpp:class:`observer::cout_observer` class.
+In this example we export data into the standard output with :cpp:class:`ponio::observer::cout_observer` class.
 
 .. literalinclude:: ../_static/cpp/lotka_volterra_cobs.cpp
   :language: cpp
@@ -103,7 +103,7 @@ The full example can be found in :download:`lotka_volterra_cobs.cpp <../_static/
 The stream observer
 -------------------
 
-In this example we export data into the standard output with :cpp:class:`observer::stream_observer` class. This observer is the more generally one and can be plug with any other type of stream, for example a `std::stringstream <https://en.cppreference.com/w/cpp/io/basic_stringstream>`_. The :cpp:class:`observer::file_observer` is a specialization with a `std::ofstream <https://en.cppreference.com/w/cpp/io/basic_ofstream>`_ and :cpp:class:`observer::cout_observer` with `std::cout <https://en.cppreference.com/w/cpp/io/cout>`_.
+In this example we export data into the standard output with :cpp:class:`ponio::observer::stream_observer` class. This observer is the more generally one and can be plug with any other type of stream, for example a `std::stringstream <https://en.cppreference.com/w/cpp/io/basic_stringstream>`_. The :cpp:class:`ponio::observer::file_observer` is a specialization with a `std::ofstream <https://en.cppreference.com/w/cpp/io/basic_ofstream>`_ and :cpp:class:`ponio::observer::cout_observer` with `std::cout <https://en.cppreference.com/w/cpp/io/cout>`_.
 
 
 .. literalinclude:: ../_static/cpp/lotka_volterra_sobs.cpp

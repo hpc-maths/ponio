@@ -4,12 +4,16 @@
 
 #pragma once
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include "runge_kutta/dirk.hpp"
 #include "runge_kutta/erk.hpp"
 #include "runge_kutta/exprk.hpp"
 #include "runge_kutta/lrk.hpp"
 #include "runge_kutta/rkc.hpp"
 #include "runge_kutta/rkl.hpp"
+
+// NOLINTEND(misc-include-cleaner)
 
 namespace ponio::runge_kutta
 {
@@ -28,6 +32,10 @@ namespace ponio::runge_kutta
 
 } // namespace ponio::runge_kutta
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include "runge_kutta/butcher_methods.hpp"
 #include "runge_kutta/pirock.hpp"
 #include "runge_kutta/rock.hpp"
+
+// NOLINTEND(misc-include-cleaner)

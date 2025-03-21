@@ -64,13 +64,13 @@ main( int, char** )
     state_t const yini = { 0.994, 0., 0., -2.00158510637908252240537862224 };
 
     filename = ( std::filesystem::path( dirname ) / "arenstorf_rk546m.dat" ).string();
-    ponio::solve( arenstorf_pb, ponio::runge_kutta::rk54_6m( 1e-5 ), yini, { 0., tf }, dt, observer::file_observer( filename ) );
+    ponio::solve( arenstorf_pb, ponio::runge_kutta::rk54_6m( 1e-5 ), yini, { 0., tf }, dt, ponio::observer::file_observer( filename ) );
 
     filename = ( std::filesystem::path( dirname ) / "arenstorf_rk547m.dat" ).string();
-    ponio::solve( arenstorf_pb, ponio::runge_kutta::rk54_7m( 1e-5 ), yini, { 0., tf }, dt, observer::file_observer( filename ) );
+    ponio::solve( arenstorf_pb, ponio::runge_kutta::rk54_7m( 1e-5 ), yini, { 0., tf }, dt, ponio::observer::file_observer( filename ) );
 
     filename = ( std::filesystem::path( dirname ) / "arenstorf_rk547s.dat" ).string();
-    ponio::solve( arenstorf_pb, ponio::runge_kutta::rk54_7s( 1e-5 ), yini, { 0., tf }, dt, observer::file_observer( filename ) );
+    ponio::solve( arenstorf_pb, ponio::runge_kutta::rk54_7s( 1e-5 ), yini, { 0., tf }, dt, ponio::observer::file_observer( filename ) );
 
     return 0;
 }

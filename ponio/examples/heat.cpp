@@ -108,7 +108,7 @@ main()
 
     save( x, yini, std::filesystem::path( dirname ) / "heat_ini.dat" );
 
-    yend = ponio::solve( pb_heat, ponio::runge_kutta::explicit_rkc2<15>(), yini, tspan, dt, observer::null_observer() );
+    yend = ponio::solve( pb_heat, ponio::runge_kutta::explicit_rkc2<15>(), yini, tspan, dt, ponio::observer::null_observer() );
 
     std::valarray<double> const yexa = heat_model::fundamental_sol( tend, x );
 

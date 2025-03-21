@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 #include <iostream>
-#include <valarray>
 
 #include <algorithm>
 #include <cmath>
@@ -28,7 +27,6 @@
 #include <samurai/samurai.hpp>
 #include <samurai/schemes/fv.hpp>
 
-#include <filesystem>
 namespace fs = std::filesystem;
 
 namespace samurai
@@ -116,7 +114,7 @@ save( fs::path const& path, std::string const& filename, field_t& u, std::string
 int
 main( int argc, char** argv )
 {
-    PetscInitialize( &argc, &argv, 0, nullptr );
+    PetscInitialize( &argc, &argv, nullptr, nullptr );
 
     constexpr std::size_t dim = 2; // cppcheck-suppress unreadVariable
     using config_t            = samurai::MRConfig<dim, 3>;
@@ -127,8 +125,8 @@ main( int argc, char** argv )
     constexpr double A = 1.3;
     constexpr double B = 1.;
 
-    samurai::VelocityVector<dim> U = { -0.5, 1 };
-    samurai::VelocityVector<dim> V = { 0.4, 0.7 };
+    samurai::VelocityVector<dim> const U = { -0.5, 1 };
+    samurai::VelocityVector<dim> const V = { 0.4, 0.7 };
 
     constexpr double nu = 1e-2;
     constexpr double mu = 1.;
@@ -139,23 +137,24 @@ main( int argc, char** argv )
     constexpr double t_end     = 1.;
 
     // multiresolution parameters
-    std::size_t min_level = 6;
-    std::size_t max_level = 6;
-    double mr_epsilon     = 1e-5; // Threshold used by multiresolution
-    double mr_regularity  = 1.;   // Regularity guess for multiresolution
+    std::size_t const min_level = 6;
+    std::size_t const max_level = 6;
+    double const mr_epsilon     = 1e-5; // Threshold used by multiresolution
+    double const mr_regularity  = 1.;   // Regularity guess for multiresolution
 
     // output parameters
-    std::string const dirname = "brusselator_advection_2d_data";
-    fs::path path             = std::filesystem::path( dirname );
-    std::string filename      = "uv";
+    std::string const dirname  = "brusselator_advection_2d_data";
+    fs::path const path        = std::filesystem::path( dirname );
+    std::string const filename = "uv";
     fs::create_directories( path );
 
     // define mesh
-    point_t box_corner1, box_corner2;
+    point_t box_corner1;
+    point_t box_corner2;
     box_corner1.fill( left_box );
     box_corner2.fill( right_box );
-    box_t box( box_corner1, box_corner2 );
-    std::array<bool, dim> periodic = { true, true };
+    box_t const box( box_corner1, box_corner2 );
+    std::array<bool, dim> const periodic = { true, true };
     samurai::MRMesh<config_t> mesh{ box, min_level, max_level, periodic };
 
     // init solution ----------------------------------------------------------
@@ -218,7 +217,7 @@ main( int argc, char** argv )
     auto fr_pb = ponio::make_implicit_operator_problem( fr, fr_t );
 
     // advection terme
-    std::array<samurai::VelocityVector<dim>, 2> velocities = { mu * U, mu * V };
+    std::array<samurai::VelocityVector<dim>, 2> const velocities = { mu * U, mu * V };
 
     auto conv = samurai::make_multi_convection_weno5<decltype( uv_ini )>( velocities );
     auto fa   = [&]( double /* t */, auto&& uv )
@@ -228,11 +227,11 @@ main( int argc, char** argv )
     };
 
     ponio::time_span<double> const t_span = { t_ini, t_end };
-    double dt                             = ( t_end - t_ini ) / 500;
+    double const dt                       = ( t_end - t_ini ) / 500;
 
     auto eigmax_computer = [&]( auto&, double, auto&, double )
     {
-        double dx = mesh.cell_length( mesh.max_level() );
+        double const dx = mesh.cell_length( mesh.max_level() );
         return nu * 4. / ( dx * dx );
     };
 

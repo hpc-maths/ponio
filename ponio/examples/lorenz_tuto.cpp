@@ -65,10 +65,10 @@ main()
     auto filename_3 = std::filesystem::path( dirname ) / "lie.dat";
     auto filename_4 = std::filesystem::path( dirname ) / "strang.dat";
 
-    observer::file_observer fobs_1( filename_1 );
-    observer::file_observer fobs_2( filename_2 );
-    observer::file_observer fobs_3( filename_3 );
-    observer::file_observer fobs_4( filename_4 );
+    ponio::observer::file_observer fobs_1( filename_1 );
+    ponio::observer::file_observer fobs_2( filename_2 );
+    ponio::observer::file_observer fobs_3( filename_3 );
+    ponio::observer::file_observer fobs_4( filename_4 );
 
     double const sigma = 10.;
     double const rho   = 28.;

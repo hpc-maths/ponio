@@ -16,7 +16,7 @@ main()
 {
     std::string const dirname = "exp_data";
     auto filename             = std::filesystem::path( dirname ) / "exp.dat";
-    observer::file_observer fobs( filename );
+    ponio::observer::file_observer fobs( filename );
 
     auto identity = []( double, double u )
     {

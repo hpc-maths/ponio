@@ -13,9 +13,9 @@
 #include <type_traits>
 
 #include "detail.hpp"
-#include "splitting.hpp"
+#include "splitting.hpp" // NOLINT(misc-include-cleaner)
 #include "stage.hpp"
-#include "user_defined_method.hpp"
+#include "user_defined_method.hpp" // NOLINT(misc-include-cleaner)
 
 namespace ponio
 {
@@ -48,7 +48,7 @@ namespace ponio
             conditional_t<is_embedded, std::array<state_t, Algorithm_t::N_stages + 2>, std::array<state_t, Algorithm_t::N_stages + 1>>;
 
         Algorithm_t alg;
-        step_storage_t kis;
+        step_storage_t kis; // NOLINT(cppcoreguidelines-pro-type-member-init,hicpp-member-init)
 
         /**
          * constructor of \ref method from its stages and a \f$u_0\f$ (only for preallocation)
@@ -82,6 +82,9 @@ namespace ponio
             return _return( tn, un, dt );
         }
 
+        // NOLINTBEGIN(modernize-type-traits,modernize-use-constraints)
+        // TODO: change to get expression (I == N_stages+1) into a requires expression
+
         template <std::size_t I = 0, typename Problem_t, typename value_t, typename Algo_t = Algorithm_t>
             requires std::same_as<Algo_t, Algorithm_t> && Algorithm_t::is_embedded
         typename std::enable_if<( I == Algorithm_t::N_stages + 1 ), void>::type
@@ -114,6 +117,8 @@ namespace ponio
             kis[I] = alg.stage( Stage<I>{}, f, tn, un, kis, dt );
             _call_stage<I + 1>( f, tn, un, dt );
         }
+
+        // NOLINTEND(modernize-type-traits,modernize-use-constraints)
 
         /**
          * return values \f$(t^n,u^n,\Delta t)\f$ after call of all stages

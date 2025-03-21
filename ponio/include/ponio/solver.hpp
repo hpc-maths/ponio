@@ -81,7 +81,7 @@ namespace ponio
 
         value_type sol;
         method_t meth;
-        problem_t& pb;
+        problem_t& pb; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
         ponio::time_span<value_t> t_span;
         typename ponio::time_span<value_t>::iterator it_next_time;
         std::optional<value_t> dt_reference;

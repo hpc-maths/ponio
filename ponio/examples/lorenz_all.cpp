@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <cstddef>
 #include <filesystem>
 #include <initializer_list>
@@ -22,21 +24,23 @@
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
 
+// NOLINTEND(misc-include-cleaner)
+
 namespace detail
 {
     template <class tuple_t, class func_t, std::size_t... I>
     constexpr func_t
-    for_each_impl( tuple_t&& t, func_t&& f, std::index_sequence<I...> )
+    for_each_impl( tuple_t const& t, func_t&& f, std::index_sequence<I...> )
     {
-        return (void)std::initializer_list<int>{ ( std::forward<func_t>( f )( std::get<I>( std::forward<tuple_t>( t ) ) ), 0 )... }, f;
+        return (void)std::initializer_list<int>{ ( std::forward<func_t>( f )( std::get<I>( t ) ), 0 )... }, f;
     }
 }
 
 template <class tuple_t, class func_t>
 constexpr func_t
-for_each( tuple_t&& t, func_t&& f )
+for_each( tuple_t const& t, func_t&& f )
 {
-    return detail::for_each_impl( std::forward<tuple_t>( t ),
+    return detail::for_each_impl( t,
         std::forward<func_t>( f ),
         std::make_index_sequence<std::tuple_size<std::remove_reference_t<tuple_t>>::value>{} );
 }
@@ -78,7 +82,7 @@ main( int, char** )
             basename << algo.id << ".dat";
             auto filename = std::filesystem::path( dirname ) / basename.str();
 
-            ponio::solve( lorenz, algo, u0, t_span, dt, observer::file_observer( filename ) );
+            ponio::solve( lorenz, algo, u0, t_span, dt, ponio::observer::file_observer( filename ) );
 
             std::cout << "\n";
         };
@@ -116,7 +120,7 @@ main( int, char** )
             basename << "l" << algo_t::id << ".dat";
             auto filename = std::filesystem::path( dirname ) / basename.str();
 
-            ponio::solve( lorenz, algo( mexp ), u0, t_span, dt, observer::file_observer( filename ) );
+            ponio::solve( lorenz, algo( mexp ), u0, t_span, dt, ponio::observer::file_observer( filename ) );
 
             std::cout << "\n";
         };
@@ -155,7 +159,7 @@ main( int, char** )
             basename << algo.id << ".dat";
             auto filename = std::filesystem::path( dirname ) / basename.str();
 
-            ponio::solve( lorenz, algo, u0, t_span, dt, observer::file_observer( filename ) );
+            ponio::solve( lorenz, algo, u0, t_span, dt, ponio::observer::file_observer( filename ) );
 
             std::cout << "\n";
         };
@@ -195,7 +199,7 @@ main( int, char** )
             basename << algo.id << ".dat";
             auto filename = std::filesystem::path( dirname ) / basename.str();
 
-            ponio::solve( lorenz, algo, u0, t_span, dt, observer::file_observer( filename ) );
+            ponio::solve( lorenz, algo, u0, t_span, dt, ponio::observer::file_observer( filename ) );
 
             std::cout << "\n";
         };

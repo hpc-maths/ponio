@@ -44,7 +44,7 @@ main()
 
     { // example of time loop with while loop controlled by user
         auto filename = std::filesystem::path( dirname ) / "sol_rk_33_ralston.dat";
-        auto obs      = observer::file_observer( filename );
+        auto obs      = ponio::observer::file_observer( filename );
 
         auto sol_range = ponio::make_solver_range( ch_pb, ponio::runge_kutta::rk_33_ralston(), y_0, { 0., 0.464, tf }, dt );
         auto it_sol    = sol_range.begin();
@@ -69,7 +69,7 @@ main()
 
     { // example of time loop with for loop on range
         auto filename = std::filesystem::path( dirname ) / "sol_rk54_6m.dat";
-        auto obs      = observer::file_observer( filename );
+        auto obs      = ponio::observer::file_observer( filename );
 
         auto sol_range = ponio::make_solver_range( ch_pb, ponio::runge_kutta::rk54_6m(), y_0, { 0., 0.464, tf }, dt );
 

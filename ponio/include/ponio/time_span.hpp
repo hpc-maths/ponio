@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <algorithm>
+#include <algorithm> // NOLINT(misc-include-cleaner)
 #include <cstddef>
-#include <vector>
+#include <vector> // NOLINT(misc-include-cleaner)
 
 namespace ponio
 {

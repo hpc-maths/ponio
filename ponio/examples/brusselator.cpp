@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <filesystem>
 #include <string>
 #include <valarray>
@@ -11,6 +13,8 @@
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 // Brusselator
 
@@ -41,7 +45,7 @@ main( int, char** )
 {
     std::string const dirname = "brusselator_data";
     auto filename             = std::filesystem::path( dirname ) / "brusselator.dat";
-    observer::file_observer fobs( filename );
+    ponio::observer::file_observer fobs( filename );
 
     auto pb_brusselator = ponio::make_simple_problem( brusselator_model( 1., 3. ) );
 
