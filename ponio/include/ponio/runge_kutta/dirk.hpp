@@ -9,7 +9,7 @@
 #include <cmath>
 #include <concepts>
 #include <cstddef>
-#include <functional>
+#include <functional> // NOLINT(misc-include-cleaner)
 #include <numeric>
 #include <ranges>
 #include <string_view>
@@ -20,7 +20,7 @@
 #include "../iteration_info.hpp"
 #include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
-#include "../stage.hpp"
+#include "../stage.hpp" // NOLINT(misc-include-cleaner)
 
 namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
 {

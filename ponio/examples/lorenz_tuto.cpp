@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <filesystem>
 #include <string>
 #include <utility>
@@ -15,6 +17,8 @@
 #include <ponio/solver.hpp>
 #include <ponio/splitting.hpp>
 #include <ponio/time_span.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 // Lorenz
 /*

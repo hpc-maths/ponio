@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <filesystem>
 #include <string>
 #include <valarray>
@@ -13,6 +15,8 @@
 #include <ponio/time_span.hpp>
 
 #include <CLI/CLI.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 /*
 Lotka-Volterra system
