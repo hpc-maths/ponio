@@ -64,7 +64,7 @@ init( Mesh& mesh )
 int
 main( int argc, char** argv )
 {
-    PetscInitialize( &argc, &argv, 0, nullptr );
+    PetscInitialize( &argc, &argv, nullptr, nullptr );
 
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
     using Config              = samurai::MRConfig<dim>;
@@ -84,7 +84,7 @@ main( int argc, char** argv )
     // Output parameters
     std::string const dirname  = "heat_samurai_data";
     std::filesystem::path path = std::filesystem::path( dirname );
-    std::string filename       = "sol_1d";
+    std::string const filename = "sol_1d";
 
     // Define mesh
     samurai::Box<double, dim> const box( { left_box }, { right_box } );
@@ -111,8 +111,8 @@ main( int argc, char** argv )
     auto pb = ponio::make_implicit_operator_problem( f, f_t );
 
     // Time step
-    double dx_min = mesh.cell_length( mesh.max_level() );
-    double dt     = cfl * dx_min * dx_min;
+    double const dx_min = mesh.cell_length( mesh.max_level() );
+    double const dt     = cfl * dx_min * dx_min;
 
     auto eigmax_computer = [=]( auto&, double, auto&, double )
     {

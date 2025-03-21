@@ -31,7 +31,7 @@ main()
     };
 
     std::stringstream buffer;
-    auto obs = observer::stream_observer( buffer );
+    auto obs = ponio::observer::stream_observer( buffer );
 
     ponio::time_span<double> const t_span = { 0., 15. }; // begin and end time
     double const dt                       = 0.1;         // time step

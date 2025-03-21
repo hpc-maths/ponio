@@ -4,6 +4,8 @@
 
 #pragma once
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #if __has_include( <eigen3/Eigen/Dense>)
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Sparse>
@@ -14,13 +16,15 @@
 #error "Eigen should be included"
 #endif
 
+// NOLINTEND(misc-include-cleaner)
+
 #include "linear_algebra.hpp"
 
 namespace ponio::linear_algebra
 {
 
     template <typename scalar_t, int size, int options, int maxrows, int maxcols>
-    struct linear_algebra<Eigen::Matrix<scalar_t, size, size, options, maxrows, maxcols>>
+    struct linear_algebra<Eigen::Matrix<scalar_t, size, size, options, maxrows, maxcols>> // NOLINT(misc-include-cleaner)
     {
         using matrix_type = Eigen::Matrix<scalar_t, size, size>;
         using vector_type = Eigen::Vector<scalar_t, size>;

@@ -8,14 +8,14 @@
 
 #include <concepts>
 #include <cstddef>
-#include <string_view>
-#include <type_traits>
+#include <string_view> // NOLINT(misc-include-cleaner)
+#include <type_traits> // NOLINT(misc-include-cleaner)
 #include <utility>
 
 #include "../butcher_tableau.hpp"
 #include "../iteration_info.hpp"
 #include "../ponio_config.hpp"
-#include "../stage.hpp"
+#include "../stage.hpp" // NOLINT(misc-include-cleaner)
 
 namespace ponio::runge_kutta::exponential_runge_kutta
 {

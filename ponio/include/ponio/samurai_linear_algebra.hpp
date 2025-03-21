@@ -73,7 +73,7 @@ namespace ponio::shampine_trick
         /**
          * @brief solves \f$(I - \alpha R)^{\ell}X = b\f$
          *
-         * @tparam l
+         * @tparam ell
          * @tparam operator_t
          * @tparam state_t
          * @param alpha           in Shampine's trick \f$\alpha = \gamma \Delta t\f$
@@ -83,7 +83,7 @@ namespace ponio::shampine_trick
          * @param u_tmp           temporary variable
          * @param shampine_result result of unknown \f$X\f$
          */
-        template <std::size_t l, typename operator_t, typename state_t>
+        template <std::size_t ell, typename operator_t, typename state_t>
         void
         operator()( value_t alpha, operator_t&& op_reac, state_t& initial_guess, state_t& rhs, state_t& u_tmp, state_t& shampine_result )
         {
@@ -110,14 +110,14 @@ namespace ponio::shampine_trick
             KSPCreate( PETSC_COMM_SELF, &ksp );
             KSPSetFromOptions( ksp );
             KSPSetOperators( ksp, J_R, J_R );
-            PetscInt err = KSPSetUp( ksp );
+            PetscInt const err = KSPSetUp( ksp );
             if ( err != 0 )
             {
                 std::cerr << "The setup of the solver failed!" << std::endl;
-                exit( EXIT_FAILURE );
+                exit( EXIT_FAILURE ); // NOLINT
             }
 
-            auto& result_l1 = ( l == 1 ) ? shampine_result : u_tmp;
+            auto& result_l1 = ( ell == 1 ) ? shampine_result : u_tmp;
 
             // Solve the system
             Vec rhs_petsc   = samurai::petsc::create_petsc_vector_from( rhs );
@@ -134,10 +134,10 @@ namespace ponio::shampine_trick
                 char const* reason_text;
                 KSPGetConvergedReasonString( ksp, &reason_text );
                 std::cerr << "Divergence of the solver ("s + reason_text + ")" << std::endl;
-                exit( EXIT_FAILURE );
+                exit( EXIT_FAILURE ); // NOLINT
             }
 
-            if constexpr ( l == 2 )
+            if constexpr ( ell == 2 )
             {
                 Vec result_petsc = samurai::petsc::create_petsc_vector_from( shampine_result );
 

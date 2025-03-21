@@ -9,11 +9,11 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
-#include <string_view>
+#include <string_view> // NOLINT(misc-include-cleaner)
 #include <tuple>
 #include <utility>
 
-#include "../detail.hpp"
+#include "../detail.hpp" // NOLINT(misc-include-cleaner)
 #include "../ponio_config.hpp"
 #include "detail.hpp"
 

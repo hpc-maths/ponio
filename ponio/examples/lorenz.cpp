@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <filesystem>
 #include <string>
 #include <valarray>
@@ -11,12 +13,14 @@
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
 
+// NOLINTEND(misc-include-cleaner)
+
 int
 main( int, char** )
 {
     std::string const dirname = "lorenz_data";
     auto filename             = std::filesystem::path( dirname ) / "lorenz.dat";
-    observer::file_observer fobs( filename );
+    ponio::observer::file_observer fobs( filename );
 
     using state_t = std::valarray<double>;
 

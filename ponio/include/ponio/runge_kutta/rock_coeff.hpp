@@ -11,6 +11,8 @@
 
 namespace ponio::runge_kutta::rock
 {
+    // Silence all checks modernize-use-std-numbers
+    // NOLINTBEGIN(modernize-use-std-numbers)
     template <typename value_t>
     struct rock2_coeff
     {
@@ -1715,4 +1717,5 @@ namespace ponio::runge_kutta::rock
         // clang-format on
     };
 
-}
+    // NOLINTEND(modernize-use-std-numbers)
+} // namespace ponio::runge_kutta::rock

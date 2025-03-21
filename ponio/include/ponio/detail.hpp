@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include <array>
+#include <array> // NOLINT(misc-include-cleaner)
 #include <cmath>
 #include <concepts>
 #include <cstddef>
 #include <ranges>
-#include <tuple>
+#include <tuple> // NOLINT(misc-include-cleaner)
 #include <type_traits>
 #include <utility>
 
@@ -123,7 +123,7 @@ namespace ponio::detail
      */
     template <std::size_t N, typename T>
     constexpr std::array<std::remove_cvref_t<T>, N>
-    init_fill_array( T&& value )
+    init_fill_array( T&& value ) // NOLINT(cppcoreguidelines-missing-std-forward)
     {
         return init_fill_array_impl( std::forward<T>( value ), std::make_index_sequence<N>() );
     }

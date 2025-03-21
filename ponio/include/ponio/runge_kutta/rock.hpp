@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <concepts>
 #include <cstddef>
 #include <limits>
 #include <numeric>
@@ -331,6 +332,7 @@ namespace ponio::runge_kutta::rock
         rock2_impl()
             : a_tol( default_config::tol )
             , r_tol( default_config::tol )
+            , eig_computer( detail::power_method() )
         {
         }
 
@@ -344,6 +346,7 @@ namespace ponio::runge_kutta::rock
         rock2_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
             , r_tol( _r_tol )
+            , _info()
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
         {
         }
@@ -571,6 +574,8 @@ namespace ponio::runge_kutta::rock
         rock4_impl()
             : a_tol( default_config::tol )
             , r_tol( default_config::tol )
+            , _info()
+            , eig_computer( detail::power_method() )
         {
         }
 
@@ -584,6 +589,7 @@ namespace ponio::runge_kutta::rock
         rock4_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
             : a_tol( _a_tol )
             , r_tol( _r_tol )
+            , _info()
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
         {
         }

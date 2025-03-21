@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <cmath>
 #include <filesystem>
 #include <numbers>
@@ -12,6 +14,8 @@
 #include <ponio/problem.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 /*
 solve pendulum problem :
@@ -33,7 +37,7 @@ main( int, char** )
 {
     std::string const dirname = "pendulum_data";
     auto filename             = std::filesystem::path( dirname ) / "pendulum.dat";
-    observer::file_observer fobs( filename );
+    ponio::observer::file_observer fobs( filename );
 
     using state_t = std::valarray<double>;
 

@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 #include <iostream>
-#include <valarray>
 
 #include <algorithm>
 #include <cmath>
@@ -28,7 +27,6 @@
 #include <samurai/samurai.hpp>
 #include <samurai/schemes/fv.hpp>
 
-#include <filesystem>
 namespace fs = std::filesystem;
 
 template <class field_t>
@@ -56,7 +54,7 @@ save( fs::path const& path, std::string const& filename, field_t& u, std::string
 int
 main( int argc, char** argv )
 {
-    PetscInitialize( &argc, &argv, 0, nullptr );
+    PetscInitialize( &argc, &argv, nullptr, nullptr );
 
     constexpr std::size_t dim = 2; // cppcheck-suppress unreadVariable
     using config_t            = samurai::MRConfig<dim, 3>;
@@ -78,23 +76,24 @@ main( int argc, char** argv )
     constexpr double t_end     = 1.;
 
     // multiresolution parameters
-    std::size_t min_level = 2;
-    std::size_t max_level = 6;
-    double mr_epsilon     = 1e-3; // Threshold used by multiresolution
-    double mr_regularity  = 1.;   // Regularity guess for multiresolution
+    std::size_t const min_level = 2;
+    std::size_t const max_level = 6;
+    double const mr_epsilon     = 1e-3; // Threshold used by multiresolution
+    double const mr_regularity  = 1.;   // Regularity guess for multiresolution
 
     // output parameters
-    std::string const dirname = "bz_2d_pirock_data";
-    fs::path path             = std::filesystem::path( dirname );
-    std::string filename      = "y";
+    std::string const dirname  = "bz_2d_pirock_data";
+    fs::path const path        = std::filesystem::path( dirname );
+    std::string const filename = "y";
     fs::create_directories( path );
 
     // define mesh
-    point_t box_corner1, box_corner2;
+    point_t box_corner1;
+    point_t box_corner2;
     box_corner1.fill( left_box );
     box_corner2.fill( right_box );
-    box_t box( box_corner1, box_corner2 );
-    std::array<bool, dim> periodic = { false, false };
+    box_t const box( box_corner1, box_corner2 );
+    std::array<bool, dim> const periodic = { false, false };
     samurai::MRMesh<config_t> mesh{ box, min_level, max_level, periodic };
 
     // init solution ----------------------------------------------------------
@@ -199,7 +198,7 @@ main( int argc, char** argv )
     // spectral radius estimator for diffusion term
     auto eigmax_computer = [&]( auto&, double, auto&, double )
     {
-        double dx = mesh.cell_length( max_level );
+        double const dx = mesh.cell_length( max_level );
         return da * 4. / ( dx * dx );
     };
 
@@ -222,7 +221,7 @@ main( int argc, char** argv )
 
     // time loop  -------------------------------------------------------------
     ponio::time_span<double> const t_span = { t_ini, t_end };
-    double dt                             = ( t_end - t_ini ) / 1000;
+    double const dt                       = ( t_end - t_ini ) / 1000;
 
     auto sol_range = ponio::make_solver_range( pb, method, y_ini, t_span, dt );
     auto it_sol    = sol_range.begin();

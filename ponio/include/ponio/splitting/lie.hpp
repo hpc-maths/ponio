@@ -8,7 +8,7 @@
 
 #include <array>
 #include <cstddef>
-#include <string_view>
+#include <string_view> // NOLINT(misc-include-cleaner)
 #include <tuple>
 #include <utility>
 

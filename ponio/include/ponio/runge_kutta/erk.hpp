@@ -8,13 +8,13 @@
 
 #include <concepts>
 #include <cstddef>
-#include <string_view>
+#include <string_view> // NOLINT(misc-include-cleaner)
 
 #include "../butcher_tableau.hpp"
 #include "../detail.hpp"
 #include "../iteration_info.hpp"
 #include "../ponio_config.hpp"
-#include "../stage.hpp"
+#include "../stage.hpp" // NOLINT(misc-include-cleaner)
 
 namespace ponio::runge_kutta::explicit_runge_kutta
 {

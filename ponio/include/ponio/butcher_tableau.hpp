@@ -7,10 +7,10 @@
 #include <array>
 #include <concepts>
 #include <cstddef>
-#include <type_traits>
+#include <type_traits> // NOLINT(misc-include-cleaner)
 #include <utility>
 
-#include "detail.hpp"
+#include "detail.hpp" // NOLINT(misc-include-cleaner)
 
 namespace ponio::runge_kutta::butcher
 {

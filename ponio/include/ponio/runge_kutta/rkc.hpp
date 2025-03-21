@@ -7,11 +7,11 @@
 #pragma once
 
 #include <cstddef>
-#include <string_view>
+#include <string_view> // NOLINT(misc-include-cleaner)
 
-#include "../detail.hpp"
+#include "../detail.hpp" // NOLINT(misc-include-cleaner)
 #include "../iteration_info.hpp"
-#include "../stage.hpp"
+#include "../stage.hpp" // NOLINT(misc-include-cleaner)
 
 namespace ponio::runge_kutta::chebyshev
 {

@@ -55,7 +55,7 @@ save( fs::path const& path, std::string const& filename, field_t& u, std::string
 int
 main( int argc, char** argv )
 {
-    PetscInitialize( &argc, &argv, 0, nullptr );
+    PetscInitialize( &argc, &argv, nullptr, nullptr );
 
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
     using config_t            = samurai::MRConfig<dim>;
@@ -73,22 +73,23 @@ main( int argc, char** argv )
     constexpr double t_end     = 35.;
 
     // multiresolution parameters
-    std::size_t min_level = 7;
-    std::size_t max_level = 7;
-    double mr_epsilon     = 1e-5; // Threshold used by multiresolution
-    double mr_regularity  = 1.;   // Regularity guess for multiresolution
+    std::size_t const min_level = 7;
+    std::size_t const max_level = 7;
+    double const mr_epsilon     = 1e-5; // Threshold used by multiresolution
+    double const mr_regularity  = 1.;   // Regularity guess for multiresolution
 
     // output parameters
-    std::string const dirname = "nagumo_pirock_data";
-    fs::path path             = std::filesystem::path( dirname );
-    std::string filename      = "u";
+    std::string const dirname  = "nagumo_pirock_data";
+    fs::path const path        = std::filesystem::path( dirname );
+    std::string const filename = "u";
     fs::create_directories( path );
 
     // define mesh
-    point_t box_corner1, box_corner2;
+    point_t box_corner1;
+    point_t box_corner2;
     box_corner1.fill( left_box );
     box_corner2.fill( right_box );
-    box_t box( box_corner1, box_corner2 );
+    box_t const box( box_corner1, box_corner2 );
     samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
 
     // init solution ----------------------------------------------------------
@@ -96,9 +97,9 @@ main( int argc, char** argv )
 
     auto exact_solution = [&]( double x, double t )
     {
-        double v   = ( 1. / std::sqrt( 2. ) ) * std::sqrt( k * d );
-        double cst = -( 1. / std::sqrt( 2. ) ) * std::sqrt( k / d );
-        double e   = std::exp( cst * ( x - x0 - v * t ) );
+        double const v   = ( 1. / std::sqrt( 2. ) ) * std::sqrt( k * d );
+        double const cst = -( 1. / std::sqrt( 2. ) ) * std::sqrt( k / d );
+        double const e   = std::exp( cst * ( x - x0 - v * t ) );
         return e / ( 1. + e );
     };
 
@@ -150,11 +151,11 @@ main( int argc, char** argv )
     auto pb = ponio::make_imex_operator_problem( fd, fr, fr_t );
 
     ponio::time_span<double> const tspan = { t_ini, t_end };
-    double dt                            = ( t_end - t_ini ) / 2000;
+    double const dt                      = ( t_end - t_ini ) / 2000;
 
     auto eigmax_computer = [&]( auto&, double, auto&, double )
     {
-        double dx = mesh.cell_length( mesh.max_level() );
+        double const dx = mesh.cell_length( mesh.max_level() );
         return 4. / ( dx * dx );
     };
 

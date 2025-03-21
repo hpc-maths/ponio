@@ -103,38 +103,54 @@ TEST_CASE( "order::explict_runge_kutta" )
 
 TEST_CASE( "order::chebychev_runge_kutta" )
 {
-    auto rkc_methods = std::make_tuple( ponio::runge_kutta::chebyshev::explicit_rkc2<10>(),
-        ponio::runge_kutta::rock::rock2<false>(),
-        ponio::runge_kutta::rock::rock4<false>() );
+    // clang-format off
+    using rkc_methods = std::tuple<
+        decltype( ponio::runge_kutta::chebyshev::explicit_rkc2<10>() ),
+        decltype( ponio::runge_kutta::rock::rock2<false>() ),
+        decltype( ponio::runge_kutta::rock::rock4<false>() )
+    >;
+    // clang-format on
 
-    test_order<class_method::explicit_method>::on<decltype( rkc_methods )>();
+    test_order<class_method::explicit_method>::on<rkc_methods>();
 }
 
 TEST_CASE( "order::legendre_runge_kutta" )
 {
-    auto rkl_methods = std::make_tuple( ponio::runge_kutta::legendre::explicit_rkl2<10>(),
-        ponio::runge_kutta::legendre::explicit_rkl2<5>(),
-        ponio::runge_kutta::legendre::explicit_rkl1<10>() );
+    // clang-format off
+    using rkl_methods = std::tuple<
+        decltype( ponio::runge_kutta::legendre::explicit_rkl2<10>() ),
+        decltype( ponio::runge_kutta::legendre::explicit_rkl2<5>() ),
+        decltype( ponio::runge_kutta::legendre::explicit_rkl1<10>() )
+    >;
+    // clang-format on
 
-    test_order<class_method::explicit_method>::on<decltype( rkl_methods )>();
+    test_order<class_method::explicit_method>::on<rkl_methods>();
 }
 
 TEST_CASE( "order::pirock" )
 {
-    auto pirock_methods = std::make_tuple( ponio::runge_kutta::pirock::pirock(),
-        ponio::runge_kutta::pirock::pirock_a1(),
-        ponio::runge_kutta::pirock::pirock_b0() );
+    // clang-format off
+    using pirock_methods = std::tuple<
+        decltype( ponio::runge_kutta::pirock::pirock() ),
+        decltype( ponio::runge_kutta::pirock::pirock_a1() ),
+        decltype( ponio::runge_kutta::pirock::pirock_b0() )
+    >;
+    // clang-format on
 
-    test_order<class_method::additive_method>::on<decltype( pirock_methods )>();
+    test_order<class_method::additive_method>::on<pirock_methods>();
 }
 
 TEST_CASE( "order::pirock_RDA" )
 {
-    auto pirock_methods = std::make_tuple( ponio::runge_kutta::pirock::pirock_RDA(),
-        ponio::runge_kutta::pirock::pirock_RDA_a1(),
-        ponio::runge_kutta::pirock::pirock_RDA_b0() );
+    // clang-format off
+    using pirock_methods = std::tuple<
+        decltype( ponio::runge_kutta::pirock::pirock_RDA() ),
+        decltype( ponio::runge_kutta::pirock::pirock_RDA_a1() ),
+        decltype( ponio::runge_kutta::pirock::pirock_RDA_b0() )
+    >;
+    // clang-format on
 
-    test_order<class_method::RDA_method>::on<decltype( pirock_methods )>();
+    test_order<class_method::RDA_method>::on<pirock_methods>();
 }
 
 TEST_CASE( "order::splitting" )

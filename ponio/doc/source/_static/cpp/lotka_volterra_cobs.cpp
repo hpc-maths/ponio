@@ -28,7 +28,7 @@ main()
         return { dt_x, dt_y };
     };
 
-    auto obs = observer::cout_observer();
+    auto obs = ponio::observer::cout_observer();
 
     ponio::time_span<double> const t_span = { 0., 15. }; // begin and end time
     double const dt                       = 0.1;         // time step

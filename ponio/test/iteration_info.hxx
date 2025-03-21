@@ -52,7 +52,7 @@ TEST_CASE( "number_of_eval::explicit_runge_kutta" )
         return k * ( std::cos( t ) - y );
     };
 
-    double y_0 = 2.0;
+    double const y_0 = 2.0;
 
     ponio::time_span<double> const t_span = { 0., 2. };
     double const dt                       = 0.05;
@@ -96,7 +96,7 @@ TEST_CASE( "number_of_eval::lawson_runge_kutta" )
         return k * std::cos( t );
     };
 
-    double y_0 = 2.0;
+    double const y_0 = 2.0;
 
     ponio::time_span<double> const t_span = { 0., 2. };
     double const dt                       = 0.05;
@@ -133,7 +133,7 @@ TEST_CASE( "number_of_eval::exponential_runge_kutta" )
         return k * std::cos( t );
     };
 
-    double y_0 = 2.0;
+    double const y_0 = 2.0;
 
     ponio::time_span<double> const t_span = { 0., 2. };
     double const dt                       = 0.05;
@@ -182,7 +182,7 @@ TEST_CASE( "number_of_eval::diagonal_implicit_runge_kutta" )
         return -k;
     };
 
-    double y_0 = 2.0;
+    double const y_0 = 2.0;
 
     ponio::time_span<double> const t_span = { 0., 2. };
     double const dt                       = 0.05;
@@ -226,7 +226,7 @@ TEST_CASE( "number_of_eval::rock2" )
         return k * ( std::cos( t ) - y );
     };
 
-    double y_0 = 2.0;
+    double const y_0 = 2.0;
 
     ponio::time_span<double> const t_span = { 0., 2. };
     double const dt                       = 0.05;
@@ -255,7 +255,7 @@ TEST_CASE( "number_of_eval::rock4" )
         return k * ( std::cos( t ) - y );
     };
 
-    double y_0 = 2.0;
+    double const y_0 = 2.0;
 
     ponio::time_span<double> const t_span = { 0., 2. };
     double const dt                       = 0.05;
@@ -310,7 +310,7 @@ TEST_CASE( "number_of_eval::pirock" )
         return k * std::cos( t );
     };
 
-    double y_0 = 2.0;
+    double const y_0 = 2.0;
 
     ponio::time_span<double> const t_span = { 0., 2. };
     double const dt                       = 0.05;
@@ -368,7 +368,7 @@ TEST_CASE( "number_of_eval::splitting_lie" )
         return k * std::cos( t );
     };
 
-    double y_0 = 2.0;
+    double const y_0 = 2.0;
 
     ponio::time_span<double> const t_span = { 0., 2. };
     double const dt                       = 0.05;
@@ -409,7 +409,7 @@ TEST_CASE( "number_of_eval::splitting_strang" )
         return k * std::cos( t );
     };
 
-    double y_0 = 2.0;
+    double const y_0 = 2.0;
 
     ponio::time_span<double> const t_span = { 0., 2. };
     double const dt                       = 0.05;
@@ -450,15 +450,15 @@ TEST_CASE( "number_of_eval::splitting_adaptive_strang" )
         return k * std::cos( t );
     };
 
-    double y_0 = 2.0;
+    double const y_0 = 2.0;
 
     ponio::time_span<double> const t_span = { 0., 2. };
     double const dt                       = 0.05;
 
     auto curtiss_hirschfelder = ponio::make_problem( f1, f2 );
 
-    double delta         = 5e-3;
-    double tol           = 1e-3;
+    double const delta   = 5e-3;
+    double const tol     = 1e-3;
     auto adaptive_strang = ponio::splitting::make_adaptive_strang_tuple( delta,
         tol,
         std::make_pair( ponio::runge_kutta::rk_33(), 0.125 * dt ),

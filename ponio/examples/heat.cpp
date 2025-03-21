@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <iostream>
 #include <valarray>
 
@@ -19,6 +21,8 @@
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 // Heat
 class heat_model
@@ -108,7 +112,7 @@ main()
 
     save( x, yini, std::filesystem::path( dirname ) / "heat_ini.dat" );
 
-    yend = ponio::solve( pb_heat, ponio::runge_kutta::explicit_rkc2<15>(), yini, tspan, dt, observer::null_observer() );
+    yend = ponio::solve( pb_heat, ponio::runge_kutta::explicit_rkc2<15>(), yini, tspan, dt, ponio::observer::null_observer() );
 
     std::valarray<double> const yexa = heat_model::fundamental_sol( tend, x );
 
