@@ -172,7 +172,7 @@ jobs:
       - name: install compiler
         run: |
           sudo apt update
-          sudo apt install clang-18 clang++-18
+          sudo apt install clang-18
       - name: Cache
         uses: actions/cache@v4
         with:
