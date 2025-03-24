@@ -20,8 +20,8 @@
 
 struct lin_alg_2_2
 {
-    using vector_type = Eigen::Vector<double, 2>;
-    using matrix_type = Eigen::Matrix<double, 2, 2>;
+    using vector_type = Eigen::Vector<double, 2>;    // NOLINT(misc-include-cleaner)
+    using matrix_type = Eigen::Matrix<double, 2, 2>; // NOLINT(misc-include-cleaner)
 
     static vector_type
     solver( matrix_type const& A, vector_type const& b )
@@ -75,7 +75,7 @@ int
 main( int, char** )
 {
     using namespace std::placeholders;
-    using vector_type = Eigen::Vector<double, 2>;
+    using vector_type = Eigen::Vector<double, 2>; // NOLINT(misc-include-cleaner)
 
     std::string const dirname = "brusselator_dirk_data";
 

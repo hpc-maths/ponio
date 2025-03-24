@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <string_view> // NOLINT(misc-include-cleaner)
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 #include "../detail.hpp" // NOLINT(misc-include-cleaner)

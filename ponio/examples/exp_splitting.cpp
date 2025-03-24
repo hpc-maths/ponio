@@ -5,6 +5,7 @@
 #include <cmath>
 #include <filesystem>
 #include <string>
+#include <tuple>
 #include <utility>
 
 #include <ponio/observer.hpp>

@@ -10,6 +10,7 @@
 #include <array>
 #include <concepts>
 #include <cstddef>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 
@@ -77,7 +78,7 @@ namespace ponio::splitting::detail
         splitting_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts, optional_args_container args )
             : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
             , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
-            , optional_arguments( args )
+            , optional_arguments( std::move( args ) )
         {
         }
 

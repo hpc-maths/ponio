@@ -21,6 +21,7 @@ Checks: "*,
         -cppcoreguidelines-init-variables,
         -hicpp-uppercase-literal-suffix,
         -readability-uppercase-literal-suffix
+        -cppcoreguidelines-pro-bounds-constant-array-index
 "
 WarningsAsErrors: '*'
 HeaderFilterRegex: 'ponio/include/ponio/*.hpp'
@@ -31,4 +32,6 @@ CheckOptions:
  - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
    value: '1'
  - key: cppcoreguidelines-rvalue-reference-param-not-moved.IgnoreNonDeducedTemplateTypes
+   value: true
+ - key: cppcoreguidelines-rvalue-reference-param-not-moved.AllowPartialMove
    value: true

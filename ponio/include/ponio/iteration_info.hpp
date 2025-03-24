@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <ranges>
 #include <tuple> // NOLINT(misc-include-cleaner)
+#include <type_traits>
 #include <utility>
 
 #include "detail.hpp"
