@@ -185,11 +185,11 @@ namespace ponio::runge_kutta::chebyshev
         state_t
         stage( Stage<j>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yi, value_t dt )
         {
-            value_t mj   = 2. * b<j>( w0 ) / b<j - 1>( w0 ) * w0;
-            value_t nj   = -b<j>( w0 ) / b<j - 2>( w0 );
-            value_t mjt  = 2. * b<j>( w0 ) / b<j - 1>( w0 ) * w1;
-            value_t gjt  = -( 1. - b<j - 1>( w0 ) * T<j - 1>( w0 ) ) * mjt;
-            value_t cjm1 = dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) * ddT<j - 1>( w0 ) / dT<j - 1>( w0 );
+            value_t const mj   = 2. * b<j>( w0 ) / b<j - 1>( w0 ) * w0;
+            value_t const nj   = -b<j>( w0 ) / b<j - 2>( w0 );
+            value_t const mjt  = 2. * b<j>( w0 ) / b<j - 1>( w0 ) * w1;
+            value_t const gjt  = -( 1. - b<j - 1>( w0 ) * T<j - 1>( w0 ) ) * mjt;
+            value_t const cjm1 = dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) * ddT<j - 1>( w0 ) / dT<j - 1>( w0 );
 
             return ( 1. - mj - nj ) * yn + mj * Yi[j - 1] + nj * Yi[j - 2] + mjt * dt * f( tn + cjm1 * dt, Yi[j - 1] ) + gjt * dt * Yi[0];
         }
@@ -231,7 +231,7 @@ namespace ponio::runge_kutta::chebyshev
         state_t
         stage( Stage<1>, problem_t&, value_t, state_t& yn, array_ki_t const& Yi, value_t dt )
         {
-            value_t m1t = b<1>( w0 ) * w1;
+            value_t const m1t = b<1>( w0 ) * w1;
             return yn + dt * m1t * Yi[0];
         }
 
@@ -255,12 +255,12 @@ namespace ponio::runge_kutta::chebyshev
         state_t
         stage( Stage<2>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yi, value_t dt )
         {
-            value_t m2  = 2. * w0;
-            value_t n2  = -1.;
-            value_t m2t = 2. * w1;
-            value_t c2  = dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) * ddT<2>( w0 ) / dT<2>( w0 );
-            value_t c1  = c2 / dT<2>( w0 );
-            value_t g2t = -( 1. - b<1>( w0 ) * T<1>( w0 ) ) * m2t;
+            value_t const m2  = 2. * w0;
+            value_t const n2  = -1.;
+            value_t const m2t = 2. * w1;
+            value_t const c2  = dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) * ddT<2>( w0 ) / dT<2>( w0 );
+            value_t const c1  = c2 / dT<2>( w0 );
+            value_t const g2t = -( 1. - b<1>( w0 ) * T<1>( w0 ) ) * m2t;
 
             return ( 1. - m2 - n2 ) * yn + m2 * Yi[1] + n2 * yn + m2t * dt * f( tn + c1 * dt, Yi[1] ) + g2t * dt * Yi[0];
         }

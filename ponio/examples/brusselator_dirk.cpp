@@ -36,8 +36,8 @@ struct lin_alg_2_2
 
 class brusselator_model
 {
-    using vector_type = Eigen::Vector<double, 2>;
-    using matrix_type = Eigen::Matrix<double, 2, 2>;
+    using vector_type = Eigen::Vector<double, 2>;    // NOLINT(misc-include-cleaner)
+    using matrix_type = Eigen::Matrix<double, 2, 2>; // NOLINT(misc-include-cleaner)
 
     double m_a;
     double m_b;

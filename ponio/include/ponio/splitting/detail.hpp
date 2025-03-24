@@ -8,8 +8,10 @@
 
 #include <algorithm>
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <tuple>
+#include <type_traits>
 
 namespace ponio::splitting::detail
 {

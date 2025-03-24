@@ -50,8 +50,8 @@ main( int, char** )
 {
     std::string const dirname = "lorenz_all_data";
 
-    using vector_type = Eigen::Vector<double, 3>;
-    using matrix_type = Eigen::Matrix<double, 3, 3>;
+    using vector_type = Eigen::Vector<double, 3>;    // NOLINT(misc-include-cleaner)
+    using matrix_type = Eigen::Matrix<double, 3, 3>; // NOLINT(misc-include-cleaner)
     using state_t     = vector_type;
 
     double const sigma = 10.;
