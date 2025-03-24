@@ -54,7 +54,7 @@ struct C_random_device
 int
 main( int argc, char* argv[] )
 {
-    CLI::App app{ "Launch N brownian motion process solved by a RK(3,3) method" };
+    CLI::App app{ "Launch N brownian motion process solved by a RK(3,3) method" }; // NOLINT(misc-include-cleaner)
 
     std::string const dirname = "brownian_data";
 

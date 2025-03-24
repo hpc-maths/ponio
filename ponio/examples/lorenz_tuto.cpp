@@ -59,8 +59,8 @@
 int
 main()
 {
-    using vector_type = Eigen::Vector<double, 3>;
-    using matrix_type = Eigen::Matrix<double, 3, 3>;
+    using vector_type = Eigen::Vector<double, 3>;    // NOLINT(misc-include-cleaner)
+    using matrix_type = Eigen::Matrix<double, 3, 3>; // NOLINT(misc-include-cleaner)
 
     std::string const dirname = "lorenz_tuto_data";
 

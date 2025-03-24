@@ -48,7 +48,7 @@ namespace ponio
             conditional_t<is_embedded, std::array<state_t, Algorithm_t::N_stages + 2>, std::array<state_t, Algorithm_t::N_stages + 1>>;
 
         Algorithm_t alg;
-        step_storage_t kis; // NOLINT(cppcoreguidelines-pro-type-member-init,hicpp-member-init)
+        step_storage_t kis;
 
         /**
          * constructor of \ref method from its stages and a \f$u_0\f$ (only for preallocation)

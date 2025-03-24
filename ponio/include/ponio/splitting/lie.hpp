@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <string_view> // NOLINT(misc-include-cleaner)
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 #include "../iteration_info.hpp"

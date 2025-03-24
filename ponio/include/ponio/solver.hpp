@@ -30,7 +30,7 @@ namespace ponio
 
         current_solution( value_t tn, state_t un, value_t dt )
             : time( tn )
-            , state( un )
+            , state( std::move( un ) )
             , time_step( dt )
         {
         }
@@ -100,7 +100,7 @@ namespace ponio
          */
         time_iterator( problem_t& pb_, method_t meth_, state_t const& u0, ponio::time_span<value_t> const& t_span_, value_t dt )
             : sol( ( t_span_.front() == t_span_.back() ) ? sentinel : t_span_.front(), u0, dt )
-            , meth( meth_ )
+            , meth( std::move( meth_ ) )
             , pb( pb_ )
             , t_span( t_span_ )
             , it_next_time( std::next( std::begin( t_span ) ) )
@@ -404,9 +404,9 @@ namespace ponio
          * @param begin initial iterator on solver_range
          * @param end   end iterator on solver_range (sentinel)
          */
-        solver_range( iterator_type const& begin, iterator_type const& end )
-            : _begin( begin )
-            , _end( end )
+        solver_range( iterator_type begin, iterator_type end )
+            : _begin( std::move( begin ) )
+            , _end( std::move( end ) )
         {
         }
 

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// NOLINTBEGIN(misc-include-cleaner)
-
+#include <cmath>
 #include <filesystem>
 #include <string>
+#include <utility>
 
 #include <ponio/observer.hpp>
 #include <ponio/problem.hpp>
@@ -13,8 +13,6 @@
 #include <ponio/solver.hpp>
 #include <ponio/splitting.hpp>
 #include <ponio/user_defined_method.hpp>
-
-// NOLINTEND(misc-include-cleaner)
 
 // solve $\dot{u} = u$ with $u(t=0) = 1$, and $t\in[0,2]$.
 

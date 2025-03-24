@@ -26,8 +26,8 @@ namespace ponio::linear_algebra
     template <typename scalar_t, int size, int options, int maxrows, int maxcols>
     struct linear_algebra<Eigen::Matrix<scalar_t, size, size, options, maxrows, maxcols>> // NOLINT(misc-include-cleaner)
     {
-        using matrix_type = Eigen::Matrix<scalar_t, size, size>;
-        using vector_type = Eigen::Vector<scalar_t, size>;
+        using matrix_type = Eigen::Matrix<scalar_t, size, size>; // NOLINT(misc-include-cleaner)
+        using vector_type = Eigen::Vector<scalar_t, size>;       // NOLINT(misc-include-cleaner)
 
         static matrix_type
         identity( vector_type const& )
@@ -43,10 +43,10 @@ namespace ponio::linear_algebra
     };
 
     template <typename scalar_t>
-    struct linear_algebra<Eigen::Matrix<scalar_t, Eigen::Dynamic, Eigen::Dynamic>>
+    struct linear_algebra<Eigen::Matrix<scalar_t, Eigen::Dynamic, Eigen::Dynamic>> // NOLINT(misc-include-cleaner)
     {
-        using matrix_type = Eigen::Matrix<scalar_t, Eigen::Dynamic, Eigen::Dynamic>;
-        using vector_type = Eigen::Vector<scalar_t, Eigen::Dynamic>;
+        using matrix_type = Eigen::Matrix<scalar_t, Eigen::Dynamic, Eigen::Dynamic>; // NOLINT(misc-include-cleaner)
+        using vector_type = Eigen::Vector<scalar_t, Eigen::Dynamic>;                 // NOLINT(misc-include-cleaner)
 
         static matrix_type
         identity( vector_type const& u )
@@ -62,11 +62,11 @@ namespace ponio::linear_algebra
     };
 
     template <typename scalar_t>
-    struct linear_algebra<Eigen::SparseMatrix<scalar_t>>
+    struct linear_algebra<Eigen::SparseMatrix<scalar_t>> // NOLINT(misc-include-cleaner)
     {
-        using matrix_type = Eigen::SparseMatrix<scalar_t>;
-        using vector_type = Eigen::SparseVector<scalar_t>;
-        using solver_type = Eigen::SimplicialCholesky<matrix_type>;
+        using matrix_type = Eigen::SparseMatrix<scalar_t>;          // NOLINT(misc-include-cleaner)
+        using vector_type = Eigen::SparseVector<scalar_t>;          // NOLINT(misc-include-cleaner)
+        using solver_type = Eigen::SimplicialCholesky<matrix_type>; // NOLINT(misc-include-cleaner)
 
       private:
 
