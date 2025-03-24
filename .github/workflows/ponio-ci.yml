@@ -172,7 +172,7 @@ jobs:
       - name: install compiler
         run: |
           sudo apt update
-          sudo apt install gcc-13 g++-13
+          sudo apt install clang-18 clang++-18
       - name: Cache
         uses: actions/cache@v4
         with:
@@ -193,9 +193,11 @@ jobs:
       - name: Configure
         shell: pixi run bash {0}
         run: |
+          export LDFLAGS="${LDFLAGS} -L$CONDA_PREFIX/lib"
           pixi run build_debug
           compdb -p build list > compile_commands.json
       - name: Run clang-tidy on ponio
         shell: pixi run bash {0}
         run: |
+          export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
           run-clang-tidy -header-filter=ponio/include/ponio/
