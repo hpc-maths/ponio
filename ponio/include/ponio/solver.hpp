@@ -404,9 +404,9 @@ namespace ponio
          * @param begin initial iterator on solver_range
          * @param end   end iterator on solver_range (sentinel)
          */
-        solver_range( iterator_type begin, iterator_type end )
-            : _begin( std::move( begin ) )
-            , _end( std::move( end ) )
+        solver_range( iterator_type const& begin, iterator_type const& end )
+            : _begin( begin )
+            , _end( end )
         {
         }
 
