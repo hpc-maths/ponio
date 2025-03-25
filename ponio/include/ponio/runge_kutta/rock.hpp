@@ -236,8 +236,8 @@ namespace ponio::runge_kutta::rock
                     return f( t, u );
                 };
 
-                double eigmax = std::forward<eig_computer_t>( eig_computer )( f_counter, tn, un, dt );
-                auto mdeg     = s_min;
+                value_t const eigmax = std::forward<eig_computer_t>( eig_computer )( f_counter, tn, un, dt );
+                auto mdeg            = s_min;
                 if constexpr ( std::same_as<rock_method, rock_order::rock_2> )
                 {
                     mdeg = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );

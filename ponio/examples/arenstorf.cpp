@@ -33,10 +33,10 @@ struct arenstorf_model
     state_t
     operator()( double, state_t&& y ) const
     {
-        double const y1 = std::move( y[0] );
-        double const y2 = std::move( y[1] );
-        double const y3 = std::move( y[2] );
-        double const y4 = std::move( y[3] );
+        double const y1 = y[0];
+        double const y2 = y[1];
+        double const y3 = y[2];
+        double const y4 = y[3];
 
         double const r1 = sqrt( ( y1 + mu ) * ( y1 + mu ) + y2 * y2 );
         double const r2 = sqrt( ( y1 - 1 + mu ) * ( y1 - 1 + mu ) + y2 * y2 );
