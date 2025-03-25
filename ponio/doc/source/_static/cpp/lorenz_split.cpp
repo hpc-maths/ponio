@@ -14,7 +14,7 @@
 int
 main()
 {
-    using namespace observer; // to use _fobs litteral
+    using namespace ponio::observer; // to use _fobs litteral
     using state_t = std::valarray<double>;
 
     double sigma = 10., rho = 28., beta = 8. / 3.;

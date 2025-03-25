@@ -6,9 +6,9 @@
 
 #include <cstddef>
 #include <limits>
-#include <type_traits>
+#include <type_traits> // NOLINT(misc-include-cleaner)
 
-namespace ponio
+namespace ponio // NOLINT(modernize-concat-nested-namespaces)
 {
 
     /** @class Stage
@@ -57,6 +57,6 @@ namespace ponio
                                                        } -> std::convertible_to<std::size_t>;
                                                };
 
-    }
+    } // namespace stages
 
-}
+} // namespace ponio

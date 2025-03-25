@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <filesystem>
 #include <string>
 
@@ -14,10 +16,12 @@
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
 
+// NOLINTEND(misc-include-cleaner)
+
 struct lin_alg_2_2
 {
-    using vector_type = Eigen::Vector<double, 2>;
-    using matrix_type = Eigen::Matrix<double, 2, 2>;
+    using vector_type = Eigen::Vector<double, 2>;    // NOLINT(misc-include-cleaner)
+    using matrix_type = Eigen::Matrix<double, 2, 2>; // NOLINT(misc-include-cleaner)
 
     static vector_type
     solver( matrix_type const& A, vector_type const& b )
@@ -32,8 +36,8 @@ struct lin_alg_2_2
 
 class brusselator_model
 {
-    using vector_type = Eigen::Vector<double, 2>;
-    using matrix_type = Eigen::Matrix<double, 2, 2>;
+    using vector_type = Eigen::Vector<double, 2>;    // NOLINT(misc-include-cleaner)
+    using matrix_type = Eigen::Matrix<double, 2, 2>; // NOLINT(misc-include-cleaner)
 
     double m_a;
     double m_b;
@@ -55,7 +59,7 @@ class brusselator_model
     }
 
     matrix_type
-    jacobian( double, vector_type const& u ) const
+    jacobian( double, vector_type const& u ) const // NOLINT(readability-convert-member-functions-to-static)
     {
         double const y1 = u[0];
         double const y2 = u[1];
@@ -71,7 +75,7 @@ int
 main( int, char** )
 {
     using namespace std::placeholders;
-    using vector_type = Eigen::Vector<double, 2>;
+    using vector_type = Eigen::Vector<double, 2>; // NOLINT(misc-include-cleaner)
 
     std::string const dirname = "brusselator_dirk_data";
 
@@ -79,9 +83,9 @@ main( int, char** )
     auto filename_2 = std::filesystem::path( dirname ) / "brusselator_dirk23_exact_solver.dat";
     auto filename_3 = std::filesystem::path( dirname ) / "brusselator_rk33.dat";
 
-    observer::file_observer fobs_1( filename_1 );
-    observer::file_observer fobs_2( filename_2 );
-    observer::file_observer fobs_3( filename_3 );
+    ponio::observer::file_observer fobs_1( filename_1 );
+    ponio::observer::file_observer fobs_2( filename_2 );
+    ponio::observer::file_observer fobs_3( filename_3 );
 
     auto model          = brusselator_model( 1., 3. );
     auto pb_brusselator = ponio::make_implicit_problem( model,

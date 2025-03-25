@@ -1,31 +1,31 @@
 Observers
 =========
 
-.. doxygenclass:: observer::capsule
+.. doxygenclass:: ponio::observer::capsule
    :project: ponio
    :members:
 
-.. doxygenfunction:: observer::make_capsule
+.. doxygenfunction:: ponio::observer::make_capsule
    :project: ponio
 
-.. doxygenfunction:: observer::operator<<( std::ostream & os , capsule<state_t> const& data )
+.. doxygenfunction:: ponio::observer::operator<<( std::ostream & os , capsule<state_t> const& data )
    :project: ponio
 
-.. doxygenclass:: observer::base_observer
-   :project: ponio
-   :members:
-
-.. doxygenclass:: observer::stream_observer
+.. doxygenclass:: ponio::observer::base_observer
    :project: ponio
    :members:
 
-.. doxygenclass:: observer::cout_observer
+.. doxygenclass:: ponio::observer::stream_observer
    :project: ponio
    :members:
 
-.. doxygenclass:: observer::file_observer
+.. doxygenclass:: ponio::observer::cout_observer
    :project: ponio
    :members:
 
-.. doxygenfunction:: observer::operator""_fobs
+.. doxygenclass:: ponio::observer::file_observer
+   :project: ponio
+   :members:
+
+.. doxygenfunction:: ponio::observer::operator""_fobs
    :project: ponio

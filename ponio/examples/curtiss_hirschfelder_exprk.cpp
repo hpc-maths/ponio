@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <cmath>
 #include <filesystem>
 #include <string>
@@ -11,6 +13,8 @@
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 /*
 solve Curtiss and Hirschfelder problem:
@@ -50,21 +54,21 @@ main()
 
     { // test with RK(4, 4) method
         auto filename = std::filesystem::path( dirname ) / "rk44.dat";
-        auto obs      = observer::file_observer( filename );
+        auto obs      = ponio::observer::file_observer( filename );
 
         ponio::solve( pb_curtiss_hirshfelder, ponio::runge_kutta::rk_44(), y_0, tspan, dt, obs );
     }
 
     { // test with expRK Krogstad method
         auto filename = std::filesystem::path( dirname ) / "krogstad.dat";
-        auto obs      = observer::file_observer( filename );
+        auto obs      = ponio::observer::file_observer( filename );
 
         ponio::solve( pb_curtiss_hirshfelder, ponio::runge_kutta::krogstad(), y_0, tspan, dt, obs );
     }
 
     { // test with LRK(4, 4) method
         auto filename = std::filesystem::path( dirname ) / "lrk44.dat";
-        auto obs      = observer::file_observer( filename );
+        auto obs      = ponio::observer::file_observer( filename );
 
         auto exp = []( double x )
         {

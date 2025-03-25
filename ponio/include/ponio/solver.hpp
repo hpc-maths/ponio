@@ -30,7 +30,7 @@ namespace ponio
 
         current_solution( value_t tn, state_t un, value_t dt )
             : time( tn )
-            , state( un )
+            , state( std::move( un ) )
             , time_step( dt )
         {
         }
@@ -81,7 +81,7 @@ namespace ponio
 
         value_type sol;
         method_t meth;
-        problem_t& pb;
+        problem_t& pb; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
         ponio::time_span<value_t> t_span;
         typename ponio::time_span<value_t>::iterator it_next_time;
         std::optional<value_t> dt_reference;
@@ -100,7 +100,7 @@ namespace ponio
          */
         time_iterator( problem_t& pb_, method_t meth_, state_t const& u0, ponio::time_span<value_t> const& t_span_, value_t dt )
             : sol( ( t_span_.front() == t_span_.back() ) ? sentinel : t_span_.front(), u0, dt )
-            , meth( meth_ )
+            , meth( std::move( meth_ ) )
             , pb( pb_ )
             , t_span( t_span_ )
             , it_next_time( std::next( std::begin( t_span ) ) )

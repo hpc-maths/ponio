@@ -19,12 +19,19 @@ Checks: "*,
         -hicpp-named-parameter,
         -cppcoreguidelines-avoid-magic-numbers,
         -cppcoreguidelines-init-variables,
+        -hicpp-uppercase-literal-suffix,
+        -readability-uppercase-literal-suffix,
+        -cppcoreguidelines-pro-bounds-constant-array-index,
 "
 WarningsAsErrors: '*'
-HeaderFilterRegex: ''
-FormatStyle:     none
+HeaderFilterRegex: 'ponio/include/ponio/*.hpp'
+FormatStyle: none
 CheckOptions:
  - key: hicpp-signed-bitwise.IgnorePositiveIntegerLiterals
    value: true
  - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
    value: '1'
+ - key: cppcoreguidelines-rvalue-reference-param-not-moved.IgnoreNonDeducedTemplateTypes
+   value: true
+ - key: cppcoreguidelines-rvalue-reference-param-not-moved.AllowPartialMove
+   value: true

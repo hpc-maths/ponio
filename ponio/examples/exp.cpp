@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <filesystem>
 #include <string>
 
 #include <ponio/observer.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 // solve $\dot{u} = u$ with $u(t=0) = 1$, and $t\in[0,2]$.
 
@@ -16,7 +20,7 @@ main()
 {
     std::string const dirname = "exp_data";
     auto filename             = std::filesystem::path( dirname ) / "exp.dat";
-    observer::file_observer fobs( filename );
+    ponio::observer::file_observer fobs( filename );
 
     auto identity = []( double, double u )
     {

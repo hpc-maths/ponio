@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -20,6 +22,8 @@
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 #include <ponio/time_span.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 // Heat
 class heat_model
@@ -131,7 +135,12 @@ main()
     save( x, y_ini, std::filesystem::path( dirname ) / "heat_ini.dat" );
 
     // make quasi-exact solution from RKC(20, 2) with a small time step
-    std::valarray<double> const y_qexa = ponio::solve( pb_heat, ponio::runge_kutta::rkc_202(), y_ini, tspan, 1e-6, observer::null_observer() );
+    std::valarray<double> const y_qexa = ponio::solve( pb_heat,
+        ponio::runge_kutta::rkc_202(),
+        y_ini,
+        tspan,
+        1e-6,
+        ponio::observer::null_observer() );
     ;
     save( x, y_qexa, std::filesystem::path( dirname ) / "heat_qexa.dat" );
 
@@ -141,8 +150,8 @@ main()
     {
         double const dt = ( t_end - t_ini ) / static_cast<double>( N );
 
-        y2_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock2( eigmax_computer ), y_ini, tspan, dt, observer::null_observer() );
-        y4_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock4(), y_ini, tspan, dt, observer::null_observer() );
+        y2_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock2( eigmax_computer ), y_ini, tspan, dt, ponio::observer::null_observer() );
+        y4_end = ponio::solve( pb_heat, ponio::runge_kutta::rock::rock4(), y_ini, tspan, dt, ponio::observer::null_observer() );
 
         errors_file << dt << " " << std::setprecision( 20 ) << error_l2( y_qexa, y2_end, dx ) << " " << error_l2( y_qexa, y4_end, dx )
                     << "\n";

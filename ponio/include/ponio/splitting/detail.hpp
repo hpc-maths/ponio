@@ -8,10 +8,11 @@
 
 #include <algorithm>
 #include <array>
+#include <concepts>
 #include <cstddef>
+#include <string_view>
 #include <tuple>
-
-#include "../ponio_config.hpp"
+#include <type_traits>
 
 namespace ponio::splitting::detail
 {
@@ -77,7 +78,7 @@ namespace ponio::splitting::detail
         splitting_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts, optional_args_container args )
             : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
             , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
-            , optional_arguments( args )
+            , optional_arguments( std::move( args ) )
         {
         }
 
@@ -85,6 +86,7 @@ namespace ponio::splitting::detail
         splitting_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts )
             : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
             , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
+            , optional_arguments( false )
         {
         }
     };
@@ -125,7 +127,7 @@ namespace ponio::splitting::detail
         return std::apply(
             [&]<typename... Args_t>( Args_t&&... args )
             {
-                return _splitting_method_t<value_t, Methods_t...>( meths, dts, args... );
+                return _splitting_method_t<value_t, Methods_t...>( meths, dts, std::forward<Args_t>( args )... );
             },
             optional_args );
     }

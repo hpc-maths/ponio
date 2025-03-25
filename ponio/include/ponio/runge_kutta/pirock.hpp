@@ -5,6 +5,9 @@
 // IWYU pragma: private, include "../runge_kutta.hpp"
 
 #pragma once
+
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <array>
 #include <concepts>
 #include <cstddef>
@@ -15,12 +18,15 @@
 #include <type_traits>
 
 #include "../detail.hpp"
+#include "../iteration_info.hpp"
 #include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
 #include "dirk.hpp"
 #include "rock.hpp"
 #include "rock_coeff.hpp"
+
+// NOLINTEND(misc-include-cleaner)
 
 namespace ponio::runge_kutta::pirock
 {
@@ -192,6 +198,9 @@ namespace ponio::runge_kutta::pirock
         pirock_impl( alpha_beta_computer_t&& _alpha_beta_computer, eig_computer_t&& _eig_computer )
             : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
+            , shampine_trick_caller( false )
+            , tolerance( 0. )
+            , _info()
         {
         }
 
@@ -214,6 +223,7 @@ namespace ponio::runge_kutta::pirock
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
             , shampine_trick_caller( std::forward<_shampine_trick_caller_t_>( _shampine_trick_caller ) )
             , tolerance( tol )
+            , _info()
         {
         }
 
@@ -694,6 +704,9 @@ namespace ponio::runge_kutta::pirock
         pirock_RDA_impl( alpha_beta_computer_t&& _alpha_beta_computer, eig_computer_t&& _eig_computer )
             : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
+            , shampine_trick_caller( false )
+            , tolerance( 0. )
+            , _info()
         {
         }
 
@@ -716,6 +729,7 @@ namespace ponio::runge_kutta::pirock
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
             , shampine_trick_caller( std::forward<_shampine_trick_caller_t_>( _shampine_trick_caller ) )
             , tolerance( tol )
+            , _info()
         {
         }
 

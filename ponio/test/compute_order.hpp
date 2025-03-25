@@ -82,8 +82,8 @@ namespace explicit_method
 #ifdef DEBUG
         std::stringstream ss;
         ss << "debug_info/" << std::string( Algorithm_t::id ) << "/dt_" << dt << ".dat";
-        std::string filename = ss.str();
-        auto obs             = observer::file_observer( filename );
+        std::string const filename = ss.str();
+        auto obs                   = ponio::observer::file_observer( filename );
 #else
         auto obs = []( T, state_t, T ) {};
 #endif

@@ -7,7 +7,7 @@
 #include <fstream>
 #include <ponio/observer.hpp>
 
-TEST_CASE( "observer::file_observer_currentpath" )
+TEST_CASE( "ponio::observer::file_observer_currentpath" )
 {
     auto pwd = std::filesystem::current_path();
 
@@ -16,7 +16,7 @@ TEST_CASE( "observer::file_observer_currentpath" )
     double un = 0.5;
 
     { // create an observer only in this scope
-        observer::file_observer obs( "test.txt" );
+        ponio::observer::file_observer obs( "test.txt" );
         obs( tn, un, dt );
     }
 
@@ -47,14 +47,14 @@ TEST_CASE( "observer::file_observer_currentpath" )
     std::filesystem::remove( test_path );
 }
 
-TEST_CASE( "observer::file_observer_newdir" )
+TEST_CASE( "ponio::observer::file_observer_newdir" )
 {
     std::filesystem::path test_path = "my_new_unique_dir/test.txt";
     int tn = 0, dt = 1;
     double un = 0.5;
 
     { // create an observer only in this scope
-        observer::file_observer obs( test_path );
+        ponio::observer::file_observer obs( test_path );
         obs( tn, un, dt );
     }
 

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
+#include <cstdint>
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
@@ -17,9 +20,11 @@
 
 #include <CLI/CLI.hpp>
 
+// NOLINTEND(misc-include-cleaner)
+
 struct C_random_device
 {
-    using result_type = unsigned int;
+    using result_type = std::uint_fast32_t;
 
     static constexpr result_type
     min()
@@ -49,13 +54,13 @@ struct C_random_device
 int
 main( int argc, char* argv[] )
 {
-    CLI::App app{ "Launch N brownian motion process solved by a RK(3,3) method" };
+    CLI::App app{ "Launch N brownian motion process solved by a RK(3,3) method" }; // NOLINT(misc-include-cleaner)
 
     std::string const dirname = "brownian_data";
 
     std::size_t n = 10;
     app.add_option( "N", n, "Number of brownian motion" );
-    CLI11_PARSE( app, argc, argv );
+    CLI11_PARSE( app, argc, argv ); // NOLINT(misc-include-cleaner)
 
     using state_t = std::valarray<double>;
 
@@ -80,7 +85,7 @@ main( int argc, char* argv[] )
         std::stringstream ssfilename;
         ssfilename << "brownian_" << i << ".dat";
         auto filename = std::filesystem::path( dirname ) / ssfilename.str();
-        observer::file_observer fobs( filename );
+        ponio::observer::file_observer fobs( filename );
         ponio::solve( brownian_pb, ponio::runge_kutta::rk_33(), yini, { 0., 10. }, dt, fobs );
     }
 

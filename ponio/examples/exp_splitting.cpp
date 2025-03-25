@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+#include <cmath>
 #include <filesystem>
 #include <string>
+#include <tuple>
+#include <utility>
 
 #include <ponio/observer.hpp>
 #include <ponio/problem.hpp>
@@ -19,7 +22,7 @@ main()
 {
     std::string const dirname = "exp_splitting_data";
 
-    double lambda = 0.3;
+    double const lambda = 0.3;
 
     auto f1 = [=]( double, double u )
     {
@@ -52,21 +55,21 @@ main()
             std::make_pair( ponio::runge_kutta::rk_22_ralston(), 0.5 * dt ) );
 
         auto filename = std::filesystem::path( dirname ) / "exp_strang.dat";
-        observer::file_observer fobs( filename );
+        ponio::observer::file_observer fobs( filename );
         ponio::solve( pb, strang, y0, { 0., 5.0 }, dt, fobs );
     }
     {
         auto exact = ponio::make_user_defined_method( exact_solver );
 
         auto filename = std::filesystem::path( dirname ) / "exp_exact.dat";
-        observer::file_observer fobs( filename );
+        ponio::observer::file_observer fobs( filename );
         ponio::solve( pb, exact, y0, { 0., 5.0 }, dt, fobs );
     }
     {
         auto rk2 = ponio::runge_kutta::rk_22_ralston();
 
         auto filename = std::filesystem::path( dirname ) / "exp_rk2.dat";
-        observer::file_observer fobs( filename );
+        ponio::observer::file_observer fobs( filename );
         ponio::solve( pb, rk2, y0, { 0., 5.0 }, dt, fobs );
     }
 

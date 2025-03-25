@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <filesystem>
 #include <string>
 #include <valarray>
@@ -13,6 +15,8 @@
 #include <ponio/time_span.hpp>
 
 #include <CLI/CLI.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 /*
 Lotka-Volterra system
@@ -31,9 +35,9 @@ This system is solved by RK(11,8) Runge-Kutta method with time step $\Delta t=0.
  */
 
 int
-main( int argc, char* argv[] )
+main( int argc, char** argv )
 {
-    CLI::App app{ "Launch Lotka-Volerra equation simulation solved by RK(11,8) method" };
+    CLI::App app{ "Launch Lotka-Volerra equation simulation solved by RK(11,8) method" }; // NOLINT(misc-include-cleaner)
 
     // default filename
     std::string const dirname = "lv_data";
@@ -45,9 +49,9 @@ main( int argc, char* argv[] )
 
     app.add_option( "filename", filename, "name of output file" );
     app.add_option( "x0", x0, "initial condition (x,y)(t=0) = (x0,x0)" );
-    CLI11_PARSE( app, argc, argv );
+    CLI11_PARSE( app, argc, argv ); // NOLINT(misc-include-cleaner)
 
-    observer::file_observer fobs( filename );
+    ponio::observer::file_observer fobs( filename );
 
     // parameters
     double const alpha = 2. / 3.;

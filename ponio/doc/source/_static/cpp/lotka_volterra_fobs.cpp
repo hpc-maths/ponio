@@ -31,7 +31,7 @@ main()
     };
 
     std::string filename = "lotka_volterra_fobs.txt";
-    auto obs             = observer::file_observer( filename );
+    auto obs             = ponio::observer::file_observer( filename );
 
     ponio::time_span<double> const t_span = { 0., 15. }; // begin and end time
     double const dt                       = 0.1;         // time step

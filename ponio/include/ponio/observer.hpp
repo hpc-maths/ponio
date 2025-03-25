@@ -4,6 +4,8 @@
 
 #pragma once
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <algorithm>
 #include <cstddef>
 #include <filesystem>
@@ -16,7 +18,9 @@
 #include <tuple>
 #include <vector>
 
-namespace observer
+// NOLINTEND(misc-include-cleaner)
+
+namespace ponio::observer
 {
 
     /** @class capsule
@@ -27,7 +31,7 @@ namespace observer
     template <typename state_t>
     struct capsule
     {
-        state_t const& data;
+        state_t const& data; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 
         capsule( state_t const& dat );
     };
@@ -131,7 +135,7 @@ namespace observer
      */
     struct cout_observer : public stream_observer<char>
     {
-        cout_observer();
+        cout_observer(); // NOLINT(hicpp-use-equals-default,modernize-use-equals-default)
     };
 
     /**
@@ -241,4 +245,4 @@ namespace observer
         solutions.push_back( std::make_tuple( tn, un, dt ) );
     }
 
-} // namespace observer
+} // namespace ponio::observer

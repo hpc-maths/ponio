@@ -10,7 +10,7 @@
 int
 main()
 {
-    using namespace observer;
+    using namespace ponio::observer;
 
     double k = 50.;
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 #include <filesystem>
 #include <string>
 #include <utility>
@@ -15,6 +17,8 @@
 #include <ponio/solver.hpp>
 #include <ponio/splitting.hpp>
 #include <ponio/time_span.hpp>
+
+// NOLINTEND(misc-include-cleaner)
 
 // Lorenz
 /*
@@ -55,8 +59,8 @@
 int
 main()
 {
-    using vector_type = Eigen::Vector<double, 3>;
-    using matrix_type = Eigen::Matrix<double, 3, 3>;
+    using vector_type = Eigen::Vector<double, 3>;    // NOLINT(misc-include-cleaner)
+    using matrix_type = Eigen::Matrix<double, 3, 3>; // NOLINT(misc-include-cleaner)
 
     std::string const dirname = "lorenz_tuto_data";
 
@@ -65,10 +69,10 @@ main()
     auto filename_3 = std::filesystem::path( dirname ) / "lie.dat";
     auto filename_4 = std::filesystem::path( dirname ) / "strang.dat";
 
-    observer::file_observer fobs_1( filename_1 );
-    observer::file_observer fobs_2( filename_2 );
-    observer::file_observer fobs_3( filename_3 );
-    observer::file_observer fobs_4( filename_4 );
+    ponio::observer::file_observer fobs_1( filename_1 );
+    ponio::observer::file_observer fobs_2( filename_2 );
+    ponio::observer::file_observer fobs_3( filename_3 );
+    ponio::observer::file_observer fobs_4( filename_4 );
 
     double const sigma = 10.;
     double const rho   = 28.;
