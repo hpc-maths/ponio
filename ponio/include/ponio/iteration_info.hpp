@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "detail.hpp"
+#include "ponio_config.hpp"
 #include "stage.hpp"
 
 namespace ponio
@@ -36,6 +37,8 @@ namespace ponio
         std::size_t number_of_stages; /**< number of stages of method */
         std::size_t number_of_eval;   /**< number of evaluation of function */
         value_t tolerance;            /**< tolerance for the method (for adaptive time step method) */
+        value_t absolute_tolerance;   /**< absolute tolerance for the method (for adaptive time step method) */
+        value_t relative_tolerance;   /**< relative tolerance for the method (for adaptive time step method) */
 
         /**
          * @brief Construct a new iteration info object
@@ -47,6 +50,8 @@ namespace ponio
             , number_of_stages( 0 )
             , number_of_eval( 0 )
             , tolerance( tol )
+            , absolute_tolerance( tol )
+            , relative_tolerance( tol )
         {
         }
 
@@ -56,6 +61,8 @@ namespace ponio
             , number_of_stages( tableau_t::N_stages )
             , number_of_eval( 0 )
             , tolerance( tol )
+            , absolute_tolerance( tol )
+            , relative_tolerance( tol )
         {
         }
 
@@ -90,27 +97,85 @@ namespace ponio
         bool is_step = false;                                            /**< sets as true only if iterator is on a step given in solver */
         std::size_t number_of_stages;                                    /**< number of stages of method */
         std::array<std::size_t, tableaus_t::N_operators> number_of_eval; /**< number of evaluation of function */
-        value_t tolerance;                                               /**< tolerance for the method (for adaptive time step method) */
+        value_t absolute_tolerance; /**< absolute tolerance for the method (for adaptive time step method) */
+        value_t relative_tolerance; /**< relative tolerance for the method (for adaptive time step method) */
+
+        /**
+         * @brief Construct a new iteration info object
+         */
+        iteration_info()
+            : error( static_cast<value_t>( 0 ) )
+            , number_of_stages( 0 )
+            , number_of_eval( ponio::detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
+            , absolute_tolerance( default_config::tol )
+            , relative_tolerance( default_config::tol )
+        {
+        }
 
         /**
          * @brief Construct a new iteration info object
          *
-         * @param tol tolerance for adaptive time step method
+         * @param tol tolerance (same for absolute or relative one)
          */
-        iteration_info( value_t tol = static_cast<value_t>( 0 ) )
+        iteration_info( value_t tol )
             : error( static_cast<value_t>( 0 ) )
+            , success( true )
+            , is_step( false )
             , number_of_stages( 0 )
-            , number_of_eval( detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
-            , tolerance( tol )
+            , number_of_eval( ponio::detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
+            , absolute_tolerance( tol )
+            , relative_tolerance( tol )
         {
         }
 
-        iteration_info( value_t tol = static_cast<value_t>( 0 ) )
+        /**
+         * @brief Construct a new iteration info object
+         *
+         * @param a_tol absolute tolerance
+         * @param r_tol relative tolerance
+         */
+        iteration_info( value_t a_tol, value_t r_tol )
+            : error( static_cast<value_t>( 0 ) )
+            , success( true )
+            , is_step( false )
+            , number_of_stages( 0 )
+            , number_of_eval( ponio::detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
+            , absolute_tolerance( a_tol )
+            , relative_tolerance( r_tol )
+        {
+        }
+
+        iteration_info()
             requires stages::has_static_number_of_stages<tableaus_t>
             : error( static_cast<value_t>( 0 ) )
             , number_of_stages( tableaus_t::N_stages )
-            , number_of_eval( detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
-            , tolerance( tol )
+            , number_of_eval( ponio::detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
+            , absolute_tolerance( default_config::tol )
+            , relative_tolerance( default_config::tol )
+        {
+        }
+
+        iteration_info( value_t tol )
+            requires stages::has_static_number_of_stages<tableaus_t>
+            : error( static_cast<value_t>( 0 ) )
+            , success( true )
+            , is_step( false )
+            , number_of_stages( tableaus_t::N_stages )
+            , number_of_eval( ponio::detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
+            , absolute_tolerance( tol )
+            , relative_tolerance( tol )
+        {
+        }
+
+        iteration_info( value_t a_tol, value_t r_tol )
+            requires stages::has_static_number_of_stages<tableaus_t>
+            : error( static_cast<value_t>( 0 ) )
+            , success( true )
+            , is_step( false )
+            , number_of_stages( tableaus_t::N_stages )
+            , number_of_eval( ponio::detail::init_fill_array<tableaus_t::N_operators, std::size_t>( 0 ) )
+            , absolute_tolerance( a_tol )
+            , relative_tolerance( r_tol )
         {
         }
 
@@ -201,7 +266,9 @@ namespace ponio
         std::size_t number_of_steps;                                /**< number of stages of method */
         details::tuple_of_number_of_eval_t<tuple_t> number_of_eval; /**< number of evaluation of function */
 
-        value_t tolerance; /**< tolerance for the method (for adaptive time step method) */
+        value_t tolerance;          /**< tolerance for the method (for adaptive time step method) */
+        value_t absolute_tolerance; /**< absolute tolerance for the method (for adaptive time step method) */
+        value_t relative_tolerance; /**< relative tolerance for the method (for adaptive time step method) */
 
         tuple_t* ptr_methods; /**< pointer to tuple of methods to access to iteration_info of each substep */
 
@@ -210,6 +277,8 @@ namespace ponio
             , error( static_cast<value_t>( 0 ) )
             , number_of_steps( splitting_t::N_steps )
             , tolerance( tol )
+            , absolute_tolerance( tol )
+            , relative_tolerance( tol )
             , ptr_methods( &methods )
         {
             reset_eval();
@@ -275,6 +344,8 @@ namespace ponio
         std::size_t number_of_stages = 0;     /**< number of stages of method */
         std::size_t number_of_eval   = 1;     /**< number of evaluation of function */
         value_t tolerance;                    /**< tolerance for the method (for adaptive time step method) */
+        value_t absolute_tolerance;           /**< absolute tolerance for the method (for adaptive time step method) */
+        value_t relative_tolerance;           /**< relative tolerance for the method (for adaptive time step method) */
 
         /**
          * @brief Construct a new iteration info object
@@ -284,6 +355,8 @@ namespace ponio
         iteration_info( value_t tol = static_cast<value_t>( 0 ) )
             : error( static_cast<value_t>( 0 ) )
             , tolerance( tol )
+            , absolute_tolerance( tol )
+            , relative_tolerance( tol )
         {
         }
 
