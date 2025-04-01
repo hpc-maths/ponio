@@ -73,10 +73,13 @@ with :math:`t>0`, on the torus :math:`x\in [0, 1)`, a velocity :math:`a=1` and w
         0         & \text{else}
     \end{cases}
 
-We choose  centred differences of order 2 to estimate the :math:`x` derivative:
+We choose a first order up-wind scheme to estimate the :math:`x` derivative:
 
 .. math::
 
-    \partial_x u(t^n, x_i) \approx \frac{u^n_{i+1} - u^n_{i-1}}{2\Delta x}
+    a \partial_x u(t^n, x_i) \approx \begin{cases}
+        \frac{u^n_{i+1} - u^n_{i}}{\Delta x}, & \text{if } a \geq 0 \\
+        \frac{u^n_{i} - u^n_{i-1}}{\Delta x}, & \text{else}
+    \end{cases}
 
 .. image:: transport.png

@@ -5,20 +5,20 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_odeiv2.h>
 
-int transport(double t, const double y[], double dy[], void *params)
+int upwind(double t, const double y[], double dy[], void *params)
 {
   double a = ((double *)params)[0];
   double dx = ((double *)params)[1];
   int n_x = ((double *)params)[2];
 
-  dy[0] = -a * ( y[1] - y[n_x - 1] ) / ( 2. * dx );
+  dy[0] = -( fmax( a, 0. ) * ( y[0] - y[n_x - 1] ) + fmin( a, 0. ) * ( y[1] - y[0] ) ) / dx;
 
   for ( int i = 1; i < n_x - 1; ++i )
   {
-      dy[i] = -a * ( y[i + 1] - y[i - 1] ) / ( 2. * dx );
+      dy[i] = -( fmax( a, 0. ) * ( y[i] - y[i - 1] ) + fmin( a, 0. ) * ( y[i + 1] - y[i] ) ) / dx;
   }
 
-  dy[n_x - 1] = -a * ( y[0] - y[n_x - 2] ) / ( 2. * dx );
+  dy[n_x - 1] = -( fmax( a, 0. ) * ( y[n_x - 1] - y[n_x - 2] ) + fmin( a, 0. ) * ( y[0] - y[n_x - 1] ) ) / dx;
 
   return GSL_SUCCESS;
 }
@@ -26,11 +26,8 @@ int transport(double t, const double y[], double dy[], void *params)
 int
 main()
 {
-  int n_x = 100;
-  double t0 = 0.;
-  double tf = 0.3;
-  double dt = 0.01;
-
+  // space parameter
+  int n_x = 500;
   double * x = (double *)malloc(n_x * sizeof(double));
   for ( int i = 0 ; i<n_x; ++i)
   {
@@ -38,14 +35,18 @@ main()
   }
   double dx = x[1] - x[0];
 
+  // velocity
   double a = 1.0;
 
+  // time parameter
+  double t0 = 0.;
+  double tf = 0.3;
+  double dt = dx / a;
+
+  // initial condition
   double * y0 = (double *)malloc(n_x * sizeof(double));
-  double sigma = 0.1;
   for ( int i = 0 ; i<n_x; ++i)
   {
-    //y0[i] = sin(2.*M_PI*x[i]);
-    // y0[i] = 1. / ( sigma * sqrt( 2. * M_PI ) ) * exp( -( x[i] - 0.5 ) * ( x[i] - 0.5 ) / ( sigma * sigma ) );
         y0[i] = 0;
         if ( 0.25 <= x[i] && x[i] < 0.5 )
         {
@@ -59,8 +60,8 @@ main()
 
   double params[3] = { a, dx, (double)n_x };
 
-  gsl_odeiv2_system transport_pb = {transport, NULL, n_x, &params};
-  gsl_odeiv2_driver * meth = gsl_odeiv2_driver_alloc_y_new(&transport_pb, gsl_odeiv2_step_rk4, dt, 1e-6, 0.0);
+  gsl_odeiv2_system transport_pb = {upwind, NULL, n_x, &params};
+  gsl_odeiv2_driver * meth = gsl_odeiv2_driver_alloc_y_new(&transport_pb, gsl_odeiv2_step_rk2, dt, 1e-6, 0.0);
 
   int n_sol = (tf-t0)/dt;
   double ** sol = (double **)malloc(n_sol*sizeof(double *));
@@ -70,8 +71,7 @@ main()
     sol[i] = (double *)malloc(n_x * sizeof(double));
   }
 
-  double * yn = (double *)malloc(n_x * sizeof(double));
-  memcpy(yn, y0, n_x*sizeof(double));
+  double * yn = y0;
 
   int n = 0;
   double tn = t0;
@@ -90,6 +90,7 @@ main()
     ++n;
   }
 
+  // save solution
   const char* filename = "transport.txt";
   FILE* output_file = fopen(filename, "w");
   if (!output_file) {
