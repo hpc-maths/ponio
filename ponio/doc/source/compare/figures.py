@@ -53,7 +53,13 @@ fig.write_html("lorenz.html")
 # transport
 print("transport figure")
 
-fig, axs = plt.subplots(len(ode_lib), 1, sharex='col', figsize=(8.3, 14))
+a = 1.0
+n_x = 500
+
+dx = 1./n_x
+dt = dx / a
+
+fig, axs = plt.subplots(len(ode_lib), 1, sharex='col', figsize=(7.85, 14))
 
 for i, d in enumerate(ode_lib.keys()):
     print(f"extract data from: {d}")
@@ -63,14 +69,17 @@ for i, d in enumerate(ode_lib.keys()):
 
     # axs[i].margins(0.05)
 
-    axs[i].text(1.0, 0.2, ode_lib[d], horizontalalignment="right")
     x = data[:, 0]
     y = data[:, 1:]
-    n_sol = y.shape[1]
+    n_sol = y.shape[1]-1
+
+    axs[i].set_xlim(x[0], x[-1])
+    axs[i].text(x[5], 0.9*np.max(y), ode_lib[d], horizontalalignment="left")
 
     for n in range(10):
-        yn = y[:, int(n/10*n_sol)]
-        axs[i].plot(x, yn, label=f"iteration {int(n/10*n_sol)}")
+        idx = int(n_sol*n/9)
+        yn = y[:, idx]
+        axs[i].plot(x, yn, label=f"$t^n = {idx * dt}$")
 
 axs[-1].set_xlabel("$x$")
 axs[0].legend(ncols=5, loc=(0., 1.05))

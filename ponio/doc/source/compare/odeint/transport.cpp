@@ -11,11 +11,8 @@ main()
 {
     using state_t = std::vector<double>;
 
-    std::size_t n_x = 100;
-    double t0       = 0.;
-    double tf       = 0.3;
-    double dt       = 0.01;
-
+    // space parameter
+    std::size_t n_x = 500;
     std::vector<double> x( n_x );
     std::generate( std::begin( x ),
         std::end( x ),
@@ -28,26 +25,15 @@ main()
     // velocity
     double a = 1.0;
 
-    // transport problem with centred difference of order 2
-    auto transport = [a, n_x, dx]( state_t const& y, state_t& dy, double t )
-    {
-        dy[0] = -a * ( y[1] - y[n_x - 1] ) / ( 2. * dx );
-
-        for ( std::size_t i = 1; i < n_x - 1; ++i )
-        {
-            dy[i] = -a * ( y[i + 1] - y[i - 1] ) / ( 2. * dx );
-        }
-
-        dy[n_x - 1] = -a * ( y[0] - y[n_x - 2] ) / ( 2. * dx );
-    };
+    // time parameter
+    double t0 = 0.;
+    double tf = 0.3;
+    double dt = dx / a;
 
     // initial condition
-    double sigma = 0.1;
     state_t y0( n_x );
     for ( std::size_t i = 0; i < n_x; ++i )
     {
-        // y0[i] = std::sin( 2. * std::numbers::pi * x[i] );
-        // y0[i] = 1. / ( sigma * std::sqrt( 2. * std::numbers::pi ) ) * std::exp( -( x[i] - 0.5 ) * ( x[i] - 0.5 ) / ( sigma * sigma ) );
         y0[i] = 0;
         if ( 0.25 <= x[i] && x[i] < 0.5 )
         {
@@ -59,6 +45,18 @@ main()
         }
     }
 
+    auto upwind = [a, n_x, dx]( state_t const& y, state_t& dy, double t )
+    {
+        dy[0] = -( std::max( a, 0. ) * ( y[0] - y[n_x - 1] ) + std::min( a, 0. ) * ( y[1] - y[0] ) ) / dx;
+
+        for ( std::size_t i = 1; i < n_x - 1; ++i )
+        {
+            dy[i] = -( std::max( a, 0. ) * ( y[i] - y[i - 1] ) + std::min( a, 0. ) * ( y[i + 1] - y[i] ) ) / dx;
+        }
+
+        dy[n_x - 1] = -( std::max( a, 0. ) * ( y[n_x - 1] - y[n_x - 2] ) + std::min( a, 0. ) * ( y[0] - y[n_x - 1] ) ) / dx;
+    };
+
     std::vector<state_t> sol;
     sol.reserve( static_cast<std::size_t>( ( tf - t0 ) / dt ) );
     auto vec_observer = [&]( state_t const& y, double const t )
@@ -66,9 +64,10 @@ main()
         sol.push_back( y );
     };
 
-    auto rk4 = boost::numeric::odeint::runge_kutta4<state_t>();
-    boost::numeric::odeint::integrate_const( rk4, transport, y0, t0, tf, dt, vec_observer );
+    auto euler = boost::numeric::odeint::euler<state_t>();
+    boost::numeric::odeint::integrate_const( euler, upwind, y0, t0, tf, dt, vec_observer );
 
+    // save solution
     std::ofstream output( "transport.txt" );
     for ( std::size_t i = 0; i < n_x; ++i )
     {

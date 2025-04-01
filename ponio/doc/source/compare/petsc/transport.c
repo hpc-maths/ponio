@@ -1,27 +1,27 @@
 #include <petsc.h>
 
-PetscErrorCode transport(TS ts, double t, Vec vec_y, Vec vec_ydot, void* params)
+PetscErrorCode transport(TS ts, double t, Vec vec_y, Vec vec_dy, void* params)
 {
     double a = ((double *)params)[0];
     double dx = ((double *)params)[1];
     int n_x = ((double *)params)[2];
 
     const double* y;
-    double* ydot;
+    double* dy;
 
     VecGetArrayRead(vec_y, &y);
-    VecGetArray(vec_ydot, &ydot);
+    VecGetArray(vec_dy, &dy);
 
-    ydot[0] = -a * ( y[1] - y[n_x - 1] ) / ( 2. * dx );
+    dy[0] = -( fmax( a, 0. ) * ( y[0] - y[n_x - 1] ) + fmin( a, 0. ) * ( y[1] - y[0] ) ) / dx;
 
     for ( int i = 1; i < n_x - 1; ++i )
     {
-        ydot[i] = -a * ( y[i + 1] - y[i - 1] ) / ( 2. * dx );
+        dy[i] = -( fmax( a, 0. ) * ( y[i] - y[i - 1] ) + fmin( a, 0. ) * ( y[i + 1] - y[i] ) ) / dx;
     }
 
-    ydot[n_x - 1] = -a * ( y[0] - y[n_x - 2] ) / ( 2. * dx );
+    dy[n_x - 1] = -( fmax( a, 0. ) * ( y[n_x - 1] - y[n_x - 2] ) + fmin( a, 0. ) * ( y[0] - y[n_x - 1] ) ) / dx;
 
-    VecRestoreArray(vec_ydot, &ydot);
+    VecRestoreArray(vec_dy, &dy);
     VecRestoreArrayRead(vec_y, &y);
 
     return PETSC_SUCCESS;
@@ -32,11 +32,8 @@ main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, NULL, NULL);
 
-  int n_x = 100;
-  double t0 = 0.;
-  double tf = 0.3;
-  double dt = 0.01;
-
+  // space parameter
+  int n_x = 500;
   double * x = (double *)malloc(n_x * sizeof(double));
   for ( int i = 0 ; i<n_x; ++i)
   {
@@ -44,14 +41,18 @@ main(int argc, char** argv)
   }
   double dx = x[1] - x[0];
 
+  // velocity
   double a = 1.0;
 
+  // time parameter
+  double t0 = 0.;
+  double tf = 0.3;
+  double dt = dx / a;
+
+  // initial condition
   double * y0 = (double *)malloc(n_x * sizeof(double));
-  double sigma = 0.1;
   for ( int i = 0 ; i<n_x; ++i)
   {
-    // y0[i] = sin(2.*M_PI*x[i]);
-    // y0[i] = 1. / ( sigma * sqrt( 2. * M_PI ) ) * exp( -( x[i] - 0.5 ) * ( x[i] - 0.5 ) / ( sigma * sigma ) );
         y0[i] = 0;
         if ( 0.25 <= x[i] && x[i] < 0.5 )
         {
@@ -76,9 +77,9 @@ main(int argc, char** argv)
   TS ts;
   TSCreate(PETSC_COMM_SELF, &ts);
   TSSetType(ts, TSRK);
-  TSRKSetType(ts, TSRK4);
+  TSRKSetType(ts, TSRK2A);
 
-  TSSetTime(ts, 0.);
+  TSSetTime(ts, t0);
   TSSetMaxTime(ts, tf);
   TSSetTimeStep(ts, dt);
 
@@ -94,23 +95,24 @@ main(int argc, char** argv)
   TSGetStepNumber(ts, &n_step);
 
   Vec vec_yn;
-  double * yn;
+  double const * yn;
 
   while( tn < tf )
   {
     TSGetStepNumber(ts, &n_step);
     TSGetSolution(ts, &vec_yn);
-    VecGetArray(vec_yn, &yn);
+    VecGetArrayRead(vec_yn, &yn);
 
     memcpy(sol[n_step], yn, n_x*sizeof(double));
 
-    VecRestoreArray(vec_yn, &yn);
+    VecRestoreArrayRead(vec_yn, &yn);
 
     TSStep(ts);
 
     TSGetTime(ts, &tn);
   }
 
+  // save solution
   const char* filename = "transport.txt";
   FILE* output_file = fopen(filename, "w");
   if (!output_file) {
