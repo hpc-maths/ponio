@@ -3,7 +3,7 @@ import scipy
 from scipy.integrate import solve_ivp
 
 
-class RK44(scipy.integrate._ivp.rk.RungeKutta):
+class Euler(scipy.integrate._ivp.rk.RungeKutta):
     order = 1
     error_estimator_order = 1
     n_stages = 1
@@ -46,7 +46,7 @@ def upwind(t, y):
     return dy
 
 
-sol = solve_ivp(upwind, t_span, y0, method=RK44,
+sol = solve_ivp(upwind, t_span, y0, method=Euler,
                 first_step=dt, max_step=dt, rtol=1.0, atol=1.0)
 
 # save solution
