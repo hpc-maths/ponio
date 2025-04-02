@@ -77,7 +77,7 @@ main(int argc, char** argv)
   TS ts;
   TSCreate(PETSC_COMM_SELF, &ts);
   TSSetType(ts, TSRK);
-  TSRKSetType(ts, TSRK2A);
+  TSRKSetType(ts, TSRK1FE);
 
   TSSetTime(ts, t0);
   TSSetMaxTime(ts, tf);
