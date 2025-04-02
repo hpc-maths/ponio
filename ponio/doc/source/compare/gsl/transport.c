@@ -5,6 +5,169 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_odeiv2.h>
 
+static int
+stepper_set_driver_null (void *vstate, const gsl_odeiv2_driver * d)
+{
+  return GSL_SUCCESS;
+}
+
+typedef struct
+{
+  double *k;
+  double *y0;
+  double *y_onestep;
+}
+euler_state_t;
+
+static void *
+euler_alloc (size_t dim)
+{
+  euler_state_t *state = (euler_state_t *) malloc (sizeof (euler_state_t));
+
+  if (state == 0)
+    {
+      GSL_ERROR_NULL ("failed to allocate space for euler_state", GSL_ENOMEM);
+    }
+
+  state->k = (double *) malloc (dim * sizeof (double));
+
+  if (state->k == 0)
+    {
+      free (state);
+      GSL_ERROR_NULL ("failed to allocate space for k", GSL_ENOMEM);
+    }
+
+  state->y0 = (double *) malloc (dim * sizeof (double));
+
+  if (state->y0 == 0)
+    {
+      free (state->k);
+      free (state);
+      GSL_ERROR_NULL ("failed to allocate space for y0", GSL_ENOMEM);
+    }
+
+  state->y_onestep = (double *) malloc (dim * sizeof (double));
+
+  if (state->y_onestep == 0)
+    {
+      free (state->y0);
+      free (state->k);
+      free (state);
+      GSL_ERROR_NULL ("failed to allocate space for ytmp", GSL_ENOMEM);
+    }
+
+  return state;
+}
+
+static int
+euler_apply (void *vstate,
+           size_t dim,
+           double t,
+           double h,
+           double y[],
+           double yerr[],
+           const double dydt_in[],
+           double dydt_out[], const gsl_odeiv2_system * sys)
+{
+    euler_state_t *state = (euler_state_t *) vstate;
+
+    size_t i;
+
+    double *const k = state->k;
+
+    if (dydt_in != NULL)
+    {
+        // DBL_MEMCPY (k, dydt_in, dim);
+        for (i = 0; i < dim; i++)
+        {
+          k[i] = dydt_in[i];
+        }
+    }
+    else
+    {
+        int s = GSL_ODEIV_FN_EVAL (sys, t, y, k);
+
+        if (s != GSL_SUCCESS)
+        {
+            return s;
+        }
+    }
+
+    for (i = 0; i < dim; i++)
+    {
+        y[i] = y[i] + h * k[i];
+    }
+
+    /* Derivatives at output */
+
+    if (dydt_out != NULL)
+    {
+        int s = GSL_ODEIV_FN_EVAL (sys, t + h, y, dydt_out);
+
+        if (s != GSL_SUCCESS)
+        {
+            return s;
+        }
+    }
+
+    /* Error estimation */
+
+    for (i = 0; i < dim; i++)
+    {
+        yerr[i] = 0.;
+    }
+
+    return GSL_SUCCESS;
+}
+
+static int
+euler_reset (void *vstate, size_t dim)
+{
+  euler_state_t *state = (euler_state_t *) vstate;
+
+  size_t i;
+  for ( i = 0; i < dim; ++i )
+  {
+    state->k[i] = 0.;
+    state->y0[i] = 0.;
+    state->y_onestep[i] = 0.;
+  }
+
+  return GSL_SUCCESS;
+}
+
+static unsigned int
+euler_order (void *vstate)
+{
+  euler_state_t *state = (euler_state_t *) vstate;
+  state = 0;                    /* prevent warnings about unused parameters */
+  return 1;
+}
+
+static void
+euler_free (void *vstate)
+{
+  euler_state_t *state = (euler_state_t *) vstate;
+  free (state->k);
+  free (state->y0);
+  free (state->y_onestep);
+  free (state);
+}
+
+static const gsl_odeiv2_step_type euler_type = { "euler",   /* name */
+  1,                            /* can use dydt_in */
+  1,                            /* gives exact dydt_out */
+  &euler_alloc,
+  &euler_apply,
+  &stepper_set_driver_null,
+  &euler_reset,
+  &euler_order,
+  &euler_free
+};
+
+const gsl_odeiv2_step_type *gsl_odeiv2_step_euler = &euler_type;
+
+
 int upwind(double t, const double y[], double dy[], void *params)
 {
   double a = ((double *)params)[0];
@@ -61,7 +224,7 @@ main()
   double params[3] = { a, dx, (double)n_x };
 
   gsl_odeiv2_system transport_pb = {upwind, NULL, n_x, &params};
-  gsl_odeiv2_driver * meth = gsl_odeiv2_driver_alloc_y_new(&transport_pb, gsl_odeiv2_step_rk2, dt, 1e-6, 0.0);
+  gsl_odeiv2_driver * meth = gsl_odeiv2_driver_alloc_y_new(&transport_pb, gsl_odeiv2_step_euler, dt, 1e-6, 0.0);
 
   int n_sol = (tf-t0)/dt;
   double ** sol = (double **)malloc(n_sol*sizeof(double *));

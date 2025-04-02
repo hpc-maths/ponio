@@ -4,22 +4,16 @@ from scipy.integrate import solve_ivp
 
 
 class RK44(scipy.integrate._ivp.rk.RungeKutta):
-    order = 4
+    order = 1
     error_estimator_order = 1
-    n_stages = 4
-    C = np.array([0, 1/2, 1/2, 1])
+    n_stages = 1
+    C = np.array([0])
     A = np.array([
-        [0, 0, 0, 0],
-        [1/2, 0, 0, 0],
-        [0, 1/2, 0, 0],
-        [0, 0, 1, 0]
+        [0]
     ])
-    B = np.array([1/6, 1/3, 1/3, 1/6])
-    E = np.array([0.1, 0.1, 0.1, 0.1, 0.1])
-    P = np.array([[1, -4 / 3, 5 / 9, 0],
-                  [0, 1, -2/3, 0],
-                  [0, 4/3, -8/9, 0],
-                  [0, -1, 1, 0]])
+    B = np.array([1])
+    E = np.array([0.1, 0.1])
+    P = np.array([[1]])
 
 
 # space parameters
