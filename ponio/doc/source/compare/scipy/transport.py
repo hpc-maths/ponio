@@ -5,13 +5,15 @@ from scipy.integrate import solve_ivp
 
 class Euler(scipy.integrate._ivp.rk.RungeKutta):
     order = 1
-    error_estimator_order = 1
     n_stages = 1
-    C = np.array([0])
     A = np.array([
         [0]
     ])
     B = np.array([1])
+    C = np.array([0])
+
+    # need this for dense output even if we don't use it
+    error_estimator_order = 1
     E = np.array([0.1, 0.1])
     P = np.array([[1]])
 
