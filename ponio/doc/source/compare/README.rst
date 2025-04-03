@@ -82,4 +82,25 @@ We choose a first order up-wind scheme to estimate the :math:`x` derivative:
         \frac{u^n_{i} - u^n_{i-1}}{\Delta x}, & \text{else}
     \end{cases}
 
+and the forward Euler method for time discretization:
+
+.. math::
+
+    u^{n+1} = u^n - \Delta t \textrm{D}_a(u^n)
+
+where :math:`\textrm{D}_a` is the approximation of partial derivative in :math:`x` at velocity :math:`a`. The complet scheme, with :math:`a>0`, becomes:
+
+.. math::
+
+    u^{n+1}_i = u^n_i - a \frac{\Delta t}{\Delta t}( u^n_{i+1} - u^n_i )
+
+In case of :math:`a=1` and :math:`\Delta t = \Delta x`, the scheme gives the exact solution. The explicit Euler method (or forward Euler method) is present in:
+
+* :doc:`Ascent <ascent/README>` with the name ``asc::Euler``
+* :doc:`odeint <odeint/README>` with the name ``euler``
+* :doc:`petsc <petsc/README>` with the name ``TSRK1FE``
+* :doc:`ponio <ponio/README>` with the name ``euler``
+
+In :doc:`GSL <gsl/README>` we need to implement our own driver, and in :doc:`SciPy <scipy/README>` to provide a Butcher tableau.
+
 .. image:: transport.png
