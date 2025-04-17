@@ -61,7 +61,7 @@ namespace ponio::linear_algebra
 
         template <typename operator_t, typename rhs_t>
         static void
-        solve( operator_t const& op, scalar_t& xn, rhs_t const& rhs )
+        solve( operator_t& op, scalar_t& xn, rhs_t const& rhs )
         {
             static constexpr std::size_t max_iter = 100;
             static constexpr scalar_t tol         = 1e-5;
