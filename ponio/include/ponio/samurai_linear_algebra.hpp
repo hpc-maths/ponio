@@ -33,7 +33,7 @@ namespace ponio::linear_algebra
 
         template <typename operator_t, typename state_t, typename rhs_t>
         static void
-        solve( operator_t const& op, state_t& u, rhs_t& rhs, std::size_t& n_eval )
+        solve( operator_t& op, state_t& u, rhs_t& rhs, std::size_t& n_eval )
         {
             auto solver = samurai::petsc::make_solver( op );
             solver.solve( u, rhs );
