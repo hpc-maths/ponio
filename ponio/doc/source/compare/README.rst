@@ -104,3 +104,78 @@ In case of :math:`a=1` and :math:`\Delta t = \Delta x`, the scheme gives the exa
 In :doc:`GSL <gsl/README>` we need to implement our own driver, and in :doc:`SciPy <scipy/README>` to provide a Butcher tableau.
 
 .. image:: transport.png
+
+
+Arenstorf orbit
+---------------
+
+We would like to compare some adaptive time step methods with the Arenstorf orbit problem
+
+.. math::
+
+    \begin{cases}
+        \ddot{x} &= x + 2\dot{y} - \frac{1-\mu}{r_1^3}(x+\mu) - \frac{\mu}{r_2^3}(x-1+\mu) \\
+        \ddot{y} &= y - 2\dot{x} - \frac{}{1-\mu}{r_1^3}y - \frac{\mu}{r_2^3}y
+    \end{cases}
+
+with initial condition :math:`(x,\dot{x},y,\dot{y})=(0.994, 0, 0, -2.001585106)`, :math:`r_1` and :math:`r_2` given by
+
+.. math::
+
+    r_1 = \sqrt{(x+\mu)^2 + y^2},\quad r_2 = \sqrt{(x-1+\mu)^2 + y^2}
+
+and with parameter :math:`\mu = 0.012277471`.
+
+First of all, we need to rewrite this problem into a first order derivative equation in time
+
+.. math::
+
+    \begin{pmatrix}
+        y_1 \\
+        y_2 \\
+        y_3 \\
+        y_4
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+        x \\
+        y \\
+        \dot{x} \\
+        \dot{y}
+    \end{pmatrix},
+    \qquad
+    \begin{cases}
+        \dot{y}_1 = y_3 \\
+        \dot{y}_2 = y_4 \\
+        \dot{y}_3 = y_1 + 2y_4 - \frac{1-\mu}{r_1^3}(y_1 + \mu) - \frac{\mu}{r_2^3}(y_1-1+\mu) \\
+        \dot{y}_4 = y_2 - 2y_3 - \frac{1-\mu}{r_1^3}y_2 - \frac{\mu}{r_2^3}y_2 \\
+    \end{cases}
+
+This is a good example to use an adaptive time step method, because we need a small time step close to the Moon, elsewhere the constraint can be relaxed. For the sake of simplicity we use only native adaptive time step method in each library, it will be:
+
+* ``DOPRI45`` in :doc:`Ascent <ascent/README>`
+* ``gsl_odeiv2_step_rk8pd`` in :doc:`GSL <gsl/README>`
+* ``runge_kutta_dopri5`` in :doc:`odeint <odeint/README>`
+* ``TSRK5DP`` in :doc:`petsc <petsc/README>`
+* ``rk54_7m`` or ``rk87_13m`` in :doc:`ponio <ponio/README>`
+* ``DOP853``` in :doc:`SciPy <scipy/README>`
+
+where ``DOPRI45``, ``runge_kutta_dopri5`` or ``rk54_7m``` are the same method, in :cite:`dormand:1980` (RK5(4) 7M) with the following Butcher tableau
+
+.. math::
+
+    \begin{array}{c|ccccccc}
+        0            &                    &                      &                    &                   &                      &               & \\
+        \frac{1}{5}  & \frac{1}{5}        &                      &                    &                   &                      &               & \\
+        \frac{3}{10} & \frac{3}{40}       & \frac{9}{40}         &                    &                   &                      &               & \\
+        \frac{4}{5}  & \frac{44}{45}      & - \frac{56}{15}      & \frac{32}{9}       &                   &                      &               & \\
+        \frac{8}{9}  & \frac{19372}{6561} & - \frac{25360}{2187} & \frac{64448}{6561} & - \frac{212}{729} &                      &               & \\
+        1            & \frac{9017}{3168}  & - \frac{355}{33}     & \frac{46732}{5247} & \frac{49}{176}    & - \frac{5103}{18656} &               & \\
+        1            & \frac{35}{384}     & 0                    & \frac{500}{1113}   & \frac{125}{192}   & - \frac{2187}{6784}  & \frac{11}{84} & \\
+        \hline
+        & \frac{35}{384} & 0 & \frac{500}{1113} & \frac{125}{192} & - \frac{2187}{6784} & \frac{11}{84} & 0  \\
+        \hline
+        & \frac{5179}{57600} & 0 & \frac{7571}{16695} & \frac{393}{640} & - \frac{92097}{339200} & \frac{187}{2100} & \frac{1}{40}
+    \end{array}
+
+and ``gsl_odeiv2_step_rk8pd``, ``DOP853`` and ``rk87_13m`` are the same method in :cite:`prince:1981` (RK8(7) 13M).
