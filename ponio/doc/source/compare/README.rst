@@ -11,6 +11,7 @@ This section is the comparison with some ODE solvers, we present the same exampl
     gsl/README
     odeint/README
     petsc/README
+    ponio/README
     scipy/README
 
 Lorenz equations
@@ -160,22 +161,4 @@ This is a good example to use an adaptive time step method, because we need a sm
 * ``rk54_7m`` or ``rk87_13m`` in :doc:`ponio <ponio/README>`
 * ``DOP853``` in :doc:`SciPy <scipy/README>`
 
-where ``DOPRI45``, ``runge_kutta_dopri5`` or ``rk54_7m``` are the same method, in :cite:`dormand:1980` (RK5(4) 7M) with the following Butcher tableau
-
-.. math::
-
-    \begin{array}{c|ccccccc}
-        0            &                    &                      &                    &                   &                      &               & \\
-        \frac{1}{5}  & \frac{1}{5}        &                      &                    &                   &                      &               & \\
-        \frac{3}{10} & \frac{3}{40}       & \frac{9}{40}         &                    &                   &                      &               & \\
-        \frac{4}{5}  & \frac{44}{45}      & - \frac{56}{15}      & \frac{32}{9}       &                   &                      &               & \\
-        \frac{8}{9}  & \frac{19372}{6561} & - \frac{25360}{2187} & \frac{64448}{6561} & - \frac{212}{729} &                      &               & \\
-        1            & \frac{9017}{3168}  & - \frac{355}{33}     & \frac{46732}{5247} & \frac{49}{176}    & - \frac{5103}{18656} &               & \\
-        1            & \frac{35}{384}     & 0                    & \frac{500}{1113}   & \frac{125}{192}   & - \frac{2187}{6784}  & \frac{11}{84} & \\
-        \hline
-        & \frac{35}{384} & 0 & \frac{500}{1113} & \frac{125}{192} & - \frac{2187}{6784} & \frac{11}{84} & 0  \\
-        \hline
-        & \frac{5179}{57600} & 0 & \frac{7571}{16695} & \frac{393}{640} & - \frac{92097}{339200} & \frac{187}{2100} & \frac{1}{40}
-    \end{array}
-
-and ``gsl_odeiv2_step_rk8pd``, ``DOP853`` and ``rk87_13m`` are the same method in :cite:`prince:1981` (RK8(7) 13M).
+where ``DOPRI45``, ``runge_kutta_dopri5`` or ``rk54_7m``` are the same method, in :cite:`dormand:1980` (RK5(4) 7M), see :cpp:type:`ponio::runge_kutta::rk54_7m_t` for more information; and ``gsl_odeiv2_step_rk8pd``, ``DOP853`` and ``rk87_13m`` are the same method in :cite:`prince:1981` (RK8(7) 13M) :cpp:type:`ponio::runge_kutta::rk87_13m_t`.
