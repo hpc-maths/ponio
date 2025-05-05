@@ -159,6 +159,8 @@ This is a good example to use an adaptive time step method, because we need a sm
 * ``runge_kutta_dopri5`` in :doc:`odeint <odeint/README>`
 * ``TSRK5DP`` in :doc:`petsc <petsc/README>`
 * ``rk54_7m`` or ``rk87_13m`` in :doc:`ponio <ponio/README>`
-* ``DOP853``` in :doc:`SciPy <scipy/README>`
+* ``DOP853`` in :doc:`SciPy <scipy/README>`
 
-where ``DOPRI45``, ``runge_kutta_dopri5`` or ``rk54_7m``` are the same method, in :cite:`dormand:1980` (RK5(4) 7M), see :cpp:type:`ponio::runge_kutta::rk54_7m_t` for more information; and ``gsl_odeiv2_step_rk8pd``, ``DOP853`` and ``rk87_13m`` are the same method in :cite:`prince:1981` (RK8(7) 13M) :cpp:type:`ponio::runge_kutta::rk87_13m_t`.
+where ``DOPRI45``, ``runge_kutta_dopri5`` or ``rk54_7m`` are the same method, in :cite:`dormand:1980` (RK5(4) 7M), see :cpp:type:`ponio::runge_kutta::rk54_7m_t` for more information; and ``gsl_odeiv2_step_rk8pd``, ``DOP853`` and ``rk87_13m`` are the same method in :cite:`prince:1981` (RK8(7) 13M) :cpp:type:`ponio::runge_kutta::rk87_13m_t`.
+
+.. image:: arenstorf.png
