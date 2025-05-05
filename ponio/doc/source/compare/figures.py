@@ -87,3 +87,26 @@ axs[0].legend(ncols=5, loc=(0., 1.05))
 
 fig.tight_layout()
 plt.savefig(os.path.join("transport.png"))
+
+# Arenstorf orbit
+print("arenstorf orbit")
+
+fig, ax = plt.subplots(figsize=(7, 7))
+ax.set_aspect('equal', 'box')
+ax.grid(visible=True)
+
+for i, d in enumerate(ode_lib.keys()):
+    print(f"extract data from: {d}")
+    if d == "ponio":
+        data1 = np.loadtxt(os.path.join(d, "arenstorf_rk54_7m.txt"))
+        ax.plot(data[:, 1], data[:, 2], "x-", label=f"{ode_lib[d]} RK5(4) 7m")
+        data1 = np.loadtxt(os.path.join(d, "arenstorf_rk87_13m.txt"))
+        ax.plot(data[:, 1], data[:, 2], "x-", label=f"{ode_lib[d]} RK8(7) 13m")
+    else:
+        data = np.loadtxt(os.path.join(d, "arenstorf.txt"))
+        ax.plot(data[:, 1], data[:, 2], "+-", label=ode_lib[d])
+
+ax.set_xlabel("$x$")
+ax.set_ylabel("$y$")
+fig.legend()
+plt.savefig(os.path.join("arenstorf.png"))
