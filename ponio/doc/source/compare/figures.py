@@ -1,6 +1,8 @@
 import numpy as np
 import os
 
+from scipy.integrate import solve_ivp
+
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
@@ -91,20 +93,55 @@ plt.savefig(os.path.join("transport.png"))
 # Arenstorf orbit
 print("arenstorf orbit")
 
+
+def arenstorf_system(t, y):
+    mu = 0.012277471
+
+    y1 = y[0]
+    y2 = y[1]
+    y3 = y[2]
+    y4 = y[3]
+
+    r1 = np.sqrt((y1 + mu) * (y1 + mu) + y2 * y2)
+    r2 = np.sqrt((y1 - 1. + mu) * (y1 - 1. + mu) + y2 * y2)
+
+    dy1 = y3
+    dy2 = y4
+    dy3 = y1 + 2 * y4 - (1 - mu) * (y1 + mu) / \
+        (r1 * r1 * r1) - mu * (y1 - 1 + mu) / (r2 * r2 * r2)
+    dy4 = y2 - 2 * y3 - (1 - mu) * y2 / (r1 * r1 * r1) - \
+        mu * y2 / (r2 * r2 * r2)
+
+    return np.asarray([dy1, dy2, dy3, dy4])
+
+
+y0 = np.array([0.994, 0., 0., -2.00158510637908252240537862224])
+t_span = [0., 17.0652165601579625588917206249]
+sol = solve_ivp(arenstorf_system, t_span, y0, method="RK45",
+                first_step=1e-8, rtol=1e-10, atol=1e-10)
+
 fig, ax = plt.subplots(figsize=(7, 7))
 ax.set_aspect('equal', 'box')
 ax.grid(visible=True)
 
+ax.plot(sol.y[0, :], sol.y[1, :], "--", color="black")
+
+
+ode_lib_arenstorf_files = {
+    "ascent": [{'method': "RK5(4) 7M", 'file': "arenstorf.txt"}],
+    "gsl": [{'method': "RK8(7) 13M", 'file': "arenstorf.txt"}],
+    "odeint": [{'method': "RK5(4) 7M", 'file': "arenstorf.txt"}],
+    "petsc": [{'method': "RK5(4) 7M", 'file': "arenstorf.txt"}],
+    "ponio": [{'method': "RK5(4) 7M", 'file': "arenstorf_rk54_7m.txt"}, {'method': "RK8(7) 13M", 'file': "arenstorf_rk87_13m.txt"}],
+    "scipy": [{'method': "RK5(4) 7M", 'file': "arenstorf_rk45.txt"}, {'method': "RK8(7) 13M", 'file': "arenstorf_dop853.txt"}],
+}
+
 for i, d in enumerate(ode_lib.keys()):
     print(f"extract data from: {d}")
-    if d == "ponio":
-        data1 = np.loadtxt(os.path.join(d, "arenstorf_rk54_7m.txt"))
-        ax.plot(data[:, 1], data[:, 2], "x-", label=f"{ode_lib[d]} RK5(4) 7m")
-        data1 = np.loadtxt(os.path.join(d, "arenstorf_rk87_13m.txt"))
-        ax.plot(data[:, 1], data[:, 2], "x-", label=f"{ode_lib[d]} RK8(7) 13m")
-    else:
-        data = np.loadtxt(os.path.join(d, "arenstorf.txt"))
-        ax.plot(data[:, 1], data[:, 2], "+-", label=ode_lib[d])
+    for simu in ode_lib_arenstorf_files[d]:
+        data = np.loadtxt(os.path.join(d, simu['file']))
+        ax.plot(data[:, 1], data[:, 2], "x",
+                label=f"{ode_lib[d]} {simu['method']}")
 
 ax.set_xlabel("$x$")
 ax.set_ylabel("$y$")
