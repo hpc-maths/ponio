@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # generate ponio/runge_kutta/butcher_methods.hpp file
 cmake . -B ./build -G "Ninja Multi-Config" -DBUILD_DOC=ON -DBUILD_OFFLINE=OFF
@@ -24,12 +24,25 @@ echo "make run"
 export CONDA_PREFIX=$(dirname $(which doxygen))/..
 make -C ponio/doc/source/_static/cpp run
 
+pushd ponio/doc/source/_static/cpp
+python figures.py
+popd
+
 # download PlantUML
 URL_PlantUML="https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml-1.2024.7.jar"
 wget $URL_PlantUML -O ponio/doc/source/plantuml.jar
 
-pushd ponio/doc/source/_static/cpp
+# launch compare plot
+pushd ponio/doc/source/compare
+
+# exclude diffeq from compare because it takes to much memory to install on RTD builder
+compare=("ascent" "gsl" "odeint" "petsc" "ponio" "scipy")
+for dir in "${compare[@]}"; do
+  make -C ${dir}
+done
+
 python figures.py
+
 popd
 
 # launch doxygen

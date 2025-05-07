@@ -9,7 +9,9 @@ dependencies:
   - numpy
   - jinja2
   - matplotlib
+  - plotly
   - cxx-compiler
+  - c-compiler
   - cmake
   - ninja
   - pkg-config
@@ -20,7 +22,13 @@ dependencies:
   - graphviz
   - doxygen
   - breathe
+  - myst-parser
   - pydata-sphinx-theme
   - sphinxcontrib-bibtex
   - sphinxcontrib-plantuml
   - openjdk
+  - julia
+  - boost-cpp
+  - gsl
+  - scipy
+  - petsc=3.22

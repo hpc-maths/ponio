@@ -1,0 +1,58 @@
+#include <fstream>
+#include <vector>
+
+#include <boost/numeric/odeint.hpp>
+
+int
+main()
+{
+    using state_t = std::vector<double>;
+
+    double const mu = 0.012277471;
+
+    auto arenstorf = [=]( state_t const& y, state_t& dy, double t )
+    {
+        double const y1 = y[0];
+        double const y2 = y[1];
+        double const y3 = y[2];
+        double const y4 = y[3];
+
+        double const r1 = sqrt( ( y1 + mu ) * ( y1 + mu ) + y2 * y2 );
+        double const r2 = sqrt( ( y1 - 1. + mu ) * ( y1 - 1. + mu ) + y2 * y2 );
+
+        dy[0] = y3;
+        dy[1] = y4;
+        dy[2] = y1 + 2. * y4 - ( 1. - mu ) * ( y1 + mu ) / ( r1 * r1 * r1 ) - mu * ( y1 - 1. + mu ) / ( r2 * r2 * r2 );
+        dy[3] = y2 - 2. * y3 - ( 1. - mu ) * y2 / ( r1 * r1 * r1 ) - mu * y2 / ( r2 * r2 * r2 );
+    };
+
+    std::vector<std::vector<double>> sol;
+    auto vec_observer = [&]( state_t const& y, double const t )
+    {
+        sol.push_back( {
+            {t, y[0], y[1], y[2], y[3]}
+        } );
+    };
+
+    state_t y0 = {
+        {0.994, 0., 0., -2.00158510637908252240537862224}
+    };
+    double t0 = 0.;
+    double tf = 17.0652165601579625588917206249;
+    double dt = 1e-5;
+
+    auto dp5 = boost::numeric::odeint::make_controlled<boost::numeric::odeint::runge_kutta_dopri5<state_t>>( 1e-5, 1e-5 );
+    boost::numeric::odeint::integrate_adaptive( dp5, arenstorf, y0, t0, tf, dt, vec_observer );
+
+    std::ofstream output( "arenstorf.txt" );
+    for ( auto& t_y : sol )
+    {
+        for ( auto& x : t_y )
+        {
+            output << x << " ";
+        }
+        output << "\n";
+    }
+
+    return 0;
+}

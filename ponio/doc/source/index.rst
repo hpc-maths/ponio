@@ -36,3 +36,9 @@ This library aims to be the easiest to use without compromising on performance.
    :glob:
 
    gallery/gallery
+
+.. toctree::
+   :caption: Comparison
+   :glob:
+
+   compare/README
