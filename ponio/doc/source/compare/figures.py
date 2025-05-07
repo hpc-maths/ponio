@@ -145,5 +145,8 @@ for i, d in enumerate(ode_lib.keys()):
 
 ax.set_xlabel("$x$")
 ax.set_ylabel("$y$")
+
+ax.set_xlim(-1.35, 1.11)
+ax.set_ylim(-1.25, 1.25)
 fig.legend()
 plt.savefig(os.path.join("arenstorf.png"))
