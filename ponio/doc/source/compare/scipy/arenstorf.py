@@ -28,6 +28,17 @@ y0 = np.array([0.994, 0., 0., -2.00158510637908252240537862224])
 t_span = [0., 17.0652165601579625588917206249]
 dt = 1e-5
 
+# RK45
+sol = solve_ivp(arenstorf_system, t_span, y0, method="RK45",
+                first_step=dt, rtol=1e-5, atol=1e-5)
+
+save_sol = np.zeros(shape=(5, len(sol.t)))
+save_sol[0, :] = sol.t
+save_sol[1:, :] = sol.y
+
+np.savetxt("arenstorf_rk45.txt", np.transpose(save_sol), delimiter=" ")
+
+# DOP853
 sol = solve_ivp(arenstorf_system, t_span, y0, method="DOP853",
                 first_step=dt, rtol=1e-5, atol=1e-5)
 
@@ -35,4 +46,4 @@ save_sol = np.zeros(shape=(5, len(sol.t)))
 save_sol[0, :] = sol.t
 save_sol[1:, :] = sol.y
 
-np.savetxt("arenstorf.txt", np.transpose(save_sol), delimiter=" ")
+np.savetxt("arenstorf_dop853.txt", np.transpose(save_sol), delimiter=" ")
