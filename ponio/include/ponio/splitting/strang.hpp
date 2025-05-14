@@ -307,6 +307,78 @@ namespace ponio::splitting::strang
         }
 
         /**
+         * @brief estimate Lipschitz constant of problem \f$f\f$ at time \f$t^n\f$
+         *
+         * @param f  callable obect which represents the problem to solve
+         * @param tn time \f$t^n\f$ last time where solution is computed
+         * @param un computed solution \f$u^n\f$ à time \f$t^n\f$
+         * @param dt time step
+         * @return auto
+         *
+         * @details
+         */
+        template <typename Problem_t, typename state_t>
+        auto
+        lipschitz_constant_estimate( Problem_t& f, value_t tn, state_t& un, value_t dt )
+        {
+            static constexpr value_t a1 = 1.0;
+            static constexpr value_t b1 = 0.5;
+            static constexpr value_t c1 = 0.5;
+            static constexpr value_t a2 = c1;
+            static constexpr value_t b2 = 0.4;
+            static constexpr value_t c2 = 0.1;
+
+            auto local_error = [&]( value_t a, value_t b, value_t c )
+            {
+                state_t u_np1_a  = un;
+                state_t u_np1_bc = un;
+
+                // compute strang(tn, un, a*dt)
+                _call_inc( f, tn, u_np1_a, a * dt, 0. );
+
+                // compute strang(tn+c*dt, strang(tn, un, c*dt), b*dt )
+                _call_inc( f, tn, u_np1_bc, c * dt, 0. );
+                _call_inc( f, tn + c * dt, u_np1_bc, b * dt, 0. );
+
+                return ::ponio::detail::norm( u_np1_a - u_np1_bc );
+            };
+
+            // e1 = || S_{a1*dt}(un) - S_{b1*dt}(S_{c1*dt}(un)) ||
+            // e2 = || S_{a2*dt}(un) - S_{b2*dt}(S_{c2*dt}(un)) ||
+            auto e1 = local_error( a1, b1, c1 );
+            auto e2 = local_error( a2, b2, c2 );
+
+            // we have:
+            // || e1 - (a1**3 - b1**3)C0 dt**3 || <= w C0 c1**3 dt**3
+            // || e2 - (a2**3 - b2**3)C0 dt**3 || <= w C0 c2**3 dt**3
+            // so (if inequalities became equalities):
+            // c2**6 * ( e1 - (a1**3 - b1**3)C0 dt**3 )**2 ~= c1**6 * ( e2 - (a2**3 - b2**3)C0 dt**3 )**2
+            // then need to solve:
+            // alpha C0**2 + beta C0 + gamma = 0
+            // with:
+            // alpha = c2**6 * dt**6 * (a1**3 - b1**3)**2 - c1**6 * dt**6 * (a2**3 - b2**3)**2
+            // beta = -2 * ( c2**6 * dt**3 * (a1**3 - b1**3) * e1  + c1**6 * dt**3 * (a2**3 - b2**3) * e2 )
+            // gamma = c2**6 * e2**2 - c1**6 * e2**2
+            // we find positive root of this polynomial to compute C0
+
+            using ::ponio::detail::power;
+
+            value_t alpha = power<6>( c2 * dt ) * power<2>( power<3>( a1 ) - power<3>( b1 ) )
+                          - power<6>( c1 * dt ) * power<2>( power<3>( a2 ) - power<3>( b2 ) );
+            value_t beta = -2 * power<3>( dt )
+                         * ( power<6>( c2 ) * ( power<3>( a1 ) - power<3>( b1 ) ) * e1
+                             + power<6>( c1 ) * ( power<3>( a2 ) - power<3>( b2 ) ) * e2 );
+            value_t gamma = power<6>( c2 ) * power<2>( e1 ) - power<6>( c1 ) * power<2>( e2 );
+
+            value_t discriminent = 2. * beta * beta - alpha * gamma;
+            value_t C0           = ( -beta - std::sqrt( discriminent ) ) / ( 2. * alpha );
+
+            value_t omega = std::abs( e1 - ( power<3>( a1 ) - power<3>( b1 ) ) * C0 * power<3>( dt ) ) / ( C0 * power<3>( c1 * dt ) );
+
+            return std::make_pair( omega, C0 );
+        }
+
+        /**
          * @brief gets `iteration_info` object
          */
         auto&

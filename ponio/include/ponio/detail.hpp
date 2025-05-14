@@ -8,6 +8,7 @@
 #include <cmath>
 #include <concepts>
 #include <cstddef>
+#include <numeric>
 #include <ranges>
 #include <tuple> // NOLINT(misc-include-cleaner)
 #include <type_traits>
@@ -15,6 +16,36 @@
 
 namespace ponio::detail
 {
+
+    /**
+     * @brief compute \f$L_1\f$ norm of a container: \f$\sum_i |x_i|\f$
+     *
+     * @tparam state_t type of computed value
+     * @param x        container
+     */
+    template <typename state_t>
+        requires std::ranges::range<state_t>
+    auto
+    norm( state_t const& x )
+    {
+        auto zero = static_cast<decltype( *std::begin( x ) )>( 0. );
+        auto accu = std::accumulate( std::begin( x ),
+            std::end( x ),
+            zero,
+            []( auto const& acc, auto const& xi )
+            {
+                return acc + std::abs( xi ) * std::abs( xi );
+            } );
+        return std::sqrt( accu );
+    }
+
+    template <typename state_t>
+    auto
+    norm( state_t const& x )
+    {
+        return std::abs( x );
+    }
+
     template <typename state_t>
     auto
     error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
@@ -22,6 +53,15 @@ namespace ponio::detail
         return std::abs( ( unp1 - unp1bis ) / ( 1.0 + std::max( std::abs( un ), std::abs( unp1 ) ) ) );
     }
 
+    /**
+     * @brief compute an error \f$\sqrt{\frac{1}{N}\sum_i \left( \frac{|u^{n+1} - \tilde{u}^{n+1}_i|}{1+\max(|u^n_i|, |u^{n+1}_i|)}
+     * \right^2}\f$
+     *
+     * @tparam state_t type of computed value
+     * @param un       state \f$u^n\f$
+     * @param unp1     state \f$u^{n+1}\f$
+     * @param unp1bis  state \f$\tilde{u}^{n+1}\f$
+     */
     template <typename state_t>
         requires std::ranges::range<state_t>
     auto
