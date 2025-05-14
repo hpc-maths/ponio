@@ -313,9 +313,58 @@ namespace ponio::splitting::strang
          * @param tn time \f$t^n\f$ last time where solution is computed
          * @param un computed solution \f$u^n\f$ à time \f$t^n\f$
          * @param dt time step
-         * @return auto
          *
-         * @details
+         * The error of classical splitting method is:
+         * \f[
+         *      \mathcal{S}^{\Delta t}u_0 - \mathcal{T}^{\Delta t}u_0 = C_0 \Delta t^3
+         * \f]
+         *
+         * where $\mathcal{S} is the time flow of Strang method, and $\mathcal{T}$ is the exact time flow of the equation, with a shifted
+         * splitting method, we can compute
+         *
+         * \f[
+         *      \mathcal{S}^{\Delta t}u_0 - \mathcal{S}_\delta^{\Delta t} u_0 = \delta C_\delta \Delta t^2
+         * \f]
+         *
+         * we find the optimal time step \f$\Delta t^\star\f$ as
+         *
+         * \f[
+         *      \| \mathcal{S}^{\Delta t}u_0 - \mathcal{T}^{\Delta t}u_0 \| \leq \| \mathcal{S}^{\Delta t}u_0 - \mathcal{S}_\delta^{\Delta
+         * t}u_0 \|,\ \forall \Delta t \leq \Delta t^\star
+         * \f]
+         *
+         * we get an estimate of \f$\Delta t^\star\f$
+         *
+         * \f[
+         *      \Delta t^\star \approx \frac{\delta C_\delta}{C_0}
+         * \f]
+         *
+         * To estimate \f$C_0\f$ we need compute two errors
+         *
+         * \f[
+         *      \begin{aligned}
+         *          e_1 &= \| \mathcal{S}^{a_1\Delta t}u_0 \mathcal{S}^{b_1\Delta t}\mathcal{S}^{c_1\Delta t}u_0 \| \\
+         *          e_2 &= \| \mathcal{S}^{a_2\Delta t}u_0 \mathcal{S}^{b_2\Delta t}\mathcal{S}^{c_2\Delta t}u_0 \|
+         *      \end{aligned}
+         * \f]
+         *
+         * we obtain two inequalities
+         *
+         * \f[
+         *      \begin{aligned}
+         *          \|e_1 - (a_1^3 - b_1^3)C_0\Delta t^3\| \leq \omega C_0 c_1^3\Delta t^3 \\
+         *          \|e_2 - (a_2^3 - b_2^3)C_0\Delta t^3\| \leq \omega C_0 c_2^3\Delta t^3
+         *      \end{aligned}
+         * \f]
+         *
+         * we choose parameters as
+         *
+         * \f[
+         *      a_1 = 1,\quad b_1=\frac{1}{2},\quad c_1=\frac{1}{2},\quad a_2=c_1,\quad b_2=\frac{2}{5},\quad c_2=\frac{1}{10}
+         * \f]
+         *
+         * to obtain estimate of \f$C_0\f$ (error estimate) and \f$\omega\f$ (Lipschitz constant estimate).
+         *
          */
         template <typename Problem_t, typename state_t>
         auto
