@@ -16,7 +16,7 @@ In Lie splitting method, the solution is computed as:
 
 .. math::
 
-   u^{n+1} = \phi_{\Delta t}^{[f_1]}\circ \cdots \circ \phi_{\Delta t}^{[f_n]} (t^n,u^n)
+   u^{n+1} = \phi_{\Delta t}^{[f_1]}\circ \cdots \circ \phi_{\Delta t}^{[f_k]} (t^n,u^n)
 
 .. doxygenclass:: ponio::splitting::lie::lie
    :project: ponio
@@ -35,9 +35,9 @@ In Strang splitting method, the solution is computed as:
 
 .. math::
 
-   u^{n+1} = \phi_{\frac{\Delta t}{2}}^{[f_1]}\circ \cdots \circ \phi_{\frac{\Delta t}{2}}^{[f_{n-1}]}
-              \circ \phi_{\Delta t}^{[f_n]}
-              \circ \phi_{\frac{\Delta t}{2}}^{[f_{n-1}]}\circ\cdots\circ \phi_{\frac{\Delta t}{2}}^{[f_1]}
+   u^{n+1} = \phi_{\frac{\Delta t}{2}}^{[f_1]}\circ \cdots \circ \phi_{\frac{\Delta t}{2}}^{[f_{k-1}]}
+              \circ \phi_{\Delta t}^{[f_k]}
+              \circ \phi_{\frac{\Delta t}{2}}^{[f_{k-1}]}\circ\cdots\circ \phi_{\frac{\Delta t}{2}}^{[f_1]}
               (t^n,u^n)
 
 .. doxygenclass:: ponio::splitting::strang::strang
@@ -58,18 +58,18 @@ In Strang splitting method, the solution is computed as:
 
 .. math::
 
-   u^{n+1} = \phi_{\frac{\Delta t}{2}}^{[f_1]}\circ \cdots \circ \phi_{\frac{\Delta t}{2}}^{[f_{n-1}]}
-              \circ \phi_{\Delta t}^{[f_n]}
-              \circ \phi_{\frac{\Delta t}{2}}^{[f_{n-1}]}\circ\cdots\circ \phi_{\frac{\Delta t}{2}}^{[f_1]}
+   u^{n+1} = \phi_{\frac{\Delta t}{2}}^{[f_1]}\circ \cdots \circ \phi_{\frac{\Delta t}{2}}^{[f_{k-1}]}
+              \circ \phi_{\Delta t}^{[f_k]}
+              \circ \phi_{\frac{\Delta t}{2}}^{[f_{k-1}]}\circ\cdots\circ \phi_{\frac{\Delta t}{2}}^{[f_1]}
               (t^n,u^n)
 
 The approximation of order 1 is computed with a shifted Strang splitting method:
 
 .. math::
 
-   \tilde{u}^{n+1} = \phi_{(\frac{1}{2}-\delta)\Delta t}^{[f_1]}\circ\phi_{\frac{\Delta t}{2}}^{[f_2]}\circ \cdots \circ \phi_{\frac{\Delta t}{2}}^{[f_{n-1}]}
-              \circ \phi_{\Delta t}^{[f_n]}
-              \circ \phi_{\frac{\Delta t}{2}}^{[f_{n-1}]}\circ\cdots\circ\phi_{\frac{\Delta t}{2}}^{[f_2]}\circ \phi_{(\frac{1}{2}+\delta)\Delta t}^{[f_1]}
+   \tilde{u}^{n+1} = \phi_{(\frac{1}{2}-\delta)\Delta t}^{[f_1]}\circ\phi_{\frac{\Delta t}{2}}^{[f_2]}\circ \cdots \circ \phi_{\frac{\Delta t}{2}}^{[f_{k-1}]}
+              \circ \phi_{\Delta t}^{[f_k]}
+              \circ \phi_{\frac{\Delta t}{2}}^{[f_{k-1}]}\circ\cdots\circ\phi_{\frac{\Delta t}{2}}^{[f_2]}\circ \phi_{(\frac{1}{2}+\delta)\Delta t}^{[f_1]}
               (t^n,u^n)
 
 with :math:`\delta\in[-1/2, 0)\cup(0,1/2]`
