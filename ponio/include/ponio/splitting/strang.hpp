@@ -319,8 +319,8 @@ namespace ponio::splitting::strang
          *      \mathcal{S}^{\Delta t}u_0 - \mathcal{T}^{\Delta t}u_0 = C_0 \Delta t^3
          * \f]
          *
-         * where $\mathcal{S} is the time flow of Strang method, and $\mathcal{T}$ is the exact time flow of the equation, with a shifted
-         * splitting method, we can compute
+         * where \f$\mathcal{S}\f$ is the time flow of Strang method, and \f$\mathcal{T}\f$ is the exact time flow of the equation, with a
+         * shifted splitting method, we can compute
          *
          * \f[
          *      \mathcal{S}^{\Delta t}u_0 - \mathcal{S}_\delta^{\Delta t} u_0 = \delta C_\delta \Delta t^2
