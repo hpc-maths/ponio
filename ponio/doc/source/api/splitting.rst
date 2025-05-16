@@ -99,7 +99,7 @@ The difficulty in adaptive time step Strang splitting method is to find a good s
 
    \Delta t^{new} = s \Delta t \sqrt{\frac{\eta}{\| u^{n+1} - \tilde{u}^{n+1} \|}}
 
-3. If local error is lower than tolerance: :math:`\| u^{n+1} - \tilde{u}^{n+1} \| < \eta`, iteration is accepted, else compute a new iteration with the new time step. Return to 1.
+3. If local error is lower than tolerance: :math:`\| u^{n+1} - \tilde{u}^{n+1} \| < \eta`, iteration is accepted, else compute a new iteration with the new time step.
 4. Every :math:`N_\delta` iterations, or if :math:`\Delta t\not\in[\beta\Delta t^\star, \gamma\Delta t^\star]` (or if first iteration and :math:`\Delta t^\star` is not computed), compute new :math:`\Delta t^\star` from current :math:`\delta` (given by :cpp:func:`ponio::splitting::strang::adaptive_strang::info` returned value which has a ``data`` member variable) and :math:`C_0` (given by :cpp:func:`ponio::splitting::strang::adaptive_strang::lipschitz_constant_estimate` method) with:
 
 .. math::
