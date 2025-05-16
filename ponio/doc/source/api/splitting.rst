@@ -82,31 +82,28 @@ The difficulty in adaptive time step Strang splitting method is to find a good s
 
 1. With a given tolerance :math:`\eta`, time step :math:`\Delta t` and shift :math:`\delta` compute estimates
 
-.. math::
+   .. math::
 
-   \begin{aligned}
-      u^{n+1} &= \mathcal{S}^{\Delta t}(t^n, u^n) \\
-      \tilde{u}^{n+1} &= \mathcal{S}_{\delta}^{\Delta t}(t^n, u^n)
-   \end{aligned}
+      \begin{aligned}
+         u^{n+1} &= \mathcal{S}^{\Delta t}(t^n, u^n) \\
+         \tilde{u}^{n+1} &= \mathcal{S}_{\delta}^{\Delta t}(t^n, u^n)
+      \end{aligned}
+2. Compute new time step from local error
 
-1. Compute new time step from local error
+   .. math::
 
-.. math::
+      \Delta t^{new} = s \Delta t \sqrt{\frac{\eta}{\| u^{n+1} - \tilde{u}^{n+1} \|}}
+3. If local error is lower than tolerance: :math:`\| u^{n+1} - \tilde{u}^{n+1} \| < \eta`, iteration is accepted, else compute a new iteration with the new time step.
+4. Every :math:`N_\delta` iterations, or if :math:`\Delta t\not\in[\beta\Delta t^\star, \gamma\Delta t^\star]` (or if first iteration and :math:`\Delta t^\star` is not computed), compute new :math:`\Delta t^\star` from current :math:`\delta` (given by :cpp:func:`~ponio::splitting::strang::adaptive_strang::info` returned value which has a ``data`` member variable) and :math:`C_0` (given by :cpp:func:`~ponio::splitting::strang::adaptive_strang::lipschitz_constant_estimate` method) with:
 
-   \Delta t^{new} = s \Delta t \sqrt{\frac{\eta}{\| u^{n+1} - \tilde{u}^{n+1} \|}}
+   .. math::
 
-1. If local error is lower than tolerance: :math:`\| u^{n+1} - \tilde{u}^{n+1} \| < \eta`, iteration is accepted, else compute a new iteration with the new time step.
-2. Every :math:`N_\delta` iterations, or if :math:`\Delta t\not\in[\beta\Delta t^\star, \gamma\Delta t^\star]` (or if first iteration and :math:`\Delta t^\star` is not computed), compute new :math:`\Delta t^\star` from current :math:`\delta` (given by :cpp:func:`~ponio::splitting::strang::adaptive_strang::info` returned value which has a ``data`` member variable) and :math:`C_0` (given by :cpp:func:`~ponio::splitting::strang::adaptive_strang::lipschitz_constant_estimate` method) with:
+      \Delta t^\star \approx \frac{\delta C_\delta}{C_0},\qquad \delta C_\delta \Delta t^2 = \| \mathcal{S}^{\Delta t}(t^n, u^n) - \mathcal{S}_\delta^{\Delta t}(t^n, u^n) \|
+5. If :math:`\Delta t \not\in [\beta\Delta t^\star, \gamma\Delta t^\star]`, assume :math:`\Delta t^\star=\Delta t` and compute a new :math:`\delta` with:
 
-.. math::
+   .. math::
 
-   \Delta t^\star \approx \frac{\delta C_\delta}{C_0},\qquad \delta C_\delta \Delta t^2 = \| \mathcal{S}^{\Delta t}(t^n, u^n) - \mathcal{S}_\delta^{\Delta t}(t^n, u^n) \|
-
-1. If :math:`\Delta t \not\in [\beta\Delta t^\star, \gamma\Delta t^\star]`, assume :math:`\Delta t^\star=\Delta t` and compute a new :math:`\delta` with:
-
-.. math::
-
-   \Delta t^\star \approx \frac{\delta C_\delta}{C_0}
+      \Delta t^\star \approx \frac{\delta C_\delta}{C_0}
 
 .. doxygenclass:: ponio::splitting::strang::adaptive_strang
    :project: ponio
