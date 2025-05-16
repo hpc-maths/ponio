@@ -242,7 +242,7 @@ namespace ponio::detail
      */
     template <std::size_t Iexp, typename Arithmetic_t>
     constexpr Arithmetic_t
-    power( Arithmetic_t&& value )
+    power( Arithmetic_t value )
     {
         return power_impl( std::forward<Arithmetic_t>( value ), std::make_index_sequence<Iexp>() );
     }

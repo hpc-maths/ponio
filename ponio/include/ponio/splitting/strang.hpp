@@ -389,7 +389,7 @@ namespace ponio::splitting::strang
                 _call_inc( f, tn, u_np1_bc, c * dt, 0. );
                 _call_inc( f, tn + c * dt, u_np1_bc, b * dt, 0. );
 
-                return ::ponio::detail::norm( u_np1_a - u_np1_bc );
+                return ::ponio::detail::norm( static_cast<state_t>( u_np1_a - u_np1_bc ) );
             };
 
             // e1 = || S_{a1*dt}(un) - S_{b1*dt}(S_{c1*dt}(un)) ||
@@ -414,7 +414,7 @@ namespace ponio::splitting::strang
 
             value_t alpha = power<6>( c2 * dt ) * power<2>( power<3>( a1 ) - power<3>( b1 ) )
                           - power<6>( c1 * dt ) * power<2>( power<3>( a2 ) - power<3>( b2 ) );
-            value_t beta = -2 * power<3>( dt )
+            value_t beta = -2.0 * power<3>( dt )
                          * ( power<6>( c2 ) * ( power<3>( a1 ) - power<3>( b1 ) ) * e1
                              + power<6>( c1 ) * ( power<3>( a2 ) - power<3>( b2 ) ) * e2 );
             value_t gamma = power<6>( c2 ) * power<2>( e1 ) - power<6>( c1 ) * power<2>( e2 );
