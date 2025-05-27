@@ -891,8 +891,6 @@ namespace ponio::runge_kutta::pirock
             auto& fr_tmp_bis = U[5];
             auto& fd_tmp     = U[6];
             auto& fd_tmp_bis = U[7];
-            auto& fd_tmp_ter = U[8];
-            auto& fd_tmp_qua = U[9];
             auto& fa_tmp     = U[10];
             auto& fa_tmp_bis = U[11];
 
@@ -1210,6 +1208,9 @@ namespace ponio::runge_kutta::pirock
             }
             else
             {
+                auto& fd_tmp_ter = U[8];
+                auto& fd_tmp_qua = U[9];
+
                 pb( diffusion_op(), tn, us_sm1, fd_tmp );
                 pb( diffusion_op(), tn, u_sm2, fd_tmp_bis );
                 pb( advection_op(), tn, u_sp5, fa_tmp );

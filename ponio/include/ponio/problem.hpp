@@ -352,7 +352,7 @@ namespace ponio
     lawson_problem<Linear_t, Nonlinear_t>::operator()( value_t t, state_t&& y, state_t& dy )
     {
         n( t, std::forward<state_t>( y ), dy );
-        dy = l * y + dy;
+        dy = l * std::forward<state_t>( y ) + dy;
     }
 
     /**
