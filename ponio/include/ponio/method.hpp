@@ -90,7 +90,7 @@ namespace ponio
         typename std::enable_if<( I == Algorithm_t::N_stages + 1 ), void>::type
         _call_stage( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
-            kis[I] = alg.stage( Stage<I>{}, f, tn, un, kis, dt );
+            alg.stage( Stage<I>{}, f, tn, un, kis, dt, kis[I] );
         }
 
         template <std::size_t I = 0, typename Problem_t, typename value_t, typename Algo_t = Algorithm_t>
@@ -114,7 +114,7 @@ namespace ponio
         typename std::enable_if<( I < Algorithm_t::N_stages + 1 ), void>::type
         _call_stage( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
-            kis[I] = alg.stage( Stage<I>{}, f, tn, un, kis, dt );
+            alg.stage( Stage<I>{}, f, tn, un, kis, dt, kis[I] );
             _call_stage<I + 1>( f, tn, un, dt );
         }
 
@@ -142,6 +142,7 @@ namespace ponio
         _return( value_t tn, state_t const& un, value_t dt )
         {
             alg.info().error = ::ponio::detail::error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
+            // std::cout << "alg.info().error = " << alg.info().error << std::endl;
 
             value_t new_dt = 0.9 * std::pow( alg.info().tolerance / alg.info().error, 1. / static_cast<value_t>( Algorithm_t::order ) ) * dt;
             new_dt = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );

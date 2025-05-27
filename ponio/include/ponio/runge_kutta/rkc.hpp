@@ -175,15 +175,16 @@ namespace ponio::runge_kutta::chebyshev
          * @param f  operator \f$f\f$
          * @param tn current time
          * @param yn current state
-         * @param Yi array of temporary stages
+         * @param Yj array of temporary stages
          * @param dt current time step
+         * @param yi computed output step
          *
          * @details \f$y_j = (1 - \mu_j - \nu_j)y^n + \mu_j y_{j-1} + \nu_j y_{j-2} + \tilde{\mu}_j\Delta tf(t^n + c_{j-1}\Delta t, y_{j-1})
          * + \tilde{\gamma}_j\Delta t f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t, std::size_t j>
-        state_t
-        stage( Stage<j>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yi, value_t dt )
+        void
+        stage( Stage<j>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& yi )
         {
             value_t const mj   = 2. * b<j>( w0 ) / b<j - 1>( w0 ) * w0;
             value_t const nj   = -b<j>( w0 ) / b<j - 2>( w0 );
@@ -191,7 +192,8 @@ namespace ponio::runge_kutta::chebyshev
             value_t const gjt  = -( 1. - b<j - 1>( w0 ) * T<j - 1>( w0 ) ) * mjt;
             value_t const cjm1 = dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) * ddT<j - 1>( w0 ) / dT<j - 1>( w0 );
 
-            return ( 1. - mj - nj ) * yn + mj * Yi[j - 1] + nj * Yi[j - 2] + mjt * dt * f( tn + cjm1 * dt, Yi[j - 1] ) + gjt * dt * Yi[0];
+            f( tn + cjm1 * dt, Yj[j - 1], yi ); // first compute yi = f(t^n + c_{j-1}\Delta t, y_{j-1})
+            yi = ( 1. - mj - nj ) * yn + mj * Yj[j - 1] + nj * Yj[j - 2] + mjt * dt * yi + gjt * dt * Yj[0];
         }
 
         /**
@@ -204,14 +206,15 @@ namespace ponio::runge_kutta::chebyshev
          * @param f  operator \f$f\f$
          * @param tn current time
          * @param yn current state
+         * @param yi computed output step
          *
          * @details \f$y_0 = f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        state_t
-        stage( Stage<0>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t )
+        void
+        stage( Stage<0>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t, state_t& yi )
         {
-            return f( tn, yn ); // be careful Yi[0] stores f(tn,yn) not yn!!!
+            f( tn, yn, yi ); // be careful Yj[0] stores f(tn,yn) not yn!!!
         }
 
         /**
@@ -222,17 +225,18 @@ namespace ponio::runge_kutta::chebyshev
          * @tparam array_ki_t type of array of temporary stages
          * @tparam j          integer of stage
          * @param yn current state
-         * @param Yi array of temporary stages
+         * @param Yj array of temporary stages
          * @param dt current time step
+         * @param yi computed output step
          *
          * @details \f$y_1 = y^n + \tilde{\mu}_1 \Delta t f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        state_t
-        stage( Stage<1>, problem_t&, value_t, state_t& yn, array_ki_t const& Yi, value_t dt )
+        void
+        stage( Stage<1>, problem_t&, value_t, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& yi )
         {
             value_t const m1t = b<1>( w0 ) * w1;
-            return yn + dt * m1t * Yi[0];
+            yi                = yn + dt * m1t * Yj[0];
         }
 
         /**
@@ -245,15 +249,16 @@ namespace ponio::runge_kutta::chebyshev
          * @param f  operator \f$f\f$
          * @param tn current time
          * @param yn current state
-         * @param Yi array of temporary stages
+         * @param Yj array of temporary stages
          * @param dt current time step
+         * @param yi computed output step
          *
          * @details \f$y_2 = (1-\mu_2 -\nu_2)y^n + \mu_2y_1 + \nu_2y^n + \tilde{\mu}_2\Delta t f(t^n + c_1\Delta t, y_1) + \tilde{\gamma}_2
          * \Delta t f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        state_t
-        stage( Stage<2>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yi, value_t dt )
+        void
+        stage( Stage<2>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& yi )
         {
             value_t const m2  = 2. * w0;
             value_t const n2  = -1.;
@@ -262,7 +267,8 @@ namespace ponio::runge_kutta::chebyshev
             value_t const c1  = c2 / dT<2>( w0 );
             value_t const g2t = -( 1. - b<1>( w0 ) * T<1>( w0 ) ) * m2t;
 
-            return ( 1. - m2 - n2 ) * yn + m2 * Yi[1] + n2 * yn + m2t * dt * f( tn + c1 * dt, Yi[1] ) + g2t * dt * Yi[0];
+            f( tn + c1 * dt, Yj[1], yi ); // first compute yi = f(t^n + c_1\Delta t, y_1)
+            yi = ( 1. - m2 - n2 ) * yn + m2 * Yj[1] + n2 * yn + m2t * dt * yi + g2t * dt * Yj[0];
         }
 
         /**

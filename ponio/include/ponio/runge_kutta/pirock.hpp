@@ -182,7 +182,7 @@ namespace ponio::runge_kutta::pirock
         static constexpr std::size_t N_operators = 2;
         static constexpr std::size_t N_stages    = stages::dynamic;
         static constexpr std::size_t N_storage   = std::
-            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 16>, std::integral_constant<std::size_t, 10>>::value;
+            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 19>, std::integral_constant<std::size_t, 13>>::value;
         static constexpr std::size_t order   = 2;
         static constexpr std::string_view id = "PIROCK";
 
@@ -263,6 +263,36 @@ namespace ponio::runge_kutta::pirock
                                || detail::problem_jacobian<decltype( pb.implicit_part ), value_t, state_t>,
                 "This kind of problem is not inversible in ponio" );
 
+            // U worker references:
+            // | index | variables        | mathematic representation                         |
+            // |-------|------------------|---------------------------------------------------|
+            // | 0     | u_j              | $u^{(j)}$ current stage in pseudo-ROCK2 method    |
+            // | 0     | fe_tmp_bis       | temporary output of explicit part                 |
+            // | 1     | u_jm1            | $u^{(j-1)}$ previous stage in pseudo-ROCK2 method |
+            // | 1     | fe_tmp_ter       | temporary output of explicit part                 |
+            // | 2     | u_jm2            | $u^{(j-2)}$ previous stage in pseudo-ROCK2 method |
+            // | 2     | fe_tmp_qua       | temporary output of explicit part                 |
+            // | 3     | u_sm2            | $u^{(s-2)}$ stage in PIROCK method                |
+            // | 4     | fe_tmp           | temporary output of explicit part (main output)   |
+            // | 5     | fi_tmp           | temporary output of implicit part (main output)   |
+            // | 6     | f_tmp            | temporary output of implicit part                 |
+            // | 7     | us_sm1           | $u^{\star(s-1)}$ stage in PIROCK method           |
+            // | 8     | us_s             | $u^{\star(s)}$ stage in PIROCK method             |
+            // | 9     | u_sp1            | $u^{(s+1)}$ stage in PIROCK method                |
+            // | 10    | u_sp2            | $u^{(s+2)}$ stage in PIROCK method                |
+            // | 11    | u_sp3            | $u^{(s+3)}$ stage in PIROCK method                |
+            // | 11    | rhs_sp2          | right-hand side to compute $u^{(s+2)}$ stage      |
+            // | 12    | u_np1            | $u^{n+1}$ output of PIROCK method                 |
+            // | 13    | shampine_element | Shampine's trick temporary element                |
+            // | 14    | f_D_u            | $F_D(u^{\star(s-1)}) - F_D(u^{(s-2)})$ term       |
+            // | 15    | u_tmp            | temporary value for compute Shampine's trick      |
+            // | 15    | fe_tmp_bis       | temporary output of explicit part                 |
+            // | 16    | err_D            | $err_D$ error on diffusion term                   |
+            // | 17    | rhs_R            | right-hand side to compute $err_R$ error term     |
+            // | 18    | err_R            | $err_R$ error on reaction term                    |
+            //
+            // > if method is called as a constant time step method, only index from 0 to 12 are used
+
             _info.reset_eval();
 
             auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( rock::rock_order::rock_2(),
@@ -271,6 +301,7 @@ namespace ponio::runge_kutta::pirock
                 tn,
                 un,
                 dt,
+                U,
                 4 );
 
             std::size_t s = mdeg + 2;
@@ -282,10 +313,13 @@ namespace ponio::runge_kutta::pirock
             value_t const beta  = alpha_beta_computer.beta( s, l );
             value_t const gamma = 1. - 0.5 * std::numbers::sqrt2;
 
-            auto& u_j   = U[0];
-            auto& u_jm1 = U[1];
-            auto& u_jm2 = U[2];
-            auto& u_sm2 = U[3];
+            auto& u_j    = U[0];
+            auto& u_jm1  = U[1];
+            auto& u_jm2  = U[2];
+            auto& u_sm2  = U[3];
+            auto& fe_tmp = U[4];
+            auto& fi_tmp = U[5];
+            auto& f_tmp  = U[6];
 
             u_j   = un;
             u_jm2 = un;
@@ -297,7 +331,8 @@ namespace ponio::runge_kutta::pirock
             value_t t_jm3 = tn;
 
             // u_1 =u^n + \alpha \mu_1 \Delta F_D( u^n )
-            u_jm1 = un + alpha * dt * mu_1 * pb.explicit_part( tn, un );
+            pb.explicit_part( tn, un, fe_tmp );
+            u_jm1 = un + alpha * dt * mu_1 * fe_tmp;
 
             if ( mdeg < 2 )
             {
@@ -311,7 +346,8 @@ namespace ponio::runge_kutta::pirock
                 value_t const nu_j    = -1.0 - kappa_j;
 
                 // u_{j} = \alpha \mu_j \Delta t F_D( u_{j-2} ) - \nu_j u_{j-1} - \kappa_j u_{j-2}
-                u_j = alpha * mu_j * dt * pb.explicit_part( t_jm1, u_jm1 ) - nu_j * u_jm1 - kappa_j * u_jm2;
+                pb.explicit_part( t_jm1, u_jm1, fe_tmp );
+                u_j = alpha * mu_j * dt * fe_tmp - nu_j * u_jm1 - kappa_j * u_jm2;
 
                 t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
 
@@ -342,20 +378,22 @@ namespace ponio::runge_kutta::pirock
             value_t sigma_a = 0.5 * ( 1.0 - alpha ) + alpha * sigma;
 
             // u_{*s-1} = u_{s-2} + \sigma_\alpha \Delta t  F_D( u_{s-2} )
-            auto& us_sm1 = U[4];
-            us_sm1       = u_sm2 + sigma_a * dt * pb.explicit_part( t_jm1, u_sm2 );
+            auto& us_sm1 = U[7];
+            pb.explicit_part( t_jm1, u_sm2, fe_tmp );
+            us_sm1 = u_sm2 + sigma_a * dt * fe_tmp;
 
             // u_{*s} = u_{*s-1} + \sigma_\alpha \Delta t  F_D( u_{*s-1} )
-            auto& us_s = U[5];
-            us_s       = us_sm1 + sigma_a * dt * pb.explicit_part( t_jm1, us_sm1 );
+            auto& us_s = U[8];
+            pb.explicit_part( t_jm1, us_sm1, fe_tmp );
+            us_s = us_sm1 + sigma_a * dt * fe_tmp;
 
             // u_{s-2+l} = u_j
             auto& u_sm2pl = u_j;
 
-            auto& u_sp1 = U[6];
+            auto& u_sp1 = U[9];
             u_sp1       = un;
 
-            auto& u_sp2 = U[7];
+            auto& u_sp2 = U[10];
             u_sp2       = un;
 
             if constexpr ( detail::problem_operator<decltype( pb.implicit_part ), value_t> )
@@ -368,9 +406,12 @@ namespace ponio::runge_kutta::pirock
 
                 std::size_t n_eval_sp2 = 0;
 
-                auto op_sp2  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.implicit_part.f_t( tn );
-                auto rhs_sp2 = static_cast<state_t>(
-                    u_sm2pl + beta * dt * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
+                pb.explicit_part( tn, u_sp1, fe_tmp );
+                pb.implicit_part( tn, u_sp1, fi_tmp );
+                auto& rhs_sp2 = U[11]; // temporary use of U[10] before u_sp3
+
+                auto op_sp2 = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.implicit_part.f_t( tn );
+                rhs_sp2     = u_sm2pl + beta * dt * fe_tmp + ( 1. - 2. * gamma ) * dt * fi_tmp;
                 ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2, n_eval_sp2 );
 
                 _info.number_of_eval[1] += n_eval_sp1 + n_eval_sp2 + 1;
@@ -380,10 +421,11 @@ namespace ponio::runge_kutta::pirock
                 using matrix_t = decltype( pb.implicit_part.df( tn, un ) );
 
                 auto identity = ::ponio::linear_algebra::linear_algebra<matrix_t>::identity( un );
-                auto g_sp1    = [&]( state_t const& u ) -> state_t
+                auto g_sp1    = [&]( state_t& u ) -> state_t
                 {
                     _info.number_of_eval[1] += 1;
-                    return u - gamma * dt * pb.implicit_part.f( tn, u ) - u_sm2pl;
+                    pb.implicit_part( tn, u, fi_tmp );
+                    return u - gamma * dt * fi_tmp - u_sm2pl;
                 };
                 auto dg = [&]( state_t const& u ) -> matrix_t
                 {
@@ -396,13 +438,17 @@ namespace ponio::runge_kutta::pirock
                     ponio::default_config::newton_tolerance,
                     ponio::default_config::newton_max_iterations );
 
-                auto g_sp2 = [&]( state_t const& u ) -> state_t
-                {
-                    _info.number_of_eval[0] += 1;
-                    _info.number_of_eval[1] += 2;
+                _info.number_of_eval[0] += 1;
+                _info.number_of_eval[1] += 1;
+                pb.explicit_part( tn, u_sp1, fe_tmp );
+                pb.implicit_part( tn, u_sp1, fi_tmp );
 
-                    return u - gamma * dt * pb.implicit_part.f( tn, u )
-                         - ( u_sm2pl + beta * dt * pb.explicit_part( tn, u_sp1 ) + ( 1. - 2. * gamma ) * dt * pb.implicit_part( tn, u_sp1 ) );
+                auto g_sp2 = [&]( state_t& u ) -> state_t
+                {
+                    _info.number_of_eval[1] += 1;
+
+                    pb.implicit_part( tn, u, f_tmp );
+                    return u - gamma * dt * f_tmp - ( u_sm2pl + beta * dt * fe_tmp + ( 1. - 2. * gamma ) * dt * fi_tmp );
                 };
                 u_sp2 = diagonal_implicit_runge_kutta::newton<value_t>( g_sp2,
                     dg,
@@ -414,47 +460,53 @@ namespace ponio::runge_kutta::pirock
 
             _info.number_of_eval[1] += 3;
 
-            auto& u_sp3 = U[8];
-            u_sp3       = u_sm2pl + ( 1. - gamma ) * dt * pb.implicit_part( tn, u_sp1 );
+            auto& u_sp3 = U[11];
+            pb.implicit_part( tn, u_sp1, fi_tmp );
+            u_sp3 = u_sm2pl + ( 1. - gamma ) * dt * fi_tmp;
 
             value_t tau   = sigma * rock_coeff::fp2[deg_index - 1] + sigma * sigma;
             value_t tau_a = 0.5 * detail::power<2>( alpha - 1. ) + 2. * alpha * ( 1. - alpha ) * sigma + alpha * alpha * tau;
 
-            auto& u_np1 = U[9];
+            auto& u_np1 = U[12];
 
             if constexpr ( shampine_trick_enable && detail::problem_operator<decltype( pb.implicit_part ), value_t> )
             {
-                auto& shampine_element = U[10];
-                auto& f_D_u            = U[11];
-                auto& u_tmp            = U[12];
+                auto& shampine_element = U[13];
+                auto& f_D_u            = U[14];
+                auto& u_tmp            = U[15];
+                auto& fe_tmp_bis       = U[15]; // temporary use of U[15] before u_tmp
 
                 // for embedded method
-                auto& err_D = U[13];
+                auto& err_D = U[16];
 
                 // $err_D = \sigma_\alpha(1-\tau_a/\sigma_a^2)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)}))$
-                err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
-                      * ( pb.explicit_part( tn, us_sm1 ) - pb.explicit_part( tn, u_sm2 ) );
+                pb.explicit_part( tn, us_sm1, fe_tmp );
+                pb.explicit_part( tn, u_sm2, fe_tmp_bis );
+                err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fe_tmp - fe_tmp_bis );
 
-                f_D_u = static_cast<state_t>( pb.explicit_part( tn, u_sp3 ) - pb.explicit_part( tn, u_sp1 ) );
+                pb.explicit_part( tn, u_sp3, fe_tmp );
+                pb.explicit_part( tn, u_sp1, fe_tmp_bis );
+                f_D_u = static_cast<state_t>( fe_tmp - fe_tmp_bis );
 
                 shampine_trick_caller.template operator()<l>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, f_D_u, u_tmp, shampine_element );
 
                 if constexpr ( is_embedded )
                 {
-                    auto& rhs_R = U[14];
-                    auto& err_R = U[15];
+                    auto& rhs_R = U[17];
+                    auto& err_R = U[18];
 
                     _info.number_of_eval[1] += 2;
 
-                    rhs_R = static_cast<state_t>( dt / 6. * ( pb.implicit_part( tn, u_sp1 ) - pb.implicit_part( tn, u_sp2 ) ) );
+                    pb.implicit_part( tn, u_sp1, fi_tmp );
+                    pb.implicit_part( tn, u_sp2, f_tmp );
+                    rhs_R = static_cast<state_t>( dt / 6. * ( fi_tmp - f_tmp ) );
 
                     // $err_R = J_R^{-1} \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
                     // to compute it, get $rhs_R = \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
                     // then solve $J_R err_R = rhs_R$ (that what Shampine's trick does, it build $J_R$ and solve it)
                     shampine_trick_caller.template operator()<1>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, rhs_R, u_tmp, err_R );
 
-                    u_np1 = us_s - err_D + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
-                          + dt / ( 2. - 4. * gamma ) * shampine_element;
+                    u_np1 = us_s - err_D + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
 
                     auto accumulator_error_gen = []( auto const& yn, auto const& ynp1, value_t a_tol, value_t r_tol )
                     {
@@ -494,16 +546,26 @@ namespace ponio::runge_kutta::pirock
                     return { tn, un, new_dt };
                 }
 
-                u_np1 = us_s - err_D + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
-                      + dt / ( 2. - 4. * gamma ) * shampine_element;
+                pb.implicit_part( tn, u_sp1, fi_tmp );
+                pb.implicit_part( tn, u_sp2, f_tmp );
+                u_np1 = us_s - err_D + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
             }
             else
             {
-                u_np1 = us_s
-                      - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
-                            * ( pb.explicit_part( tn, us_sm1 ) - pb.explicit_part( tn, u_sm2 ) )
-                      + 0.5 * dt * pb.implicit_part( tn, u_sp1 ) + 0.5 * dt * pb.implicit_part( tn, u_sp2 )
-                      + dt / ( 2. - 4. * gamma ) * ( pb.explicit_part( tn, u_sp3 ) - pb.explicit_part( tn, u_sp1 ) );
+                auto& fe_tmp_bis = U[0]; // temporary use of U[0] after u_j
+                auto& fe_tmp_ter = U[1]; // temporary use of U[1] after u_jm1
+                auto& fe_tmp_qua = U[2]; // temporary use of U[2] after u_jm2
+
+                pb.explicit_part( tn, us_sm1, fe_tmp );
+                pb.explicit_part( tn, u_sm2, fe_tmp_bis );
+                pb.explicit_part( tn, u_sp3, fe_tmp_ter );
+                pb.explicit_part( tn, u_sp1, fe_tmp_qua );
+
+                pb.implicit_part( tn, u_sp1, fi_tmp );
+                pb.implicit_part( tn, u_sp2, f_tmp );
+
+                u_np1 = us_s - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fe_tmp - fe_tmp_bis ) + 0.5 * dt * fi_tmp
+                      + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * ( fe_tmp_ter - fe_tmp_qua );
             }
 
             return { tn + dt, u_np1, dt };
@@ -712,7 +774,7 @@ namespace ponio::runge_kutta::pirock
         static constexpr std::size_t N_operators = 3;
         static constexpr std::size_t N_stages    = stages::dynamic;
         static constexpr std::size_t N_storage   = std::
-            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 20>, std::integral_constant<std::size_t, 13>>::value;
+            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 28>, std::integral_constant<std::size_t, 21>>::value;
         static constexpr std::size_t order   = 2;
         static constexpr std::string_view id = "PIROCK";
 
@@ -809,6 +871,7 @@ namespace ponio::runge_kutta::pirock
                 tn,
                 un,
                 dt,
+                U,
                 4 );
             std::size_t s                               = mdeg + 2;
 
@@ -824,6 +887,15 @@ namespace ponio::runge_kutta::pirock
             auto& u_jm2 = U[2];
             auto& u_sm2 = U[3];
 
+            auto& fr_tmp     = U[4];
+            auto& fr_tmp_bis = U[5];
+            auto& fd_tmp     = U[6];
+            auto& fd_tmp_bis = U[7];
+            auto& fd_tmp_ter = U[8];
+            auto& fd_tmp_qua = U[9];
+            auto& fa_tmp     = U[10];
+            auto& fa_tmp_bis = U[11];
+
             u_j   = un;
             u_jm2 = un;
 
@@ -834,7 +906,8 @@ namespace ponio::runge_kutta::pirock
             value_t t_jm3 = tn;
 
             // u_1 =u^n + \alpha \mu_1 \Delta F_D( u^n )
-            u_jm1 = un + alpha * dt * mu_1 * pb( diffusion_op(), tn, un );
+            pb( diffusion_op(), tn, un, fd_tmp );
+            u_jm1 = un + alpha * dt * mu_1 * fd_tmp;
 
             if ( mdeg < 2 )
             {
@@ -848,7 +921,8 @@ namespace ponio::runge_kutta::pirock
                 value_t const nu_j    = -1.0 - kappa_j;
 
                 // u_{j} = \alpha \mu_j \Delta t F_D( u_{j-2} ) - \nu_j u_{j-1} - \kappa_j u_{j-2}
-                u_j = alpha * mu_j * dt * pb( diffusion_op(), t_jm1, u_jm1 ) - nu_j * u_jm1 - kappa_j * u_jm2;
+                pb( diffusion_op(), t_jm1, u_jm1, fd_tmp );
+                u_j = alpha * mu_j * dt * fd_tmp - nu_j * u_jm1 - kappa_j * u_jm2;
 
                 t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
 
@@ -879,27 +953,29 @@ namespace ponio::runge_kutta::pirock
             value_t sigma_a = 0.5 * ( 1.0 - alpha ) + alpha * sigma;
 
             // u_{*s-1} = u_{s-2} + \sigma_\alpha \Delta t  F_D( u_{s-2} )
-            auto& us_sm1 = U[4];
-            us_sm1       = u_sm2 + sigma_a * dt * pb( diffusion_op(), t_jm1, u_sm2 );
+            auto& us_sm1 = U[12];
+            pb( diffusion_op(), t_jm1, u_sm2, fd_tmp );
+            us_sm1 = u_sm2 + sigma_a * dt * fd_tmp;
 
             // u_{*s} = u_{*s-1} + \sigma_\alpha \Delta t  F_D( u_{*s-1} )
-            auto& us_s = U[5];
-            us_s       = us_sm1 + sigma_a * dt * pb( diffusion_op(), t_jm1, us_sm1 );
+            auto& us_s = U[13];
+            pb( diffusion_op(), t_jm1, us_sm1, fd_tmp );
+            us_s = us_sm1 + sigma_a * dt * fd_tmp;
 
             // u_{s-2+l} = u_j
             auto& u_sm2pl = u_j;
 
             // u^{(s+1)} = u^{(s-2+\ell)} + \gamma \Delta t F_R(u^{(s+1)})
-            auto& u_sp1 = U[6];
+            auto& u_sp1 = U[14];
             u_sp1       = un;
 
             // u^{(s+2)} = u^{(s-2+\ell)} + \beta \Delta t F_D(u^{(s+1)}) + \Delta t F_A(u^{(s+1)}) + (1-2\gamma)\Delta t F_R(u^{(s+1)}) +
             // \gamma \Delta t F_R(u^{(s+2)})
-            auto& u_sp2 = U[7];
+            auto& u_sp2 = U[15];
             u_sp2       = un;
 
             // store F_A(u^{(s+1)})
-            auto& Fa_u_sp1 = U[8];
+            auto& Fa_u_sp1 = U[16];
 
             if constexpr ( detail::problem_operator<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t> )
             {
@@ -913,16 +989,17 @@ namespace ponio::runge_kutta::pirock
 
                 ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp1, u_sp1, rhs_sp1, n_eval_sp1 );
 
-                Fa_u_sp1 = pb( advection_op(), tn, u_sp1 );
+                pb( advection_op(), tn, u_sp1, Fa_u_sp1 );
 
                 std::size_t n_eval_sp2 = 0;
 
+                pb( diffusion_op(), tn, u_sp1, fd_tmp );
+                pb( reaction_op(), tn, u_sp1, fr_tmp );
                 // I - \gamma \Delta t F_R
                 auto op_sp2 = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un )
                             - gamma * dt * std::get<reaction_op::value>( pb.system ).f_t( tn );
                 // u^{(s-2+\ell)} + \beta \Delta t F_D(u^{(s+1)}) + \Delta t F_A(u^{(s+1)}) + (1-2\gamma)\Delta t F_R(u^{(s+1)})
-                auto rhs_sp2 = static_cast<state_t>( u_sm2pl + beta * dt * pb( diffusion_op(), tn, u_sp1 ) + dt * Fa_u_sp1
-                                                     + ( 1. - 2. * gamma ) * dt * pb( reaction_op(), tn, u_sp1 ) );
+                auto rhs_sp2 = static_cast<state_t>( u_sm2pl + beta * dt * fd_tmp + dt * Fa_u_sp1 + ( 1. - 2. * gamma ) * dt * fr_tmp );
 
                 ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2, n_eval_sp2 );
 
@@ -933,14 +1010,15 @@ namespace ponio::runge_kutta::pirock
                 using matrix_t = decltype( std::get<reaction_op::value>( pb.system ).df( tn, un ) );
 
                 auto identity = ::ponio::linear_algebra::linear_algebra<matrix_t>::identity( un );
-                auto g_sp1    = [&]( state_t const& u ) -> state_t
+                auto g_sp1    = [&]( state_t& u ) -> state_t
                 {
                     _info.number_of_eval[1] += 1;
+                    pb( reaction_op(), tn, u, fr_tmp );
 
                     // u - \gamma \Delta t F_R(u) - u^{(s-2+\ell)}
-                    return u - gamma * dt * pb( reaction_op(), tn, u ) - u_sm2pl;
+                    return u - gamma * dt * fr_tmp - u_sm2pl;
                 };
-                auto dg = [&]( state_t const& u ) -> matrix_t
+                auto dg = [&]( state_t& u ) -> matrix_t
                 {
                     // Jacobian of g
                     // I - \gamma \Delta t \partial_u F_R(u)
@@ -953,18 +1031,20 @@ namespace ponio::runge_kutta::pirock
                     ponio::default_config::newton_tolerance,
                     ponio::default_config::newton_max_iterations );
 
-                Fa_u_sp1 = pb( advection_op(), tn, u_sp1 );
+                pb( advection_op(), tn, u_sp1, Fa_u_sp1 );
+                pb( diffusion_op(), tn, u_sp1, fd_tmp );
+                pb( reaction_op(), tn, u_sp1, fr_tmp_bis );
 
-                auto g_sp2 = [&]( state_t const& u ) -> state_t
+                auto g_sp2 = [&]( state_t& u ) -> state_t
                 {
                     _info.number_of_eval[0] += 1;
                     _info.number_of_eval[1] += 2;
 
+                    pb( reaction_op(), tn, u, fr_tmp );
+
                     // u - \gamma \Delta t F_R(u) - (u^{(s-2+\ell)} + \beta \Delta t F_D(u^{(s+1)}) + \Delta t F_A(u^{(s+1)}) +
                     // (1-2\gamma)\Delta t F_R(u^{(s+1)}))
-                    return u - gamma * dt * pb( reaction_op(), tn, u )
-                         - ( u_sm2pl + beta * dt * pb( diffusion_op(), tn, u_sp1 ) + dt * Fa_u_sp1
-                             + ( 1. - 2. * gamma ) * dt * pb( reaction_op(), tn, u_sp1 ) );
+                    return u - gamma * dt * fr_tmp - ( u_sm2pl + beta * dt * fd_tmp + dt * Fa_u_sp1 + ( 1. - 2. * gamma ) * dt * fr_tmp_bis );
                 };
                 u_sp2 = diagonal_implicit_runge_kutta::newton<value_t>( g_sp2,
                     dg,
@@ -977,27 +1057,29 @@ namespace ponio::runge_kutta::pirock
             _info.number_of_eval[1] += 3;
 
             // u^{(s+3)} = u^{(s-2+\ell)} + (1-2\gamma)\Delta t F_A(u^{(s+1)}) + (1-\gamma)\Delta t F_R(u^{(s+1)})
-            auto& u_sp3 = U[9];
-            u_sp3       = u_sm2pl + ( 1. - 2. * gamma ) * dt * Fa_u_sp1 + ( 1. - gamma ) * dt * pb( reaction_op(), tn, u_sp1 );
+            pb( reaction_op(), tn, u_sp1, fr_tmp );
+            auto& u_sp3 = U[17];
+            u_sp3       = u_sm2pl + ( 1. - 2. * gamma ) * dt * Fa_u_sp1 + ( 1. - gamma ) * dt * fr_tmp;
 
             // u^{(s+4)} = u^{(s+2-\ell)} + 1/3 \Delta t F_A(u^{(s+1)})
-            auto& u_sp4 = U[10];
+            auto& u_sp4 = U[18];
             u_sp4       = u_sm2pl + 1. / 3. * dt * Fa_u_sp1;
 
             // u^{(s+5)} = u^{(s+2-\ell)} + 2/3 \beta \Delta t F_D(u^{(s+1)}) + 2/3 \Delta t J_R^{-1} F_A(u^{(s+4)}) + (2/3-\gamma) \Delta t
             // F_R(u^{(s+1)}) + 2/3 \gamma \Delta t F_R(u^{(s+2)}) with Shampine's trick J_R = I - \gamma \Delta t \partial_u
             // F_R(u^{(s-2+\ell)}) else J_R = I
 
-            auto& u_sp5 = U[11];
+            auto& u_sp5 = U[19];
 
             if constexpr ( shampine_trick_enable
                            && detail::problem_operator<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t> )
             {
-                auto& shampine_element = U[13]; // solution of (I - \gamma \Delta t \partial_u F_R ) X = F_A(u^{(s+4)})
-                auto& f_A_u            = U[14];
-                auto& u_tmp            = U[15];
+                auto& shampine_element = U[21]; // solution of (I - \gamma \Delta t \partial_u F_R ) X = F_A(u^{(s+4)})
+                auto& f_A_u            = U[22];
+                auto& u_tmp            = U[23];
 
-                f_A_u = dt * pb( advection_op(), tn, u_sp4 );
+                pb( advection_op(), tn, u_sp4, f_A_u );
+                f_A_u = dt * f_A_u;
 
                 shampine_trick_caller.template operator()<1>( gamma * dt,
                     std::get<reaction_op::value>( pb.system ).f_t( tn ),
@@ -1006,35 +1088,44 @@ namespace ponio::runge_kutta::pirock
                     u_tmp,
                     shampine_element );
 
-                u_sp5 = u_sm2pl + 2. / 3. * beta * dt * pb( diffusion_op(), tn, u_sp1 ) + 2. / 3. * shampine_element
-                      + ( 2. / 3. - gamma ) * dt * pb( reaction_op(), tn, u_sp1 ) + 2. / 3. * gamma * dt * pb( reaction_op(), u_sp2 );
+                pb( diffusion_op(), tn, u_sp1, fd_tmp );
+                pb( reaction_op(), tn, u_sp1, fr_tmp );
+                pb( reaction_op(), u_sp2, fr_tmp_bis );
+                u_sp5 = u_sm2pl + 2. / 3. * beta * dt * fd_tmp + 2. / 3. * shampine_element + ( 2. / 3. - gamma ) * dt * fr_tmp
+                      + 2. / 3. * gamma * dt * fr_tmp_bis;
             }
             else
             {
-                u_sp5 = u_sm2pl + 2. / 3. * beta * dt * pb( diffusion_op(), tn, u_sp1 ) + 2. / 3. * dt * pb( advection_op(), tn, u_sp4 )
-                      + ( 2. / 3. - gamma ) * dt * pb( reaction_op(), tn, u_sp1 ) + 2. / 3. * gamma * dt * pb( reaction_op(), tn, u_sp2 );
+                pb( diffusion_op(), tn, u_sp1, fd_tmp );
+                pb( advection_op(), tn, u_sp4, fa_tmp );
+                pb( reaction_op(), tn, u_sp1, fr_tmp );
+                pb( reaction_op(), tn, u_sp2, fr_tmp_bis );
+                u_sp5 = u_sm2pl + 2. / 3. * beta * dt * fd_tmp + 2. / 3. * dt * fa_tmp + ( 2. / 3. - gamma ) * dt * fr_tmp
+                      + 2. / 3. * gamma * dt * fr_tmp_bis;
             }
 
             value_t tau   = sigma * rock_coeff::fp2[deg_index - 1] + sigma * sigma;
             value_t tau_a = 0.5 * detail::power<2>( alpha - 1. ) + 2. * alpha * ( 1. - alpha ) * sigma + alpha * alpha * tau;
 
-            auto& u_np1 = U[12];
+            auto& u_np1 = U[20];
 
             if constexpr ( shampine_trick_enable
                            && detail::problem_operator<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t> )
             {
-                auto& shampine_element = U[13];
-                auto& f_D_u            = U[14];
-                auto& u_tmp            = U[15];
+                auto& shampine_element = U[21];
+                auto& f_D_u            = U[22];
+                auto& u_tmp            = U[23];
 
                 // for embedded method
-                auto& err_D = U[16];
-
+                auto& err_D = U[24];
+                pb( diffusion_op(), tn, us_sm1, fd_tmp );
+                pb( diffusion_op(), tn, u_sm2, fd_tmp_bis );
                 // $err_D = \sigma_\alpha(1-\tau_a/\sigma_a^2)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)}))$
-                err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
-                      * ( pb( diffusion_op(), tn, us_sm1 ) - pb( diffusion_op(), tn, u_sm2 ) );
+                err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fd_tmp - fd_tmp_bis );
 
-                f_D_u = static_cast<state_t>( pb( diffusion_op(), tn, u_sp3 ) - pb( diffusion_op(), tn, u_sp1 ) );
+                pb( diffusion_op(), tn, u_sp3, fd_tmp );
+                pb( diffusion_op(), tn, u_sp1, fd_tmp_bis );
+                f_D_u = static_cast<state_t>( fd_tmp - fd_tmp_bis );
 
                 shampine_trick_caller.template operator()<l>( gamma * dt,
                     std::get<reaction_op::value>( pb.system ).f_t( tn ),
@@ -1045,13 +1136,15 @@ namespace ponio::runge_kutta::pirock
 
                 if constexpr ( is_embedded )
                 {
-                    auto& rhs_R = U[17];
-                    auto& err_R = U[18];
-                    auto& err_A = U[19];
+                    auto& rhs_R = U[25];
+                    auto& err_R = U[26];
+                    auto& err_A = U[27];
 
                     _info.number_of_eval[1] += 2;
 
-                    rhs_R = dt * ( pb( reaction_op(), tn, u_sp1 ) - pb( reaction_op(), tn, u_sp2 ) ) / 6.;
+                    pb( reaction_op(), tn, u_sp1, fr_tmp );
+                    pb( reaction_op(), tn, u_sp2, fr_tmp_bis );
+                    rhs_R = dt * ( fr_tmp - fr_tmp_bis ) / 6.;
 
                     // $err_R = J_R^{-1} \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
                     // to compute it, get $rhs_R = \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
@@ -1063,12 +1156,13 @@ namespace ponio::runge_kutta::pirock
                         u_tmp,
                         err_R );
 
+                    pb( advection_op(), tn, u_sp4, fa_tmp );
+                    pb( advection_op(), tn, u_sp5, fa_tmp_bis );
                     // err_A = -3/20 \Delta t F_A(u^{(s+1)}) + 3/10 \Delta t F_A(u^{(s+4)}) - 3/20 \Delta t F_A(u^{(s+5)})
-                    err_A = -0.15 * dt * Fa_u_sp1 + 0.3 * dt * pb( advection_op(), tn, u_sp4 ) - 0.15 * dt * pb( advection_op(), tn, u_sp5 );
+                    err_A = -0.15 * dt * Fa_u_sp1 + 0.3 * dt * fa_tmp - 0.15 * dt * fa_tmp_bis;
 
-                    u_np1 = us_s - err_D + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.25 * dt * Fa_u_sp1
-                          + 0.75 * dt * pb( advection_op(), tn, u_sp5 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp1 )
-                          + 0.5 * dt * pb( reaction_op(), tn, u_sp2 ) + 1.0 / ( 2. - 4. * gamma ) * shampine_element;
+                    u_np1 = us_s - err_D + 0.5 * dt * fr_tmp + 0.25 * dt * Fa_u_sp1 + 0.75 * dt * fa_tmp_bis + 0.5 * dt * fr_tmp
+                          + 0.5 * dt * fr_tmp_bis + 1.0 / ( 2. - 4. * gamma ) * shampine_element;
 
                     auto accumulator_error_gen = []( auto const& yn, auto const& ynp1, value_t a_tol, value_t r_tol )
                     {
@@ -1108,18 +1202,25 @@ namespace ponio::runge_kutta::pirock
                     return { tn, un, new_dt };
                 }
 
-                u_np1 = us_s - err_D + 0.5 * dt * pb( reaction_op(), tn, u_sp1 ) + 0.25 * dt * Fa_u_sp1
-                      + 0.75 * dt * pb( advection_op(), tn, u_sp5 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp1 )
-                      + 0.5 * dt * pb( reaction_op(), tn, u_sp2 ) + dt / ( 2. - 4. * gamma ) * shampine_element;
+                pb( reaction_op(), tn, u_sp1, fr_tmp );
+                pb( advection_op(), tn, u_sp5, fa_tmp );
+                pb( reaction_op(), tn, u_sp2, fr_tmp_bis );
+                u_np1 = us_s - err_D + 0.5 * dt * fr_tmp + 0.25 * dt * Fa_u_sp1 + 0.75 * dt * fa_tmp + 0.5 * dt * fr_tmp
+                      + 0.5 * dt * fr_tmp_bis + dt / ( 2. - 4. * gamma ) * shampine_element;
             }
             else
             {
-                u_np1 = us_s
-                      - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt
-                            * ( pb( diffusion_op(), tn, us_sm1 ) - pb( diffusion_op(), tn, u_sm2 ) )
-                      + 0.25 * dt * Fa_u_sp1 + 0.75 * dt * pb( advection_op(), tn, u_sp5 ) + 0.5 * dt * pb( reaction_op(), tn, u_sp1 )
-                      + 0.5 * dt * pb( reaction_op(), tn, u_sp2 )
-                      + dt / ( 2. - 4. * gamma ) * ( pb( diffusion_op(), tn, u_sp3 ) - pb( diffusion_op(), tn, u_sp1 ) );
+                pb( diffusion_op(), tn, us_sm1, fd_tmp );
+                pb( diffusion_op(), tn, u_sm2, fd_tmp_bis );
+                pb( advection_op(), tn, u_sp5, fa_tmp );
+                pb( reaction_op(), tn, u_sp1, fr_tmp );
+                pb( reaction_op(), tn, u_sp2, fr_tmp_bis );
+                pb( diffusion_op(), tn, u_sp3, fd_tmp_ter );
+                pb( diffusion_op(), tn, u_sp1, fd_tmp_qua );
+
+                u_np1 = us_s - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fd_tmp - fd_tmp_bis ) + 0.25 * dt * Fa_u_sp1
+                      + 0.75 * dt * fa_tmp + 0.5 * dt * fr_tmp + 0.5 * dt * fr_tmp_bis
+                      + dt / ( 2. - 4. * gamma ) * ( fd_tmp_ter - fd_tmp_qua );
             }
 
             return { tn + dt, u_np1, dt };

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <cstddef>
 #include <tuple>
 #include <type_traits>
@@ -17,7 +18,7 @@ namespace ponio
      *  define a problem with a unique function
      *  @tparam Callable_t type of callable object (or function) stored in problem
      *
-     *  This class represent a problem of the form \f( \dot{u}=f(t,u) \f)
+     *  This class represent a problem of the form \f( \dot{y}=f(t,y) \f)
      */
     template <typename Callable_t>
     struct simple_problem
@@ -27,12 +28,34 @@ namespace ponio
         simple_problem( Callable_t&& f_ );
 
         template <typename state_t, typename value_t>
-        state_t
-        operator()( value_t t, state_t&& u );
+            requires std::invocable<Callable_t, value_t, state_t, state_t&>
+        void
+        operator()( value_t t, state_t&& y, state_t& dy );
 
         template <typename state_t, typename value_t>
-        state_t
-        operator()( value_t t, state_t& u );
+            requires std::invocable<Callable_t, value_t, state_t, state_t&>
+        void
+        operator()( value_t t, state_t& y, state_t& dy );
+
+        template <typename state_t, typename value_t>
+            requires std::invocable<Callable_t, value_t, state_t, state_t&>
+        void
+        operator()( value_t t, state_t const& y, state_t& dy );
+
+        template <typename state_t, typename value_t>
+            requires std::invocable<Callable_t, value_t, state_t>
+        void
+        operator()( value_t t, state_t&& y, state_t& dy );
+
+        template <typename state_t, typename value_t>
+            requires std::invocable<Callable_t, value_t, state_t>
+        void
+        operator()( value_t t, state_t& y, state_t& dy );
+
+        template <typename state_t, typename value_t>
+            requires std::invocable<Callable_t, value_t, state_t>
+        void
+        operator()( value_t t, state_t const& y, state_t& dy );
     };
 
     /**
@@ -46,25 +69,63 @@ namespace ponio
     }
 
     /**
-     * call operator to evaluate \f$f(t,u)\f$
-     * @param t time value \f$t\f$
-     * @param u variable of the problem value \f$u\f$
-     * @return Returns \f$f(t,u)\f$
+     * call operator to evaluate \f$f(t,y)\f$
+     * @param t  time value \f$t\f$
+     * @param y  variable of the problem value \f$y\f$
+     * @param dy \f$\dot{y}\f$, returns value of \f$f(t, y)\f$ of the problem
      */
     template <typename Callable_t>
     template <typename state_t, typename value_t>
-    inline state_t
-    simple_problem<Callable_t>::operator()( value_t t, state_t&& u )
+        requires std::invocable<Callable_t, value_t, state_t, state_t&>
+    inline void
+    simple_problem<Callable_t>::operator()( value_t t, state_t&& y, state_t& dy )
     {
-        return f( t, std::forward<state_t>( u ) );
+        f( t, std::forward<state_t>( y ), dy );
     }
 
     template <typename Callable_t>
     template <typename state_t, typename value_t>
-    inline state_t
-    simple_problem<Callable_t>::operator()( value_t t, state_t& u )
+        requires std::invocable<Callable_t, value_t, state_t, state_t&>
+    inline void
+    simple_problem<Callable_t>::operator()( value_t t, state_t& y, state_t& dy )
     {
-        return f( t, u );
+        f( t, y, dy );
+    }
+
+    template <typename Callable_t>
+    template <typename state_t, typename value_t>
+        requires std::invocable<Callable_t, value_t, state_t, state_t&>
+    inline void
+    simple_problem<Callable_t>::operator()( value_t t, state_t const& y, state_t& dy )
+    {
+        f( t, y, dy );
+    }
+
+    template <typename Callable_t>
+    template <typename state_t, typename value_t>
+        requires std::invocable<Callable_t, value_t, state_t>
+    inline void
+    simple_problem<Callable_t>::operator()( value_t t, state_t&& y, state_t& dy )
+    {
+        dy = f( t, std::forward<state_t>( y ) );
+    }
+
+    template <typename Callable_t>
+    template <typename state_t, typename value_t>
+        requires std::invocable<Callable_t, value_t, state_t>
+    inline void
+    simple_problem<Callable_t>::operator()( value_t t, state_t& y, state_t& dy )
+    {
+        dy = f( t, y );
+    }
+
+    template <typename Callable_t>
+    template <typename state_t, typename value_t>
+        requires std::invocable<Callable_t, value_t, state_t>
+    inline void
+    simple_problem<Callable_t>::operator()( value_t t, state_t const& y, state_t& dy )
+    {
+        dy = f( t, y );
     }
 
     /**
@@ -176,17 +237,25 @@ namespace ponio
         imex_problem( Callable_explicit_t&& f_explicit, Implicit_problem_t&& pb_implicit );
 
         template <typename state_t, typename value_t>
-        state_t
-        operator()( value_t t, state_t&& u )
+        void
+        operator()( value_t t, state_t&& y, state_t& dy )
         {
-            return explicit_part( t, std::forward<state_t>( u ) ) + implicit_part( t, std::forward<state_t>( u ) );
+            state_t dy_exp = dy;
+            state_t dy_imp = dy;
+            explicit_part( t, std::forward<state_t>( y ), dy_exp );
+            implicit_part( t, std::forward<state_t>( y ), dy_imp );
+            dy = dy_exp + dy_imp;
         }
 
         template <typename state_t, typename value_t>
-        state_t
-        operator()( value_t t, state_t& u )
+        void
+        operator()( value_t t, state_t& y, state_t& dy )
         {
-            return explicit_part( t, u ) + implicit_part( t, u );
+            state_t dy_exp = dy;
+            state_t dy_imp = dy;
+            explicit_part( t, y, dy_exp );
+            implicit_part( t, y, dy_imp );
+            dy = dy_exp + dy_imp;
         }
     };
 
@@ -255,8 +324,8 @@ namespace ponio
         lawson_problem( Linear_t&& l_, Nonlinear_t&& n_ );
 
         template <typename state_t, typename value_t>
-        state_t
-        operator()( value_t t, state_t&& u );
+        void
+        operator()( value_t t, state_t&& y, state_t& dy );
     };
 
     /**
@@ -279,10 +348,11 @@ namespace ponio
      */
     template <typename Linear_t, typename Nonlinear_t>
     template <typename state_t, typename value_t>
-    state_t
-    lawson_problem<Linear_t, Nonlinear_t>::operator()( value_t t, state_t&& u )
+    void
+    lawson_problem<Linear_t, Nonlinear_t>::operator()( value_t t, state_t&& y, state_t& dy )
     {
-        return l * u + n( t, std::forward<state_t>( u ) );
+        n( t, std::forward<state_t>( y ), dy );
+        dy = l * y + dy;
     }
 
     /**
@@ -313,35 +383,43 @@ namespace ponio
 
         template <typename value_t, typename state_t, std::size_t... Is>
         state_t
-        _sum_components_impl( value_t t, state_t&& u, std::index_sequence<Is...> );
+        _sum_components_impl( value_t t, state_t&& y, state_t& dy, std::index_sequence<Is...> );
 
         template <typename value_t, typename state_t, std::size_t... Is>
         state_t
-        _sum_components_impl( value_t t, state_t& u, std::index_sequence<Is...> );
+        _sum_components_impl( value_t t, state_t& y, state_t& dy, std::index_sequence<Is...> );
 
         template <typename value_t, typename state_t>
-        state_t
-        operator()( value_t t, state_t&& u );
+        void
+        operator()( value_t t, state_t&& y, state_t& dy );
 
         template <typename value_t, typename state_t>
-        state_t
-        operator()( value_t t, state_t& u );
+        void
+        operator()( value_t t, state_t& y, state_t& dy );
 
         template <std::size_t I, typename value_t, typename state_t>
-        state_t
-        operator()( std::integral_constant<std::size_t, I>, value_t t, state_t&& u );
+        void
+        operator()( std::integral_constant<std::size_t, I>, value_t t, state_t&& y, state_t& dy );
 
         template <std::size_t I, typename value_t, typename state_t>
-        state_t
-        operator()( std::integral_constant<std::size_t, I>, value_t t, state_t& u );
+        void
+        operator()( std::integral_constant<std::size_t, I>, value_t t, state_t& y, state_t& dy );
+
+        template <std::size_t I, typename value_t, typename state_t>
+        void
+        operator()( std::integral_constant<std::size_t, I>, value_t t, state_t const& y, state_t& dy );
 
         template <std::size_t Index, typename value_t, typename state_t>
         state_t
-        call( value_t t, state_t&& u );
+        call( value_t t, state_t&& y, state_t& dy );
 
         template <std::size_t Index, typename value_t, typename state_t>
         state_t
-        call( value_t t, state_t& u );
+        call( value_t t, state_t& y, state_t& dy );
+
+        template <std::size_t Index, typename value_t, typename state_t>
+        state_t
+        call( value_t t, state_t const& y, state_t& dy );
     };
 
     /**
@@ -364,17 +442,17 @@ namespace ponio
     template <typename... Callables_t>
     template <typename value_t, typename state_t, std::size_t... Is>
     inline state_t
-    problem<Callables_t...>::_sum_components_impl( value_t t, state_t&& u, std::index_sequence<Is...> )
+    problem<Callables_t...>::_sum_components_impl( value_t t, state_t&& y, state_t& dy, std::index_sequence<Is...> )
     {
-        return ( call<Is>( t, std::forward<state_t>( u ) ) + ... );
+        return ( call<Is>( t, std::forward<state_t>( y ), dy ) + ... );
     }
 
     template <typename... Callables_t>
     template <typename value_t, typename state_t, std::size_t... Is>
     inline state_t
-    problem<Callables_t...>::_sum_components_impl( value_t t, state_t& u, std::index_sequence<Is...> )
+    problem<Callables_t...>::_sum_components_impl( value_t t, state_t& y, state_t& dy, std::index_sequence<Is...> )
     {
-        return ( call<Is>( t, u ) + ... );
+        return ( call<Is>( t, y, dy ) + ... );
     }
 
     /**
@@ -385,18 +463,18 @@ namespace ponio
      */
     template <typename... Callables_t>
     template <typename value_t, typename state_t>
-    inline state_t
-    problem<Callables_t...>::operator()( value_t t, state_t&& u )
+    inline void
+    problem<Callables_t...>::operator()( value_t t, state_t&& y, state_t& dy )
     {
-        return _sum_components_impl( t, std::forward<state_t>( u ), std::make_index_sequence<size>{} );
+        dy = _sum_components_impl( t, std::forward<state_t>( y ), dy, std::make_index_sequence<size>{} );
     }
 
     template <typename... Callables_t>
     template <typename value_t, typename state_t>
-    inline state_t
-    problem<Callables_t...>::operator()( value_t t, state_t& u )
+    inline void
+    problem<Callables_t...>::operator()( value_t t, state_t& y, state_t& dy )
     {
-        return _sum_components_impl( t, u, std::make_index_sequence<size>{} );
+        dy = _sum_components_impl( t, y, dy, std::make_index_sequence<size>{} );
     }
 
     /**
@@ -409,18 +487,26 @@ namespace ponio
      */
     template <typename... Callables_t>
     template <std::size_t I, typename value_t, typename state_t>
-    inline state_t
-    problem<Callables_t...>::operator()( std::integral_constant<std::size_t, I>, value_t t, state_t&& u )
+    inline void
+    problem<Callables_t...>::operator()( std::integral_constant<std::size_t, I>, value_t t, state_t&& y, state_t& dy )
     {
-        return call<I>( t, std::forward<state_t>( u ) );
+        call<I>( t, std::forward<state_t>( y ), dy );
     }
 
     template <typename... Callables_t>
     template <std::size_t I, typename value_t, typename state_t>
-    inline state_t
-    problem<Callables_t...>::operator()( std::integral_constant<std::size_t, I>, value_t t, state_t& u )
+    inline void
+    problem<Callables_t...>::operator()( std::integral_constant<std::size_t, I>, value_t t, state_t& y, state_t& dy )
     {
-        return call<I>( t, u );
+        call<I>( t, y, dy );
+    }
+
+    template <typename... Callables_t>
+    template <std::size_t I, typename value_t, typename state_t>
+    inline void
+    problem<Callables_t...>::operator()( std::integral_constant<std::size_t, I>, value_t t, state_t const& y, state_t& dy )
+    {
+        call<I>( t, y, dy );
     }
 
     /**
@@ -433,17 +519,28 @@ namespace ponio
     template <typename... Callables_t>
     template <std::size_t Index, typename value_t, typename state_t>
     inline state_t
-    problem<Callables_t...>::call( value_t t, state_t&& u )
+    problem<Callables_t...>::call( value_t t, state_t&& y, state_t& dy )
     {
-        return std::get<Index>( system )( t, std::forward<state_t>( u ) );
+        std::get<Index>( system )( t, std::forward<state_t>( y ), dy );
+        return dy;
     }
 
     template <typename... Callables_t>
     template <std::size_t Index, typename value_t, typename state_t>
     inline state_t
-    problem<Callables_t...>::call( value_t t, state_t& u )
+    problem<Callables_t...>::call( value_t t, state_t& y, state_t& dy )
     {
-        return std::get<Index>( system )( t, u );
+        std::get<Index>( system )( t, y, dy );
+        return dy;
+    }
+
+    template <typename... Callables_t>
+    template <std::size_t Index, typename value_t, typename state_t>
+    inline state_t
+    problem<Callables_t...>::call( value_t t, state_t const& y, state_t& dy )
+    {
+        std::get<Index>( system )( t, y, dy );
+        return dy;
     }
 
     /**
