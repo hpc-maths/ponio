@@ -116,9 +116,9 @@ In this example we solve this system with some explicit adaptive time step metho
 |------------------------------------------|---------------------------------------------|
 | ![Arenstorf orbit](img/arenstorf/01.png) | ![Arenstorf velocity](img/arenstorf/02.png) |
 
-| Time step history                          |
-|--------------------------------------------|
-| ![Time step history](img/arenstorf/03.png) |
+| Time step history                          | Error over time                          |
+|--------------------------------------------|------------------------------------------|
+| ![Time step history](img/arenstorf/03.png) | ![Error over time](img/arenstorf/04.png) |
 
 All example in [arenstorf.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/arenstorf.cpp), and run
 
