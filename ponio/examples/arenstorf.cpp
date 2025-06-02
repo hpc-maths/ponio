@@ -94,9 +94,12 @@ main( int, char** )
 
     double const mu = 0.012277471;
 
-    auto arenstorf_pb = arenstorf_model( mu ); // ponio::make_problem( arenstorf_model( mu ) );
+    auto arenstorf_pb = arenstorf_model( mu );
 
     state_t const yini = { 0.994, 0., 0., -2.00158510637908252240537862224 };
+
+    filename = ( std::filesystem::path( dirname ) / "arenstorf_rk118.dat" ).string();
+    ponio::solve( arenstorf_pb, ponio::runge_kutta::rk_118(), yini, { 0., tf }, dt, ponio::observer::file_observer( filename ) );
 
     filename = ( std::filesystem::path( dirname ) / "arenstorf_rk546m.dat" ).string();
     ponio::solve( arenstorf_pb, ponio::runge_kutta::rk54_6m( 1e-5 ), yini, { 0., tf }, dt, ponio::observer::file_observer( filename ) );
@@ -107,6 +110,7 @@ main( int, char** )
     filename = ( std::filesystem::path( dirname ) / "arenstorf_rk547s.dat" ).string();
     ponio::solve( arenstorf_pb, ponio::runge_kutta::rk54_7s( 1e-5 ), yini, { 0., tf }, dt, ponio::observer::file_observer( filename ) );
 
+    // adaptive Strang method with Lipschitz estimate
     using namespace std::placeholders;
     auto phi_1 = [&]( double t, state_t&& y ) -> state_t
     {
