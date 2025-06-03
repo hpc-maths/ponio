@@ -78,7 +78,7 @@ namespace ponio::detail
 
         for ( auto it_un = std::ranges::cbegin( un ); it_un != last; ++it_un, ++it_unp1, ++it_unp1bis )
         {
-            auto tmp = ( *it_unp1 - *it_unp1bis ) / ( 1.0 + std::max( std::abs( *it_un ), std::abs( *it_unp1 ) ) );
+            auto tmp = std::abs( *it_unp1 - *it_unp1bis ) / ( 1.0 + std::max( std::abs( *it_un ), std::abs( *it_unp1 ) ) );
             r += tmp * tmp;
         }
         return std::sqrt( ( 1. / static_cast<double>( n_elm ) ) * r );

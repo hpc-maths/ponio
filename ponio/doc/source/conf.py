@@ -49,11 +49,14 @@ extensions = [
     'sphinx.ext.graphviz',
     'breathe',
     'sphinxcontrib.bibtex',
-    'sphinxcontrib.plantuml'
+    'sphinxcontrib.plantuml',
+    'myst_parser'
 ]
 
 breathe_projects = {'ponio': '../xml'}
 bibtex_bibfiles = ['bibliography.bib']
+
+myst_enable_extensions = ["dollarmath", "amsmath"]
 
 plantuml_jar = os.path.join(os.path.abspath(os.getcwd()), 'plantuml.jar')
 plantuml = f"java -jar {plantuml_jar}"
@@ -65,7 +68,10 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 
 rst_epilog = f"""
 .. |project| replace:: {project}
@@ -89,6 +95,8 @@ language = 'en'
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
+
+html_extra_path = ["compare/lorenz.html"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None

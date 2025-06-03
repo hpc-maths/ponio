@@ -290,3 +290,6 @@ ponio/doc/source/gallery/notebook
 ponio/doc/source/_static/cpp/*.txt
 ponio/doc/source/_static/cpp/*.out
 ponio/doc/source/_static/cpp/*.png
+ponio/doc/source/compare/*/*.txt
+ponio/doc/source/compare/*/*.out
+ponio/doc/source/compare/*/*.png
