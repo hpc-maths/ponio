@@ -56,6 +56,8 @@ extensions = [
 breathe_projects = {'ponio': '../xml'}
 bibtex_bibfiles = ['bibliography.bib']
 
+myst_enable_extensions = ["dollarmath", "amsmath"]
+
 plantuml_jar = os.path.join(os.path.abspath(os.getcwd()), 'plantuml.jar')
 plantuml = f"java -jar {plantuml_jar}"
 
