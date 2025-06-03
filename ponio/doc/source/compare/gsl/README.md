@@ -22,7 +22,57 @@ $$
 
 with parameter $\sigma=10$, $\rho = 28$ and $\beta = \frac{8}{3}$, and the initial state $(x_0, y_0, z_0) = (1,1,1)$. We solve it with a classical Runge-Kutta method of order 4, given by `gsl_odeiv2_step_rk4` method.
 
-For the complet example, see [`lorenz.cpp` source file](lorenz.cpp).
+To solve a problem with GSL we first write our equation as a ODE of the form:
+
+$$
+  \dot{u} = f(t, u)
+$$
+
+and the user provide the function $f$ as:
+
+```c
+  int f(double t, const double u[], double du[], void* params);
+```
+
+where `u` the current state of the function, `t` the current time and output `du` $f(t,u)$. To use GSL you should convert your state type in C-style array.
+
+```{literalinclude} lorenz.c
+  :lines: 7-18
+  :language: c
+  :linenos:
+  :lineno-start: 7
+```
+
+Now we should define the system and the driver for the chosen integrator
+
+```{literalinclude} lorenz.c
+  :lines: 29-30
+  :language: c
+  :linenos:
+  :lineno-start: 29
+```
+
+now we can call the integrator by
+
+```{literalinclude} lorenz.c
+  :lines: 53-53
+  :language: c
+  :linenos:
+  :lineno-start: 53
+```
+
+The complet time loop is
+
+```{literalinclude} lorenz.c
+  :lines: 45-61
+  :language: c
+  :linenos:
+  :lineno-start: 45
+```
+
+where `sol` is an array where we save all states.
+
+For the complet example, see [`lorenz.c` source file](lorenz.c).
 
 ## Transport equation
 
@@ -48,18 +98,30 @@ To define the explicit Euler method, we define a ``euler_state_t`` data structur
 
 ```{literalinclude} transport.c
   :lines: 14-19
+  :language: c
 ```
 
 and add a new ``gsl_odeiv2_step_type`` with following lines:
 
 ```{literalinclude} transport.c
   :lines: 157-167
+  :language: c
 ```
 
 where we should define how to allocate a ``euler_state_t`` (``euler_alloc``), increment it with ``euler_apply``, reset data with ``euler_reset``, a function to return the order ``euler_order`` and a deallocator ``euler_free``.
 
+We define the up-wind scheme as:
 
-For the complet example, see [`transport.cpp` source file](transport.cpp).
+```{literalinclude} transport.c
+  :lines: 169-186
+  :language: c
+  :linenos:
+  :lineno-start: 169
+```
+
+The time loop is the same as for Lorenz equation.
+
+For the complet example, see [`transport.c` source file](transport.c).
 
 ## Arenstorf orbit
 
@@ -105,6 +167,33 @@ $$
   \end{cases}
 $$
 
-We solve this example with given method `gsl_odeiv2_step_rk8pd` which is the method RK8(7) 13M in [@prince:1981] (mainly call *DOPRI8*).
+We define this system as:
 
-For the complet example, see [`arenstorf.cpp` source file](arenstorf.cpp).
+```{literalinclude} arenstorf.c
+  :lines: 8-26
+  :language: c
+  :linenos:
+  :lineno-start: 8
+```
+
+We solve this example with given method `gsl_odeiv2_step_rk8pd` which is the method RK8(7) 13M in [[PD81](https://doi.org/10.1016/0771-050X(81)90010-3)] (mainly call *DOPRI8*). To do this we define our system to GSL and also a stepper, and some objects to control adaptive time step method:
+
+```{literalinclude} arenstorf.c
+  :lines: 37-42
+  :language: c
+  :linenos:
+  :lineno-start: 37
+```
+
+then the time loop becomes
+
+```{literalinclude} arenstorf.c
+  :lines: 57-75
+  :language: cpp
+  :linenos:
+  :lineno-start: 57
+```
+
+we should call `gsl_odeiv2_evolve_apply` to only make a step and not call the method from initial time to final time.
+
+For the complet example, see [`arenstorf.c` source file](arenstorf.c).

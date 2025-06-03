@@ -22,7 +22,54 @@ $$
 
 with parameter $\sigma=10$, $\rho = 28$ and $\beta = \frac{8}{3}$, and the initial state $(x_0, y_0, z_0) = (1,1,1)$. We solve it with a classical Runge-Kutta method of order 4, given by `TSRK4` method.
 
-For the complet example, see [`lorenz.cpp` source file](lorenz.cpp).
+To solve a problem with PETSc we first write our equation as a ODE of the form:
+
+$$
+  \dot{u} = f(t, u)
+$$
+
+and the user provide the function $f$ as:
+
+```c
+  PetscErrorCode f(TS ts, double t, Vec u, Vec du, void* params);
+```
+
+where `u` the current state of the function, `t` the current time and output `du` $f(t,u)$, and `ts` the time stepper.
+
+```{literalinclude} lorenz.c
+  :lines: 3-23
+  :language: c
+  :linenos:
+  :lineno-start: 3
+```
+
+Next we need to define a time stepper and set all parameters, and give it the $f$ function
+
+```{literalinclude} lorenz.c
+  :lines: 43-52
+  :language: c
+  :linenos:
+  :lineno-start: 43
+```
+
+now we can call the time stepper by:
+
+```c
+  TSStep(ts);
+```
+
+and get current state and time with `TSGetSolution` `TSGetTime` functions. The complet time loop is
+
+```{literalinclude} lorenz.c
+  :lines: 66-82
+  :language: c
+  :linenos:
+  :lineno-start: 66
+```
+
+where `sol` is an array to store all states.
+
+For the complet example, see [`lorenz.c` source file](lorenz.c).
 
 ## Transport equation
 
@@ -44,7 +91,18 @@ $$
 
 We choose a first order up-wind scheme to estimate the $x$ derivative and a forward Euler method for the time discretization given by `TSRK1FE` method.
 
-For the complet example, see [`transport.cpp` source file](transport.cpp).
+We define the up-wind scheme as:
+
+```{literalinclude} transport.c
+  :lines: 3-29
+  :language: c
+  :linenos:
+  :lineno-start: 3
+```
+
+The time loop is the same as for Lorenz equation.
+
+For the complet example, see [`transport.c` source file](transport.c).
 
 ## Arenstorf orbit
 
@@ -90,6 +148,31 @@ $$
   \end{cases}
 $$
 
-We solve this example with given method `TSRK5DP` which is the method RK8(7) 13M in [@prince:1981] (mainly call *DOPRI8*).
+We define this system as:
 
-For the complet example, see [`arenstorf.cpp` source file](arenstorf.cpp).
+```{literalinclude} arenstorf.c
+  :lines: 3-30
+  :language: c
+  :linenos:
+  :lineno-start: 3
+```
+
+We solve this example with given method `TSRK5DP` which is the method RK8(7) 13M in [[PD81](https://doi.org/10.1016/0771-050X(81)90010-3)] (mainly call *DOPRI8*). For this we need to set the integrator and settings for adaptive time step method
+
+```{literalinclude} arenstorf.c
+  :lines: 50-60
+  :language: c
+  :linenos:
+  :lineno-start: 50
+```
+
+then the time loop becomes
+
+```{literalinclude} arenstorf.c
+  :lines: 74-93
+  :language: c
+  :linenos:
+  :lineno-start: 74
+```
+
+For the complet example, see [`arenstorf.c` source file](arenstorf.c).

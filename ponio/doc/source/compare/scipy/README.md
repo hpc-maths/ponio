@@ -34,7 +34,41 @@ and now call it with `scipy.integrate.solve_ivp` function:
 sol = solve_ivp(lorenz_system, t_span, y0, method=RK44, first_step=dt)
 ```
 
-For the complet example, see [`lorenz.cpp` source file](lorenz.cpp).
+To solve a problem with SciPy we first write our equation as a ODE of the form:
+
+$$
+  \dot{u} = f(t, u)
+$$
+
+and the user provide the function $f$ as:
+
+```py
+  def f(t, u):
+    # ...
+    return du
+```
+
+where `u` the current state of the function, `t` the current time and output `du` $f(t,u)$.
+
+```{literalinclude} lorenz.py
+  :lines: 27-36
+  :language: py
+  :linenos:
+  :lineno-start: 27
+```
+
+After chose a method, we can solve the problem between initial time and final time
+
+```{literalinclude} lorenz.py
+  :lines: 43-44
+  :language: py
+  :linenos:
+  :lineno-start: 43
+```
+
+this function returns an object with solution at each time (and also dense output properties).
+
+For the complet example, see [`lorenz.py` source file](lorenz.py).
 
 ## Transport equation
 
@@ -68,7 +102,18 @@ and now call it with `scipy.integrate.solve_ivp` function:
 sol = solve_ivp(upwind, t_span, y0, method=Euler, first_step=dt)
 ```
 
-For the complet example, see [`transport.cpp` source file](transport.cpp).
+We define the up-wind scheme as:
+
+```{literalinclude} transport.py
+  :lines: 38-48
+  :language: py
+  :linenos:
+  :lineno-start: 38
+```
+
+The time loop is the same as for Lorenz equation.
+
+For the complet example, see [`transport.py` source file](transport.py).
 
 ## Arenstorf orbit
 
@@ -114,7 +159,33 @@ $$
   \end{cases}
 $$
 
-We solve this example with given method `RK45` which is the method RK5(4) 7M in [@dormand:1980] (mainly call *DOPRI5*) and `DOP853` which is the method RK8(7) 13M in [@prince:1981] (mainly call *DOPRI8*).
+We define this system as:
 
+```{literalinclude} arenstorf.py
+  :lines: 6-24
+  :language: py
+  :linenos:
+  :lineno-start: 6
+```
 
-For the complet example, see [`arenstorf.cpp` source file](arenstorf.cpp).
+We solve this example with given method `RK45` which is the method RK5(4) 7M in [[DP80](https://doi.org/10.1016/0771-050X(80)90013-3)] (mainly call *DOPRI5*) and `DOP853` which is the method RK8(7) 13M in [[PD81](https://doi.org/10.1016/0771-050X(81)90010-3)] (mainly call *DOPRI8*).
+
+The time loop is the same as for Lorenz equation, for `RK45` method
+
+```{literalinclude} arenstorf.py
+  :lines: 32-33
+  :language: py
+  :linenos:
+  :lineno-start: 32
+```
+
+and for `DOP853` method
+
+```{literalinclude} arenstorf.py
+  :lines: 42-43
+  :language: py
+  :linenos:
+  :lineno-start: 42
+```
+
+For the complet example, see [`arenstorf.py` source file](arenstorf.py).

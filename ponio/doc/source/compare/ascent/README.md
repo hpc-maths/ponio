@@ -36,13 +36,29 @@ and the user provide the function $f$ as (a lambda function for the example):
 
 where `u` the current state of the function, `t` the current time and output `du` $f(t,u)$ by reference. By default, Ascent provide a `asc::state_t` type as a reference to `std::vector<double>` class.
 
-We need To use a more generic state type we need to use `asc::RK4T<state_t>` integrator in place of `asc::RK4`. Next we can call this integrator for one step with the time step `dt` by calling it as
+```{literalinclude} lorenz.cpp
+  :lines: 13-18
+  :language: cpp
+  :linenos:
+  :lineno-start: 13
+```
+
+If we need a more generic state type we need to use `asc::RK4T<state_t>` integrator in place of `asc::RK4`. Next we can call this integrator for one step with the time step `dt` by calling it as
 
 ```cpp
   integrator(f, un, tn, dt);
 ```
 
-which takes current state `un` and time `tn` by references (also `dt` if this is an adaptive time step method).
+which takes current state `un` and time `tn` by references (also `dt` if this is an adaptive time step method), inside the time loop:
+
+```{literalinclude} lorenz.cpp
+  :lines: 40-44
+  :language: cpp
+  :linenos:
+  :lineno-start: 40
+```
+
+where `vec_observer` is an observer to save states in a `std::vector`.
 
 For the complet example, see [`lorenz.cpp` source file](lorenz.cpp).
 
@@ -65,6 +81,17 @@ $$
 $$
 
 We choose a first order up-wind scheme to estimate the $x$ derivative and a forward Euler method for the time discretization given by `asc::Euler` method.
+
+We define the up-wind scheme as:
+
+```{literalinclude} transport.cpp
+  :lines: 46-56
+  :language: cpp
+  :linenos:
+  :lineno-start: 46
+```
+
+The time loop is the same as for Lorenz equation.
 
 For the complet example, see [`transport.cpp` source file](transport.cpp).
 
@@ -112,6 +139,33 @@ $$
   \end{cases}
 $$
 
-We solve this example with given method `asc::DOPRI45` which is the method RK5(4) 7M in [@dormand:1980] (mainly call *DOPRI5*).
+We define this system as:
+
+```{literalinclude} arenstorf.cpp
+  :lines: 11-25
+  :language: cpp
+  :linenos:
+  :lineno-start: 11
+```
+
+We solve this example with given method `asc::DOPRI45` which is the method RK5(4) 7M in [[DP80](https://doi.org/10.1016/0771-050X(80)90013-3)] (mainly call *DOPRI5*). For this we need to set the integrator and settings for adaptive time step method
+
+```{literalinclude} arenstorf.cpp
+  :lines: 42-43
+  :language: cpp
+  :linenos:
+  :lineno-start: 42
+```
+
+then the time loop becomes
+
+```{literalinclude} arenstorf.cpp
+  :lines: 48-52
+  :language: cpp
+  :linenos:
+  :lineno-start: 48
+```
+
+where we should pass the `adaptive_setting` object to integrator.
 
 For the complet example, see [`arenstorf.cpp` source file](arenstorf.cpp).

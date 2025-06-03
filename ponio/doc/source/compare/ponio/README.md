@@ -23,6 +23,38 @@ $$
 
 with parameter $\sigma=10$, $\rho = 28$ and $\beta = \frac{8}{3}$, and the initial state $(x_0, y_0, z_0) = (1,1,1)$. We solve it with a classical Runge-Kutta method of order 4, given by `ponio::runge_kutta::rk_44` method.
 
+To solve a problem with ponio we first write our equation as a ODE of the form:
+
+$$
+  \dot{u} = f(t, u)
+$$
+
+and the user provide the function $f$ as (a lambda function for the example):
+
+```cpp
+  auto f = [](double t, state_t const& u) -> state_t;
+```
+
+where `u` the current state of the function, `t` the current time and output is the result of $f(t,u)$.
+
+```{literalinclude} lorenz.cpp
+  :lines: 19-22
+  :language: cpp
+  :linenos:
+  :lineno-start: 19
+```
+
+After defined a method with `ponio::runge_kutta::rk_44()`, we can solve the problem between initial time and final time and give an observer which be call after each succeed time iteration
+
+```{literalinclude} lorenz.cpp
+  :lines: 30-30
+  :language: cpp
+  :linenos:
+  :lineno-start: 30
+```
+
+the `ponio::observer::file_observer` is an observer that save all states in a file.
+
 For the complet example, see [`lorenz.cpp` source file](lorenz.cpp).
 
 ## Transport equation
@@ -44,6 +76,17 @@ $$
 $$
 
 We choose a first order up-wind scheme to estimate the $x$ derivative and a forward Euler method for the time discretization given by `ponio::runge_kutta::euler` method.
+
+We define the up-wind scheme as:
+
+```{literalinclude} transport.cpp
+  :lines: 50-64
+  :language: cpp
+  :linenos:
+  :lineno-start: 50
+```
+
+The time loop is the same as for Lorenz equation.
 
 For the complet example, see [`transport.cpp` source file](transport.cpp).
 
@@ -91,6 +134,33 @@ $$
   \end{cases}
 $$
 
-We solve this example with given method `ponio::runge_kutta::rk54_7m` which is the method RK5(4) 7M in [@dormand:1980] (mainly call *DOPRI5*) and `ponio::runge_kutta::rk87_13m` which is the method RK8(7) 13M in [@prince:1981] (mainly call *DOPRI8*).
+We define this system as:
+
+```{literalinclude} arenstorf.cpp
+  :lines: 17-33
+  :language: cpp
+  :linenos:
+  :lineno-start: 17
+```
+
+We solve this example with given method `ponio::runge_kutta::rk54_7m` which is the method RK5(4) 7M in [[DP80](https://doi.org/10.1016/0771-050X(80)90013-3)] (mainly call *DOPRI5*) and `ponio::runge_kutta::rk87_13m` which is the method RK8(7) 13M in [[PD81](https://doi.org/10.1016/0771-050X(81)90010-3)] (mainly call *DOPRI8*).
+
+The time loop is the same as for Lorenz equation, for `rk54_7m` method
+
+```{literalinclude} arenstorf.cpp
+  :lines: 41
+  :language: cpp
+  :linenos:
+  :lineno-start: 41
+```
+
+and for `rk87_13m` method
+
+```{literalinclude} arenstorf.cpp
+  :lines: 42
+  :language: cpp
+  :linenos:
+  :lineno-start: 42
+```
 
 For the complet example, see [`arenstorf.cpp` source file](arenstorf.cpp).

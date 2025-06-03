@@ -21,6 +21,38 @@ $$
 
 with parameter $\sigma=10$, $\rho = 28$ and $\beta = \frac{8}{3}$, and the initial state $(x_0, y_0, z_0) = (1,1,1)$. We solve it with a classical Runge-Kutta method of order 4, given by `boost::numeric::odeint::runge_kutta4<state_t>` method.
 
+To solve a problem with odeint we first write our equation as a ODE of the form:
+
+$$
+  \dot{u} = f(t, u)
+$$
+
+and the user provide the function $f$ as (a lambda function for the example):
+
+```cpp
+  auto f = [](state_t const& u, state_t & du, double t);
+```
+
+where `u` the current state of the function, `t` the current time and output `du` $f(t,u)$ by reference.
+
+```{literalinclude} lorenz.cpp
+  :lines: 15-20
+  :language: cpp
+  :linenos:
+  :lineno-start: 15
+```
+
+After defined a method with `boost::numeric::odeint::runge_kutta4<state_t>()`, we can solve the problem between initial time and final time and give an observer which be call after each succeed time iteration
+
+```{literalinclude} lorenz.cpp
+  :lines: 37-38
+  :language: cpp
+  :linenos:
+  :lineno-start: 37
+```
+
+the `vec_observer` is a lambda function which store all iteration in a `std::vector`.
+
 For the complet example, see [`lorenz.cpp` source file](lorenz.cpp).
 
 ## Transport equation
@@ -42,6 +74,17 @@ $$
 $$
 
 We choose a first order up-wind scheme to estimate the $x$ derivative and a forward Euler method for the time discretization given by `boost::numeric::odeint::euler<state_t>` method.
+
+We define the up-wind scheme as:
+
+```{literalinclude} transport.cpp
+  :lines: 48-58
+  :language: cpp
+  :linenos:
+  :lineno-start: 48
+```
+
+The time loop is the same as for Lorenz equation.
 
 For the complet example, see [`transport.cpp` source file](transport.cpp).
 
@@ -89,6 +132,22 @@ $$
   \end{cases}
 $$
 
-We solve this example with given method `boost::numeric::odeint::runge_kutta_dopri5<state_t>` which is the method RK5(4) 7M in [@dormand:1980] (mainly call *DOPRI5*), and need to embedded it into `boost::numeric::odeint::make_controlled` to make an adaptive time step method.
+We define this system as:
+
+```{literalinclude} arenstorf.cpp
+  :lines: 13-27
+  :language: cpp
+  :linenos:
+  :lineno-start: 13
+```
+
+We solve this example with given method `boost::numeric::odeint::runge_kutta_dopri5<state_t>` which is the method RK5(4) 7M in [[DP80](https://doi.org/10.1016/0771-050X(80)90013-3)] (mainly call *DOPRI5*), and need to embedded it into `boost::numeric::odeint::make_controlled` to make an adaptive time step method, and solve the system with a specific function for adaptive time step method:
+
+```{literalinclude} arenstorf.cpp
+  :lines: 44-45
+  :language: cpp
+  :linenos:
+  :lineno-start: 44
+```
 
 For the complet example, see [`arenstorf.cpp` source file](arenstorf.cpp).
