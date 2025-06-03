@@ -34,7 +34,6 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
           pixi-version: v0.26.1
-          cache: true
       - name: Install Python
         run: pixi add python
       - name: Install compdb
@@ -59,7 +58,6 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
           pixi-version: v0.26.1
-          cache: true
       - name: Install compiler and Python
         run: pixi add cxx-compiler python
       - name: Install samurai
