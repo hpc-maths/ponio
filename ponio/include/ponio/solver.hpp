@@ -526,6 +526,7 @@ namespace ponio
         state_t un1 = u0;
 
         value_t last_time = t_span.back();
+        auto last_it      = t_span.end() - 1;
 
         auto meth = make_method<value_t>( std::forward<Algorithm_t>( algo ), un );
 
@@ -543,7 +544,10 @@ namespace ponio
             {
                 current_dt = *it_next_time - current_time;
                 reset_dt   = true;
-                ++it_next_time;
+                if ( it_next_time != last_it )
+                {
+                    ++it_next_time;
+                }
             }
             else if ( reset_dt )
             {
