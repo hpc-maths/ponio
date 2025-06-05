@@ -46,11 +46,12 @@ TEST_CASE( "number_of_eval::explicit_runge_kutta" )
     std::size_t manual_counter = 0;
 
     double const k            = 50;
-    auto curtiss_hirschfelder = [&, k]( double t, double y )
-    {
-        ++manual_counter;
-        return k * ( std::cos( t ) - y );
-    };
+    auto curtiss_hirschfelder = ponio::make_simple_problem(
+        [&, k]( double t, double y )
+        {
+            ++manual_counter;
+            return k * ( std::cos( t ) - y );
+        } );
 
     double const y_0 = 2.0;
 
@@ -90,11 +91,12 @@ TEST_CASE( "number_of_eval::lawson_runge_kutta" )
 
     double const k = 50;
     double const l = -k;
-    auto n         = [&, k]( double t, double )
-    {
-        ++manual_counter;
-        return k * std::cos( t );
-    };
+    auto n         = ponio::make_simple_problem(
+        [&, k]( double t, double )
+        {
+            ++manual_counter;
+            return k * std::cos( t );
+        } );
 
     double const y_0 = 2.0;
 
@@ -127,11 +129,12 @@ TEST_CASE( "number_of_eval::exponential_runge_kutta" )
 
     double const k = 50;
     double const l = -k;
-    auto n         = [&, k]( double t, double )
-    {
-        ++manual_counter;
-        return k * std::cos( t );
-    };
+    auto n         = ponio::make_simple_problem(
+        [&, k]( double t, double )
+        {
+            ++manual_counter;
+            return k * std::cos( t );
+        } );
 
     double const y_0 = 2.0;
 
@@ -171,11 +174,12 @@ TEST_CASE( "number_of_eval::diagonal_implicit_runge_kutta" )
     std::size_t manual_counter = 0;
 
     double const k = 50;
-    auto f         = [&, k]( double t, double y )
-    {
-        ++manual_counter;
-        return k * ( std::cos( t ) - y );
-    };
+    auto f         = ponio::make_simple_problem(
+        [&, k]( double t, double y )
+        {
+            ++manual_counter;
+            return k * ( std::cos( t ) - y );
+        } );
 
     auto df = [=]( double, double )
     {
@@ -220,11 +224,12 @@ TEST_CASE( "number_of_eval::rock2" )
     std::size_t manual_counter = 0;
 
     double const k            = 50;
-    auto curtiss_hirschfelder = [&, k]( double t, double y )
-    {
-        ++manual_counter;
-        return k * ( std::cos( t ) - y );
-    };
+    auto curtiss_hirschfelder = ponio::make_simple_problem(
+        [&, k]( double t, double y )
+        {
+            ++manual_counter;
+            return k * ( std::cos( t ) - y );
+        } );
 
     double const y_0 = 2.0;
 
@@ -249,11 +254,12 @@ TEST_CASE( "number_of_eval::rock4" )
     std::size_t manual_counter = 0;
 
     double const k            = 50;
-    auto curtiss_hirschfelder = [&, k]( double t, double y )
-    {
-        ++manual_counter;
-        return k * ( std::cos( t ) - y );
-    };
+    auto curtiss_hirschfelder = ponio::make_simple_problem(
+        [&, k]( double t, double y )
+        {
+            ++manual_counter;
+            return k * ( std::cos( t ) - y );
+        } );
 
     double const y_0 = 2.0;
 
@@ -295,20 +301,22 @@ TEST_CASE( "number_of_eval::pirock" )
     std::size_t manual_counter_ex = 0;
 
     double const k = 50;
-    auto f_im      = [&]( double, double y )
-    {
-        ++manual_counter_im;
-        return -k * y;
-    };
+    auto f_im      = ponio::make_simple_problem(
+        [&]( double, double y, double& dy )
+        {
+            ++manual_counter_im;
+            dy = -k * y;
+        } );
     auto df_im = [&]( double, double )
     {
         return -k;
     };
-    auto f_ex = [&, k]( double t, double )
-    {
-        ++manual_counter_ex;
-        return k * std::cos( t );
-    };
+    auto f_ex = ponio::make_simple_problem(
+        [&, k]( double t, double, double& dy )
+        {
+            ++manual_counter_ex;
+            dy = k * std::cos( t );
+        } );
 
     double const y_0 = 2.0;
 
@@ -357,16 +365,18 @@ TEST_CASE( "number_of_eval::splitting_lie" )
     std::size_t manual_counter_2 = 0;
 
     double const k = 50;
-    auto f1        = [&]( double, double y )
-    {
-        ++manual_counter_1;
-        return -k * y;
-    };
-    auto f2 = [&, k]( double t, double )
-    {
-        ++manual_counter_2;
-        return k * std::cos( t );
-    };
+    auto f1        = ponio::make_simple_problem(
+        [&]( double, double y )
+        {
+            ++manual_counter_1;
+            return -k * y;
+        } );
+    auto f2 = ponio::make_simple_problem(
+        [&, k]( double t, double )
+        {
+            ++manual_counter_2;
+            return k * std::cos( t );
+        } );
 
     double const y_0 = 2.0;
 
@@ -398,16 +408,19 @@ TEST_CASE( "number_of_eval::splitting_strang" )
     std::size_t manual_counter_2 = 0;
 
     double const k = 50;
-    auto f1        = [&]( double, double y )
-    {
-        ++manual_counter_1;
-        return -k * y;
-    };
-    auto f2 = [&, k]( double t, double )
-    {
-        ++manual_counter_2;
-        return k * std::cos( t );
-    };
+
+    auto f1 = ponio::make_simple_problem(
+        [&]( double, double y )
+        {
+            ++manual_counter_1;
+            return -k * y;
+        } );
+    auto f2 = ponio::make_simple_problem(
+        [&, k]( double t, double )
+        {
+            ++manual_counter_2;
+            return k * std::cos( t );
+        } );
 
     double const y_0 = 2.0;
 
@@ -439,16 +452,19 @@ TEST_CASE( "number_of_eval::splitting_adaptive_strang" )
     std::size_t manual_counter_2 = 0;
 
     double const k = 50;
-    auto f1        = [&]( double, double y )
-    {
-        ++manual_counter_1;
-        return -k * y;
-    };
-    auto f2 = [&, k]( double t, double )
-    {
-        ++manual_counter_2;
-        return k * std::cos( t );
-    };
+
+    auto f1 = ponio::make_simple_problem(
+        [&]( double, double y )
+        {
+            ++manual_counter_1;
+            return -k * y;
+        } );
+    auto f2 = ponio::make_simple_problem(
+        [&, k]( double t, double )
+        {
+            ++manual_counter_2;
+            return k * std::cos( t );
+        } );
 
     double const y_0 = 2.0;
 

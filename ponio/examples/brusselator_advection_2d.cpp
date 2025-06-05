@@ -175,10 +175,10 @@ main( int argc, char** argv )
 
     // diffusion terme
     auto diff = samurai::make_diffusion_order2<decltype( uv_ini )>( nu );
-    auto fd   = [&]( double /* t */, auto&& uv )
+    auto fd   = [&]( double /* t */, auto&& uv, auto& dt_uv )
     {
         samurai::update_ghost_mr( uv );
-        return -diff( uv );
+        dt_uv = -diff( uv );
     };
 
     // reaction terme
@@ -209,10 +209,10 @@ main( int argc, char** argv )
     {
         return react;
     };
-    auto fr = [&]( double t, auto&& uv )
+    auto fr = [&]( double t, auto&& uv, auto& dt_uv )
     {
         // samurai::update_ghost_mr( uv );
-        return fr_t( t )( uv );
+        dt_uv = fr_t( t )( uv );
     };
     auto fr_pb = ponio::make_implicit_operator_problem( fr, fr_t );
 
@@ -220,16 +220,16 @@ main( int argc, char** argv )
     std::array<samurai::VelocityVector<dim>, 2> const velocities = { mu * U, mu * V };
 
     auto conv = samurai::make_multi_convection_weno5<decltype( uv_ini )>( velocities );
-    auto fa   = [&]( double /* t */, auto&& uv )
+    auto fa   = [&]( double /* t */, auto&& uv, auto& dt_uv )
     {
         samurai::update_ghost_mr( uv );
-        return -conv( uv );
+        dt_uv = -conv( uv );
     };
 
     ponio::time_span<double> const t_span = { t_ini, t_end };
     double const dt                       = ( t_end - t_ini ) / 500;
 
-    auto eigmax_computer = [&]( auto&, double, auto&, double )
+    auto eigmax_computer = [&]( auto&, double, auto&, double, auto& )
     {
         double const dx = mesh.cell_length( mesh.max_level() );
         return nu * 4. / ( dx * dx );

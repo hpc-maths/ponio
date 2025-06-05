@@ -101,11 +101,11 @@ TEST_CASE( "samurai::order::pirock" )
 
     // diffusion terme
     auto diff = samurai::make_diffusion_order2<decltype( u_ini )>( d );
-    auto fd   = [&]( double /* t */, auto&& u )
+    auto fd   = [&]( double /* t */, auto&& u, auto& du )
     {
         samurai::make_bc<samurai::Neumann<1>>( u, 0. );
         samurai::update_ghost_mr( u );
-        return -diff( u );
+        du = -diff( u );
     };
 
     // reaction terme
@@ -128,16 +128,16 @@ TEST_CASE( "samurai::order::pirock" )
     {
         return react;
     };
-    auto fr = [&]( double t, auto&& u )
+    auto fr = [&]( double t, auto&& u, auto& du )
     {
         samurai::make_bc<samurai::Neumann<1>>( u, 0. );
         samurai::update_ghost_mr( u );
-        return fr_t( t )( u );
+        du = fr_t( t )( u );
     };
 
-    auto eigmax_computer = [=]( auto&, double, auto&, double )
+    auto eigmax_computer = [&mesh]( auto&, double, auto&, double, auto& )
     {
-        double dx = samurai::cell_length( max_level );
+        double dx = mesh.cell_length( mesh.max_level() );
         return 4. / ( dx * dx );
     };
 

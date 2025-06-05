@@ -88,10 +88,10 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         {
         }
 
-        template <typename problem_t, typename state_t, typename array_ki_t, std::size_t I>
+        template <typename problem_t, typename state_t, typename array_kj_t, std::size_t I>
             requires detail::problem_operator<problem_t, value_t>
-        state_t
-        stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
+        void
+        stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_kj_t const& Kj, value_t dt, state_t& ki )
         {
             if constexpr ( I == 0 )
             {
@@ -101,20 +101,20 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             state_t ui = un;
             auto op_i  = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un )
                       - dt * butcher.A[I][I] * pb.f_t( tn + butcher.c[I] * dt );
-            auto rhs = detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt );
+            auto rhs = detail::tpl_inner_product<I>( butcher.A[I], Kj, un, dt );
 
             std::size_t n_eval = 0;
             ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_i, ui, rhs, n_eval );
 
             _info.number_of_eval += n_eval + 1;
 
-            return pb.f( tn + butcher.c[I] * dt, ui );
+            pb.f( tn + butcher.c[I] * dt, ui, ki );
         }
 
-        template <typename problem_t, typename state_t, typename array_ki_t, std::size_t I>
+        template <typename problem_t, typename state_t, typename array_kj_t, std::size_t I>
             requires detail::problem_jacobian<problem_t, value_t, state_t>
-        state_t
-        stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
+        void
+        stage( Stage<I>, problem_t& pb, value_t tn, state_t& un, array_kj_t const& Kj, value_t dt, state_t& ki )
         {
             if constexpr ( I == 0 )
             {
@@ -146,22 +146,22 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             auto g = [&]( state_t const& k ) -> state_t
             {
                 _info.number_of_eval += 1;
-                return k
-                     - pb.f( tn + butcher.c[I] * dt, detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt ) + dt * butcher.A[I][I] * k );
+                pb.f( tn + butcher.c[I] * dt, detail::tpl_inner_product<I>( butcher.A[I], Kj, un, dt ) + dt * butcher.A[I][I] * k, ki );
+                return k - ki;
             };
             auto dg = [&]( state_t const& k ) -> matrix_t
             {
                 return identity
                      - butcher.A[I][I] * dt
                            * pb.df( tn + butcher.c[I] * dt,
-                               detail::tpl_inner_product<I>( butcher.A[I], Ki, un, dt ) + dt * butcher.A[I][I] * k );
+                               detail::tpl_inner_product<I>( butcher.A[I], Kj, un, dt ) + dt * butcher.A[I][I] * k );
             };
 
             // call newton method
             if constexpr ( detail::has_newton_method<lin_alg_t, decltype( g ), decltype( dg )>
                            || detail::has_newton_method<lin_alg_t, decltype( g ), decltype( dg ), state_t> )
             {
-                return linalg.newton( g, dg, un );
+                linalg.newton( g, dg, un );
             }
             else
             {
@@ -177,27 +177,27 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
                         return &::ponio::linear_algebra::linear_algebra<matrix_t>::solver;
                     }
                 }();
-                return newton<value_t>( g, dg, un, solver, tol, max_iter );
+                newton<value_t>( g, dg, un, solver, tol, max_iter );
             }
         }
 
-        template <typename problem_t, typename state_t, typename array_ki_t>
-        state_t
-        stage( Stage<N_stages>, problem_t&, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
+        template <typename problem_t, typename state_t, typename array_kj_t>
+        void
+        stage( Stage<N_stages>, problem_t&, value_t, state_t& un, array_kj_t const& Kj, value_t dt, state_t& ki )
         {
             // last stage is always explicit and just equals to:
             // $$
             //   u^{n+1} = u^n + \Delta t \sum_{i} b_i k_i
             // $$
-            return detail::tpl_inner_product<N_stages>( butcher.b, Ki, un, dt );
+            ki = detail::tpl_inner_product<N_stages>( butcher.b, Kj, un, dt );
         }
 
-        template <typename problem_t, typename state_t, typename array_ki_t, typename tab_t = tableau_t>
+        template <typename problem_t, typename state_t, typename array_kj_t, typename tab_t = tableau_t>
             requires std::same_as<tab_t, tableau_t> && is_embedded
-        state_t
-        stage( Stage<N_stages + 1>, problem_t&, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
+        void
+        stage( Stage<N_stages + 1>, problem_t&, value_t, state_t& un, array_kj_t const& Kj, value_t dt, state_t& ki )
         {
-            return detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
+            ki = detail::tpl_inner_product<N_stages>( butcher.b2, Kj, un, dt );
         }
 
         /**

@@ -22,21 +22,21 @@ configure_long_test = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUIL
 configure_debug = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_DEMOS=ON" }
 
 build_ninja = { cmd = "cmake --build ./build --config Release" }                 # don't call this rule alone
-build = { depends_on = ["configure", "build_ninja"] }
-build_test = { depends_on = ["configure_test", "build_ninja"] }
-build_long_test = { depends_on = ["configure_long_test", "build_ninja"] }
-build_debug = { cmd = "ninja -C build ponio", depends_on = ["configure_debug"] }
+build = { depends-on = ["configure", "build_ninja"] }
+build_test = { depends-on = ["configure_test", "build_ninja"] }
+build_long_test = { depends-on = ["configure_long_test", "build_ninja"] }
+build_debug = { cmd = "ninja -C build ponio", depends-on = ["configure_debug"] }
 
-test = { cmd = "./build/ponio/test/Release/ponio_tests", depends_on = [
+test = { cmd = "./build/ponio/test/Release/ponio_tests", depends-on = [
   "build_test",
 ] }
-long_test = { cmd = "./build/ponio/test/Release/ponio_tests", depends_on = [
+long_test = { cmd = "./build/ponio/test/Release/ponio_tests", depends-on = [
   "build_long_test",
 ] }
-nbval = { cmd = "pytest --nbval --nbval-current-env -p no:warnings", cwd = "./ponio/notebooks", depends_on = [
+nbval = { cmd = "pytest --nbval --nbval-current-env -p no:warnings", cwd = "./ponio/notebooks", depends-on = [
   "build",
 ] }
-cppcheck = { cmd = "cppcheck --enable=all --check-level=exhaustive -q --project=./build/compile_commands.json --suppressions-list=.cppcheck --inline-suppr 2> cppcheck_err.txt", depends_on = [
+cppcheck = { cmd = "cppcheck --enable=all --check-level=exhaustive -q --project=./build/compile_commands.json --suppressions-list=.cppcheck --inline-suppr 2> cppcheck_err.txt", depends-on = [
   "build_debug",
 ] }
 
@@ -62,7 +62,7 @@ doctest = ">=2.4.11,<2.5"
 sympy = ">=1.12,<2"
 eigen = ">=3.4.0,<3.5"
 numpy = ">=1.26.3,<1.27"
-samurai = ">=0.16.0,<0.17"
+samurai = "<0.20"
 
 [target.linux-64.dependencies]
 petsc = "3.20.*"
