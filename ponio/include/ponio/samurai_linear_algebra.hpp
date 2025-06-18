@@ -12,6 +12,7 @@
 #include <xtensor/xfixed.hpp>
 
 #include <samurai/petsc.hpp>
+#include <samurai/utils.hpp>
 #else
 #error "Samurai should be included"
 #endif
@@ -21,8 +22,11 @@ namespace ponio::linear_algebra
     template <typename solver_t>
     concept has_Snes_method = std::is_member_function_pointer_v<decltype( &solver_t::Snes )>;
 
-    template <class mesh_t, class value_t, std::size_t size, bool SOA>
-    struct operator_algebra<::samurai::Field<mesh_t, value_t, size, SOA>>
+    template <typename field_t>
+        requires std::same_as<field_t,
+                     ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp, ::samurai::detail::is_soa_v<field_t>>>
+              || std::same_as<field_t, ::samurai::ScalarField<typename field_t::mesh_t, typename field_t::value_type>>
+    struct operator_algebra<field_t>
     {
         template <typename state_t>
         static auto
@@ -62,27 +66,29 @@ namespace ponio::shampine_trick
     /**
      * @brief For PIROCK method, compute the Shampine's trick
      *
-     * @tparam mesh_t  type of underlying mesh in samurai::Field
-     * @tparam value_t value stored in samurai::Field
-     * @tparam size    the "size" of the samurai::Field (warning: this is not a size in container meaning)
-     * @tparam SOA     SOA or AOS
+     * @tparam field_t type of samurai field
      */
-    template <class mesh_t, class value_t, std::size_t size, bool SOA>
-    struct shampine_trick<::samurai::Field<mesh_t, value_t, size, SOA>>
-    {
-        /**
-         * @brief solves \f$(I - \alpha R)^{\ell}X = b\f$
-         *
-         * @tparam ell
-         * @tparam operator_t
-         * @tparam state_t
-         * @param alpha           in Shampine's trick \f$\alpha = \gamma \Delta t\f$
-         * @param op_reac         \f$R\f$ operator
-         * @param initial_guess   initial guess for \f$X\f$ unknown
-         * @param rhs             right hand side term, \f$b\f$
-         * @param u_tmp           temporary variable
-         * @param shampine_result result of unknown \f$X\f$
-         */
+    template <typename field_t>
+        requires std::same_as<field_t,
+                     ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp, ::samurai::detail::is_soa_v<field_t>>>
+              || std::same_as<field_t, ::samurai::ScalarField<typename field_t::mesh_t, typename field_t::value_type>>
+    struct shampine_trick<field_t>
+    { /**
+       * @brief solves \f$(I - \alpha R)^{\ell}X = b\f$
+       *
+       * @tparam ell
+       * @tparam operator_t
+       * @tparam state_t
+       * @param alpha           in Shampine's trick \f$\alpha = \gamma \Delta t\f$
+       * @param op_reac         \f$R\f$ operator
+       * @param initial_guess   initial guess for \f$X\f$ unknown
+       * @param rhs             right hand side term, \f$b\f$
+       * @param u_tmp           temporary variable
+       * @param shampine_result result of unknown \f$X\f$
+       */
+
+        using value_t = typename field_t::value_type;
+
         template <std::size_t ell, typename operator_t, typename state_t>
         void
         operator()( value_t alpha, operator_t&& op_reac, state_t& initial_guess, state_t& rhs, state_t& u_tmp, state_t& shampine_result )

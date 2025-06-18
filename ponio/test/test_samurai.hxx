@@ -79,7 +79,7 @@ TEST_CASE( "samurai::order::pirock" )
     samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
 
     // init solution ----------------------------------------------------------
-    auto u_ini = samurai::make_field<1>( "u", mesh );
+    auto u_ini = samurai::make_scalar_field<double>( "u", mesh );
 
     auto exact_solution = [&]( double x, double t )
     {
@@ -109,7 +109,7 @@ TEST_CASE( "samurai::order::pirock" )
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::size, decltype( u_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::n_comp, decltype( u_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(

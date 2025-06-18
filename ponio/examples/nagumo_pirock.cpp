@@ -35,7 +35,7 @@ void
 save( fs::path const& path, std::string const& filename, field_t& u, std::string const& suffix = "" )
 {
     auto mesh   = u.mesh();
-    auto level_ = samurai::make_field<std::size_t, 1>( "level", mesh );
+    auto level_ = samurai::make_scalar_field<std::size_t>( "level", mesh );
     u.name()    = "u";
 
     if ( !fs::exists( path ) )
@@ -93,7 +93,7 @@ main( int argc, char** argv )
     samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
 
     // init solution ----------------------------------------------------------
-    auto u_ini = samurai::make_field<1>( "u", mesh );
+    auto u_ini = samurai::make_scalar_field<double>( "u", mesh );
 
     auto exact_solution = [&]( double x, double t )
     {
@@ -122,7 +122,7 @@ main( int argc, char** argv )
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::size, decltype( u_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::n_comp, decltype( u_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
