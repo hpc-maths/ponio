@@ -21,7 +21,7 @@ void
 save( std::filesystem::path const& path, std::string const& filename, Field& u, std::string const& suffix = "" )
 {
     auto mesh   = u.mesh();
-    auto level_ = samurai::make_field<std::size_t, 1>( "level", mesh );
+    auto level_ = samurai::make_scalar_field<std::size_t>( "level", mesh );
     u.name()    = "u";
 
     if ( !std::filesystem::exists( path ) )
@@ -42,7 +42,7 @@ template <class Mesh>
 auto
 init( Mesh& mesh )
 {
-    auto u = samurai::make_field<double, 1>( "u", mesh );
+    auto u = samurai::make_scalar_field<double>( "u", mesh );
     u.fill( 0. );
 
     samurai::for_each_cell( mesh,
