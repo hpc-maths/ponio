@@ -148,11 +148,11 @@ main( int argc, char** argv )
     // diffusion terme
     auto d    = samurai::DiffCoeff<3>( { Da, Db, Dc } );
     auto diff = samurai::make_multi_diffusion_order2<decltype( u_ini )>( d );
-    auto fd   = [&]( double /* t */, auto&& u )
+    auto fd   = [&]( double /* t */, auto&& u, auto& du )
     {
         samurai::make_bc<samurai::Neumann<1>>( u, 0., 0., 0. );
         samurai::update_ghost_mr( u );
-        return -diff( u );
+        du = -diff( u );
     };
 
     // reaction terme
@@ -188,17 +188,17 @@ main( int argc, char** argv )
     {
         return react;
     };
-    auto fr = [&]( double t, auto&& u )
+    auto fr = [&]( double t, auto&& u, auto& du )
     {
         samurai::make_bc<samurai::Neumann<1>>( u, 0., 0., 0. );
         samurai::update_ghost_mr( u );
-        return fr_t( t )( u );
+        du = fr_t( t )( u );
     };
 
     ponio::time_span<double> const t_span = { t_ini, t_end };
     double const dt                       = ( t_end - t_ini ) / 2000;
 
-    auto eigmax_computer = [&]( auto&, double, auto&, double )
+    auto eigmax_computer = [&]( auto&, double, auto&, double, auto& )
     {
         double const dx = mesh.cell_length( mesh.max_level() );
         return 4. / ( dx * dx );

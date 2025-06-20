@@ -71,9 +71,9 @@ namespace explicit_method
     {
         using state_t = T;
 
-        auto pb = []( T, state_t y ) -> state_t
+        auto pb = []( T, state_t y, state_t& dy )
         {
-            return y;
+            dy = y;
         };
 
         state_t y0                 = 1.0;
@@ -141,9 +141,10 @@ namespace explicit_method
         T gamma = 1.;
         T delta = 1.;
 
-        auto pb = [=]( T, auto&& u ) -> state_t
+        auto pb = [=]( T, auto&& u, state_t& du )
         {
-            return { alpha * u[0] - beta * u[0] * u[1], delta * u[0] * u[1] - gamma * u[1] };
+            du[0] = alpha * u[0] - beta * u[0] * u[1];
+            du[1] = delta * u[0] * u[1] - gamma * u[1];
         };
 
         // invariant calculator
@@ -203,15 +204,15 @@ namespace additive_method
         using state_t = T;
 
         auto pb = ponio::make_imex_jacobian_problem(
-            [=]( T, state_t y ) -> state_t
+            [=]( T, state_t y, state_t& dy )
             {
-                return lambda * y;
+                dy = lambda * y;
             },
-            [=]( T, state_t y ) -> state_t
+            [=]( T, state_t y, state_t& dy )
             {
-                return ( 1. - lambda ) * y;
+                dy = ( 1. - lambda ) * y;
             },
-            [=]( T, state_t ) -> state_t
+            [=]( T, state_t )
             {
                 return 1. - lambda;
             } );
@@ -269,21 +270,21 @@ namespace RDA_method
 
         auto pb = ponio::make_problem(
             ponio::make_implicit_problem(
-                [=]( T, state_t y ) -> state_t
+                [=]( T, state_t y, state_t& dy )
                 {
-                    return 0.125 * lambda * y;
+                    dy = 0.125 * lambda * y;
                 },
                 [=]( T, state_t ) -> state_t
                 {
                     return 0.125 * lambda;
                 } ),
-            [=]( T, state_t y ) -> state_t
+            [=]( T, state_t y, state_t& dy )
             {
-                return 0.375 * lambda * y;
+                dy = 0.375 * lambda * y;
             },
-            [=]( T, state_t y ) -> state_t
+            [=]( T, state_t y, state_t& dy )
             {
-                return ( 1. - 0.5 * lambda ) * y;
+                dy = ( 1. - 0.5 * lambda ) * y;
             } );
 
         state_t y0                 = 1.0;
@@ -344,17 +345,20 @@ namespace splitting_method
         T delta = 1.;
 
         auto pb = ponio::make_problem(
-            [=]( T, auto&& u ) -> state_t
+            [=]( T, auto&& u, state_t& du )
             {
-                return { alpha * u[0] - beta * u[0] * u[1], 0. };
+                du[0] = alpha * u[0] - beta * u[0] * u[1];
+                du[1] = 0.;
             },
-            [=]( T, auto&& u ) -> state_t
+            [=]( T, auto&& u, state_t& du )
             {
-                return { 0., delta * u[0] * u[1] };
+                du[0] = 0.;
+                du[1] = delta * u[0] * u[1];
             },
-            [=]( T, auto&& u ) -> state_t
+            [=]( T, auto&& u, state_t& du )
             {
-                return { 0., -gamma * u[1] };
+                du[0] = 0.;
+                du[1] = -gamma * u[1];
             } );
 
         // invariant calculator
@@ -403,9 +407,9 @@ namespace diagonal_implicit_method
         using state_t = T;
 
         auto pb = ponio::make_implicit_problem(
-            [=]( T, state_t y ) -> state_t
+            [=]( T, state_t y, state_t& dy )
             {
-                return y;
+                dy = y;
             },
             [=]( T, state_t ) -> state_t
             {

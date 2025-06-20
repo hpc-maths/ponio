@@ -8,6 +8,7 @@
 #include <string>
 
 #include <ponio/observer.hpp>
+#include <ponio/problem.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 
@@ -22,10 +23,11 @@ main()
     auto filename             = std::filesystem::path( dirname ) / "exp.dat";
     ponio::observer::file_observer fobs( filename );
 
-    auto identity = []( double, double u )
-    {
-        return u;
-    };
+    auto identity = ponio::make_simple_problem(
+        []( double, double u )
+        {
+            return u;
+        } );
     double const x0 = 1.0;
     double const dt = 0.1;
 

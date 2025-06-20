@@ -102,11 +102,11 @@ main( int argc, char** argv )
     {
         return -diff;
     };
-    auto f = [&]( [[maybe_unused]] double t, auto&& u )
+    auto f = [&]( [[maybe_unused]] double t, auto&& u, auto& du )
     {
         samurai::make_bc<samurai::Neumann<1>>( u, 0. );
         samurai::update_ghost_mr( u );
-        return f_t( t )( u );
+        du = f_t( t )( u );
     };
     auto pb = ponio::make_implicit_operator_problem( f, f_t );
 
@@ -114,7 +114,7 @@ main( int argc, char** argv )
     double const dx_min = mesh.cell_length( mesh.max_level() );
     double const dt     = cfl * dx_min * dx_min;
 
-    auto eigmax_computer = [=]( auto&, double, auto&, double )
+    auto eigmax_computer = [=]( auto&, double, auto&, double, auto& )
     {
         return 4. / ( dx_min * dx_min );
     };

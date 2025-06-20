@@ -87,16 +87,18 @@ namespace ponio::runge_kutta::legendre
          * @param f  operator \f$f\f$
          * @param tn current time
          * @param yn current state
-         * @param Yi array of temporary stages
+         * @param Yj array of temporary stages
          * @param dt current time step
+         * @param yi computed output step
          *
          * @details \f$y^{(j)} = \mu_j y^{(j-1)} + \nu_j y^{(j-2)} + \tilde{\mu}_j \Delta t f(t^n, y^{(j-1)})\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t, std::size_t j>
-        state_t
-        stage( Stage<j>, problem_t& f, value_t tn, state_t&, array_ki_t const& Yi, value_t dt )
+        void
+        stage( Stage<j>, problem_t& f, value_t tn, state_t&, array_ki_t const& Yj, value_t dt, state_t& yi )
         {
-            return mu<j>() * Yi[j - 1] + nu<j>() * Yi[j - 2] + mu_t<j>() * dt * f( tn, Yi[j - 1] ); // be careful Yi[j] is y^{(j+1)}
+            f( tn, Yj[j - 1], yi );
+            yi = mu<j>() * Yj[j - 1] + nu<j>() * Yj[j - 2] + mu_t<j>() * dt * yi; // be careful Yj[j] is y^{(j+1)}
         }
 
         /**
@@ -106,14 +108,15 @@ namespace ponio::runge_kutta::legendre
          * @tparam state_t    type of current state
          * @tparam array_ki_t type of array of temporary stages
          * @param yn current state
+         * @param yi computed output step
          *
          * @details \f$y^{(0)} = y^n\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        state_t
-        stage( Stage<0>, problem_t&, value_t, state_t& yn, array_ki_t const&, value_t )
+        void
+        stage( Stage<0>, problem_t&, value_t, state_t& yn, array_ki_t const&, value_t, state_t& yi )
         {
-            return yn;
+            yi = yn;
         }
 
         /**
@@ -126,14 +129,16 @@ namespace ponio::runge_kutta::legendre
          * @param tn current time
          * @param yn current state
          * @param dt current time step
+         * @param yi computed output step
          *
          * @details \f$y^{(1)} = y^n + \tilde{\mu}_1 \Delta t f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        state_t
-        stage( Stage<1>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t dt )
+        void
+        stage( Stage<1>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t dt, state_t& yi )
         {
-            return yn + mu_t<1>() * dt * f( tn, yn );
+            f( tn, yn, yi );
+            yi = yn + mu_t<1>() * dt * yi;
         }
 
         /**
@@ -324,18 +329,19 @@ namespace ponio::runge_kutta::legendre
          * @param f  operator \f$f\f$
          * @param tn current time
          * @param yn current state
-         * @param Yi array of temporary stages
+         * @param Yj array of temporary stages
          * @param dt current time step
+         * @param yi computed output step
          *
          * @details \f$y^{(j)} = \mu_j y^{(j-1)} + \nu_j y^{(j-2)} + (1-\mu_j-\nu_j)y^{(0)} + \tilde{\mu}_j \Delta t f(t^n, y^{(j-1)}) +
          * \gamma_j\Delta t f(t^n, y^{(0)})\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t, std::size_t j>
-        state_t
-        stage( Stage<j>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yi, value_t dt )
+        void
+        stage( Stage<j>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& yi )
         {
-            return mu<j>() * Yi[j - 1] + nu<j>() * Yi[j - 2] + ( 1. - mu<j>() - nu<j>() ) * yn + mu_t<j>() * dt * f( tn, Yi[j - 1] )
-                 + gamma_t<j>() * Yi[0];
+            f( tn, Yj[j - 1], yi );
+            yi = mu<j>() * Yj[j - 1] + nu<j>() * Yj[j - 2] + ( 1. - mu<j>() - nu<j>() ) * yn + mu_t<j>() * dt * yi + gamma_t<j>() * Yj[0];
         }
 
         /**
@@ -348,14 +354,16 @@ namespace ponio::runge_kutta::legendre
          * @param tn current time
          * @param yn current state
          * @param dt current time step
+         * @param yi computed output step
          *
          * @warning first stage of RKL2 method is \f$y^n\f$ but here we compute \f$\Delta t f(t^n, y^n)\f$ term
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        state_t
-        stage( Stage<0>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t dt )
+        void
+        stage( Stage<0>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t dt, state_t& yi )
         {
-            return dt * f( tn, yn ); // be careful Yi[0] is dt*f(tn, yn)
+            f( tn, yn, yi );
+            yi = dt * yi; // be careful Yj[0] is dt*f(tn, yn)
         }
 
         /**
@@ -365,15 +373,16 @@ namespace ponio::runge_kutta::legendre
          * @tparam state_t    type of current state
          * @tparam array_ki_t type of array of temporary stages
          * @param yn current state
-         * @param Yi array of temporary stages
+         * @param Yj array of temporary stages
+         * @param yi computed output step
          *
          * @details \f$y^{(1)} = y^n + \tilde{\mu}_1 \Delta t f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        state_t
-        stage( Stage<1>, problem_t&, value_t, state_t& yn, array_ki_t const& Yi, value_t )
+        void
+        stage( Stage<1>, problem_t&, value_t, state_t& yn, array_ki_t const& Yj, value_t, state_t& yi )
         {
-            return yn + mu_t<1>() * Yi[0];
+            yi = yn + mu_t<1>() * Yj[0];
         }
 
         /**
@@ -385,17 +394,19 @@ namespace ponio::runge_kutta::legendre
          * @param f  operator \f$f\f$
          * @param tn current time
          * @param yn current state
-         * @param Yi array of temporary stages
+         * @param Yj array of temporary stages
          * @param dt current time step
+         * @param yi computed output step
          *
          * @details \f$y^{(2)} = \mu_2 y^{(1)} + \nu_2y^n + (1-\mu_2-\nu_2)y^n + \tilde{\mu}_2\Delta tf(t^n, y^{(1)}) + \gamma_2\Delta t
          * f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        state_t
-        stage( Stage<2>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yi, value_t dt )
+        void
+        stage( Stage<2>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& yi )
         {
-            return mu<2>() * Yi[1] + nu<2>() * yn + ( 1. - mu<2>() - nu<2>() ) * yn + mu_t<2>() * dt * f( tn, Yi[1] ) + gamma_t<2>() * Yi[0];
+            f( tn, Yj[1], yi );
+            yi = mu<2>() * Yj[1] + nu<2>() * yn + ( 1. - mu<2>() - nu<2>() ) * yn + mu_t<2>() * dt * yi + gamma_t<2>() * Yj[0];
         }
 
         /**

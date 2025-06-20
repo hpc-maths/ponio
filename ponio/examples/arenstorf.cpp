@@ -32,20 +32,20 @@ struct arenstorf_model
     {
     }
 
-    state_t
-    phi_1( double, state_t&& y ) const
+    void
+    phi_1( double, state_t&& y, state_t& dy ) const
     {
         double const y3 = y[2];
         double const y4 = y[3];
 
-        double const dy1 = y3;
-        double const dy2 = y4;
-
-        return { dy1, dy2, 0., 0. };
+        dy[0] = y3;
+        dy[1] = y4;
+        dy[2] = 0.;
+        dy[3] = 0.;
     }
 
-    state_t
-    phi_2( double, state_t&& y ) const
+    void
+    phi_2( double, state_t&& y, state_t& dy ) const
     {
         double const y1 = y[0];
         double const y2 = y[1];
@@ -55,14 +55,14 @@ struct arenstorf_model
         double const r1 = sqrt( ( y1 + mu ) * ( y1 + mu ) + y2 * y2 );
         double const r2 = sqrt( ( y1 - 1 + mu ) * ( y1 - 1 + mu ) + y2 * y2 );
 
-        double const dy3 = y1 + 2 * y4 - ( 1 - mu ) * ( y1 + mu ) / ( r1 * r1 * r1 ) - mu * ( y1 - 1 + mu ) / ( r2 * r2 * r2 );
-        double const dy4 = y2 - 2 * y3 - ( 1 - mu ) * y2 / ( r1 * r1 * r1 ) - mu * y2 / ( r2 * r2 * r2 );
-
-        return { 0., 0., dy3, dy4 };
+        dy[0] = 0.;
+        dy[1] = 0.;
+        dy[2] = y1 + 2 * y4 - ( 1 - mu ) * ( y1 + mu ) / ( r1 * r1 * r1 ) - mu * ( y1 - 1 + mu ) / ( r2 * r2 * r2 );
+        dy[3] = y2 - 2 * y3 - ( 1 - mu ) * y2 / ( r1 * r1 * r1 ) - mu * y2 / ( r2 * r2 * r2 );
     }
 
-    state_t
-    operator()( double, state_t&& y ) const
+    void
+    operator()( double, state_t&& y, state_t& dy ) const
     {
         double const y1 = y[0];
         double const y2 = y[1];
@@ -72,12 +72,10 @@ struct arenstorf_model
         double const r1 = sqrt( ( y1 + mu ) * ( y1 + mu ) + y2 * y2 );
         double const r2 = sqrt( ( y1 - 1 + mu ) * ( y1 - 1 + mu ) + y2 * y2 );
 
-        double const dy1 = y3;
-        double const dy2 = y4;
-        double const dy3 = y1 + 2 * y4 - ( 1 - mu ) * ( y1 + mu ) / ( r1 * r1 * r1 ) - mu * ( y1 - 1 + mu ) / ( r2 * r2 * r2 );
-        double const dy4 = y2 - 2 * y3 - ( 1 - mu ) * y2 / ( r1 * r1 * r1 ) - mu * y2 / ( r2 * r2 * r2 );
-
-        return { dy1, dy2, dy3, dy4 };
+        dy[0] = y3;
+        dy[1] = y4;
+        dy[2] = y1 + 2 * y4 - ( 1 - mu ) * ( y1 + mu ) / ( r1 * r1 * r1 ) - mu * ( y1 - 1 + mu ) / ( r2 * r2 * r2 );
+        dy[3] = y2 - 2 * y3 - ( 1 - mu ) * y2 / ( r1 * r1 * r1 ) - mu * y2 / ( r2 * r2 * r2 );
     }
 };
 
@@ -112,13 +110,13 @@ main( int, char** )
 
     // adaptive Strang method with Lipschitz estimate
     using namespace std::placeholders;
-    auto phi_1 = [&]( double t, state_t&& y ) -> state_t
+    auto phi_1 = [&]( double t, state_t&& y, state_t& dy )
     {
-        return arenstorf_pb.phi_1( t, std::forward<state_t>( y ) );
+        arenstorf_pb.phi_1( t, std::forward<state_t>( y ), dy );
     };
-    auto phi_2 = [&]( double t, state_t&& y ) -> state_t
+    auto phi_2 = [&]( double t, state_t&& y, state_t& dy )
     {
-        return arenstorf_pb.phi_2( t, std::forward<state_t>( y ) );
+        arenstorf_pb.phi_2( t, std::forward<state_t>( y ), dy );
     };
 
     auto arenstorf_splitting_pb = ponio::make_problem( phi_1, phi_2 );
