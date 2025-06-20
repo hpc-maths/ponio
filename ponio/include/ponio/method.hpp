@@ -133,7 +133,7 @@ namespace ponio
         std::tuple<value_t, state_t, value_t>
         _return( value_t tn, [[maybe_unused]] state_t const& un, value_t dt )
         {
-            return std::make_tuple( tn + dt, kis.back(), dt );
+            return std::forward_as_tuple( tn + dt, kis.back(), dt );
         }
 
         template <typename value_t, typename Algo_t = Algorithm_t>
@@ -150,11 +150,11 @@ namespace ponio
             if ( alg.info().error > alg.info().tolerance )
             {
                 alg.info().success = false;
-                return std::make_tuple( tn, un, new_dt );
+                return std::forward_as_tuple( tn, un, new_dt );
             }
 
             alg.info().success = true;
-            return std::make_tuple( tn + dt, kis[Algorithm_t::N_stages], new_dt );
+            return std::forward_as_tuple( tn + dt, kis[Algorithm_t::N_stages], new_dt );
         }
 
         /**
