@@ -43,6 +43,34 @@ static_for( lambda_t&& f )
     detail::static_for_impl<value_t, begin>( std::forward<lambda_t>( f ), std::make_integer_sequence<value_t, end - begin>() );
 }
 
+template <typename mesh_t>
+auto
+init_field( std::string const& name, mesh_t& mesh )
+{
+    if constexpr ( requires { make_scalar_field<double>( name, mesh ); } )
+    {
+        return make_scalar_field( name, mesh );
+    }
+    else
+    {
+        return make_field<1>( name, mesh );
+    }
+}
+
+template <typename mesh_t>
+auto
+min_cell_length( mesh_t& mesh )
+{
+    if constexpr ( requires { mesh.cell_length( mesh.max_level() ); } )
+    {
+        return mesh.cell_length( mesh.max_level() );
+    }
+    else
+    {
+        return samurai::cell_length( mesh.max_level() );
+    }
+}
+
 TEST_CASE( "samurai::order::pirock" )
 {
     int argc                = 1;
@@ -79,7 +107,8 @@ TEST_CASE( "samurai::order::pirock" )
     samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
 
     // init solution ----------------------------------------------------------
-    auto u_ini = samurai::make_scalar_field<double>( "u", mesh );
+
+    auto u_ini = init_field( "u", mesh );
 
     auto exact_solution = [&]( double x, double t )
     {
@@ -109,7 +138,7 @@ TEST_CASE( "samurai::order::pirock" )
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::n_comp, decltype( u_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, 1, decltype( u_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
@@ -137,7 +166,7 @@ TEST_CASE( "samurai::order::pirock" )
 
     auto eigmax_computer = [&mesh]( auto&, double, auto&, double, auto& )
     {
-        double dx = mesh.cell_length( mesh.max_level() );
+        double dx = min_cell_length( mesh );
         return 4. / ( dx * dx );
     };
 
@@ -218,6 +247,7 @@ TEST_CASE( "samurai::order::pirock" )
             auto [a, b] = mayor_method( time_steps, errors );
 
             INFO( "test order ", pirock_param[I] );
+            CHECK( a >= doctest::Approx( 2 ).epsilon( 0.05 ) );
             WARN( a == doctest::Approx( 2 ).epsilon( 0.05 ) );
         } );
 }
