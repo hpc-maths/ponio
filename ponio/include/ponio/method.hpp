@@ -62,6 +62,8 @@ namespace ponio
         {
         }
 
+        method() = default;
+
         /**
          * call operator which process all stages of underlying algorithm
          * @param f  callable obect which represents the problem to solve

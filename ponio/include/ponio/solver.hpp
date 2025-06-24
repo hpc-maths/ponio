@@ -34,6 +34,12 @@ namespace ponio
             , time_step( dt )
         {
         }
+
+        current_solution( value_t tn )
+            : time( tn )
+            , time_step( static_cast<value_t>( 0. ) )
+        {
+        }
     };
 
     /**
@@ -98,12 +104,21 @@ namespace ponio
          *
          * @note In user interface ponio::time_iterator object is build by ponio::solver_range member functions.
          */
-        time_iterator( problem_t& pb_, method_t meth_, state_t const& u0, ponio::time_span<value_t> const& t_span_, value_t dt )
+        time_iterator( problem_t& pb_, method_t&& meth_, state_t const& u0, ponio::time_span<value_t> const& t_span_, value_t dt )
             : sol( ( t_span_.front() == t_span_.back() ) ? sentinel : t_span_.front(), u0, dt )
             , meth( std::move( meth_ ) )
             , pb( pb_ )
             , t_span( t_span_ )
             , it_next_time( std::next( std::begin( t_span ) ) )
+            , dt_reference( std::nullopt )
+        {
+        }
+
+        time_iterator( problem_t& pb_, value_t t_end )
+            : sol( sentinel )
+            , pb( pb_ )
+            , t_span( { t_end } )
+            , it_next_time( std::end( t_span ) )
             , dt_reference( std::nullopt )
         {
         }
@@ -378,9 +393,92 @@ namespace ponio
      */
     template <typename value_t, typename state_t, typename method_t, typename problem_t>
     auto
-    make_time_iterator( problem_t& pb, method_t meth, state_t const& u0, ponio::time_span<value_t> const& t_span, value_t dt )
+    make_time_iterator( problem_t& pb, method_t&& meth, state_t const& u0, ponio::time_span<value_t> const& t_span, value_t dt )
     {
-        return time_iterator<value_t, state_t, method_t, problem_t>( pb, meth, u0, t_span, dt );
+        return time_iterator<value_t, state_t, method_t, problem_t>( pb, std::forward<method_t>( meth ), u0, t_span, dt );
+    }
+
+    template <typename value_t_>
+    struct time_sentinel_iterator
+    {
+        using value_t         = value_t_;
+        using difference_type = value_t;
+
+        value_t time = std::numeric_limits<value_t>::max();
+    };
+
+    /**
+     * @brief equality operator that compares only current time
+     */
+    template <typename value_t>
+    bool
+    operator==( time_sentinel_iterator<value_t> const& lhs, time_sentinel_iterator<value_t> const& rhs )
+    {
+        return lhs.time == rhs.time;
+    }
+
+    /**
+     * @brief three-way comparison operator that compares only current time
+     */
+    template <typename value_t>
+    auto
+    operator<=>( time_sentinel_iterator<value_t> const& lhs, time_sentinel_iterator<value_t> const& rhs )
+    {
+        return lhs.time <=> rhs.time;
+    }
+
+    /**
+     * @brief equality operator that compares only current time
+     */
+    template <typename value_t, typename state_t, typename method_t, typename problem_t>
+    bool
+    operator==( time_iterator<value_t, state_t, method_t, problem_t> const& lhs, time_sentinel_iterator<value_t> const& rhs )
+    {
+        return lhs.sol.time == rhs.time;
+    }
+
+    /**
+     * @brief three-way comparison operator that compares only current time
+     */
+    template <typename value_t, typename state_t, typename method_t, typename problem_t>
+    auto
+    operator<=>( time_iterator<value_t, state_t, method_t, problem_t> const& lhs, time_sentinel_iterator<value_t> const& rhs )
+    {
+        return lhs.sol.time <=> rhs.time;
+    }
+
+    /**
+     * @brief equality operator that compares only current time
+     */
+    template <typename value_t, typename state_t, typename method_t, typename problem_t>
+    bool
+    operator==( time_sentinel_iterator<value_t> const& lhs, time_iterator<value_t, state_t, method_t, problem_t> const& rhs )
+    {
+        return lhs.time == rhs.sol.time;
+    }
+
+    /**
+     * @brief three-way comparison operator that compares only current time
+     */
+    template <typename value_t, typename state_t, typename method_t, typename problem_t>
+    auto
+    operator<=>( time_sentinel_iterator<value_t> const& lhs, time_iterator<value_t, state_t, method_t, problem_t> const& rhs )
+    {
+        return lhs.time <=> rhs.sol.time;
+    }
+
+    /**
+     * @brief factory of ending `time_sentinel_iterator`
+     *
+     * @tparam value_t   type of time and time step
+     *
+     * @return auto
+     */
+    template <typename value_t>
+    auto
+    make_sentinel_iterator()
+    {
+        return time_sentinel_iterator<value_t>();
     }
 
     /**
@@ -395,8 +493,9 @@ namespace ponio
     struct solver_range
     {
         using iterator_type = time_iterator<value_t, state_t, method_t, problem_t>;
+        using sentinel_type = time_sentinel_iterator<value_t>;
         iterator_type _begin;
-        iterator_type _end;
+        sentinel_type _end;
 
         /**
          * @brief Construct a new solver range object
@@ -404,7 +503,7 @@ namespace ponio
          * @param begin initial iterator on solver_range
          * @param end   end iterator on solver_range (sentinel)
          */
-        solver_range( iterator_type const& begin, iterator_type const& end )
+        solver_range( iterator_type const& begin, sentinel_type const& end )
             : _begin( begin )
             , _end( end )
         {
@@ -493,8 +592,8 @@ namespace ponio
     {
         auto meth = make_method<value_t>( std::forward<algorithm_t>( algo ), u0 );
 
-        auto begin = make_time_iterator( pb, meth, u0, t_span, dt );
-        auto end   = make_time_iterator( pb, meth, u0, { t_span.back() }, dt );
+        auto begin = make_time_iterator( pb, std::move( meth ), u0, t_span, dt );
+        auto end   = make_sentinel_iterator<value_t>();
 
         return solver_range<value_t, state_t, decltype( meth ), problem_t>( begin, end );
     }
