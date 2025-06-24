@@ -17,15 +17,48 @@
 #error "Samurai should be included"
 #endif
 
+namespace samurai
+{
+    template <class mesh_t_, class value_t, std::size_t size_, bool SOA>
+    class Field;
+
+    template <class mesh_t, class value_t, std::size_t n_comp, bool SOA>
+    class VectorField;
+
+    template <class mesh_t, class value_t>
+    class ScalarField;
+}
+
+namespace ponio_samurai
+{
+    template <typename field_t>
+    concept is_field = std::same_as<field_t,
+        ::samurai::Field<typename field_t::mesh_t, typename field_t::value_type, field_t::size, field_t::is_soa>>;
+
+    template <typename field_t>
+    concept is_scalar_field = std::same_as<field_t, ::samurai::ScalarField<typename field_t::mesh_t, typename field_t::value_type>>;
+
+    template <typename field_t>
+    concept is_vector_field_soa = std::same_as<field_t,
+        ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp, true>>;
+    template <typename field_t>
+    concept is_vector_field_aos = std::same_as<field_t,
+        ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp, false>>;
+
+    template <typename field_t>
+    concept is_vector_field = is_vector_field_soa<field_t> || is_vector_field_aos<field_t>;
+
+    template <typename field_t>
+    concept is_samurai_field = is_field<field_t> || is_scalar_field<field_t> || is_vector_field<field_t>;
+}
+
 namespace ponio::linear_algebra
 {
     template <typename solver_t>
     concept has_Snes_method = std::is_member_function_pointer_v<decltype( &solver_t::Snes )>;
 
     template <typename field_t>
-        requires std::same_as<field_t,
-                     ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp, ::samurai::detail::is_soa_v<field_t>>>
-              || std::same_as<field_t, ::samurai::ScalarField<typename field_t::mesh_t, typename field_t::value_type>>
+        requires ::ponio_samurai::is_samurai_field<field_t>
     struct operator_algebra<field_t>
     {
         template <typename state_t>
@@ -69,26 +102,24 @@ namespace ponio::shampine_trick
      * @tparam field_t type of samurai field
      */
     template <typename field_t>
-        requires std::same_as<field_t,
-                     ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp, ::samurai::detail::is_soa_v<field_t>>>
-              || std::same_as<field_t, ::samurai::ScalarField<typename field_t::mesh_t, typename field_t::value_type>>
+        requires ::ponio_samurai::is_samurai_field<field_t>
     struct shampine_trick<field_t>
-    { /**
-       * @brief solves \f$(I - \alpha R)^{\ell}X = b\f$
-       *
-       * @tparam ell
-       * @tparam operator_t
-       * @tparam state_t
-       * @param alpha           in Shampine's trick \f$\alpha = \gamma \Delta t\f$
-       * @param op_reac         \f$R\f$ operator
-       * @param initial_guess   initial guess for \f$X\f$ unknown
-       * @param rhs             right hand side term, \f$b\f$
-       * @param u_tmp           temporary variable
-       * @param shampine_result result of unknown \f$X\f$
-       */
-
+    {
         using value_t = typename field_t::value_type;
 
+        /**
+         * @brief solves \f$(I - \alpha R)^{\ell}X = b\f$
+         *
+         * @tparam ell
+         * @tparam operator_t
+         * @tparam state_t
+         * @param alpha           in Shampine's trick \f$\alpha = \gamma \Delta t\f$
+         * @param op_reac         \f$R\f$ operator
+         * @param initial_guess   initial guess for \f$X\f$ unknown
+         * @param rhs             right hand side term, \f$b\f$
+         * @param u_tmp           temporary variable
+         * @param shampine_result result of unknown \f$X\f$
+         */
         template <std::size_t ell, typename operator_t, typename state_t>
         void
         operator()( value_t alpha, operator_t&& op_reac, state_t& initial_guess, state_t& rhs, state_t& u_tmp, state_t& shampine_result )
