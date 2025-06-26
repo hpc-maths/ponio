@@ -429,7 +429,7 @@ namespace splitting_method
             T y0 = 1.0;
             T y1 = 0.0;
 
-            ponio::splitting::detail::§<I>( pb, split_tuple.methods, y0, t0, t1, dt, y1, split_tuple.info() );
+            ponio::splitting::detail::_split_solve<I>( pb, split_tuple.methods, y0, t0, t1, dt, y1, split_tuple.info() );
 
             auto e = error( y_exa, y1 );
             errors.push_back( std::log( e ) );
