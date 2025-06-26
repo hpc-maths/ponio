@@ -150,6 +150,11 @@ namespace ponio::splitting::lie
         _call_inc( f, tn, un, dt, unp1 );
         // return std::make_tuple( tn + dt, ui, dt );
 
+        if constexpr ( N_methods % 2 == 0 )
+        {
+            std::swap( un, unp1 );
+        }
+
         tn = tn + dt;
     }
 

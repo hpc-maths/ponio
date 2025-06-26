@@ -40,7 +40,7 @@ namespace ponio::splitting::detail
             // std::tie( current_time, ui, current_dt ) = std::get<I>( meth )( std::get<I>( pb.system ), current_time, ui, current_dt );
             std::get<I>( meth )( std::get<I>( pb.system ), current_time, ui, current_dt, uip1 );
 
-            if ( current_time + current_dt >= tf )
+            if ( current_time + current_dt > tf )
             {
                 current_dt = tf - current_time;
             }
