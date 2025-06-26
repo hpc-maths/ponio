@@ -379,7 +379,7 @@ namespace ponio
          */
         template <typename lambda_t>
         void
-        callback_on_stages( lambda_t&& f )
+        callback_on_stages( lambda_t&& f ) // cppcheck-suppress unusedFunction
         {
             for ( auto& ki : stages() )
             {
@@ -390,7 +390,7 @@ namespace ponio
 
         template <std::size_t I, typename lambda_t>
         void
-        callback_on_stages( sub_method<I> subI, lambda_t&& f )
+        callback_on_stages( sub_method<I> subI, lambda_t&& f ) // cppcheck-suppress unusedFunction
         {
             for ( auto& ki : stages( subI ) )
             {
