@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "../iteration_info.hpp"
+#include "../stage.hpp"
 #include "detail.hpp"
 
 namespace ponio::splitting::lie
@@ -56,7 +57,7 @@ namespace ponio::splitting::lie
         // (see https://github.com/llvm/llvm-project/issues/56482)
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I == N_steps )
-        void _call_inc( Problem_t&, value_t, state_t&, value_t )
+        void _call_inc( Problem_t&, value_t, state_t&, value_t, state_t& )
         {
         }
 
@@ -71,20 +72,22 @@ namespace ponio::splitting::lie
          */
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I < N_steps )
-        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, state_t& uip1 )
         {
             if constexpr ( I == 0 )
             {
                 _info.reset_eval();
             }
 
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
-            _call_inc<I + 1>( f, tn, ui, dt );
+            // ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
+            detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], uip1, _info );
+            _call_inc<I + 1>( f, tn, uip1, dt, ui );
         }
 
         template <typename Problem_t, typename state_t>
-        auto
-        operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt );
+        // auto
+        void
+        operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 );
 
         /**
          * @brief gets `iteration_info` object
@@ -111,7 +114,7 @@ namespace ponio::splitting::lie
          */
         template <std::size_t I>
         auto&
-        stages( std::integral_constant<std::size_t, I> )
+        stages( sub_method<I> )
         {
             return std::get<I>( methods ).stages();
         }
@@ -123,7 +126,7 @@ namespace ponio::splitting::lie
          */
         template <std::size_t I>
         auto const&
-        stages( std::integral_constant<std::size_t, I> ) const
+        stages( sub_method<I> ) const
         {
             return std::get<I>( methods ).stages();
         }
@@ -138,12 +141,16 @@ namespace ponio::splitting::lie
      */
     template <typename value_t, typename... methods_t>
     template <typename Problem_t, typename state_t>
-    auto
-    lie<value_t, methods_t...>::operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
+    // auto
+    void
+    lie<value_t, methods_t...>::operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
     {
-        state_t ui = un;
-        _call_inc( f, tn, ui, dt );
-        return std::make_tuple( tn + dt, ui, dt );
+        // state_t ui = un;
+
+        _call_inc( f, tn, un, dt, unp1 );
+        // return std::make_tuple( tn + dt, ui, dt );
+
+        tn = tn + dt;
     }
 
     // ---- *helper* ----

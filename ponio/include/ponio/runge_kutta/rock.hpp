@@ -424,8 +424,9 @@ namespace ponio::runge_kutta::rock
          * @param dt current time step
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        std::tuple<value_t, state_t, value_t>
-        operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
+        // std::tuple<value_t, state_t, value_t>
+        void
+        operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt, state_t& unp1 )
         {
             _info.reset_eval();
 
@@ -507,17 +508,30 @@ namespace ponio::runge_kutta::rock
                 // accepted step
                 if ( _info.success )
                 {
-                    return { tn + dt, uj, new_dt };
-                }
+                    // return { tn + dt, uj, new_dt };
 
-                return { tn, un, new_dt };
+                    tn = tn + dt;
+                    std::swap( uj, unp1 );
+                    dt = new_dt;
+                }
+                else
+                {
+                    // return { tn, un, new_dt };
+
+                    // tn = tn;
+                    std::swap( un, unp1 );
+                    dt = new_dt;
+                }
             }
             else
             {
                 f( t_jm1, ujm1, f_tmp );
-                uj = ujm1 + ( delta_t_1 + delta_t_2 ) * f_tmp - delta_t_2 * ujm2;
+                // uj = ujm1 + ( delta_t_1 + delta_t_2 ) * f_tmp - delta_t_2 * ujm2;
 
-                return { tn + dt, uj, dt };
+                tn   = tn + dt;
+                unp1 = ujm1 + ( delta_t_1 + delta_t_2 ) * f_tmp - delta_t_2 * ujm2;
+
+                // return { tn + dt, uj, dt };
             }
         }
 
@@ -667,8 +681,9 @@ namespace ponio::runge_kutta::rock
          * @param dt current time step
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        std::tuple<value_t, state_t, value_t>
-        operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt )
+        // std::tuple<value_t, state_t, value_t>
+        void
+        operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt, state_t& unp1 )
         {
             _info.reset_eval();
 
@@ -783,17 +798,30 @@ namespace ponio::runge_kutta::rock
                 // accepted step
                 if ( _info.success )
                 {
-                    return { tn + dt, uj, new_dt };
-                }
+                    tn = tn + dt;
+                    std::swap( uj, unp1 );
+                    dt = new_dt;
 
-                return { tn, un, new_dt };
+                    // return { tn + dt, uj, new_dt };
+                }
+                else
+                {
+                    // tn = tn;
+                    std::swap( un, unp1 );
+                    dt = new_dt;
+
+                    // return { tn, un, new_dt };
+                }
             }
             else
             {
                 f( t_jm2, ujm4, f_tmp );
-                uj = uj + b_1 * ujm1 + b_2 * ujm2 + b_3 * ujm3 + b_4 * f_tmp;
+                // uj = uj + b_1 * ujm1 + b_2 * ujm2 + b_3 * ujm3 + b_4 * f_tmp;
 
-                return { tn + dt, uj, dt };
+                tn   = tn + dt;
+                unp1 = uj + b_1 * ujm1 + b_2 * ujm2 + b_3 * ujm3 + b_4 * f_tmp;
+
+                // return { tn + dt, uj, dt };
             }
         }
 

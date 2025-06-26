@@ -10,11 +10,11 @@
 #include <optional>
 
 #include "method.hpp"
+#include "stage.hpp"
 #include "time_span.hpp"
 
 namespace ponio
 {
-
     /**
      * @brief store \f$(t^n, u^n, \Delta t^n)\f$
      *
@@ -86,6 +86,7 @@ namespace ponio
         using iterator_category = std::output_iterator_tag;
 
         value_type sol;
+        state_t u_tmp;
         method_t meth;
         problem_t& pb; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
         ponio::time_span<value_t> t_span;
@@ -106,19 +107,11 @@ namespace ponio
          */
         time_iterator( problem_t& pb_, method_t&& meth_, state_t const& u0, ponio::time_span<value_t> const& t_span_, value_t dt )
             : sol( ( t_span_.front() == t_span_.back() ) ? sentinel : t_span_.front(), u0, dt )
+            , u_tmp( u0 )
             , meth( std::move( meth_ ) )
             , pb( pb_ )
             , t_span( t_span_ )
             , it_next_time( std::next( std::begin( t_span ) ) )
-            , dt_reference( std::nullopt )
-        {
-        }
-
-        time_iterator( problem_t& pb_, value_t t_end )
-            : sol( sentinel )
-            , pb( pb_ )
-            , t_span( { t_end } )
-            , it_next_time( std::end( t_span ) )
             , dt_reference( std::nullopt )
         {
         }
@@ -132,6 +125,7 @@ namespace ponio
          */
         time_iterator( time_iterator const& rhs )
             : sol( rhs.sol )
+            , u_tmp( rhs.u_tmp )
             , meth( rhs.meth )
             , pb( rhs.pb )
             , t_span( rhs.t_span )
@@ -147,6 +141,7 @@ namespace ponio
          */
         time_iterator( time_iterator&& rhs ) noexcept
             : sol( std::move( rhs.sol ) )
+            , u_tmp( std::move( rhs.u_tmp ) )
             , meth( std::move( rhs.meth ) )
             , pb( std::move( rhs.pb ) )
             , t_span( std::move( rhs.t_span ) )
@@ -167,6 +162,7 @@ namespace ponio
             if ( this != &rhs )
             {
                 sol          = rhs.sol;
+                u_tmp        = rhs.tmp;
                 meth         = rhs.meth;
                 pb           = rhs.pb;
                 t_span       = rhs.t_span;
@@ -189,6 +185,7 @@ namespace ponio
             if ( this != &rhs )
             {
                 sol          = std::move( rhs.sol );
+                u_tmp        = std::move( rhs.u_tmp );
                 meth         = std::move( rhs.meth );
                 pb           = std::move( rhs.pb );
                 t_span       = std::move( rhs.t_span );
@@ -209,7 +206,9 @@ namespace ponio
         void
         increment()
         {
-            std::tie( sol.time, sol.state, sol.time_step ) = meth( pb, sol.time, sol.state, sol.time_step );
+            // std::tie( sol.time, sol.state, sol.time_step ) = meth( pb, sol.time, sol.state, sol.time_step );
+            meth( pb, sol.time, sol.state, sol.time_step, u_tmp );
+            std::swap( u_tmp, sol.state );
         }
 
         /**
@@ -347,6 +346,57 @@ namespace ponio
         stages() const // cppcheck-suppress unusedFunction
         {
             return meth.stages();
+        }
+
+        /**
+         * @brief returns stages if need to access to them to resize or change condition on them
+         *
+         * @return auto&
+         */
+        template <std::size_t I>
+        auto&
+        stages( sub_method<I> subI ) // cppcheck-suppress unusedFunction
+        {
+            return meth.stages( subI );
+        }
+
+        /**
+         * @brief returns stages if need to access to them
+         *
+         * @return auto const&
+         */
+        template <std::size_t I>
+        auto const&
+        stages( sub_method<I> subI ) const // cppcheck-suppress unusedFunction
+        {
+            return meth.stages( subI );
+        }
+
+        /**
+         * @brief call a callback function on each intermediate stage of method and also on temporary \f$u^{n=1}\f$ state
+         *
+         * @param f callback function
+         */
+        template <typename lambda_t>
+        void
+        callback_on_stages( lambda_t&& f )
+        {
+            for ( auto& ki : stages() )
+            {
+                f( ki );
+            }
+            f( u_tmp );
+        }
+
+        template <std::size_t I, typename lambda_t>
+        void
+        callback_on_stages( sub_method<I> subI, lambda_t&& f )
+        {
+            for ( auto& ki : stages( subI ) )
+            {
+                f( ki );
+            }
+            f( u_tmp );
         }
     };
 
@@ -633,7 +683,8 @@ namespace ponio
 
         while ( current_time < last_time )
         {
-            std::tie( current_time, un1, current_dt ) = meth( pb, current_time, un, current_dt );
+            // std::tie( current_time, un1, current_dt ) = meth( pb, current_time, un, current_dt );
+            meth( pb, current_time, un, current_dt, un1 );
             std::swap( un, un1 );
 
             obs( current_time, un, current_dt );

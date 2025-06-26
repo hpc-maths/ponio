@@ -16,6 +16,7 @@
 
 #include "../detail.hpp" // NOLINT(misc-include-cleaner)
 #include "../ponio_config.hpp"
+#include "../stage.hpp"
 #include "detail.hpp"
 
 namespace ponio::splitting::strang
@@ -58,10 +59,11 @@ namespace ponio::splitting::strang
         // (see https://github.com/llvm/llvm-project/issues/56482)
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I == N_methods - 1 )
-        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, state_t& uip1 )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
-            _call_dec<I - 1>( f, tn, ui, dt );
+            // ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
+            detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], uip1, _info );
+            _call_dec<I - 1>( f, tn, uip1, dt, ui );
         }
 
         /**
@@ -75,23 +77,25 @@ namespace ponio::splitting::strang
          */
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I < N_methods - 1 )
-        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, state_t& uip1 )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I], _info );
-            _call_inc<I + 1>( f, tn, ui, dt );
+            // ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I], _info );
+            detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I], uip1, _info );
+            _call_inc<I + 1>( f, tn, uip1, dt, ui );
         }
 
         template <std::size_t I = N_methods - 1, typename Problem_t, typename state_t>
             requires( I == 0 )
-        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt );
+        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, state_t& uip1 );
 
         template <std::size_t I = N_methods - 1, typename Problem_t, typename state_t>
             requires( I > 0 )
-        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt );
+        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, state_t& uip1 );
 
         template <typename Problem_t, typename state_t>
-        auto
-        operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt );
+        // auto
+        void
+        operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 );
 
         /**
          * @brief gets `iteration_info` object
@@ -118,7 +122,7 @@ namespace ponio::splitting::strang
          */
         template <std::size_t I>
         auto&
-        stages( std::integral_constant<std::size_t, I> )
+        stages( sub_method<I> )
         {
             return std::get<I>( methods ).stages();
         }
@@ -130,7 +134,7 @@ namespace ponio::splitting::strang
          */
         template <std::size_t I>
         auto const&
-        stages( std::integral_constant<std::size_t, I> ) const
+        stages( sub_method<I> ) const
         {
             return std::get<I>( methods ).stages();
         }
@@ -140,9 +144,10 @@ namespace ponio::splitting::strang
     template <typename value_t, typename... methods_t>
     template <std::size_t I, typename Problem_t, typename state_t>
         requires( I == 0 )
-    inline void strang<value_t, methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+    inline void strang<value_t, methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, state_t& uip1 )
     {
-        ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], _info );
+        // ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], _info );
+        detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], uip1, _info );
     }
 
     /**
@@ -158,10 +163,11 @@ namespace ponio::splitting::strang
     template <typename value_t, typename... methods_t>
     template <std::size_t I, typename Problem_t, typename state_t>
         requires( I > 0 )
-    inline void strang<value_t, methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+    inline void strang<value_t, methods_t...>::_call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, state_t& uip1 )
     {
-        ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], _info );
-        _call_dec<I - 1>( f, tn, ui, dt );
+        // ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], _info );
+        detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], uip1, _info );
+        _call_dec<I - 1>( f, tn, uip1, dt, ui );
     }
 
     /**
@@ -173,14 +179,18 @@ namespace ponio::splitting::strang
      */
     template <typename value_t, typename... methods_t>
     template <typename Problem_t, typename state_t>
-    auto
-    strang<value_t, methods_t...>::operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
+    // auto
+    void
+    strang<value_t, methods_t...>::operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
     {
         _info.reset_eval();
 
-        state_t ui = un;
-        _call_inc( f, tn, ui, dt );
-        return std::make_tuple( tn + dt, ui, dt );
+        // state_t ui = un;
+
+        _call_inc( f, tn, un, dt, unp1 );
+
+        tn = tn + dt;
+        // return std::make_tuple( tn + dt, ui, dt );
     }
 
     // ---- *helper* ----
@@ -239,60 +249,71 @@ namespace ponio::splitting::strang
 
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I == N_methods - 1 )
-        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift, state_t& uip1 )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
-            _call_dec<I - 1>( f, tn, ui, dt, shift );
+            // ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
+            detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], uip1, _info );
+            _call_dec<I - 1>( f, tn, uip1, dt, shift, ui );
         }
 
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( 0 < I && I < N_methods - 1 )
-        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift, state_t& uip1 )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I], _info );
-            _call_inc<I + 1>( f, tn, ui, dt, shift );
+            // ui = detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I], _info );
+            detail::_split_solve<I>( f, methods, ui, tn, tn + 0.5 * dt, time_steps[I], uip1, _info );
+            _call_inc<I + 1>( f, tn, uip1, dt, shift, ui );
         }
 
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I == 0 )
-        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift, state_t& uip1 )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + ( 0.5 + shift ) * dt, time_steps[I], _info );
-            _call_inc<I + 1>( f, tn, ui, dt, shift );
+            // ui = detail::_split_solve<I>( f, methods, ui, tn, tn + ( 0.5 + shift ) * dt, time_steps[I], _info );
+            detail::_split_solve<I>( f, methods, ui, tn, tn + ( 0.5 + shift ) * dt, time_steps[I], uip1, _info );
+            _call_inc<I + 1>( f, tn, uip1, dt, shift, ui );
         }
 
         template <std::size_t I = N_methods - 1, typename Problem_t, typename state_t>
             requires( I > 0 )
-        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift, state_t& uip1 )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], _info );
-            _call_dec<I - 1>( f, tn, ui, dt, shift );
+            // ui = detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], _info );
+            detail::_split_solve<I>( f, methods, ui, tn + 0.5 * dt, tn + dt, time_steps[I], uip1, _info );
+            _call_dec<I - 1>( f, tn, uip1, dt, shift, ui );
         }
 
         template <std::size_t I = N_methods - 1, typename Problem_t, typename state_t>
             requires( I == 0 )
-        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift )
+        void _call_dec( Problem_t& f, value_t tn, state_t& ui, value_t dt, value_t shift, state_t& uip1 )
         {
-            ui = detail::_split_solve<I>( f, methods, ui, tn + ( 0.5 + shift ) * dt, tn + dt, time_steps[I], _info );
+            // ui = detail::_split_solve<I>( f, methods, ui, tn + ( 0.5 + shift ) * dt, tn + dt, time_steps[I], _info );
+            detail::_split_solve<I>( f, methods, ui, tn + ( 0.5 + shift ) * dt, tn + dt, time_steps[I], uip1, _info );
         }
 
         template <typename Problem_t, typename state_t>
-        auto
-        operator()( Problem_t& f, value_t tn, state_t& un, value_t dt )
+        // auto
+        void
+        operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& u_np1 )
         {
             _info.reset_eval();
 
-            state_t u_np1_ref   = un;
+            // state_t u_np1_ref   = un;
+            state_t u_n         = un;
+            state_t u_n_shift   = un;
             state_t u_np1_shift = un;
 
             // TODO: launch _call_inc in parallel
             // j'ai voulu lancer chacune de ces 2 fonctions dans des threads différents
             // avec std::thread
             // mais j'ai eu une erreur, donc à corriger plus tard
-            _call_inc( f, tn, u_np1_ref, dt, 0. );
-            _call_inc( f, tn, u_np1_shift, dt, _info.delta );
+            //_call_inc( f, tn, u_np1_ref, dt, 0. );
 
-            _info.error = ::ponio::detail::error_estimate( un, u_np1_ref, u_np1_shift );
+            _call_inc( f, tn, u_n, dt, 0., u_np1 );
+            _call_inc( f, tn, u_n_shift, dt, _info.delta, u_np1_shift );
+
+            //_info.error = ::ponio::detail::error_estimate( un, u_np1_ref, u_np1_shift );
+            _info.error = ::ponio::detail::error_estimate( un, u_np1, u_np1_shift );
 
             value_t new_dt = 0.9 * std::sqrt( _info.tolerance / _info.error ) * dt;
             new_dt         = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
@@ -301,9 +322,19 @@ namespace ponio::splitting::strang
 
             if ( !_info.success )
             {
-                return std::make_tuple( tn, un, new_dt );
+                // tn = tn;
+                std::swap( un, u_np1 );
+                dt = new_dt;
+
+                // return std::make_tuple( tn, un, new_dt );
             }
-            return std::make_tuple( tn + dt, u_np1_ref, new_dt );
+            else
+            {
+                tn = tn + dt;
+                dt = new_dt;
+
+                // return std::make_tuple( tn + dt, u_np1_ref, new_dt );
+            }
         }
 
         /**
@@ -377,17 +408,21 @@ namespace ponio::splitting::strang
             static constexpr value_t b2 = 0.4;
             static constexpr value_t c2 = 0.1;
 
+            state_t u_n      = un;
+            state_t u_np1_a  = un;
+            state_t u_tmp_bc = un;
+            state_t u_np1_bc = un;
+
             auto local_error = [&]( value_t a, value_t b, value_t c )
             {
-                state_t u_np1_a  = un;
-                state_t u_np1_bc = un;
-
+                u_n = un;
                 // compute strang(tn, un, a*dt)
-                _call_inc( f, tn, u_np1_a, a * dt, 0. );
+                _call_inc<0>( f, tn, u_n, a * dt, 0., u_np1_a );
 
+                u_n = un;
                 // compute strang(tn+c*dt, strang(tn, un, c*dt), b*dt )
-                _call_inc( f, tn, u_np1_bc, c * dt, 0. );
-                _call_inc( f, tn + c * dt, u_np1_bc, b * dt, 0. );
+                _call_inc<0>( f, tn, u_n, c * dt, 0., u_tmp_bc );
+                _call_inc<0>( f, tn + c * dt, u_tmp_bc, b * dt, 0., u_np1_bc );
 
                 return ::ponio::detail::norm( static_cast<state_t>( u_np1_a - u_np1_bc ) );
             };
@@ -452,7 +487,7 @@ namespace ponio::splitting::strang
          */
         template <std::size_t I>
         auto&
-        stages( std::integral_constant<std::size_t, I> )
+        stages( sub_method<I> )
         {
             return std::get<I>( methods ).stages();
         }
@@ -464,7 +499,7 @@ namespace ponio::splitting::strang
          */
         template <std::size_t I>
         auto const&
-        stages( std::integral_constant<std::size_t, I> ) const
+        stages( sub_method<I> ) const
         {
             return std::get<I>( methods ).stages();
         }

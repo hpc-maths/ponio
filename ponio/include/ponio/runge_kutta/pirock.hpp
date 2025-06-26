@@ -256,8 +256,9 @@ namespace ponio::runge_kutta::pirock
          * @param dt current time step
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        std::tuple<value_t, state_t, value_t>
-        operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt )
+        // std::tuple<value_t, state_t, value_t>
+        void
+        operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt, state_t& u_np1 )
         {
             static_assert( detail::problem_operator<decltype( pb.implicit_part ), value_t>
                                || detail::problem_jacobian<decltype( pb.implicit_part ), value_t, state_t>,
@@ -467,7 +468,7 @@ namespace ponio::runge_kutta::pirock
             value_t tau   = sigma * rock_coeff::fp2[deg_index - 1] + sigma * sigma;
             value_t tau_a = 0.5 * detail::power<2>( alpha - 1. ) + 2. * alpha * ( 1. - alpha ) * sigma + alpha * alpha * tau;
 
-            auto& u_np1 = U[12];
+            // auto& u_np1 = U[12];
 
             if constexpr ( shampine_trick_enable && detail::problem_operator<decltype( pb.implicit_part ), value_t> )
             {
@@ -540,15 +541,28 @@ namespace ponio::runge_kutta::pirock
                     // accepted step
                     if ( _info.success )
                     {
-                        return { tn + dt, u_np1, new_dt };
+                        tn = tn + dt;
+                        dt = new_dt;
+
+                        // return { tn + dt, u_np1, new_dt };
                     }
+                    else
+                    {
+                        // tn = tn
+                        std::swap( un, u_np1 );
+                        dt = new_dt;
 
-                    return { tn, un, new_dt };
+                        // return { tn, un, new_dt };
+                    }
                 }
+                else
+                {
+                    pb.implicit_part( tn, u_sp1, fi_tmp );
+                    pb.implicit_part( tn, u_sp2, f_tmp );
 
-                pb.implicit_part( tn, u_sp1, fi_tmp );
-                pb.implicit_part( tn, u_sp2, f_tmp );
-                u_np1 = us_s - err_D + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
+                    tn    = tn + dt;
+                    u_np1 = us_s - err_D + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
+                }
             }
             else
             {
@@ -564,11 +578,12 @@ namespace ponio::runge_kutta::pirock
                 pb.implicit_part( tn, u_sp1, fi_tmp );
                 pb.implicit_part( tn, u_sp2, f_tmp );
 
+                tn    = tn + dt;
                 u_np1 = us_s - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fe_tmp - fe_tmp_bis ) + 0.5 * dt * fi_tmp
                       + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * ( fe_tmp_ter - fe_tmp_qua );
             }
 
-            return { tn + dt, u_np1, dt };
+            // return { tn + dt, u_np1, dt };
         }
 
         /**
@@ -848,8 +863,9 @@ namespace ponio::runge_kutta::pirock
          * @param dt current time step
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        std::tuple<value_t, state_t, value_t>
-        operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt )
+        // std::tuple<value_t, state_t, value_t>
+        void
+        operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt, state_t& u_np1 )
         {
             // In problem_t pb.system (a tuple) :
             // 0: reaction operator
@@ -1105,7 +1121,7 @@ namespace ponio::runge_kutta::pirock
             value_t tau   = sigma * rock_coeff::fp2[deg_index - 1] + sigma * sigma;
             value_t tau_a = 0.5 * detail::power<2>( alpha - 1. ) + 2. * alpha * ( 1. - alpha ) * sigma + alpha * alpha * tau;
 
-            auto& u_np1 = U[20];
+            // auto& u_np1 = U[20];
 
             if constexpr ( shampine_trick_enable
                            && detail::problem_operator<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t> )
@@ -1194,15 +1210,26 @@ namespace ponio::runge_kutta::pirock
                     // accepted step
                     if ( _info.success )
                     {
-                        return { tn + dt, u_np1, new_dt };
-                    }
+                        tn = tn + dt;
+                        dt = new_dt;
 
-                    return { tn, un, new_dt };
+                        // return { tn + dt, u_np1, new_dt };
+                    }
+                    else
+                    {
+                        // tn = tn;
+                        std::swap( un, u_np1 );
+                        dt = new_dt;
+
+                        // return { tn, un, new_dt };
+                    }
                 }
 
                 pb( reaction_op(), tn, u_sp1, fr_tmp );
                 pb( advection_op(), tn, u_sp5, fa_tmp );
                 pb( reaction_op(), tn, u_sp2, fr_tmp_bis );
+
+                tn    = tn + dt;
                 u_np1 = us_s - err_D + 0.5 * dt * fr_tmp + 0.25 * dt * Fa_u_sp1 + 0.75 * dt * fa_tmp + 0.5 * dt * fr_tmp
                       + 0.5 * dt * fr_tmp_bis + dt / ( 2. - 4. * gamma ) * shampine_element;
             }
@@ -1219,12 +1246,13 @@ namespace ponio::runge_kutta::pirock
                 pb( diffusion_op(), tn, u_sp3, fd_tmp_ter );
                 pb( diffusion_op(), tn, u_sp1, fd_tmp_qua );
 
+                tn    = tn + dt;
                 u_np1 = us_s - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fd_tmp - fd_tmp_bis ) + 0.25 * dt * Fa_u_sp1
                       + 0.75 * dt * fa_tmp + 0.5 * dt * fr_tmp + 0.5 * dt * fr_tmp_bis
                       + dt / ( 2. - 4. * gamma ) * ( fd_tmp_ter - fd_tmp_qua );
             }
 
-            return { tn + dt, u_np1, dt };
+            // return { tn + dt, u_np1, dt };
         }
 
         /**

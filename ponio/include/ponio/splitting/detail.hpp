@@ -30,22 +30,28 @@ namespace ponio::splitting::detail
      * @param dt   time step
      */
     template <std::size_t I, typename Problem_t, typename Method_t, typename state_t, typename value_t, typename iteration_info_t>
-    state_t
-    _split_solve( Problem_t& pb, Method_t& meth, state_t& ui, value_t ti, value_t tf, value_t dt, iteration_info_t& info )
+    void
+    _split_solve( Problem_t& pb, Method_t& meth, state_t& ui, value_t ti, value_t tf, value_t dt, state_t& uip1, iteration_info_t& info )
     {
         value_t current_dt   = std::min( dt, tf - ti );
         value_t current_time = ti;
-        while ( current_time != tf )
+        while ( current_time < tf )
         {
-            std::tie( current_time, ui, current_dt ) = std::get<I>( meth )( std::get<I>( pb.system ), current_time, ui, current_dt );
-            if ( current_time + current_dt > tf )
+            // std::tie( current_time, ui, current_dt ) = std::get<I>( meth )( std::get<I>( pb.system ), current_time, ui, current_dt );
+            std::get<I>( meth )( std::get<I>( pb.system ), current_time, ui, current_dt, uip1 );
+
+            if ( current_time + current_dt >= tf )
             {
                 current_dt = tf - current_time;
             }
 
             info.template increment<I>( std::get<I>( meth ).info().number_of_eval );
+
+            std::swap( ui, uip1 );
         }
-        return ui;
+
+        std::swap( ui, uip1 );
+        //  return ui;
     }
 
     // ---- class splitting_tuple ----------------------------------

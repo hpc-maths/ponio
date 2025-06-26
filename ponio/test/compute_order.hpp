@@ -395,6 +395,52 @@ namespace splitting_method
         return long_time_check_order( algo );
     }
 
+    template <std::size_t I, typename splitting_tuple_t, typename T = double>
+    T
+    check_order_split_solve( splitting_tuple_t split_tuple = splitting_tuple_t() )
+    {
+        using state_t = T;
+
+        std::vector<T> errors;
+        std::vector<T> dts;
+
+        T t0 = 0.0;
+        T t1 = 1.0;
+
+        auto pb = ponio::make_problem(
+            []( T, state_t y, state_t& dy )
+            {
+                dy = y;
+            },
+            []( T, state_t y, state_t& dy )
+            {
+                dy = y;
+            },
+            []( T, state_t y, state_t& dy )
+            {
+                dy = y;
+            } );
+
+        state_t y_exa = std::exp( t1 );
+
+        for ( auto n_iter : { 50, 25, 20, 15, 10 } )
+        {
+            T dt = ( t1 - t0 ) / n_iter;
+            T y0 = 1.0;
+            T y1 = 0.0;
+
+            ponio::splitting::detail::§<I>( pb, split_tuple.methods, y0, t0, t1, dt, y1, split_tuple.info() );
+
+            auto e = error( y_exa, y1 );
+            errors.push_back( std::log( e ) );
+            dts.push_back( std::log( dt ) );
+        }
+
+        auto [a, b] = mayor_method( dts, errors );
+
+        return a;
+    }
+
 } // splitting_method
 
 namespace diagonal_implicit_method
