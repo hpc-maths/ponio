@@ -14,7 +14,7 @@ main()
 
     double const mu = 0.012277471;
 
-    auto arenstorf = [=]( double t, state_t const& y ) -> state_t
+    auto arenstorf = [=]( double t, auto&& y, state_t& dy )
     {
         double const y1 = y[0];
         double const y2 = y[1];
@@ -24,12 +24,10 @@ main()
         double const r1 = sqrt( ( y1 + mu ) * ( y1 + mu ) + y2 * y2 );
         double const r2 = sqrt( ( y1 - 1 + mu ) * ( y1 - 1 + mu ) + y2 * y2 );
 
-        double const dy1 = y3;
-        double const dy2 = y4;
-        double const dy3 = y1 + 2 * y4 - ( 1 - mu ) * ( y1 + mu ) / ( r1 * r1 * r1 ) - mu * ( y1 - 1 + mu ) / ( r2 * r2 * r2 );
-        double const dy4 = y2 - 2 * y3 - ( 1 - mu ) * y2 / ( r1 * r1 * r1 ) - mu * y2 / ( r2 * r2 * r2 );
-
-        return { dy1, dy2, dy3, dy4 };
+        dy[0] = y3;
+        dy[1] = y4;
+        dy[2] = y1 + 2 * y4 - ( 1 - mu ) * ( y1 + mu ) / ( r1 * r1 * r1 ) - mu * ( y1 - 1 + mu ) / ( r2 * r2 * r2 );
+        dy[3] = y2 - 2 * y3 - ( 1 - mu ) * y2 / ( r1 * r1 * r1 ) - mu * y2 / ( r2 * r2 * r2 );
     };
 
     state_t y0 = {

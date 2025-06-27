@@ -16,9 +16,11 @@ main()
     double const rho   = 28.0;
     double const beta  = 8.0 / 3.0;
 
-    auto lorenz = [&]( double t, state_t const& y ) -> state_t
+    auto lorenz = [&]( double t, auto&& y, state_t& dy )
     {
-        return { sigma * ( y[1] - y[0] ), y[0] * ( rho - y[2] ) - y[1], y[0] * y[1] - beta * y[2] };
+        dy[0] = sigma * ( y[1] - y[0] );
+        dy[1] = y[0] * ( rho - y[2] ) - y[1];
+        dy[2] = y[0] * y[1] - beta * y[2];
     };
 
     state_t y0 = {
