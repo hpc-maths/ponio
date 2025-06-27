@@ -18,21 +18,22 @@ main()
 
     double sigma = 10., rho = 28., beta = 8. / 3.;
 
-    auto lorenz = [=]( double /* t */, state_t&& u ) -> state_t
-    {
-        double dt_u0 = sigma * ( u[1] - u[0] );
-        double dt_u1 = rho * u[0] - u[1] - u[0] * u[2];
-        double dt_u2 = u[0] * u[1] - beta * u[2];
+    auto lorenz = ponio::make_simple_problem(
+        [=]( double /* t */, state_t&& u ) -> state_t
+        {
+            double dt_u0 = sigma * ( u[1] - u[0] );
+            double dt_u1 = rho * u[0] - u[1] - u[0] * u[2];
+            double dt_u2 = u[0] * u[1] - beta * u[2];
 
-        return { dt_u0, dt_u1, dt_u2 };
-    };
+            return { dt_u0, dt_u1, dt_u2 };
+        } );
 
     state_t const u0 = { 1., 1., 1. };
 
     ponio::time_span<double> const tspan = { 0., 20. };
     double const dt                      = 0.01;
 
-    ponio::solve( ponio::make_simple_problem( lorenz ), ponio::runge_kutta::rk_44(), u0, tspan, dt, "lorenz_rk_pb.txt"_fobs );
+    ponio::solve( lorenz, ponio::runge_kutta::rk_44(), u0, tspan, dt, "lorenz_rk_pb.txt"_fobs );
 
     return 0;
 }

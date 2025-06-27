@@ -44,7 +44,7 @@ Now we can write :math:`f:t, u\mapsto f(t,u)` as a lambda function:
 
 .. literalinclude:: ../_static/cpp/lorenz_rk_pb.cpp
   :language: cpp
-  :lines: 19-28
+  :lines: 19-29
   :lineno-start: 19
   :linenos:
 
@@ -56,8 +56,8 @@ ponio library provides interface for a function :math:`f` defined in this way, b
 
 .. literalinclude:: ../_static/cpp/lorenz_rk_pb.cpp
   :language: cpp
-  :lines: 30-35
-  :lineno-start: 30
+  :lines: 31-36
+  :lineno-start: 31
   :linenos:
   :emphasize-lines: 6
 
