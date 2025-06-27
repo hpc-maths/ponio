@@ -153,14 +153,37 @@ TEST_CASE( "order::pirock_RDA" )
     test_order<class_method::RDA_method>::on<pirock_methods>();
 }
 
-TEST_CASE( "order::splitting" )
+TEST_CASE( "order::splitting[odd]" )
 {
-    auto lie_splitting    = ponio::splitting::make_lie_tuple( std::make_pair( ponio::runge_kutta::rk_33(), .1 ),
+    // clang-format off
+    auto lie_splitting    = ponio::splitting::make_lie_tuple(
         std::make_pair( ponio::runge_kutta::rk_33(), .1 ),
-        std::make_pair( ponio::runge_kutta::rk_33(), .1 ) );
-    auto strang_splitting = ponio::splitting::make_strang_tuple( std::make_pair( ponio::runge_kutta::rk_33(), .1 ),
+        std::make_pair( ponio::runge_kutta::rk_33(), .1 ),
+        std::make_pair( ponio::runge_kutta::rk_33(), .1 )
+    );
+    auto strang_splitting = ponio::splitting::make_strang_tuple(
+        std::make_pair( ponio::runge_kutta::rk_33(), .1 ),
         std::make_pair( ponio::runge_kutta::rk_44(), .1 ),
-        std::make_pair( ponio::runge_kutta::rk_44(), .1 ) );
+        std::make_pair( ponio::runge_kutta::rk_44(), .1 )
+    );
+    // clang-format on
+
+    WARN( splitting_method::check_order( lie_splitting ) == doctest::Approx( lie_splitting.order ).epsilon( 0.125 ) );
+    WARN( splitting_method::check_order( strang_splitting ) == doctest::Approx( strang_splitting.order ).epsilon( 0.125 ) );
+}
+
+TEST_CASE( "order::splitting[even]" )
+{
+    // clang-format off
+    auto lie_splitting    = ponio::splitting::make_lie_tuple(
+        std::make_pair( ponio::runge_kutta::rk_44(), .001 ),
+        std::make_pair( ponio::runge_kutta::rk_33(), .001 )
+    );
+    auto strang_splitting = ponio::splitting::make_strang_tuple(
+        std::make_pair( ponio::runge_kutta::rk_33(), .1 ),
+        std::make_pair( ponio::runge_kutta::rk_44(), .1 )
+    );
+    // clang-format on
 
     WARN( splitting_method::check_order( lie_splitting ) == doctest::Approx( lie_splitting.order ).epsilon( 0.125 ) );
     WARN( splitting_method::check_order( strang_splitting ) == doctest::Approx( strang_splitting.order ).epsilon( 0.125 ) );

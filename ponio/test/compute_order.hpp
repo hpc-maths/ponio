@@ -333,9 +333,42 @@ namespace RDA_method
 namespace splitting_method
 {
 
+    namespace detail
+    {
+
+        template <typename func_t, std::size_t... Is>
+        constexpr auto
+        tuple_init_impl( func_t const& f, std::index_sequence<Is...> )
+        {
+            return std::make_tuple( ( static_cast<void>( Is ), f )... );
+        }
+
+        template <std::size_t N, typename func_t>
+        constexpr auto
+        tuple_init( func_t const& f )
+        {
+            return tuple_init_impl( f, std::make_index_sequence<N>() );
+        }
+
+        template <typename problem_tuple_t, size_t... Is>
+        auto
+        make_variadic_problem_impl( problem_tuple_t& pb_tuple, std::index_sequence<Is...> )
+        {
+            return ponio::make_problem( std::get<Is>( pb_tuple )... );
+        }
+
+        template <typename problem_tuple_t>
+        auto
+        make_variadic_problem( problem_tuple_t& pb_tuple )
+        {
+            static constexpr std::size_t size = std::tuple_size_v<problem_tuple_t>;
+            return make_variadic_problem_impl( pb_tuple, std::make_index_sequence<size>{} );
+        }
+    }
+
     template <typename Algorithm_t, typename T = double>
     auto
-    long_time_check_order( Algorithm_t& algo )
+    long_time_check_order_odd( Algorithm_t& algo )
     {
         using state_t = std::valarray<T>;
 
@@ -389,17 +422,77 @@ namespace splitting_method
     }
 
     template <typename Algorithm_t, typename T = double>
+    auto
+    long_time_check_order_even( Algorithm_t& algo )
+    {
+        using state_t = std::valarray<T>;
+
+        T alpha = 2. / 3.;
+        T beta  = 4. / 3.;
+        T gamma = 1.;
+        T delta = 1.;
+
+        auto pb = ponio::make_problem(
+            [=]( T, auto&& u, state_t& du )
+            {
+                du[0] = alpha * u[0] - beta * u[0] * u[1];
+                du[1] = -gamma * u[1];
+            },
+            [=]( T, auto&& u, state_t& du )
+            {
+                du[0] = 0.;
+                du[1] = delta * u[0] * u[1];
+            } );
+
+        // invariant calculator
+        auto V = [=]( state_t const& u ) -> T
+        {
+            return delta * u[0] - gamma * std::log( u[0] ) + beta * u[1] - alpha * std::log( u[1] );
+        };
+
+        T x0          = 1.9;
+        state_t u_ini = { x0, x0 };
+        T V_ini       = V( u_ini );
+
+        ponio::time_span<T> t_span = { 0., 1000. };
+        std::vector<T> dts         = { 0.5, 0.3333, 0.25, 0.125, 0.1 }; // find a way to adapt this range to the method
+        std::vector<T> relative_errors;
+        std::vector<T> log_dts;
+
+        for ( auto dt : dts )
+        {
+            state_t u_end = ::ponio::solve( pb, algo, u_ini, t_span, dt, []( T, state_t const&, T ) {} );
+            relative_errors.push_back( std::log10( relative_error( V_ini, V( u_end ) ) ) );
+            log_dts.push_back( std::log10( dt ) );
+        }
+
+        auto [a, b] = mayor_method( log_dts, relative_errors );
+
+        return a;
+    }
+
+    template <typename Algorithm_t, typename T = double>
     T
     check_order( Algorithm_t algo = Algorithm_t() )
     {
-        return long_time_check_order( algo );
+        using algos_t = decltype( algo.algos );
+
+        if constexpr ( std::tuple_size_v<algos_t> % 2 == 0 )
+        {
+            return long_time_check_order_even( algo );
+        }
+        else
+        {
+            return long_time_check_order_odd( algo );
+        }
     }
 
     template <std::size_t I, typename splitting_tuple_t, typename T = double>
     T
     check_order_split_solve( splitting_tuple_t split_tuple = splitting_tuple_t() )
     {
-        using state_t = T;
+        using state_t                             = T;
+        static constexpr std::size_t split_length = std::tuple_size_v<decltype( split_tuple.methods )>;
 
         std::vector<T> errors;
         std::vector<T> dts;
@@ -407,19 +500,13 @@ namespace splitting_method
         T t0 = 0.0;
         T t1 = 1.0;
 
-        auto pb = ponio::make_problem(
-            []( T, state_t y, state_t& dy )
-            {
-                dy = y;
-            },
-            []( T, state_t y, state_t& dy )
-            {
-                dy = y;
-            },
+        // make split_length problems for _split_solve function
+        auto pb_tuple = detail::tuple_init<split_length>(
             []( T, state_t y, state_t& dy )
             {
                 dy = y;
             } );
+        auto pb = detail::make_variadic_problem( pb_tuple );
 
         state_t y_exa = std::exp( t1 );
 
