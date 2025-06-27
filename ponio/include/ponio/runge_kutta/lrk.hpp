@@ -52,27 +52,27 @@ namespace ponio::runge_kutta::lawson_runge_kutta
         }
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, std::size_t i>
-        state_t
-        stage( Stage<i>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Ki, value_t dt )
+        void
+        stage( Stage<i>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Kj, value_t dt, state_t& ki )
         {
-            return m_exp( -butcher.c[i] * dt * pb.l )
-                 * pb.n( tn + butcher.c[i] * dt,
-                     m_exp( butcher.c[i] * dt * pb.l ) * detail::tpl_inner_product<i>( butcher.A[i], Ki, un, dt ) );
+            state_t tmp = ki;
+            pb.n( tn + butcher.c[i] * dt, m_exp( butcher.c[i] * dt * pb.l ) * detail::tpl_inner_product<i>( butcher.A[i], Kj, un, dt ), tmp );
+            ki = m_exp( -butcher.c[i] * dt * pb.l ) * tmp;
         }
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t>
-        state_t
-        stage( Stage<N_stages>, problem_t& pb, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
+        void
+        stage( Stage<N_stages>, problem_t& pb, value_t, state_t& un, array_ki_t const& Kj, value_t dt, state_t& ki )
         {
-            return m_exp( dt * pb.l ) * detail::tpl_inner_product<N_stages>( butcher.b, Ki, un, dt );
+            ki = m_exp( dt * pb.l ) * detail::tpl_inner_product<N_stages>( butcher.b, Kj, un, dt );
         }
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, typename tab_t = tableau_t>
             requires std::same_as<tab_t, tableau_t> && is_embedded
-        state_t
-        stage( Stage<N_stages + 1>, problem_t& pb, value_t, state_t& un, array_ki_t const& Ki, value_t dt )
+        void
+        stage( Stage<N_stages + 1>, problem_t& pb, value_t, state_t& un, array_ki_t const& Kj, value_t dt, state_t& ki )
         {
-            return m_exp( dt * pb.l ) * detail::tpl_inner_product<N_stages>( butcher.b2, Ki, un, dt );
+            ki = m_exp( dt * pb.l ) * detail::tpl_inner_product<N_stages>( butcher.b2, Kj, un, dt );
         }
 
         /**

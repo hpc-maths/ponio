@@ -33,3 +33,4 @@ clear:
 
 mrproper: clear
 	rm -f $(RUN)
+	rm -f *.png

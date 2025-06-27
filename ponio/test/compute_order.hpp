@@ -71,9 +71,9 @@ namespace explicit_method
     {
         using state_t = T;
 
-        auto pb = []( T, state_t y ) -> state_t
+        auto pb = []( T, state_t y, state_t& dy )
         {
-            return y;
+            dy = y;
         };
 
         state_t y0                 = 1.0;
@@ -141,9 +141,10 @@ namespace explicit_method
         T gamma = 1.;
         T delta = 1.;
 
-        auto pb = [=]( T, auto&& u ) -> state_t
+        auto pb = [=]( T, auto&& u, state_t& du )
         {
-            return { alpha * u[0] - beta * u[0] * u[1], delta * u[0] * u[1] - gamma * u[1] };
+            du[0] = alpha * u[0] - beta * u[0] * u[1];
+            du[1] = delta * u[0] * u[1] - gamma * u[1];
         };
 
         // invariant calculator
@@ -203,15 +204,15 @@ namespace additive_method
         using state_t = T;
 
         auto pb = ponio::make_imex_jacobian_problem(
-            [=]( T, state_t y ) -> state_t
+            [=]( T, state_t y, state_t& dy )
             {
-                return lambda * y;
+                dy = lambda * y;
             },
-            [=]( T, state_t y ) -> state_t
+            [=]( T, state_t y, state_t& dy )
             {
-                return ( 1. - lambda ) * y;
+                dy = ( 1. - lambda ) * y;
             },
-            [=]( T, state_t ) -> state_t
+            [=]( T, state_t )
             {
                 return 1. - lambda;
             } );
@@ -269,21 +270,21 @@ namespace RDA_method
 
         auto pb = ponio::make_problem(
             ponio::make_implicit_problem(
-                [=]( T, state_t y ) -> state_t
+                [=]( T, state_t y, state_t& dy )
                 {
-                    return 0.125 * lambda * y;
+                    dy = 0.125 * lambda * y;
                 },
                 [=]( T, state_t ) -> state_t
                 {
                     return 0.125 * lambda;
                 } ),
-            [=]( T, state_t y ) -> state_t
+            [=]( T, state_t y, state_t& dy )
             {
-                return 0.375 * lambda * y;
+                dy = 0.375 * lambda * y;
             },
-            [=]( T, state_t y ) -> state_t
+            [=]( T, state_t y, state_t& dy )
             {
-                return ( 1. - 0.5 * lambda ) * y;
+                dy = ( 1. - 0.5 * lambda ) * y;
             } );
 
         state_t y0                 = 1.0;
@@ -332,30 +333,98 @@ namespace RDA_method
 namespace splitting_method
 {
 
+    namespace detail
+    {
+
+        template <typename func_t, std::size_t... Is>
+        constexpr auto
+        tuple_init_impl( func_t const& f, std::index_sequence<Is...> )
+        {
+            return std::make_tuple( ( static_cast<void>( Is ), f )... );
+        }
+
+        template <std::size_t N, typename func_t>
+        constexpr auto
+        tuple_init( func_t const& f )
+        {
+            return tuple_init_impl( f, std::make_index_sequence<N>() );
+        }
+
+        template <typename problem_tuple_t, size_t... Is>
+        auto
+        make_variadic_problem_impl( problem_tuple_t& pb_tuple, std::index_sequence<Is...> )
+        {
+            return ponio::make_problem( std::get<Is>( pb_tuple )... );
+        }
+
+        template <typename problem_tuple_t>
+        auto
+        make_variadic_problem( problem_tuple_t& pb_tuple )
+        {
+            static constexpr std::size_t size = std::tuple_size_v<problem_tuple_t>;
+            return make_variadic_problem_impl( pb_tuple, std::make_index_sequence<size>{} );
+        }
+    }
+
+    template <std::size_t I>
+    auto
+    make_lotka_volterra_problem( double, double, double, double )
+    {
+    }
+
+    template <>
+    auto
+    make_lotka_volterra_problem<2>( double alpha, double beta, double gamma, double delta )
+    {
+        return ponio::make_problem(
+            [=]( double, auto&& u, auto& du )
+            {
+                du[0] = alpha * u[0] - beta * u[0] * u[1];
+                du[1] = -gamma * u[1];
+            },
+            [=]( double, auto&& u, auto& du )
+            {
+                du[0] = 0.;
+                du[1] = delta * u[0] * u[1];
+            } );
+    }
+
+    template <>
+    auto
+    make_lotka_volterra_problem<3>( double alpha, double beta, double gamma, double delta )
+    {
+        return ponio::make_problem(
+            [=]( double, auto&& u, auto& du )
+            {
+                du[0] = alpha * u[0] - beta * u[0] * u[1];
+                du[1] = 0.;
+            },
+            [=]( double, auto&& u, auto& du )
+            {
+                du[0] = 0.;
+                du[1] = delta * u[0] * u[1];
+            },
+            [=]( double, auto&& u, auto& du )
+            {
+                du[0] = 0.;
+                du[1] = -gamma * u[1];
+            } );
+    }
+
     template <typename Algorithm_t, typename T = double>
     auto
     long_time_check_order( Algorithm_t& algo )
     {
         using state_t = std::valarray<T>;
 
+        static constexpr std::size_t split_size = std::tuple_size_v<decltype( algo.algos )>;
+
         T alpha = 2. / 3.;
         T beta  = 4. / 3.;
         T gamma = 1.;
         T delta = 1.;
 
-        auto pb = ponio::make_problem(
-            [=]( T, auto&& u ) -> state_t
-            {
-                return { alpha * u[0] - beta * u[0] * u[1], 0. };
-            },
-            [=]( T, auto&& u ) -> state_t
-            {
-                return { 0., delta * u[0] * u[1] };
-            },
-            [=]( T, auto&& u ) -> state_t
-            {
-                return { 0., -gamma * u[1] };
-            } );
+        auto pb = make_lotka_volterra_problem<split_size>( alpha, beta, gamma, delta );
 
         // invariant calculator
         auto V = [=]( state_t const& u ) -> T
@@ -367,8 +436,8 @@ namespace splitting_method
         state_t u_ini = { x0, x0 };
         T V_ini       = V( u_ini );
 
-        ponio::time_span<T> t_span = { 0., 1000. };
-        std::vector<T> dts         = { 0.25, 0.125, 0.1, 0.075, 0.05 }; // find a way to adapt this range to the method
+        ponio::time_span<T> t_span = { 0., 100. };
+        std::vector<T> dts         = { 0.5, 0.125, 0.1, 0.075, 0.05 }; // find a way to adapt this range to the method
         std::vector<T> relative_errors;
         std::vector<T> log_dts;
 
@@ -391,6 +460,49 @@ namespace splitting_method
         return long_time_check_order( algo );
     }
 
+    template <std::size_t I, typename splitting_tuple_t, typename T = double>
+    T
+    check_order_split_solve( splitting_tuple_t split_tuple = splitting_tuple_t() )
+    {
+        // multiple solve of problem : dy = y
+
+        using state_t                             = T;
+        static constexpr std::size_t split_length = std::tuple_size_v<decltype( split_tuple.methods )>;
+
+        std::vector<T> errors;
+        std::vector<T> dts;
+
+        T t0 = 0.0;
+        T t1 = 1.0;
+
+        // make split_length problems for _split_solve function
+        auto pb_tuple = detail::tuple_init<split_length>(
+            []( T, state_t y, state_t& dy )
+            {
+                dy = y;
+            } );
+        auto pb = detail::make_variadic_problem( pb_tuple );
+
+        state_t y_exa = std::exp( t1 );
+
+        for ( auto n_iter : { 50, 25, 20, 15, 10 } )
+        {
+            T dt = ( t1 - t0 ) / n_iter;
+            T y0 = 1.0;
+            T y1 = 0.0;
+
+            ponio::splitting::detail::_split_solve<I>( pb, split_tuple.methods, y0, t0, t1, dt, y1, split_tuple.info() );
+
+            auto e = error( y_exa, y1 );
+            errors.push_back( std::log( e ) );
+            dts.push_back( std::log( dt ) );
+        }
+
+        auto [a, b] = mayor_method( dts, errors );
+
+        return a;
+    }
+
 } // splitting_method
 
 namespace diagonal_implicit_method
@@ -403,9 +515,9 @@ namespace diagonal_implicit_method
         using state_t = T;
 
         auto pb = ponio::make_implicit_problem(
-            [=]( T, state_t y ) -> state_t
+            [=]( T, state_t y, state_t& dy )
             {
-                return y;
+                dy = y;
             },
             [=]( T, state_t ) -> state_t
             {

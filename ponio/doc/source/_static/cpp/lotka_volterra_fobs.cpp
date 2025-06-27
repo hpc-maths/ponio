@@ -22,12 +22,10 @@ main()
     double gamma = 1.;
     double delta = 1.;
 
-    auto lotka_volterra_pb = [=]( double, state_t const& u ) -> state_t
+    auto lotka_volterra_pb = [=]( double, auto const& u, state_t& du )
     {
-        double dt_x = alpha * u[0] - beta * u[0] * u[1];
-        double dt_y = delta * u[0] * u[1] - gamma * u[1];
-
-        return { dt_x, dt_y };
+        du[0] = alpha * u[0] - beta * u[0] * u[1];
+        du[1] = delta * u[0] * u[1] - gamma * u[1];
     };
 
     std::string filename = "lotka_volterra_fobs.txt";

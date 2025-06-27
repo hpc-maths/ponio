@@ -27,9 +27,11 @@ main()
         { rho,   -1,    0    },
         { 0,     0,     -beta}
     };
-    auto N = [=]( double, state_t&& u ) -> state_t
+    auto N = [=]( double, auto&& u, state_t& du )
     {
-        return { 0., -u[0] * u[2], u[0] * u[1] };
+        du[0] = 0.;
+        du[1] = -u[0] * u[2];
+        du[2] = u[0] * u[1];
     };
     auto lorenz = ponio::make_lawson_problem( L, N );
 

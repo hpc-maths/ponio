@@ -9,6 +9,7 @@
 #include <string>
 
 #include <ponio/observer.hpp>
+#include <ponio/problem.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 
@@ -39,10 +40,11 @@ main()
 
     double const k = 50;
 
-    auto ch_pb = [=]( double t, double y )
-    {
-        return k * ( std::cos( t ) - y );
-    };
+    auto ch_pb = ponio::make_simple_problem(
+        [=]( double t, double y )
+        {
+            return k * ( std::cos( t ) - y );
+        } );
 
     state_t const y_0 = 2.0;
 

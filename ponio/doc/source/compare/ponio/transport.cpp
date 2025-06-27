@@ -47,10 +47,8 @@ main()
         }
     }
 
-    auto upwind = [a, n_x, dx]( double t, state_t const& y )
+    auto upwind = [a, n_x, dx]( double t, auto&& y, state_t& dy )
     {
-        auto dy = state_t( y.size() );
-
         dy[0] = -( std::max( a, 0. ) * ( y[0] - y[n_x - 1] ) + std::min( a, 0. ) * ( y[1] - y[0] ) ) / dx;
 
         for ( std::size_t i = 1; i < n_x - 1; ++i )
@@ -59,8 +57,6 @@ main()
         }
 
         dy[n_x - 1] = -( std::max( a, 0. ) * ( y[n_x - 1] - y[n_x - 2] ) + std::min( a, 0. ) * ( y[0] - y[n_x - 1] ) ) / dx;
-
-        return dy;
     };
 
     auto vec_observer = ponio::observer::vector_observer<state_t, double>();

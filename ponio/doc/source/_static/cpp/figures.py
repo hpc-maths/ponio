@@ -69,7 +69,7 @@ def plot_multi_lorenz(methods: dict[str, str], output: str):
 
 def lorenz_fig():
     # explicit RK
-    plot_lorenz("lorenz_rk.txt", "lorenz_rk.png")
+    plot_lorenz("lorenz_rk_pb.txt", "lorenz_rk_pb.png")
 
     # 4 methods
     methods = {

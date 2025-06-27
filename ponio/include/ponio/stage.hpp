@@ -59,4 +59,10 @@ namespace ponio // NOLINT(modernize-concat-nested-namespaces)
 
     } // namespace stages
 
+    /** @class sub_method
+     *  @brief indicator for sub-method in splitting method
+     */
+    template <std::size_t I>
+    using sub_method = std::integral_constant<std::size_t, I>;
+
 } // namespace ponio

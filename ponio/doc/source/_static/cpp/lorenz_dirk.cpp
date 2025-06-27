@@ -23,13 +23,11 @@ main()
 
     double sigma = 10., rho = 28., beta = 8. / 3.;
 
-    auto f = [=]( double /* t */, state_t const& u ) -> state_t
+    auto f = [=]( double /* t */, auto const& u, state_t& du )
     {
-        double dt_u0 = sigma * ( u[1] - u[0] );
-        double dt_u1 = rho * u[0] - u[1] - u[0] * u[2];
-        double dt_u2 = u[0] * u[1] - beta * u[2];
-
-        return { dt_u0, dt_u1, dt_u2 };
+        du[0] = sigma * ( u[1] - u[0] );
+        du[1] = rho * u[0] - u[1] - u[0] * u[2];
+        du[2] = u[0] * u[1] - beta * u[2];
     };
     auto jac_f = [=]( double, state_t const& u ) -> matrix_type
     {

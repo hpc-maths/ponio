@@ -14,9 +14,9 @@ main()
 
     double k = 50.;
 
-    auto curtiss_hirschfelder = [=]( double t, double y )
+    auto curtiss_hirschfelder = [=]( double t, double y, double& dy )
     {
-        return k * ( std::cos( t ) - y );
+        dy = k * ( std::cos( t ) - y );
     };
 
     ponio::time_span<double> const t_span = { 0., 2. }; // begin and end time

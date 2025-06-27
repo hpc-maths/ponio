@@ -83,20 +83,20 @@ main()
         { rho,   -1,    0    },
         { 0,     0,     -beta}
     };
-    auto N = [=]( double, vector_type const& u ) -> vector_type
+    auto N = []( double, vector_type const& u, vector_type& du )
     {
-        return { 0., -u[0] * u[2], u[0] * u[1] };
+        du = { 0., -u[0] * u[2], u[0] * u[1] };
     };
     auto pb = ponio::make_lawson_problem( L, N );
 
     // redefine a problem for splitting method
-    auto linear_part = [=]( double, vector_type const& u ) -> vector_type
+    auto linear_part = [=]( double, vector_type const& u, vector_type& du )
     {
-        return L * u;
+        du = L * u;
     };
-    auto nonlinear_part = [=]( double t, vector_type const& u ) -> vector_type
+    auto nonlinear_part = [=]( double t, vector_type const& u, vector_type& du )
     {
-        return N( t, u );
+        N( t, u, du );
     };
     auto pb_multi = ponio::make_problem( linear_part, nonlinear_part );
 

@@ -64,19 +64,19 @@ main( int, char** )
     double const dt                       = 0.01;
 
     // explicit methods
+    std::cout << "explicit methods ---" << std::endl;
     {
         // define problem
-        auto lorenz = [=]( double, state_t const& u ) -> state_t
+        auto lorenz = [=]( double, state_t const& u, state_t& du )
         {
-            auto du1 = sigma * ( u[1] - u[0] );
-            auto du2 = rho * u[0] - u[1] - u[0] * u[2];
-            auto du3 = u[0] * u[1] - beta * u[2];
-            return { du1, du2, du3 };
+            du[0] = sigma * ( u[1] - u[0] );
+            du[1] = rho * u[0] - u[1] - u[0] * u[2];
+            du[2] = u[0] * u[1] - beta * u[2];
         };
 
         auto explicit_solve_lorenz = [&]( auto& algo )
         {
-            std::cout << algo.id << "...";
+            std::cout << algo.id << "..." << std::flush;
 
             std::stringstream basename;
             basename << algo.id << ".dat";
@@ -84,7 +84,7 @@ main( int, char** )
 
             ponio::solve( lorenz, algo, u0, t_span, dt, ponio::observer::file_observer( filename ) );
 
-            std::cout << "\n";
+            std::cout << std::endl;
         };
 
         auto erk_algo = ponio::runge_kutta::erk_tuple<double>();
@@ -92,6 +92,7 @@ main( int, char** )
     }
 
     // lawson methods
+    std::cout << "Lawson methods ---" << std::endl;
     {
         // define problem
         auto L = matrix_type{
@@ -99,9 +100,9 @@ main( int, char** )
             { rho,   -1,    0    },
             { 0,     0,     -beta}
         };
-        auto N = [=]( double, vector_type const& u ) -> vector_type
+        auto N = []( double, vector_type const& u, vector_type& du )
         {
-            return { 0., -u[0] * u[2], u[0] * u[1] };
+            du = { 0., -u[0] * u[2], u[0] * u[1] };
         };
         auto lorenz = ponio::make_lawson_problem( L, N );
 
@@ -114,7 +115,7 @@ main( int, char** )
         auto lawson_solve_lorenz = [&]( auto& algo )
         {
             using algo_t = decltype( algo( mexp ) );
-            std::cout << "l" << algo_t::id << "...";
+            std::cout << "l" << algo_t::id << "..." << std::flush;
 
             std::stringstream basename;
             basename << "l" << algo_t::id << ".dat";
@@ -122,7 +123,7 @@ main( int, char** )
 
             ponio::solve( lorenz, algo( mexp ), u0, t_span, dt, ponio::observer::file_observer( filename ) );
 
-            std::cout << "\n";
+            std::cout << std::endl;
         };
 
         auto lrk_algo = ponio::runge_kutta::lrk_tuple<double, decltype( mexp )>();
@@ -130,14 +131,14 @@ main( int, char** )
     }
 
     // dirk methods
+    std::cout << "dirk methods ---" << std::endl;
     {
         // define problem
-        auto f = [=]( double, state_t const& u ) -> state_t
+        auto f = [=]( double, state_t const& u, state_t& du )
         {
-            auto du1 = sigma * ( u[1] - u[0] );
-            auto du2 = rho * u[0] - u[1] - u[0] * u[2];
-            auto du3 = u[0] * u[1] - beta * u[2];
-            return { du1, du2, du3 };
+            du[0] = sigma * ( u[1] - u[0] );
+            du[1] = rho * u[0] - u[1] - u[0] * u[2];
+            du[2] = u[0] * u[1] - beta * u[2];
         };
 
         auto jac_f = [=]( double, state_t const& u ) -> matrix_type
@@ -153,7 +154,7 @@ main( int, char** )
 
         auto dirk_solve_lorenz = [&]( auto& algo )
         {
-            std::cout << algo.id << "...";
+            std::cout << algo.id << "..." << std::flush;
 
             std::stringstream basename;
             basename << algo.id << ".dat";
@@ -161,7 +162,7 @@ main( int, char** )
 
             ponio::solve( lorenz, algo, u0, t_span, dt, ponio::observer::file_observer( filename ) );
 
-            std::cout << "\n";
+            std::cout << std::endl;
         };
 
         auto dirk_algo = std::make_tuple( ponio::runge_kutta::backward_euler(),
@@ -180,20 +181,25 @@ main( int, char** )
     }
 
     // splitting methods
+    std::cout << "splitting methods ---" << std::endl;
     {
-        auto linear_part = [=]( double, vector_type const& u ) -> vector_type
+        auto linear_part = [=]( double, vector_type const& u, vector_type& du )
         {
-            return { -sigma * u[0] + sigma * u[1], rho * u[0] - u[1], -beta * u[2] };
+            du[0] = -sigma * u[0] + sigma * u[1];
+            du[1] = rho * u[0] - u[1];
+            du[2] = -beta * u[2];
         };
-        auto nonlinear_part = [=]( double, vector_type const& u ) -> vector_type
+        auto nonlinear_part = [=]( double, vector_type const& u, vector_type& du )
         {
-            return { 0., -u[0] * u[2], u[0] * u[1] };
+            du[0] = 0.;
+            du[1] = -u[0] * u[2];
+            du[2] = u[0] * u[1];
         };
         auto lorenz = ponio::make_problem( linear_part, nonlinear_part );
 
         auto splitting_solve_lorenz = [&]( auto& algo )
         {
-            std::cout << algo.id << "...";
+            std::cout << algo.id << "..." << std::flush;
 
             std::stringstream basename;
             basename << algo.id << ".dat";
@@ -201,7 +207,7 @@ main( int, char** )
 
             ponio::solve( lorenz, algo, u0, t_span, dt, ponio::observer::file_observer( filename ) );
 
-            std::cout << "\n";
+            std::cout << std::endl;
         };
 
         auto splitting_algo = std::make_tuple( ponio::splitting::make_lie_tuple( std::make_pair( ponio::runge_kutta::rk_44(), 0.005 ),
