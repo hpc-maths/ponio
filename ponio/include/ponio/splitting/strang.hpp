@@ -67,13 +67,14 @@ namespace ponio::splitting::strang
         }
 
         /**
-         * incremental call of each method of each subproblem
+         * @brief incremental call of each method of each subproblem
+         *
          * @tparam I solving step
-         * @param f          \ref problem to solve
-         * @param tn         current time \f$t^n\f$
-         * @param[in,out] ui \f$\texttt{ui}=\phi_{^{\Delta t}/_2}^{[f_1]}\circ\cdots\circ\phi_{^{\Delta t}/_2}^{[f_{i-1}]}(t^n,u^n)\f$
-         * @param dt         time step \f$\Delta t\f$
-         * @details The parameter @p ui is update to \f$\phi_{^{\Delta t}/_2}^{[f_i]}(t^n,\texttt{ui})\f$
+         * @param f    problem to solve
+         * @param tn   current time \f$\Delta t\f$
+         * @param ui   initial solution for step `I`
+         * @param dt   time step \f$\Delta t\f$
+         * @param uip1 solution \f$\texttt{uip1} = \phi^{[i]}(\texttt{ui})\f$
          */
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I < N_methods - 1 )
@@ -151,14 +152,14 @@ namespace ponio::splitting::strang
     }
 
     /**
-     * decremental call of each method of each subproblem
+     * @brief decremental call of each method of each subproblem
+     *
      * @tparam I solving step
-     * @param f          \ref problem to solve
-     * @param tn         current time \f$t^n\f$
-     * @param[in,out] ui current state of the substep I \f$\texttt{ui}=\phi_{^{\Delta t}/_2}^{[f_1]}\circ\cdots\circ\phi_{\Delta
-     * t}^{[f_{n}]}\circ\cdots\circ\phi_{^{\Delta t}/_2}^{[f_{i+1}]}(t^n,u^n)\f$
-     * @param dt         time step \f$\Delta t\f$
-     * @details The parameter @p ui is update to \f$\phi_{^{\Delta t}/_2}^{[f_i]}(t^n,\texttt{ui})\f$
+     * @param f    problem to solve
+     * @param tn   current time \f$\Delta t\f$
+     * @param ui   initial solution for step `I`
+     * @param dt   time step \f$\Delta t\f$
+     * @param uip1 solution \f$\texttt{uip1} = \phi^{[i]}(\texttt{ui})\f$
      */
     template <typename value_t, typename... methods_t>
     template <std::size_t I, typename Problem_t, typename state_t>
@@ -172,14 +173,14 @@ namespace ponio::splitting::strang
 
     /**
      * call operator to initiate Strang splitting recursion
-     * @param f  \ref problem to solve
-     * @param tn current time \f$t^n\f$
-     * @param un current solution \f$u^n \approx u(t^n)\f$
-     * @param dt time step \f$\Delta t\f$
+     * @param f    \ref problem to solve
+     * @param tn   current time \f$t^n\f$
+     * @param un   current solution \f$u^n \approx u(t^n)\f$
+     * @param dt   time step \f$\Delta t\f$
+     * @param unp1 solution at time \f$t^{n+1} = t^n + \Delta t\f$
      */
     template <typename value_t, typename... methods_t>
     template <typename Problem_t, typename state_t>
-    // auto
     void
     strang<value_t, methods_t...>::operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
     {
@@ -291,8 +292,15 @@ namespace ponio::splitting::strang
             detail::_split_solve<I>( f, methods, ui, tn + ( 0.5 + shift ) * dt, tn + dt, time_steps[I], uip1, _info );
         }
 
+        /**
+         * call operator to initiate adaptive Strang splitting recursion
+         * @param f    \ref problem to solve
+         * @param tn   current time \f$t^n\f$
+         * @param un   current solution \f$u^n \approx u(t^n)\f$
+         * @param dt   time step \f$\Delta t\f$
+         * @param unp1 solution at time \f$t^{n+1} = t^n + \Delta t\f$
+         */
         template <typename Problem_t, typename state_t>
-        // auto
         void
         operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& u_np1 )
         {

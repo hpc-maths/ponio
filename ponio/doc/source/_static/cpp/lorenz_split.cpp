@@ -19,29 +19,23 @@ main()
 
     double sigma = 10., rho = 28., beta = 8. / 3.;
 
-    auto phi_0 = [=]( double /* t */, state_t&& u ) -> state_t
+    auto phi_0 = [=]( double /* t */, auto&& u, state_t& du )
     {
-        double dt_u0 = sigma * u[1];
-        double dt_u1 = rho * u[0];
-        double dt_u2 = u[0] * u[1];
-
-        return { dt_u0, dt_u1, dt_u2 };
+        du[0] = sigma * u[1];
+        du[1] = rho * u[0];
+        du[2] = u[0] * u[1];
     };
-    auto phi_1 = [=]( double /* t */, state_t&& u ) -> state_t
+    auto phi_1 = [=]( double /* t */, auto&& u, state_t& du )
     {
-        double dt_u0 = -sigma * u[0];
-        double dt_u1 = -u[1];
-        double dt_u2 = -beta * u[2];
-
-        return { dt_u0, dt_u1, dt_u2 };
+        du[0] = -sigma * u[0];
+        du[1] = -u[1];
+        du[2] = -beta * u[2];
     };
-    auto phi_2 = [=]( double /* t */, state_t&& u ) -> state_t
+    auto phi_2 = [=]( double /* t */, auto&& u, state_t& du )
     {
-        double dt_u0 = 0;
-        double dt_u1 = -u[0] * u[2];
-        double dt_u2 = 0;
-
-        return { dt_u0, dt_u1, dt_u2 };
+        du[0] = 0;
+        du[1] = -u[0] * u[2];
+        du[2] = 0;
     };
     auto lorenz = ponio::make_problem( phi_0, phi_1, phi_2 );
 

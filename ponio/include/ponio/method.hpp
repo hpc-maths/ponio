@@ -71,20 +71,16 @@ namespace ponio
          * @param un   computed solution \f$u^n\f$ à time \f$t^n\f$
          * @param dt   time step
          * @param unp1 computed solution \f$u^{n+1}\f$ à time \f$t^{n+1}\f$
-         * @return tuple of result of iteration \f$(t^{n+1},u^{n+1},\Delta t_{opt})\f$ if
-         * iteration is accepted, \f$(t^{n},u^{n},\Delta t_{opt})\f$ otherwise. If `Algorithm_t`
-         * is a constant time step method, so \f$\Delta t_{opt}\f$ is alway equal to the same
-         * initial value.
+         * @details Current time `tn`, time step `dt` and state `unp1` are updated. If this is an adaptive time step method, and the
+         * iteration failed with time step `dt`, `unp1` is step to initial solution `un` and current time `tn` isn't updated.
          */
         template <typename Problem_t, typename value_t>
-        // std::tuple<value_t, state_t, value_t>
         void
         operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
         {
             _call_stage( f, tn, un, dt );
 
             _return( tn, un, dt, unp1 );
-            // return _return( tn, un, dt );
         }
 
         // NOLINTBEGIN(modernize-type-traits,modernize-use-constraints)
@@ -131,24 +127,18 @@ namespace ponio
          * @param un   state at the begining of the step
          * @param dt   time step of the step
          * @param unp1 state at the begining of the step
-         * @return return \f$(t^{n+1},u^{n+1},\Delta t_{opt})\f$ if iteration is accepted,
-         * and return \f$(t^{n},u^{n},\Delta t_{opt})\f$ otherwise.
          * @details This member function differs if the algorithm is adaptive time stepping or not.
          */
         template <typename value_t, typename Algo_t = Algorithm_t>
-        // std::tuple<value_t, state_t, value_t>
         void
         _return( value_t& tn, [[maybe_unused]] state_t& un, value_t& dt, state_t& unp1 )
         {
             tn = tn + dt;
             std::swap( kis.back(), unp1 );
-
-            // return std::forward_as_tuple( tn + dt, kis.back(), dt );
         }
 
         template <typename value_t, typename Algo_t = Algorithm_t>
             requires std::same_as<Algo_t, Algorithm_t> && Algorithm_t::is_embedded
-        // std::tuple<value_t, state_t, value_t>
         void
         _return( value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
         {
@@ -165,8 +155,6 @@ namespace ponio
                 // tn = tn;
                 std::swap( un, unp1 );
                 dt = new_dt;
-
-                // return std::forward_as_tuple( tn, un, new_dt );
             }
             else
             {
@@ -175,8 +163,6 @@ namespace ponio
                 tn = tn + dt;
                 std::swap( kis[Algorithm_t::N_stages], unp1 );
                 dt = new_dt;
-
-                // return std::forward_as_tuple( tn + dt, kis[Algorithm_t::N_stages], new_dt );
             }
         }
 
@@ -240,12 +226,18 @@ namespace ponio
         {
         }
 
+        /**
+         * call operator which process the underlying algorithm
+         * @param f    callable obect which represents the problem to solve
+         * @param tn   time \f$t^n\f$ last time where solution is computed
+         * @param un   computed solution \f$u^n\f$ à time \f$t^n\f$
+         * @param dt   time step
+         * @param unp1 computed solution \f$u^{n+1}\f$ à time \f$t^{n+1}\f$
+         */
         template <typename Problem_t, typename value_t>
-        // std::tuple<value_t, state_t, value_t>
         void
         operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
         {
-            // return alg( f, tn, un, kis, dt );
             return alg( f, tn, un, kis, dt, unp1 );
         }
 
@@ -310,12 +302,10 @@ namespace ponio
         }
 
         template <typename Problem_t, typename value_t>
-        // std::tuple<value_t, state_t, value_t>
         void
         operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
         {
             std::tie( tn, unp1, dt ) = alg( f, tn, un, dt );
-            // return alg( f, tn, un, dt );
         }
 
         /**

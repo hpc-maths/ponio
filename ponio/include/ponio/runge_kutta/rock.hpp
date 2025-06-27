@@ -674,14 +674,14 @@ namespace ponio::runge_kutta::rock
          * @tparam problem_t  type of \f$f\f$
          * @tparam state_t    type of current state
          * @tparam array_ki_t type of temporary stages (only 6 needed for ROCK4)
-         * @param f  operator \f$f\f$
-         * @param tn current time
-         * @param un current state
-         * @param G  array of temporary stages
-         * @param dt current time step
+         * @param f     operator \f$f\f$
+         * @param tn    current time
+         * @param un    current state
+         * @param G     array of temporary stages
+         * @param dt    current time step
+         * @param u_np1 solution \f$u^{n+1}\f$ at time \f$t^{n+1} = t^n + \Delta t\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        // std::tuple<value_t, state_t, value_t>
         void
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt, state_t& unp1 )
         {
@@ -801,27 +801,20 @@ namespace ponio::runge_kutta::rock
                     tn = tn + dt;
                     std::swap( uj, unp1 );
                     dt = new_dt;
-
-                    // return { tn + dt, uj, new_dt };
                 }
                 else
                 {
                     // tn = tn;
                     std::swap( un, unp1 );
                     dt = new_dt;
-
-                    // return { tn, un, new_dt };
                 }
             }
             else
             {
                 f( t_jm2, ujm4, f_tmp );
-                // uj = uj + b_1 * ujm1 + b_2 * ujm2 + b_3 * ujm3 + b_4 * f_tmp;
 
                 tn   = tn + dt;
                 unp1 = uj + b_1 * ujm1 + b_2 * ujm2 + b_3 * ujm3 + b_4 * f_tmp;
-
-                // return { tn + dt, uj, dt };
             }
         }
 

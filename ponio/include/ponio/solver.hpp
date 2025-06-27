@@ -409,9 +409,6 @@ namespace ponio
         time_iterator<value_t, state_t, method_t, problem_t> const& rhs )
     {
         return lhs.sol.time == rhs.sol.time;
-
-        //( std::abs( lhs.sol.time - rhs.sol.time ) <= std::numeric_limits<value_t>::epsilon() * std::abs( std::min( lhs.sol.time,
-        // rhs.sol.time ) ) * 1 );
     }
 
     /**
@@ -448,6 +445,11 @@ namespace ponio
         return time_iterator<value_t, state_t, method_t, problem_t>( pb, std::forward<method_t>( meth ), u0, t_span, dt );
     }
 
+    /**
+     * @brief sentinel for time_iterator class
+     *
+     * @tparam value_t_ type time
+     */
     template <typename value_t_>
     struct time_sentinel_iterator
     {
@@ -683,7 +685,6 @@ namespace ponio
 
         while ( current_time < last_time )
         {
-            // std::tie( current_time, un1, current_dt ) = meth( pb, current_time, un, current_dt );
             meth( pb, current_time, un, current_dt, un1 );
             std::swap( un, un1 );
 

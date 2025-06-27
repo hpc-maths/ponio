@@ -181,8 +181,12 @@ namespace ponio::runge_kutta::pirock
         static constexpr bool is_imex_method     = true;
         static constexpr std::size_t N_operators = 2;
         static constexpr std::size_t N_stages    = stages::dynamic;
-        static constexpr std::size_t N_storage   = std::
-            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 19>, std::integral_constant<std::size_t, 13>>::value;
+        // clang-format off
+        static constexpr std::size_t N_storage   = std::conditional_t<shampine_trick_enable,
+                                                    std::integral_constant<std::size_t, 18>, // if shampine's trick
+                                                    std::integral_constant<std::size_t, 12>  // else (no error estimation)
+                                                >::value;
+        // clang-format on
         static constexpr std::size_t order   = 2;
         static constexpr std::string_view id = "PIROCK";
 
@@ -249,14 +253,14 @@ namespace ponio::runge_kutta::pirock
          * @tparam problem_t  type of \f$f\f$
          * @tparam state_t    type of current state
          * @tparam array_ki_t type of temporary stages (only 3 needed for ROCK2)
-         * @param pb problem \f$(F_D, F_R)\f$ and the Jacibian of reaction part \f$\frac{\partial F_R}{\partial u}\f$
-         * @param tn current time
-         * @param un current state
-         * @param U  array of temporary stages
-         * @param dt current time step
+         * @param pb    problem \f$(F_D, F_R)\f$ and the Jacibian of reaction part \f$\frac{\partial F_R}{\partial u}\f$
+         * @param tn    current time
+         * @param un    current state
+         * @param U     array of temporary stages
+         * @param dt    current time step
+         * @param u_np1 solution \f$u^{n+1}\f$ at time \f$t^{n+1} = t^n + \Delta t\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        // std::tuple<value_t, state_t, value_t>
         void
         operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt, state_t& u_np1 )
         {
@@ -283,14 +287,13 @@ namespace ponio::runge_kutta::pirock
             // | 10    | u_sp2            | $u^{(s+2)}$ stage in PIROCK method                |
             // | 11    | u_sp3            | $u^{(s+3)}$ stage in PIROCK method                |
             // | 11    | rhs_sp2          | right-hand side to compute $u^{(s+2)}$ stage      |
-            // | 12    | u_np1            | $u^{n+1}$ output of PIROCK method                 |
-            // | 13    | shampine_element | Shampine's trick temporary element                |
-            // | 14    | f_D_u            | $F_D(u^{\star(s-1)}) - F_D(u^{(s-2)})$ term       |
-            // | 15    | u_tmp            | temporary value for compute Shampine's trick      |
+            // | 12    | shampine_element | Shampine's trick temporary element                |
+            // | 13    | f_D_u            | $F_D(u^{\star(s-1)}) - F_D(u^{(s-2)})$ term       |
+            // | 14    | u_tmp            | temporary value for compute Shampine's trick      |
             // | 15    | fe_tmp_bis       | temporary output of explicit part                 |
-            // | 16    | err_D            | $err_D$ error on diffusion term                   |
-            // | 17    | rhs_R            | right-hand side to compute $err_R$ error term     |
-            // | 18    | err_R            | $err_R$ error on reaction term                    |
+            // | 15    | err_D            | $err_D$ error on diffusion term                   |
+            // | 16    | rhs_R            | right-hand side to compute $err_R$ error term     |
+            // | 17    | err_R            | $err_R$ error on reaction term                    |
             //
             // > if method is called as a constant time step method, only index from 0 to 12 are used
 
@@ -472,13 +475,13 @@ namespace ponio::runge_kutta::pirock
 
             if constexpr ( shampine_trick_enable && detail::problem_operator<decltype( pb.implicit_part ), value_t> )
             {
-                auto& shampine_element = U[13];
-                auto& f_D_u            = U[14];
-                auto& u_tmp            = U[15];
-                auto& fe_tmp_bis       = U[15]; // temporary use of U[15] before u_tmp
+                auto& shampine_element = U[12];
+                auto& f_D_u            = U[13];
+                auto& u_tmp            = U[14];
+                auto& fe_tmp_bis       = U[14]; // temporary use of U[15] before u_tmp
 
                 // for embedded method
-                auto& err_D = U[16];
+                auto& err_D = U[15];
 
                 // $err_D = \sigma_\alpha(1-\tau_a/\sigma_a^2)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)}))$
                 pb.explicit_part( tn, us_sm1, fe_tmp );
@@ -493,8 +496,8 @@ namespace ponio::runge_kutta::pirock
 
                 if constexpr ( is_embedded )
                 {
-                    auto& rhs_R = U[17];
-                    auto& err_R = U[18];
+                    auto& rhs_R = U[16];
+                    auto& err_R = U[17];
 
                     _info.number_of_eval[1] += 2;
 
@@ -789,7 +792,7 @@ namespace ponio::runge_kutta::pirock
         static constexpr std::size_t N_operators = 3;
         static constexpr std::size_t N_stages    = stages::dynamic;
         static constexpr std::size_t N_storage   = std::
-            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 28>, std::integral_constant<std::size_t, 21>>::value;
+            conditional_t<shampine_trick_enable, std::integral_constant<std::size_t, 27>, std::integral_constant<std::size_t, 20>>::value;
         static constexpr std::size_t order   = 2;
         static constexpr std::string_view id = "PIROCK";
 
@@ -856,14 +859,14 @@ namespace ponio::runge_kutta::pirock
          * @tparam problem_t  type of \f$f\f$
          * @tparam state_t    type of current state
          * @tparam array_ki_t type of temporary stages (13 or 18 stages needed)
-         * @param pb problem with 3 operators: \f$F_R\f$, \f$F_D\f$ and \f$F_A\f$
-         * @param tn current time
-         * @param un current state
-         * @param U  array of temporary stages
-         * @param dt current time step
+         * @param pb    problem with 3 operators: \f$F_R\f$, \f$F_D\f$ and \f$F_A\f$
+         * @param tn    current time
+         * @param un    current state
+         * @param U     array of temporary stages
+         * @param dt    current time step
+         * @param u_np1 solution \f$u^{n+1}\f$ at time \f$t^{n+1} = t^n + \Delta t\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        // std::tuple<value_t, state_t, value_t>
         void
         operator()( problem_t& pb, value_t& tn, state_t& un, array_ki_t& U, value_t& dt, state_t& u_np1 )
         {
@@ -1121,17 +1124,15 @@ namespace ponio::runge_kutta::pirock
             value_t tau   = sigma * rock_coeff::fp2[deg_index - 1] + sigma * sigma;
             value_t tau_a = 0.5 * detail::power<2>( alpha - 1. ) + 2. * alpha * ( 1. - alpha ) * sigma + alpha * alpha * tau;
 
-            // auto& u_np1 = U[20];
-
             if constexpr ( shampine_trick_enable
                            && detail::problem_operator<std::tuple_element_t<reaction_op::value, decltype( pb.system )>, value_t> )
             {
-                auto& shampine_element = U[21];
-                auto& f_D_u            = U[22];
-                auto& u_tmp            = U[23];
+                auto& shampine_element = U[20];
+                auto& f_D_u            = U[21];
+                auto& u_tmp            = U[22];
 
                 // for embedded method
-                auto& err_D = U[24];
+                auto& err_D = U[23];
                 pb( diffusion_op(), tn, us_sm1, fd_tmp );
                 pb( diffusion_op(), tn, u_sm2, fd_tmp_bis );
                 // $err_D = \sigma_\alpha(1-\tau_a/\sigma_a^2)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)}))$
@@ -1150,9 +1151,9 @@ namespace ponio::runge_kutta::pirock
 
                 if constexpr ( is_embedded )
                 {
-                    auto& rhs_R = U[25];
-                    auto& err_R = U[26];
-                    auto& err_A = U[27];
+                    auto& rhs_R = U[24];
+                    auto& err_R = U[25];
+                    auto& err_A = U[26];
 
                     _info.number_of_eval[1] += 2;
 

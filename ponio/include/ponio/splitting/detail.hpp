@@ -27,6 +27,7 @@ namespace ponio::splitting::detail
      * @param ui   initial state
      * @param ti   initial time
      * @param tf   final time
+     * @param uip1 final state
      * @param dt   time step
      */
     template <std::size_t I, typename Problem_t, typename Method_t, typename state_t, typename value_t, typename iteration_info_t>
@@ -51,7 +52,6 @@ namespace ponio::splitting::detail
         }
 
         std::swap( ui, uip1 );
-        //  return ui;
     }
 
     // ---- class splitting_tuple ----------------------------------

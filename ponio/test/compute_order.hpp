@@ -366,83 +366,65 @@ namespace splitting_method
         }
     }
 
-    template <typename Algorithm_t, typename T = double>
+    template <std::size_t I>
     auto
-    long_time_check_order_odd( Algorithm_t& algo )
+    make_lotka_volterra_problem( double, double, double, double )
     {
-        using state_t = std::valarray<T>;
+    }
 
-        T alpha = 2. / 3.;
-        T beta  = 4. / 3.;
-        T gamma = 1.;
-        T delta = 1.;
+    template <>
+    auto
+    make_lotka_volterra_problem<2>( double alpha, double beta, double gamma, double delta )
+    {
+        return ponio::make_problem(
+            [=]( double, auto&& u, auto& du )
+            {
+                du[0] = alpha * u[0] - beta * u[0] * u[1];
+                du[1] = -gamma * u[1];
+            },
+            [=]( double, auto&& u, auto& du )
+            {
+                du[0] = 0.;
+                du[1] = delta * u[0] * u[1];
+            } );
+    }
 
-        auto pb = ponio::make_problem(
-            [=]( T, auto&& u, state_t& du )
+    template <>
+    auto
+    make_lotka_volterra_problem<3>( double alpha, double beta, double gamma, double delta )
+    {
+        return ponio::make_problem(
+            [=]( double, auto&& u, auto& du )
             {
                 du[0] = alpha * u[0] - beta * u[0] * u[1];
                 du[1] = 0.;
             },
-            [=]( T, auto&& u, state_t& du )
+            [=]( double, auto&& u, auto& du )
             {
                 du[0] = 0.;
                 du[1] = delta * u[0] * u[1];
             },
-            [=]( T, auto&& u, state_t& du )
+            [=]( double, auto&& u, auto& du )
             {
                 du[0] = 0.;
                 du[1] = -gamma * u[1];
             } );
-
-        // invariant calculator
-        auto V = [=]( state_t const& u ) -> T
-        {
-            return delta * u[0] - gamma * std::log( u[0] ) + beta * u[1] - alpha * std::log( u[1] );
-        };
-
-        T x0          = 1.9;
-        state_t u_ini = { x0, x0 };
-        T V_ini       = V( u_ini );
-
-        ponio::time_span<T> t_span = { 0., 1000. };
-        std::vector<T> dts         = { 0.25, 0.125, 0.1, 0.075, 0.05 }; // find a way to adapt this range to the method
-        std::vector<T> relative_errors;
-        std::vector<T> log_dts;
-
-        for ( auto dt : dts )
-        {
-            state_t u_end = ::ponio::solve( pb, algo, u_ini, t_span, dt, []( T, state_t const&, T ) {} );
-            relative_errors.push_back( std::log10( relative_error( V_ini, V( u_end ) ) ) );
-            log_dts.push_back( std::log10( dt ) );
-        }
-
-        auto [a, b] = mayor_method( log_dts, relative_errors );
-
-        return a;
     }
 
     template <typename Algorithm_t, typename T = double>
     auto
-    long_time_check_order_even( Algorithm_t& algo )
+    long_time_check_order( Algorithm_t& algo )
     {
         using state_t = std::valarray<T>;
+
+        static constexpr std::size_t split_size = std::tuple_size_v<decltype( algo.algos )>;
 
         T alpha = 2. / 3.;
         T beta  = 4. / 3.;
         T gamma = 1.;
         T delta = 1.;
 
-        auto pb = ponio::make_problem(
-            [=]( T, auto&& u, state_t& du )
-            {
-                du[0] = alpha * u[0] - beta * u[0] * u[1];
-                du[1] = -gamma * u[1];
-            },
-            [=]( T, auto&& u, state_t& du )
-            {
-                du[0] = 0.;
-                du[1] = delta * u[0] * u[1];
-            } );
+        auto pb = make_lotka_volterra_problem<split_size>( alpha, beta, gamma, delta );
 
         // invariant calculator
         auto V = [=]( state_t const& u ) -> T
@@ -454,8 +436,8 @@ namespace splitting_method
         state_t u_ini = { x0, x0 };
         T V_ini       = V( u_ini );
 
-        ponio::time_span<T> t_span = { 0., 1000. };
-        std::vector<T> dts         = { 0.5, 0.3333, 0.25, 0.125, 0.1 }; // find a way to adapt this range to the method
+        ponio::time_span<T> t_span = { 0., 100. };
+        std::vector<T> dts         = { 0.5, 0.125, 0.1, 0.075, 0.05 }; // find a way to adapt this range to the method
         std::vector<T> relative_errors;
         std::vector<T> log_dts;
 
@@ -475,22 +457,15 @@ namespace splitting_method
     T
     check_order( Algorithm_t algo = Algorithm_t() )
     {
-        using algos_t = decltype( algo.algos );
-
-        if constexpr ( std::tuple_size_v<algos_t> % 2 == 0 )
-        {
-            return long_time_check_order_even( algo );
-        }
-        else
-        {
-            return long_time_check_order_odd( algo );
-        }
+        return long_time_check_order( algo );
     }
 
     template <std::size_t I, typename splitting_tuple_t, typename T = double>
     T
     check_order_split_solve( splitting_tuple_t split_tuple = splitting_tuple_t() )
     {
+        // multiple solve of problem : dy = y
+
         using state_t                             = T;
         static constexpr std::size_t split_length = std::tuple_size_v<decltype( split_tuple.methods )>;
 

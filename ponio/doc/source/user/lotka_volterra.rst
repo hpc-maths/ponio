@@ -16,7 +16,7 @@ We write the problem like
 
 .. literalinclude:: ../_static/cpp/lotka_volterra_fobs.cpp
   :language: cpp
-  :lines: 19-31
+  :lines: 19-29
   :lineno-start: 19
   :linenos:
 
@@ -24,13 +24,12 @@ And launch the simulation between :math:`0` and :math:`15` with the time step :m
 
 .. literalinclude:: ../_static/cpp/lotka_volterra_fobs.cpp
   :language: cpp
-  :lines: 36-41
-  :lineno-start: 36
+  :lines: 34-39
+  :lineno-start: 34
   :linenos:
 
 
 The next sections specify how to define the observer :code:`obs`, to write into a file, in standard output, a stream, or a user-defined observer. The observer is called at each iteration in time and take the current time :math:`t^n`, the current state :math:`u^n` and the current time step :math:`\Delta t^n`.
-
 
 The file observer
 -----------------
@@ -47,8 +46,8 @@ The :cpp:class:`ponio::observer::file_observer` class can be build with a `std::
 
 .. literalinclude:: ../_static/cpp/lotka_volterra_fobs.cpp
   :language: cpp
-  :lines: 33-34
-  :lineno-start: 33
+  :lines: 31-32
+  :lineno-start: 31
   :linenos:
 
 .. note::
@@ -82,8 +81,8 @@ In this example we export data into the standard output with :cpp:class:`ponio::
 
 .. literalinclude:: ../_static/cpp/lotka_volterra_cobs.cpp
   :language: cpp
-  :lines: 31
-  :lineno-start: 31
+  :lines: 29
+  :lineno-start: 29
   :linenos:
 
 .. note::
@@ -108,16 +107,16 @@ In this example we export data into the standard output with :cpp:class:`ponio::
 
 .. literalinclude:: ../_static/cpp/lotka_volterra_sobs.cpp
   :language: cpp
-  :lines: 33-34
-  :lineno-start: 33
+  :lines: 31-32
+  :lineno-start: 31
   :linenos:
 
 Next we get all informations into the observer or our buffer.
 
 .. literalinclude:: ../_static/cpp/lotka_volterra_sobs.cpp
   :language: cpp
-  :lines: 43
-  :lineno-start: 43
+  :lines: 41
+  :lineno-start: 41
   :linenos:
 
 
@@ -158,8 +157,8 @@ Now we just have to build an instance of this class
 
 .. literalinclude:: ../_static/cpp/lotka_volterra_uobs.cpp
   :language: cpp
-  :lines: 71
-  :lineno-start: 71
+  :lines: 69
+  :lineno-start: 69
   :linenos:
 
 The output of this observer looks like this

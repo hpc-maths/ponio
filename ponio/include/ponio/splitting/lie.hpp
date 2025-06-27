@@ -62,13 +62,13 @@ namespace ponio::splitting::lie
         }
 
         /**
-         * incremental call of each method of each subproblem
-         * @tparam I solving step
-         * @param f          \ref problem to solve
-         * @param tn         current time \f$t^n\f$
-         * @param[in,out] ui \f$\texttt{ui}=\phi_{\Delta t}^{[f_1]}\circ\cdots\circ\phi_{\Delta t}^{[f_{i-1}]}(t^n,u^n)\f$
-         * @param dt         time step \f$\Delta t\f$
-         * @details The parameter @p ui is update to \f$\phi_{\Delta t}^{[f_i]}(t^n,\texttt{ui})\f$
+         * @brief incremental call of each method of each subproblem
+         *
+         * @param f    problem to solve
+         * @param tn   current time \f$\Delta t\f$
+         * @param ui   initial solution for step `I`
+         * @param dt   time step \f$\Delta t\f$
+         * @param uip1 solution \f$\texttt{uip1} = \phi^{[i]}(\texttt{ui})\f$
          */
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I < N_steps )
@@ -79,13 +79,11 @@ namespace ponio::splitting::lie
                 _info.reset_eval();
             }
 
-            // ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
             detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], uip1, _info );
             _call_inc<I + 1>( f, tn, uip1, dt, ui );
         }
 
         template <typename Problem_t, typename state_t>
-        // auto
         void
         operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 );
 
@@ -134,10 +132,11 @@ namespace ponio::splitting::lie
 
     /**
      * call operator to initiate Lie splitting recursion
-     * @param f  \ref problem to solve
-     * @param tn current time \f$t^n\f$
-     * @param un current solution \f$u^n \approx u(t^n)\f$
-     * @param dt time step \f$\Delta t\f$
+     * @param f    \ref problem to solve
+     * @param tn   current time \f$t^n\f$
+     * @param un   current solution \f$u^n \approx u(t^n)\f$
+     * @param dt   time step \f$\Delta t\f$
+     * @param unp1 solution at time \f$t^{n+1} = t^n + \Delta t\f$
      */
     template <typename value_t, typename... methods_t>
     template <typename Problem_t, typename state_t>
@@ -145,10 +144,7 @@ namespace ponio::splitting::lie
     void
     lie<value_t, methods_t...>::operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
     {
-        // state_t ui = un;
-
         _call_inc( f, tn, un, dt, unp1 );
-        // return std::make_tuple( tn + dt, ui, dt );
 
         if constexpr ( N_methods % 2 == 0 )
         {

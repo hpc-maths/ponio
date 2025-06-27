@@ -155,6 +155,8 @@ TEST_CASE( "order::pirock_RDA" )
 
 TEST_CASE( "order::splitting[odd]" )
 {
+    // for Lie splitting method number of sub-stages can be odd or even (for Strang is always odd)
+
     // clang-format off
     auto lie_splitting    = ponio::splitting::make_lie_tuple(
         std::make_pair( ponio::runge_kutta::rk_33(), .1 ),
@@ -174,6 +176,8 @@ TEST_CASE( "order::splitting[odd]" )
 
 TEST_CASE( "order::splitting[even]" )
 {
+    // for Lie splitting method number of sub-stages can be odd or even (for Strang is always odd)
+
     // clang-format off
     auto lie_splitting    = ponio::splitting::make_lie_tuple(
         std::make_pair( ponio::runge_kutta::rk_44(), .001 ),
