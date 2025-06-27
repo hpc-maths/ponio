@@ -232,7 +232,7 @@ and create a :cpp:class:`ponio::implicit_problem`
 
 .. literalinclude:: ../_static/cpp/lorenz_dirk.cpp
   :language: cpp
-  :lines: 24-42
+  :lines: 24-40
   :lineno-start: 24
   :linenos:
 
@@ -240,8 +240,8 @@ Finally we can solve the problem with the same lines of previous solver
 
 .. literalinclude:: ../_static/cpp/lorenz_dirk.cpp
   :language: cpp
-  :lines: 44-49
-  :lineno-start: 44
+  :lines: 42-47
+  :lineno-start: 42
   :linenos:
 
 We use the DIRK(3, 4) method: :cpp:func:`ponio::runge_kutta::dirk34_t`.
