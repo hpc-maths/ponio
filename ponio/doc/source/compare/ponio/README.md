@@ -32,13 +32,13 @@ $$
 and the user provide the function $f$ as (a lambda function for the example):
 
 ```cpp
-  auto f = [](double t, state_t const& u) -> state_t;
+  auto f = [](double t, auto const& u, state_t& du);
 ```
 
 where `u` the current state of the function, `t` the current time and output is the result of $f(t,u)$.
 
 ```{literalinclude} lorenz.cpp
-  :lines: 19-22
+  :lines: 19-24
   :language: cpp
   :linenos:
   :lineno-start: 19
@@ -47,10 +47,10 @@ where `u` the current state of the function, `t` the current time and output is 
 After defined a method with `ponio::runge_kutta::rk_44()`, we can solve the problem between initial time and final time and give an observer which be call after each succeed time iteration
 
 ```{literalinclude} lorenz.cpp
-  :lines: 30-30
+  :lines: 32
   :language: cpp
   :linenos:
-  :lineno-start: 30
+  :lineno-start: 32
 ```
 
 the `ponio::observer::file_observer` is an observer that save all states in a file.
@@ -80,7 +80,7 @@ We choose a first order up-wind scheme to estimate the $x$ derivative and a forw
 We define the up-wind scheme as:
 
 ```{literalinclude} transport.cpp
-  :lines: 50-64
+  :lines: 50-60
   :language: cpp
   :linenos:
   :lineno-start: 50
@@ -137,7 +137,7 @@ $$
 We define this system as:
 
 ```{literalinclude} arenstorf.cpp
-  :lines: 17-33
+  :lines: 17-31
   :language: cpp
   :linenos:
   :lineno-start: 17
@@ -148,19 +148,19 @@ We solve this example with given method `ponio::runge_kutta::rk54_7m` which is t
 The time loop is the same as for Lorenz equation, for `rk54_7m` method
 
 ```{literalinclude} arenstorf.cpp
-  :lines: 41
+  :lines: 39
   :language: cpp
   :linenos:
-  :lineno-start: 41
+  :lineno-start: 39
 ```
 
 and for `rk87_13m` method
 
 ```{literalinclude} arenstorf.cpp
-  :lines: 42
+  :lines: 40
   :language: cpp
   :linenos:
-  :lineno-start: 42
+  :lineno-start: 40
 ```
 
 For the complet example, see [`arenstorf.cpp` source file](arenstorf.cpp).

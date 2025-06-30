@@ -171,7 +171,7 @@ Now we can write the linear part :math:`L` and non-linear part :math:`N:t, u\map
   :lines: 23-36
   :lineno-start: 23
   :linenos:
-  :emphasize-lines: 12
+  :emphasize-lines: 14
 
 The :cpp:class:`ponio::lawson_problem` builds in the emphasize line provides an interface which can be use by a classical explicit Runge-Kutta method or a Lawson method.
 
@@ -235,6 +235,7 @@ and create a :cpp:class:`ponio::implicit_problem`
   :lines: 24-40
   :lineno-start: 24
   :linenos:
+  :emphasize-lines: 17
 
 Finally we can solve the problem with the same lines of previous solver
 
@@ -312,6 +313,7 @@ Next we define the three function to represent :math:`\varphi^{[0]}`, :math:`\va
   :lines: 20-40
   :lineno-start: 20
   :linenos:
+  :emphasize-lines: 21
 
 Now we create a tuple of algorithms with :cpp:func:`ponio::splitting::lie::make_lie_tuple` or :cpp:func:`ponio::splitting::strang::make_strang_tuple` for respectively a Lie splitting method or Strang splitting method. In ponio their is also an adaptive time stepping Strang splitting method with :cpp:func:`ponio::splitting::strang::make_adaptive_strang_tuple`.
 
