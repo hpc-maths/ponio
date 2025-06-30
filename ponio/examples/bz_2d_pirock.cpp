@@ -144,10 +144,10 @@ main( int argc, char** argv )
     // diffusion terme
     auto diff_coeff = samurai::DiffCoeff<3>( { da, db, dc } );
     auto diff       = samurai::make_multi_diffusion_order2<decltype( y_ini )>( diff_coeff );
-    auto fd         = [&]( double /* t */, auto&& y )
+    auto fd         = [&]( double /* t */, auto&& y, auto& dy )
     {
         samurai::update_ghost_mr( y );
-        return -diff( y );
+        dy = -diff( y );
     };
 
     // reaction terme
@@ -189,14 +189,14 @@ main( int argc, char** argv )
     {
         return react;
     };
-    auto fr = [&]( double t, auto&& uv )
+    auto fr = [&]( double t, auto&& uv, auto& dt_uv )
     {
         // samurai::update_ghost_mr( uv );
-        return fr_t( t )( uv );
+        dt_uv = fr_t( t )( uv );
     };
 
     // spectral radius estimator for diffusion term
-    auto eigmax_computer = [&]( auto&, double, auto&, double )
+    auto eigmax_computer = [&]( auto&, double, auto&, double, auto& )
     {
         double const dx = mesh.cell_length( max_level );
         return da * 4. / ( dx * dx );

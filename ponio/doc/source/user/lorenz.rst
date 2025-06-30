@@ -34,56 +34,56 @@ In this section we solve this problem with a classical Runge-Kutta method. First
 
 next we choose a data structure to store state :math:`u`, for the sake of simplicity we chose the STL container :code:`std::valarray<double>`:
 
-.. literalinclude:: ../_static/cpp/lorenz_rk.cpp
+.. literalinclude:: ../_static/cpp/lorenz_rk_pb.cpp
   :language: cpp
-  :lines: 16
-  :lineno-start: 16
+  :lines: 17
+  :lineno-start: 17
   :linenos:
 
 Now we can write :math:`f:t, u\mapsto f(t,u)` as a lambda function:
 
-.. literalinclude:: ../_static/cpp/lorenz_rk.cpp
+.. literalinclude:: ../_static/cpp/lorenz_rk_pb.cpp
   :language: cpp
-  :lines: 18-27
-  :lineno-start: 18
+  :lines: 19-29
+  :lineno-start: 19
   :linenos:
 
-we can also use a :cpp:class:`ponio::problem` object, a user-defined functor or a function. Next we define the initial condition to :math:`u_0 = (1, 1, 1)`, the initial and final time in a time span (here between :math:`0` and :math:`20`) the time step :math:`\Delta t = 0.01` and solve with all this parameters with a classical RK(4,4): :cpp:type:`ponio::runge_kutta::rk_44_t`.
+ponio library provides interface for a function :math:`f` defined in this way, but we need to embedded it in a :cpp:class:`ponio::simple_problem` (see the call of :cpp:func:`ponio::solve` function). Next we define the initial condition to :math:`u_0 = (1, 1, 1)`, the initial and final time in a time span (here between :math:`0` and :math:`20`) the time step :math:`\Delta t = 0.01` and solve with all this parameters with a classical RK(4,4): :cpp:type:`ponio::runge_kutta::rk_44_t`.
 
 .. note::
 
   List of all explicit Runge-Kutta methods can be found in the :doc:`algorithms section <../api/algorithm>`.
 
-.. literalinclude:: ../_static/cpp/lorenz_rk.cpp
+.. literalinclude:: ../_static/cpp/lorenz_rk_pb.cpp
   :language: cpp
-  :lines: 29-34
-  :lineno-start: 29
+  :lines: 31-36
+  :lineno-start: 31
   :linenos:
   :emphasize-lines: 6
 
-In the last line we call :cpp:func:`ponio::solve` function, with a :cpp:class:`observer::file_observer` to store the output in :code:`lorenz_rk44.txt` text file.
+In the last line we call :cpp:func:`ponio::solve` function, with a :cpp:class:`observer::file_observer` to store the output in :code:`lorenz_rk_pb.txt` text file.
 
 .. note::
 
   To use the :code:`_fobs` literal you need to using the correct namespace
 
-  .. literalinclude:: ../_static/cpp/lorenz_rk.cpp
+  .. literalinclude:: ../_static/cpp/lorenz_rk_pb.cpp
     :language: cpp
-    :lines: 15
+    :lines: 16
 
-The full example can be found in :download:`lorenz_rk.cpp <../_static/cpp/lorenz_rk.cpp>`.
+The full example can be found in :download:`lorenz_rk_pb.cpp <../_static/cpp/lorenz_rk_pb.cpp>`.
 
 You can compile this example
 
 .. code-block::
 
-  $CXX -std=c++20 -I PONIO_INCLUDE lorenz_rk.cpp -o lorenz_rk
+  $CXX -std=c++20 -I PONIO_INCLUDE lorenz_rk_pb.cpp -o lorenz_rk_pb
 
 or with a cmake like in `ponio-gallery <https://github.com/hpc-maths/ponio-gallery>`_ repository.
 
 The output looks like this
 
-.. literalinclude:: ../_static/cpp/lorenz_rk.txt
+.. literalinclude:: ../_static/cpp/lorenz_rk_pb.txt
     :language: text
     :lines: 1-5
 
@@ -94,18 +94,39 @@ with in the first column the current time, the last one the current time step an
     import numpy as np
     import matplotlib.pyplot as plt
 
-    data = np.loadtxt("lorenz_rk.txt")
+    data = np.loadtxt("lorenz_rk_pb.txt")
     ax = plt.figure().add_subplot(projection='3d')
     x, y, z = data[:,1], data[:, 2], data[:, 3]
     ax.plot( x, y, z )
 
 
-.. figure:: ../_static/cpp/lorenz_rk.png
+.. figure:: ../_static/cpp/lorenz_rk_pb.png
     :scale: 50 %
     :alt: Lorenz attractor solved by RK(4, 4) method
 
     Lorenz attractor solved by RK(4, 4) method
 
+Like many other library, ponio library provides an interface with a function :math:`f` which takes the output by reference to provides extra-allocation:
+
+.. literalinclude:: ../_static/cpp/lorenz_rk.txt
+    :language: text
+    :lines: 20-25
+  :lineno-start: 20
+
+now the :cpp:func:`ponio::solve` function can takes this lambda without underlying it in a class:
+
+.. literalinclude:: ../_static/cpp/lorenz_rk.txt
+    :language: text
+    :lines: 32
+
+
+The full example can be found in :download:`lorenz_rk.cpp <../_static/cpp/lorenz_rk.cpp>`.
+
+You can compile this example
+
+.. code-block::
+
+  $CXX -std=c++20 -I PONIO_INCLUDE lorenz_rk.cpp -o lorenz_rk
 
 ----
 
@@ -147,10 +168,10 @@ Now we can write the linear part :math:`L` and non-linear part :math:`N:t, u\map
 
 .. literalinclude:: ../_static/cpp/lorenz_lrk.cpp
   :language: cpp
-  :lines: 23-34
+  :lines: 23-36
   :lineno-start: 23
   :linenos:
-  :emphasize-lines: 12
+  :emphasize-lines: 14
 
 The :cpp:class:`ponio::lawson_problem` builds in the emphasize line provides an interface which can be use by a classical explicit Runge-Kutta method or a Lawson method.
 
@@ -158,8 +179,8 @@ We have to define the exponential function which takes a matrix and return a mat
 
 .. literalinclude:: ../_static/cpp/lorenz_lrk.cpp
   :language: cpp
-  :lines: 36-40
-  :lineno-start: 36
+  :lines: 39-42
+  :lineno-start: 39
   :linenos:
 
 We can also define your own exponential function if you know the analytic form of the result of :math:`\exp(\tau L)` with :math:`\tau = c_j\Delta t`.
@@ -168,8 +189,8 @@ The call of function :cpp:func:`ponio::solve` doesn't change
 
 .. literalinclude:: ../_static/cpp/lorenz_lrk.cpp
   :language: cpp
-  :lines: 42-47
-  :lineno-start: 42
+  :lines: 44-49
+  :lineno-start: 44
   :linenos:
 
 We use the Lawson method given by the underlying RK(4,4) method: :cpp:var:`ponio::runge_kutta::lrk_44_t`.
@@ -211,16 +232,17 @@ and create a :cpp:class:`ponio::implicit_problem`
 
 .. literalinclude:: ../_static/cpp/lorenz_dirk.cpp
   :language: cpp
-  :lines: 24-42
+  :lines: 24-40
   :lineno-start: 24
   :linenos:
+  :emphasize-lines: 17
 
 Finally we can solve the problem with the same lines of previous solver
 
 .. literalinclude:: ../_static/cpp/lorenz_dirk.cpp
   :language: cpp
-  :lines: 44-49
-  :lineno-start: 44
+  :lines: 42-47
+  :lineno-start: 42
   :linenos:
 
 We use the DIRK(3, 4) method: :cpp:func:`ponio::runge_kutta::dirk34_t`.
@@ -288,16 +310,17 @@ Next we define the three function to represent :math:`\varphi^{[0]}`, :math:`\va
 
 .. literalinclude:: ../_static/cpp/lorenz_split.cpp
   :language: cpp
-  :lines: 20-46
+  :lines: 20-40
   :lineno-start: 20
   :linenos:
+  :emphasize-lines: 21
 
 Now we create a tuple of algorithms with :cpp:func:`ponio::splitting::lie::make_lie_tuple` or :cpp:func:`ponio::splitting::strang::make_strang_tuple` for respectively a Lie splitting method or Strang splitting method. In ponio their is also an adaptive time stepping Strang splitting method with :cpp:func:`ponio::splitting::strang::make_adaptive_strang_tuple`.
 
 .. literalinclude:: ../_static/cpp/lorenz_split.cpp
   :language: cpp
-  :lines: 48-50
-  :lineno-start: 48
+  :lines: 42-44
+  :lineno-start: 42
   :linenos:
 
 We have to select an algorithm for each step of splitting method, and specify a time step (smaller than splitting time step), in this case we choose 3 different Runge-Kutta methods of order 4 with 4 stages:
@@ -320,8 +343,8 @@ Finally we call :cpp:func:`ponio::solve` function, as previous solver
 
 .. literalinclude:: ../_static/cpp/lorenz_split.cpp
   :language: cpp
-  :lines: 52-57
-  :lineno-start: 52
+  :lines: 46-51
+  :lineno-start: 46
   :linenos:
 
 

@@ -50,12 +50,11 @@ class brusselator_model
     {
     }
 
-    vector_type
-    operator()( double, vector_type const& u ) const
+    void
+    operator()( double, vector_type const& u, vector_type& du ) const
     {
-        double const du1 = m_a - ( m_b + 1 ) * u[0] + u[0] * u[0] * u[1];
-        double const du2 = m_b * u[0] - u[0] * u[0] * u[1];
-        return vector_type{ du1, du2 };
+        du[0] = m_a - ( m_b + 1 ) * u[0] + u[0] * u[0] * u[1];
+        du[1] = m_b * u[0] - u[0] * u[0] * u[1];
     }
 
     matrix_type
@@ -64,10 +63,12 @@ class brusselator_model
         double const y1 = u[0];
         double const y2 = u[1];
 
+        // clang-format off
         return matrix_type{
-            {2.0 * y1 * y2 - ( m_b + 1.0 ), y1 * y1 },
-            { -2.0 * y1 * y2 + m_b,         -y1 * y1}
+            {  2.0 * y1 * y2 - ( m_b + 1.0 ), y1 * y1 },
+            { -2.0 * y1 * y2 + m_b,          -y1 * y1 }
         };
+        // clang-format on
     }
 };
 

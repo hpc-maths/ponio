@@ -42,13 +42,11 @@ struct nagumo
     {
     }
 
-    std::valarray<double>
-    operator()( double, std::valarray<double> const& u ) const
+    void
+    operator()( double, std::valarray<double> const& u, std::valarray<double>& udot ) const
     {
         double const oneoverdxdx = 1. / ( dx * dx );
         std::size_t const nx     = u.size();
-
-        std::valarray<double> udot( nx );
 
         udot[0] = oneoverdxdx * ( -2. * u[0] + 2. * u[1] );
         for ( std::size_t i = 1; i < nx - 1; ++i )
@@ -58,8 +56,6 @@ struct nagumo
         udot[nx - 1] = oneoverdxdx * ( 2. * u[nx - 2] - 2. * u[nx - 1] );
 
         udot += k * u * u * ( 1.0 - u );
-
-        return udot;
     }
 
     std::valarray<double>

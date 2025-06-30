@@ -42,10 +42,11 @@ main()
     double const k = 50;
 
     auto linear_part    = -k;
-    auto nonlinear_part = [=]( double t, double )
-    {
-        return k * std::cos( t );
-    };
+    auto nonlinear_part = ponio::make_simple_problem(
+        [=]( double t, double )
+        {
+            return k * std::cos( t );
+        } );
 
     auto pb_curtiss_hirshfelder = ponio::make_lawson_problem( linear_part, nonlinear_part );
 

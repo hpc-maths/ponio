@@ -10,11 +10,11 @@
 #include <optional>
 
 #include "method.hpp"
+#include "stage.hpp"
 #include "time_span.hpp"
 
 namespace ponio
 {
-
     /**
      * @brief store \f$(t^n, u^n, \Delta t^n)\f$
      *
@@ -32,6 +32,12 @@ namespace ponio
             : time( tn )
             , state( std::move( un ) )
             , time_step( dt )
+        {
+        }
+
+        current_solution( value_t tn )
+            : time( tn )
+            , time_step( static_cast<value_t>( 0. ) )
         {
         }
     };
@@ -80,6 +86,7 @@ namespace ponio
         using iterator_category = std::output_iterator_tag;
 
         value_type sol;
+        state_t u_tmp;
         method_t meth;
         problem_t& pb; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
         ponio::time_span<value_t> t_span;
@@ -98,8 +105,9 @@ namespace ponio
          *
          * @note In user interface ponio::time_iterator object is build by ponio::solver_range member functions.
          */
-        time_iterator( problem_t& pb_, method_t meth_, state_t const& u0, ponio::time_span<value_t> const& t_span_, value_t dt )
+        time_iterator( problem_t& pb_, method_t&& meth_, state_t const& u0, ponio::time_span<value_t> const& t_span_, value_t dt )
             : sol( ( t_span_.front() == t_span_.back() ) ? sentinel : t_span_.front(), u0, dt )
+            , u_tmp( u0 )
             , meth( std::move( meth_ ) )
             , pb( pb_ )
             , t_span( t_span_ )
@@ -117,6 +125,7 @@ namespace ponio
          */
         time_iterator( time_iterator const& rhs )
             : sol( rhs.sol )
+            , u_tmp( rhs.u_tmp )
             , meth( rhs.meth )
             , pb( rhs.pb )
             , t_span( rhs.t_span )
@@ -132,6 +141,7 @@ namespace ponio
          */
         time_iterator( time_iterator&& rhs ) noexcept
             : sol( std::move( rhs.sol ) )
+            , u_tmp( std::move( rhs.u_tmp ) )
             , meth( std::move( rhs.meth ) )
             , pb( std::move( rhs.pb ) )
             , t_span( std::move( rhs.t_span ) )
@@ -152,6 +162,7 @@ namespace ponio
             if ( this != &rhs )
             {
                 sol          = rhs.sol;
+                u_tmp        = rhs.tmp;
                 meth         = rhs.meth;
                 pb           = rhs.pb;
                 t_span       = rhs.t_span;
@@ -174,6 +185,7 @@ namespace ponio
             if ( this != &rhs )
             {
                 sol          = std::move( rhs.sol );
+                u_tmp        = std::move( rhs.u_tmp );
                 meth         = std::move( rhs.meth );
                 pb           = std::move( rhs.pb );
                 t_span       = std::move( rhs.t_span );
@@ -194,7 +206,9 @@ namespace ponio
         void
         increment()
         {
-            std::tie( sol.time, sol.state, sol.time_step ) = meth( pb, sol.time, sol.state, sol.time_step );
+            // std::tie( sol.time, sol.state, sol.time_step ) = meth( pb, sol.time, sol.state, sol.time_step );
+            meth( pb, sol.time, sol.state, sol.time_step, u_tmp );
+            std::swap( u_tmp, sol.state );
         }
 
         /**
@@ -333,6 +347,57 @@ namespace ponio
         {
             return meth.stages();
         }
+
+        /**
+         * @brief returns stages if need to access to them to resize or change condition on them
+         *
+         * @return auto&
+         */
+        template <std::size_t I>
+        auto&
+        stages( sub_method<I> subI ) // cppcheck-suppress unusedFunction
+        {
+            return meth.stages( subI );
+        }
+
+        /**
+         * @brief returns stages if need to access to them
+         *
+         * @return auto const&
+         */
+        template <std::size_t I>
+        auto const&
+        stages( sub_method<I> subI ) const // cppcheck-suppress unusedFunction
+        {
+            return meth.stages( subI );
+        }
+
+        /**
+         * @brief call a callback function on each intermediate stage of method and also on temporary \f$u^{n=1}\f$ state
+         *
+         * @param f callback function
+         */
+        template <typename lambda_t>
+        void
+        callback_on_stages( lambda_t&& f ) // cppcheck-suppress unusedFunction
+        {
+            for ( auto& ki : stages() )
+            {
+                f( ki );
+            }
+            f( u_tmp );
+        }
+
+        template <std::size_t I, typename lambda_t>
+        void
+        callback_on_stages( sub_method<I> subI, lambda_t&& f ) // cppcheck-suppress unusedFunction
+        {
+            for ( auto& ki : stages( subI ) )
+            {
+                f( ki );
+            }
+            f( u_tmp );
+        }
     };
 
     /**
@@ -344,9 +409,6 @@ namespace ponio
         time_iterator<value_t, state_t, method_t, problem_t> const& rhs )
     {
         return lhs.sol.time == rhs.sol.time;
-
-        //( std::abs( lhs.sol.time - rhs.sol.time ) <= std::numeric_limits<value_t>::epsilon() * std::abs( std::min( lhs.sol.time,
-        // rhs.sol.time ) ) * 1 );
     }
 
     /**
@@ -378,9 +440,97 @@ namespace ponio
      */
     template <typename value_t, typename state_t, typename method_t, typename problem_t>
     auto
-    make_time_iterator( problem_t& pb, method_t meth, state_t const& u0, ponio::time_span<value_t> const& t_span, value_t dt )
+    make_time_iterator( problem_t& pb, method_t&& meth, state_t const& u0, ponio::time_span<value_t> const& t_span, value_t dt )
     {
-        return time_iterator<value_t, state_t, method_t, problem_t>( pb, meth, u0, t_span, dt );
+        return time_iterator<value_t, state_t, method_t, problem_t>( pb, std::forward<method_t>( meth ), u0, t_span, dt );
+    }
+
+    /**
+     * @brief sentinel for time_iterator class
+     *
+     * @tparam value_t_ type time
+     */
+    template <typename value_t_>
+    struct time_sentinel_iterator
+    {
+        using value_t         = value_t_;
+        using difference_type = value_t;
+
+        value_t time = std::numeric_limits<value_t>::max();
+    };
+
+    /**
+     * @brief equality operator that compares only current time
+     */
+    template <typename value_t>
+    bool
+    operator==( time_sentinel_iterator<value_t> const& lhs, time_sentinel_iterator<value_t> const& rhs )
+    {
+        return lhs.time == rhs.time;
+    }
+
+    /**
+     * @brief three-way comparison operator that compares only current time
+     */
+    template <typename value_t>
+    auto
+    operator<=>( time_sentinel_iterator<value_t> const& lhs, time_sentinel_iterator<value_t> const& rhs )
+    {
+        return lhs.time <=> rhs.time;
+    }
+
+    /**
+     * @brief equality operator that compares only current time
+     */
+    template <typename value_t, typename state_t, typename method_t, typename problem_t>
+    bool
+    operator==( time_iterator<value_t, state_t, method_t, problem_t> const& lhs, time_sentinel_iterator<value_t> const& rhs )
+    {
+        return lhs.sol.time == rhs.time;
+    }
+
+    /**
+     * @brief three-way comparison operator that compares only current time
+     */
+    template <typename value_t, typename state_t, typename method_t, typename problem_t>
+    auto
+    operator<=>( time_iterator<value_t, state_t, method_t, problem_t> const& lhs, time_sentinel_iterator<value_t> const& rhs )
+    {
+        return lhs.sol.time <=> rhs.time;
+    }
+
+    /**
+     * @brief equality operator that compares only current time
+     */
+    template <typename value_t, typename state_t, typename method_t, typename problem_t>
+    bool
+    operator==( time_sentinel_iterator<value_t> const& lhs, time_iterator<value_t, state_t, method_t, problem_t> const& rhs )
+    {
+        return lhs.time == rhs.sol.time;
+    }
+
+    /**
+     * @brief three-way comparison operator that compares only current time
+     */
+    template <typename value_t, typename state_t, typename method_t, typename problem_t>
+    auto
+    operator<=>( time_sentinel_iterator<value_t> const& lhs, time_iterator<value_t, state_t, method_t, problem_t> const& rhs )
+    {
+        return lhs.time <=> rhs.sol.time;
+    }
+
+    /**
+     * @brief factory of ending `time_sentinel_iterator`
+     *
+     * @tparam value_t   type of time and time step
+     *
+     * @return auto
+     */
+    template <typename value_t>
+    auto
+    make_sentinel_iterator()
+    {
+        return time_sentinel_iterator<value_t>();
     }
 
     /**
@@ -395,8 +545,9 @@ namespace ponio
     struct solver_range
     {
         using iterator_type = time_iterator<value_t, state_t, method_t, problem_t>;
+        using sentinel_type = time_sentinel_iterator<value_t>;
         iterator_type _begin;
-        iterator_type _end;
+        sentinel_type _end;
 
         /**
          * @brief Construct a new solver range object
@@ -404,7 +555,7 @@ namespace ponio
          * @param begin initial iterator on solver_range
          * @param end   end iterator on solver_range (sentinel)
          */
-        solver_range( iterator_type const& begin, iterator_type const& end )
+        solver_range( iterator_type const& begin, sentinel_type const& end )
             : _begin( begin )
             , _end( end )
         {
@@ -493,8 +644,8 @@ namespace ponio
     {
         auto meth = make_method<value_t>( std::forward<algorithm_t>( algo ), u0 );
 
-        auto begin = make_time_iterator( pb, meth, u0, t_span, dt );
-        auto end   = make_time_iterator( pb, meth, u0, { t_span.back() }, dt );
+        auto begin = make_time_iterator( pb, std::move( meth ), u0, t_span, dt );
+        auto end   = make_sentinel_iterator<value_t>();
 
         return solver_range<value_t, state_t, decltype( meth ), problem_t>( begin, end );
     }
@@ -534,7 +685,7 @@ namespace ponio
 
         while ( current_time < last_time )
         {
-            std::tie( current_time, un1, current_dt ) = meth( pb, current_time, un, current_dt );
+            meth( pb, current_time, un, current_dt, un1 );
             std::swap( un, un1 );
 
             obs( current_time, un, current_dt );

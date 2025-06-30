@@ -31,12 +31,11 @@ class brusselator_model
     {
     }
 
-    std::valarray<double>
-    operator()( double, std::valarray<double> u ) const
+    void
+    operator()( double, std::valarray<double>&& u, std::valarray<double>& du ) const
     {
-        double const du1 = m_a - ( m_b + 1 ) * u[0] + u[0] * u[0] * u[1];
-        double const du2 = m_b * u[0] - u[0] * u[0] * u[1];
-        return std::valarray<double>{ du1, du2 };
+        du[0] = m_a - ( m_b + 1 ) * u[0] + u[0] * u[0] * u[1];
+        du[1] = m_b * u[0] - u[0] * u[0] * u[1];
     }
 };
 
@@ -47,7 +46,7 @@ main( int, char** )
     auto filename             = std::filesystem::path( dirname ) / "brusselator.dat";
     ponio::observer::file_observer fobs( filename );
 
-    auto pb_brusselator = ponio::make_simple_problem( brusselator_model( 1., 3. ) );
+    auto pb_brusselator = brusselator_model( 1., 3. );
 
     std::valarray<double> const uini = { 1.5, 3 };
 

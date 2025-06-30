@@ -15,7 +15,7 @@
 #include <ponio/splitting.hpp>
 #include <ponio/user_defined_method.hpp>
 
-// solve $\dot{u} = u$ with $u(t=0) = 1$, and $t\in[0,2]$.
+// solve $\dot{y} = y$ with $y(t=0) = 1$, and $t\in[0,2]$.
 
 int
 main()
@@ -24,17 +24,17 @@ main()
 
     double const lambda = 0.3;
 
-    auto f1 = [=]( double, double u )
+    auto f1 = [=]( double, double y )
     {
-        return lambda * u;
+        return lambda * y;
     };
 
-    auto f2 = [=]( double, double u )
+    auto f2 = [=]( double, double y )
     {
-        return ( 1.0 - lambda ) * u;
+        return ( 1.0 - lambda ) * y;
     };
 
-    auto pb = ponio::make_problem( f1, f2 );
+    auto pb = ponio::make_problem( ponio::make_simple_problem( f1 ), ponio::make_simple_problem( f2 ) );
 
     auto exact_solver_f1 = [=]( auto /* f */, double tn, double yn, double dt ) -> std::tuple<double, double, double>
     {

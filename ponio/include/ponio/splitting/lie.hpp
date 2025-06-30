@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "../iteration_info.hpp"
+#include "../stage.hpp"
 #include "detail.hpp"
 
 namespace ponio::splitting::lie
@@ -56,35 +57,35 @@ namespace ponio::splitting::lie
         // (see https://github.com/llvm/llvm-project/issues/56482)
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I == N_steps )
-        void _call_inc( Problem_t&, value_t, state_t&, value_t )
+        void _call_inc( Problem_t&, value_t, state_t&, value_t, state_t& )
         {
         }
 
         /**
-         * incremental call of each method of each subproblem
-         * @tparam I solving step
-         * @param f          \ref problem to solve
-         * @param tn         current time \f$t^n\f$
-         * @param[in,out] ui \f$\texttt{ui}=\phi_{\Delta t}^{[f_1]}\circ\cdots\circ\phi_{\Delta t}^{[f_{i-1}]}(t^n,u^n)\f$
-         * @param dt         time step \f$\Delta t\f$
-         * @details The parameter @p ui is update to \f$\phi_{\Delta t}^{[f_i]}(t^n,\texttt{ui})\f$
+         * @brief incremental call of each method of each subproblem
+         *
+         * @param f    problem to solve
+         * @param tn   current time \f$\Delta t\f$
+         * @param ui   initial solution for step `I`
+         * @param dt   time step \f$\Delta t\f$
+         * @param uip1 solution \f$\texttt{uip1} = \phi^{[i]}(\texttt{ui})\f$
          */
         template <std::size_t I = 0, typename Problem_t, typename state_t>
             requires( I < N_steps )
-        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt )
+        void _call_inc( Problem_t& f, value_t tn, state_t& ui, value_t dt, state_t& uip1 )
         {
             if constexpr ( I == 0 )
             {
                 _info.reset_eval();
             }
 
-            ui = detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], _info );
-            _call_inc<I + 1>( f, tn, ui, dt );
+            detail::_split_solve<I>( f, methods, ui, tn, tn + dt, time_steps[I], uip1, _info );
+            _call_inc<I + 1>( f, tn, uip1, dt, ui );
         }
 
         template <typename Problem_t, typename state_t>
-        auto
-        operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt );
+        void
+        operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 );
 
         /**
          * @brief gets `iteration_info` object
@@ -111,7 +112,7 @@ namespace ponio::splitting::lie
          */
         template <std::size_t I>
         auto&
-        stages( std::integral_constant<std::size_t, I> )
+        stages( sub_method<I> )
         {
             return std::get<I>( methods ).stages();
         }
@@ -123,7 +124,7 @@ namespace ponio::splitting::lie
          */
         template <std::size_t I>
         auto const&
-        stages( std::integral_constant<std::size_t, I> ) const
+        stages( sub_method<I> ) const
         {
             return std::get<I>( methods ).stages();
         }
@@ -131,19 +132,26 @@ namespace ponio::splitting::lie
 
     /**
      * call operator to initiate Lie splitting recursion
-     * @param f  \ref problem to solve
-     * @param tn current time \f$t^n\f$
-     * @param un current solution \f$u^n \approx u(t^n)\f$
-     * @param dt time step \f$\Delta t\f$
+     * @param f    \ref problem to solve
+     * @param tn   current time \f$t^n\f$
+     * @param un   current solution \f$u^n \approx u(t^n)\f$
+     * @param dt   time step \f$\Delta t\f$
+     * @param unp1 solution at time \f$t^{n+1} = t^n + \Delta t\f$
      */
     template <typename value_t, typename... methods_t>
     template <typename Problem_t, typename state_t>
-    auto
-    lie<value_t, methods_t...>::operator()( Problem_t& f, value_t tn, state_t const& un, value_t dt )
+    // auto
+    void
+    lie<value_t, methods_t...>::operator()( Problem_t& f, value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
     {
-        state_t ui = un;
-        _call_inc( f, tn, ui, dt );
-        return std::make_tuple( tn + dt, ui, dt );
+        _call_inc( f, tn, un, dt, unp1 );
+
+        if constexpr ( N_methods % 2 == 0 )
+        {
+            std::swap( un, unp1 );
+        }
+
+        tn = tn + dt;
     }
 
     // ---- *helper* ----
