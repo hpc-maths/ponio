@@ -223,11 +223,12 @@ TEST_CASE( "samurai::order::pirock" )
                 auto it_sol = sol_range.begin();
                 while ( it_sol->time < t_end )
                 {
-                    for ( auto& ki : it_sol.stages() )
-                    {
-                        ki.resize();
-                        ki.fill( 0. );
-                    }
+                    it_sol.callback_on_stages(
+                        []( auto& ki )
+                        {
+                            ki.resize();
+                            ki.fill( 0. );
+                        } );
 
                     ++it_sol;
                     samurai::update_ghost_mr( it_sol->state );

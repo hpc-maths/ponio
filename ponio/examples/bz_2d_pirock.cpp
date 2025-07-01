@@ -247,11 +247,12 @@ main( int argc, char** argv )
 
     while ( it_sol->time < t_end )
     {
-        for ( auto& ki : it_sol.stages() )
-        {
-            ki.resize();
-            ki.fill( 0. );
-        }
+        it_sol.callback_on_stages(
+            []( auto& ki )
+            {
+                ki.resize();
+                ki.fill( 0. );
+            } );
 
         ++it_sol;
         std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << ++n_save << "\r";

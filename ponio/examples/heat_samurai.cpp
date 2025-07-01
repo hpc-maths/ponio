@@ -140,11 +140,12 @@ main( int argc, char** argv )
     {
         // samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
 
-        for ( auto& ki : it_sol.stages() )
-        {
-            ki.resize();
-            ki.fill( 0. );
-        }
+        it_sol.callback_on_stages(
+            []( auto& ki )
+            {
+                ki.resize();
+                ki.fill( 0. );
+            } );
 
         ++it_sol;
 

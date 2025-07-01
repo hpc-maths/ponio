@@ -182,11 +182,12 @@ main( int argc, char** argv )
         samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
         samurai::update_ghost_mr( it_sol->state );
 
-        for ( auto& ki : it_sol.stages() )
-        {
-            ki.resize();
-            ki.fill( 0. );
-        }
+        it_sol.callback_on_stages(
+            []( auto& ki )
+            {
+                ki.resize();
+                ki.fill( 0. );
+            } );
 
         ++it_sol;
         std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << n_save << "\r";
