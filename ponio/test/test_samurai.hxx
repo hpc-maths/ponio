@@ -43,6 +43,34 @@ static_for( lambda_t&& f )
     detail::static_for_impl<value_t, begin>( std::forward<lambda_t>( f ), std::make_integer_sequence<value_t, end - begin>() );
 }
 
+template <typename mesh_t>
+auto
+init_field( std::string const& name, mesh_t& mesh )
+{
+    if constexpr ( requires { make_scalar_field<double>( name, mesh ); } )
+    {
+        return make_scalar_field( name, mesh );
+    }
+    else
+    {
+        return make_field<1>( name, mesh );
+    }
+}
+
+template <typename mesh_t>
+auto
+min_cell_length( mesh_t& mesh )
+{
+    if constexpr ( requires { mesh.cell_length( mesh.max_level() ); } )
+    {
+        return mesh.cell_length( mesh.max_level() );
+    }
+    else
+    {
+        return samurai::cell_length( mesh.max_level() );
+    }
+}
+
 TEST_CASE( "samurai::order::pirock" )
 {
     int argc                = 1;
@@ -52,7 +80,7 @@ TEST_CASE( "samurai::order::pirock" )
     PetscInitialize( &argc, &argv_c, 0, nullptr );
 
     constexpr std::size_t dim = 1;
-    using config_t            = samurai::MRConfig<dim>;
+    using config_t            = samurai::MRConfig<dim, 3>;
     using box_t               = samurai::Box<double, dim>;
     using point_t             = typename box_t::point_t;
 
@@ -60,14 +88,14 @@ TEST_CASE( "samurai::order::pirock" )
     constexpr double d = .1;
     constexpr double k = 1. / d;
 
-    constexpr double left_box  = -40;
-    constexpr double right_box = 10;
+    constexpr double left_box  = -3;
+    constexpr double right_box = 5;
     constexpr double t_ini     = 0.;
-    constexpr double t_end     = 2.;
+    constexpr double t_end     = 3.;
 
     // multiresolution parameters
-    std::size_t min_level = 7;
-    std::size_t max_level = 7;
+    std::size_t min_level = 10;
+    std::size_t max_level = 10;
 
     ponio::time_span<double> const tspan = { t_ini, t_end };
 
@@ -79,11 +107,12 @@ TEST_CASE( "samurai::order::pirock" )
     samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
 
     // init solution ----------------------------------------------------------
-    auto u_ini = samurai::make_field<1>( "u", mesh );
+
+    auto u_ini = init_field( "u", mesh );
 
     auto exact_solution = [&]( double x, double t )
     {
-        double x0  = -25.;
+        double x0  = 0.;
         double v   = ( 1. / std::sqrt( 2. ) ) * std::sqrt( k * d );
         double cst = -( 1. / std::sqrt( 2. ) ) * std::sqrt( k / d );
         double e   = std::exp( cst * ( x - x0 - v * t ) );
@@ -93,15 +122,16 @@ TEST_CASE( "samurai::order::pirock" )
     samurai::for_each_cell( mesh,
         [&]( auto& cell )
         {
-            u_ini[cell] = exact_solution( cell.center( 0 ), 0 );
+            u_ini[cell] = exact_solution( cell.center( 0. ), 0. );
         } );
     samurai::make_bc<samurai::Neumann<1>>( u_ini, 0. );
 
     // define problem ---------------------------------------------------------
+    using state_t = decltype( u_ini );
 
     // diffusion terme
     auto diff = samurai::make_diffusion_order2<decltype( u_ini )>( d );
-    auto fd   = [&]( double /* t */, auto&& u, auto& du )
+    auto fd   = [&]( double /* t */, state_t u, auto& du )
     {
         samurai::make_bc<samurai::Neumann<1>>( u, 0. );
         samurai::update_ghost_mr( u );
@@ -109,26 +139,26 @@ TEST_CASE( "samurai::order::pirock" )
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::size, decltype( u_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, 1, decltype( u_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
         [&]( auto const& cell, auto const& field ) -> samurai::SchemeValue<cfg>
         {
             auto u = field[cell];
-            return k * u * u * ( 1 - u );
+            return k * u * u * ( 1. - u );
         } );
     react.set_jacobian_function(
         [&]( auto const& cell, auto const& field ) -> samurai::JacobianMatrix<cfg>
         {
             auto u = field[cell];
-            return k * ( 2 * u * ( 1 - u ) - u * u );
+            return k * ( 2. * u * ( 1. - u ) - u * u );
         } );
     auto fr_t = [&]( double /* t */ )
     {
         return react;
     };
-    auto fr = [&]( double t, auto&& u, auto& du )
+    auto fr = [&]( double t, state_t u, auto& du )
     {
         samurai::make_bc<samurai::Neumann<1>>( u, 0. );
         samurai::update_ghost_mr( u );
@@ -137,11 +167,9 @@ TEST_CASE( "samurai::order::pirock" )
 
     auto eigmax_computer = [&mesh]( auto&, double, auto&, double, auto& )
     {
-        double dx = mesh.cell_length( mesh.max_level() );
+        double dx = min_cell_length( mesh );
         return 4. / ( dx * dx );
     };
-
-    auto pb = ponio::make_imex_operator_problem( fd, fr, fr_t );
 
     // clang-format off
     auto pirock_methods = std::make_tuple(
@@ -177,6 +205,13 @@ TEST_CASE( "samurai::order::pirock" )
     };
     // clang-format on
 
+    samurai::for_each_cell( mesh,
+        [&]( auto& cell )
+        {
+            u_ini[cell] = exact_solution( cell.center( 0. ), 0. );
+        } );
+    auto pb = ponio::make_imex_operator_problem( fd, fr, fr_t );
+
     static_for<std::size_t, 0, N_methods>(
         [&]<std::size_t I>( std::integral_constant<std::size_t, I> )
         {
@@ -188,20 +223,22 @@ TEST_CASE( "samurai::order::pirock" )
                 double dt = ( t_end - t_ini ) / static_cast<double>( N_iter );
 
                 // time loop  ---------------------------------------------------------
-
                 auto sol_range = ponio::make_solver_range( pb, std::get<I>( pirock_methods ), u_ini, tspan, dt );
 
                 auto it_sol = sol_range.begin();
+
                 while ( it_sol->time < t_end )
                 {
-                    for ( auto& ki : it_sol.stages() )
-                    {
-                        ki.resize();
-                        ki.fill( 0. );
-                    }
+                    samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
+                    samurai::update_ghost_mr( it_sol->state );
+                    it_sol.callback_on_stages(
+                        []( auto& ki )
+                        {
+                            ki.resize();
+                            ki.fill( 0. );
+                        } );
 
                     ++it_sol;
-                    samurai::update_ghost_mr( it_sol->state );
                 }
 
                 // compute error
@@ -209,7 +246,7 @@ TEST_CASE( "samurai::order::pirock" )
                 samurai::for_each_cell( mesh,
                     [&]( auto& cell )
                     {
-                        error += std::abs( it_sol->state[cell] - exact_solution( cell.center( 0 ), t_end ) ) * cell.length;
+                        error += std::abs( it_sol->state[cell] - exact_solution( cell.center( 0. ), t_end ) ) * cell.length;
                     } );
                 errors.push_back( std::log( error ) );
                 time_steps.push_back( std::log( dt ) );
@@ -218,6 +255,7 @@ TEST_CASE( "samurai::order::pirock" )
             auto [a, b] = mayor_method( time_steps, errors );
 
             INFO( "test order ", pirock_param[I] );
+            CHECK( a >= doctest::Approx( 2 ).epsilon( 0.05 ) );
             WARN( a == doctest::Approx( 2 ).epsilon( 0.05 ) );
         } );
 }
