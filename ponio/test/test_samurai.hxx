@@ -26,31 +26,6 @@
 
 #include "compute_order.hpp"
 
-#include <samurai/io/hdf5.hpp>
-#include <sstream>
-
-template <class field_t>
-void
-save( fs::path const& path, std::string const& filename, field_t& u, std::string const& suffix = "" )
-{
-    auto mesh   = u.mesh();
-    auto level_ = samurai::make_scalar_field<std::size_t>( "level", mesh );
-    u.name()    = "u";
-
-    if ( !fs::exists( path ) )
-    {
-        fs::create_directory( path );
-    }
-
-    samurai::for_each_cell( mesh,
-        [&]( auto& cell )
-        {
-            level_[cell] = cell.level;
-        } );
-
-    samurai::save( path, fmt::format( "{}{}", filename, suffix ), mesh, u, level_ );
-}
-
 namespace detail
 {
     template <typename value_t, value_t begin, typename lambda_t, value_t... ints>
