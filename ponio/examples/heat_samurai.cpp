@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 #include <samurai/field.hpp>
-#include <samurai/hdf5.hpp>
+#include <samurai/io/hdf5.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
 #include <samurai/schemes/fv.hpp>
@@ -21,7 +21,7 @@ void
 save( std::filesystem::path const& path, std::string const& filename, Field& u, std::string const& suffix = "" )
 {
     auto mesh   = u.mesh();
-    auto level_ = samurai::make_field<std::size_t, 1>( "level", mesh );
+    auto level_ = samurai::make_scalar_field<std::size_t>( "level", mesh );
     u.name()    = "u";
 
     if ( !std::filesystem::exists( path ) )
@@ -42,7 +42,7 @@ template <class Mesh>
 auto
 init( Mesh& mesh )
 {
-    auto u = samurai::make_field<double, 1>( "u", mesh );
+    auto u = samurai::make_scalar_field<double>( "u", mesh );
     u.fill( 0. );
 
     samurai::for_each_cell( mesh,
@@ -140,11 +140,12 @@ main( int argc, char** argv )
     {
         // samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
 
-        for ( auto& ki : it_sol.stages() )
-        {
-            ki.resize();
-            ki.fill( 0. );
-        }
+        it_sol.callback_on_stages(
+            []( auto& ki )
+            {
+                ki.resize();
+                ki.fill( 0. );
+            } );
 
         ++it_sol;
 

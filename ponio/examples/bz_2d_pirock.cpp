@@ -21,7 +21,7 @@
 #include <ponio/time_span.hpp>
 
 #include <samurai/field.hpp>
-#include <samurai/hdf5.hpp>
+#include <samurai/io/hdf5.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
 #include <samurai/samurai.hpp>
@@ -34,7 +34,7 @@ void
 save( fs::path const& path, std::string const& filename, field_t& u, std::string const& suffix = "" )
 {
     auto mesh   = u.mesh();
-    auto level_ = samurai::make_field<std::size_t, 1>( "level", mesh );
+    auto level_ = samurai::make_scalar_field<std::size_t>( "level", mesh );
     u.name()    = "u";
 
     if ( !fs::exists( path ) )
@@ -97,7 +97,7 @@ main( int argc, char** argv )
     samurai::MRMesh<config_t> mesh{ box, min_level, max_level, periodic };
 
     // init solution ----------------------------------------------------------
-    auto y_ini = samurai::make_field<3>( "y", mesh );
+    auto y_ini = samurai::make_vector_field<double, 3>( "y", mesh );
 
     y_ini.fill( 0 );
     samurai::for_each_cell( mesh,
@@ -151,7 +151,7 @@ main( int argc, char** argv )
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( y_ini )::size, decltype( y_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( y_ini )::n_comp, decltype( y_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
@@ -230,7 +230,7 @@ main( int argc, char** argv )
     samurai::make_bc<samurai::Neumann<>>( it_sol->state, 0., 0., 0. );
 
     // preapre MR for solution on iterator
-    auto b_field = samurai::make_field<1>( "b", mesh );
+    auto b_field = samurai::make_scalar_field<double>( "b", mesh );
     samurai::for_each_interval( mesh,
         [&]( auto level, auto& i, auto& idx )
         {
@@ -247,11 +247,12 @@ main( int argc, char** argv )
 
     while ( it_sol->time < t_end )
     {
-        for ( auto& ki : it_sol.stages() )
-        {
-            ki.resize();
-            ki.fill( 0. );
-        }
+        it_sol.callback_on_stages(
+            []( auto& ki )
+            {
+                ki.resize();
+                ki.fill( 0. );
+            } );
 
         ++it_sol;
         std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << ++n_save << "\r";

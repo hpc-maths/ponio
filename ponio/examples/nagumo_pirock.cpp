@@ -21,7 +21,7 @@
 #include <ponio/time_span.hpp>
 
 #include <samurai/field.hpp>
-#include <samurai/hdf5.hpp>
+#include <samurai/io/hdf5.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
 #include <samurai/samurai.hpp>
@@ -35,7 +35,7 @@ void
 save( fs::path const& path, std::string const& filename, field_t& u, std::string const& suffix = "" )
 {
     auto mesh   = u.mesh();
-    auto level_ = samurai::make_field<std::size_t, 1>( "level", mesh );
+    auto level_ = samurai::make_scalar_field<std::size_t>( "level", mesh );
     u.name()    = "u";
 
     if ( !fs::exists( path ) )
@@ -93,7 +93,7 @@ main( int argc, char** argv )
     samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
 
     // init solution ----------------------------------------------------------
-    auto u_ini = samurai::make_field<1>( "u", mesh );
+    auto u_ini = samurai::make_scalar_field<double>( "u", mesh );
 
     auto exact_solution = [&]( double x, double t )
     {
@@ -122,7 +122,7 @@ main( int argc, char** argv )
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::size, decltype( u_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::n_comp, decltype( u_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
@@ -182,11 +182,12 @@ main( int argc, char** argv )
         samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
         samurai::update_ghost_mr( it_sol->state );
 
-        for ( auto& ki : it_sol.stages() )
-        {
-            ki.resize();
-            ki.fill( 0. );
-        }
+        it_sol.callback_on_stages(
+            []( auto& ki )
+            {
+                ki.resize();
+                ki.fill( 0. );
+            } );
 
         ++it_sol;
         std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << n_save << "\r";

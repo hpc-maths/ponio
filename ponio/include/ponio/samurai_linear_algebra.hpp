@@ -12,17 +12,54 @@
 #include <xtensor/xfixed.hpp>
 
 #include <samurai/petsc.hpp>
+#include <samurai/utils.hpp>
 #else
 #error "Samurai should be included"
 #endif
+
+namespace samurai
+{
+    template <class mesh_t_, class value_t, std::size_t size_, bool SOA>
+    class Field;
+
+    template <class mesh_t, class value_t, std::size_t n_comp, bool SOA>
+    class VectorField;
+
+    template <class mesh_t, class value_t>
+    class ScalarField;
+}
+
+namespace ponio_samurai
+{
+    template <typename field_t>
+    concept is_field = std::same_as<field_t,
+        ::samurai::Field<typename field_t::mesh_t, typename field_t::value_type, field_t::size, field_t::is_soa>>;
+
+    template <typename field_t>
+    concept is_scalar_field = std::same_as<field_t, ::samurai::ScalarField<typename field_t::mesh_t, typename field_t::value_type>>;
+
+    template <typename field_t>
+    concept is_vector_field_soa = std::same_as<field_t,
+        ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp, true>>;
+    template <typename field_t>
+    concept is_vector_field_aos = std::same_as<field_t,
+        ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp, false>>;
+
+    template <typename field_t>
+    concept is_vector_field = is_vector_field_soa<field_t> || is_vector_field_aos<field_t>;
+
+    template <typename field_t>
+    concept is_samurai_field = is_field<field_t> || is_scalar_field<field_t> || is_vector_field<field_t>;
+}
 
 namespace ponio::linear_algebra
 {
     template <typename solver_t>
     concept has_Snes_method = std::is_member_function_pointer_v<decltype( &solver_t::Snes )>;
 
-    template <class mesh_t, class value_t, std::size_t size, bool SOA>
-    struct operator_algebra<::samurai::Field<mesh_t, value_t, size, SOA>>
+    template <typename field_t>
+        requires ::ponio_samurai::is_samurai_field<field_t>
+    struct operator_algebra<field_t>
     {
         template <typename state_t>
         static auto
@@ -62,14 +99,14 @@ namespace ponio::shampine_trick
     /**
      * @brief For PIROCK method, compute the Shampine's trick
      *
-     * @tparam mesh_t  type of underlying mesh in samurai::Field
-     * @tparam value_t value stored in samurai::Field
-     * @tparam size    the "size" of the samurai::Field (warning: this is not a size in container meaning)
-     * @tparam SOA     SOA or AOS
+     * @tparam field_t type of samurai field
      */
-    template <class mesh_t, class value_t, std::size_t size, bool SOA>
-    struct shampine_trick<::samurai::Field<mesh_t, value_t, size, SOA>>
+    template <typename field_t>
+        requires ::ponio_samurai::is_samurai_field<field_t>
+    struct shampine_trick<field_t>
     {
+        using value_t = typename field_t::value_type;
+
         /**
          * @brief solves \f$(I - \alpha R)^{\ell}X = b\f$
          *
