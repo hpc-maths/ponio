@@ -73,7 +73,8 @@ namespace ponio::linear_algebra
         solve( operator_t& op, state_t& u, rhs_t& rhs, std::size_t& n_eval )
         {
             auto solver = samurai::petsc::make_solver( op );
-            solver.solve( u, rhs );
+            auto _rhs   = static_cast<state_t>( rhs );
+            solver.solve( u, _rhs );
 
             if constexpr ( operator_t::cfg_t::scheme_type == samurai::SchemeType::NonLinear && has_Snes_method<decltype( solver )> )
             {
