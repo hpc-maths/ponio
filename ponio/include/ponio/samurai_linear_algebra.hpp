@@ -6,6 +6,7 @@
 
 #include <cassert>
 
+#include "detail.hpp"
 #include "linear_algebra.hpp"
 
 #if __has_include( <samurai/petsc.hpp>)
@@ -194,3 +195,35 @@ namespace ponio::shampine_trick
     };
 
 } // namespace ponio::shampine_trick
+
+namespace ponio
+{
+    /**
+     * @brief return a error norm given by: \f$$\sum_i \left(\frac{x_i}{a_{tol} + r_{tol}\max(|y_i|, |z_i|)}\right)^2\Delta x_i\f$$
+     *
+     * @tparam value_t type of tolerances
+     * @tparam state_t type of vectors \f$x\f$, \f$y\f$ and \f$z\f$
+     * @param x mainly the estimate error
+     * @param y mainly the solution at time \f$t^n\f$
+     * @param z mainly the estimation of solution at time \f$t^{n+1}\f$
+     * @param a_tol absolute tolerance
+     * @param r_tol relative tolerance
+     */
+    template <typename value_t, typename state_t>
+        requires ::ponio_samurai::is_samurai_field<state_t>
+    value_t
+    norm_error( state_t const& x, state_t const& y, state_t const& z, value_t a_tol, value_t r_tol )
+    {
+        value_t err = 0.;
+
+        samurai::for_each_cell( x.mesh(),
+            [&]( auto& cell )
+            {
+                err += xt::sum( xt::pow( x[cell] / ( a_tol + r_tol * xt::maximum( xt::abs( y[cell] ), xt::abs( z[cell] ) ) ), 2 ) )[0]
+                     * cell.length;
+            } );
+
+        return err;
+    }
+
+} // namespace ponio
