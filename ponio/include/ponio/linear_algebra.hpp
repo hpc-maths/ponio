@@ -8,6 +8,8 @@
 #include <concepts>
 #include <cstddef>
 
+#include "detail.hpp"
+
 namespace ponio::linear_algebra
 {
 
@@ -103,3 +105,43 @@ namespace ponio::shampine_trick
         static_assert( dependent_false<state_t>, "non implemented Shampine's trick structure for this type" );
     };
 } // namespace ponio::shampine_trick
+
+namespace ponio
+{
+
+    template <typename value_t, typename state_t>
+        requires std::floating_point<state_t>
+    value_t
+    norm_error( state_t const& x, state_t const& y, state_t const& z, value_t a_tol, value_t r_tol )
+    {
+        return detail::power<2>( x / ( a_tol + r_tol * std::max( std::abs( y ), std::abs( z ) ) ) );
+    }
+
+    /**
+     * @brief return a error norm given by: \f$$\sum_i \left(\frac{x_i}{a_{tol} + r_{tol}\max(|y_i|, |z_i|)}\right)^2\f$$
+     *
+     * @tparam value_t type of tolerances
+     * @tparam state_t type of vectors \f$x\f$, \f$y\f$ and \f$z\f$
+     * @param x mainly the estimate error
+     * @param y mainly the solution at time \f$t^n\f$
+     * @param z mainly the estimation of solution at time \f$t^{n+1}\f$
+     * @param a_tol absolute tolerance
+     * @param r_tol relative tolerance
+     */
+    template <typename value_t, typename state_t>
+    value_t
+    norm_error( state_t const& x, state_t const& y, state_t const& z, value_t a_tol, value_t r_tol )
+    {
+        auto it_y = std::begin( y );
+        auto it_z = std::begin( z );
+
+        return std::accumulate( std::begin( x ),
+            std::end( x ),
+            static_cast<value_t>( 0. ),
+            [&]( auto const& acc, auto const& x_i )
+            {
+                return acc + detail::power<2>( x_i / ( a_tol + r_tol * std::max( std::abs( *it_y++ ), std::abs( *it_z++ ) ) ) );
+            } );
+    }
+
+} // namespace ponio
