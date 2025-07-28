@@ -28,7 +28,7 @@ jobs:
           pixi-version: v0.44.0
           cache: true
       - name: Install Cppcheck
-        run: pixi add cppcheck cxx-compiler
+        run: pixi add cppcheck=2.17.1 cxx-compiler
       - name: Configure
         run: pixi run build_debug
       - name: Run Cppcheck on ponio
