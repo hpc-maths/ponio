@@ -162,7 +162,7 @@ namespace ponio
             if ( this != &rhs )
             {
                 sol          = rhs.sol;
-                u_tmp        = rhs.tmp;
+                u_tmp        = rhs.u_tmp;
                 meth         = rhs.meth;
                 pb           = rhs.pb;
                 t_span       = rhs.t_span;
