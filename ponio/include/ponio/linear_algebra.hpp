@@ -114,7 +114,7 @@ namespace ponio
     value_t
     norm_error( state_t const& x, state_t const& y, state_t const& z, value_t a_tol, value_t r_tol )
     {
-        return detail::power<2>( x / ( a_tol + r_tol * std::max( std::abs( y ), std::abs( z ) ) ) );
+        return std::abs( x / ( a_tol + r_tol * std::max( std::abs( y ), std::abs( z ) ) ) );
     }
 
     /**
@@ -135,13 +135,15 @@ namespace ponio
         auto it_y = std::begin( y );
         auto it_z = std::begin( z );
 
-        return std::accumulate( std::begin( x ),
-            std::end( x ),
-            static_cast<value_t>( 0. ),
-            [&]( auto const& acc, auto const& x_i )
-            {
-                return acc + detail::power<2>( x_i / ( a_tol + r_tol * std::max( std::abs( *it_y++ ), std::abs( *it_z++ ) ) ) );
-            } );
+        return std::sqrt( 1. / ( std::size( x ) )
+                          * std::accumulate( std::begin( x ),
+                              std::end( x ),
+                              static_cast<value_t>( 0. ),
+                              [&]( auto const& acc, auto const& x_i )
+                              {
+                                  return acc
+                                       + detail::power<2>( x_i / ( a_tol + r_tol * std::max( std::abs( *it_y++ ), std::abs( *it_z++ ) ) ) );
+                              } ) );
     }
 
 } // namespace ponio

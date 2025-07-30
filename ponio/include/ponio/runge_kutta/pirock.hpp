@@ -21,6 +21,7 @@
 #include "../iteration_info.hpp"
 #include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
+#include "../samurai_linear_algebra.hpp"
 #include "../stage.hpp"
 #include "dirk.hpp"
 #include "rock.hpp"
