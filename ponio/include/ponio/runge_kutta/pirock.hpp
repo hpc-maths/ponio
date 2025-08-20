@@ -21,7 +21,6 @@
 #include "../iteration_info.hpp"
 #include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
-#include "../samurai_linear_algebra.hpp"
 #include "../stage.hpp"
 #include "dirk.hpp"
 #include "rock.hpp"
@@ -533,8 +532,16 @@ namespace ponio::runge_kutta::pirock
                     //     static_cast<value_t>( 0. ),
                     //     accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
 
-                    value_t err_R_scalar = norm_error( err_R, un, u_np1, _info.absolute_tolerance, _info.relative_tolerance );
-                    value_t err_D_scalar = norm_error( err_D, un, u_np1, _info.absolute_tolerance, _info.relative_tolerance );
+                    value_t err_R_scalar = shampine_trick_caller.norm_error( err_R,
+                        un,
+                        u_np1,
+                        _info.absolute_tolerance,
+                        _info.relative_tolerance );
+                    value_t err_D_scalar = shampine_trick_caller.norm_error( err_D,
+                        un,
+                        u_np1,
+                        _info.absolute_tolerance,
+                        _info.relative_tolerance );
 
                     _info.error   = std::max( err_D_scalar, err_R_scalar );
                     _info.success = _info.error < 1.0;
