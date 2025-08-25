@@ -534,9 +534,9 @@ Following functions are useful for to build a PIROCK method with :math:`\ell=1` 
 
 With this functions you can initialize different kind of PIROCK method to solve your problem:
 
-The mainly diffusive case with :math:`\alpha=1` (to get a ROCK2 method when reaction becomes null) use :cpp:func:`ponio::runge_kutta::pirock::pirock_a1` or :cpp:func:`ponio::runge_kutta::pirock::pirock` with a :cpp:class:`ponio::runge_kutta::pirock::alpha_fixed` object, you can also add a `Shampine's trick` caller to get adaptive time step method.
+The mainly diffusive case with :math:`\alpha=1` and :math:`\ell=2` (to get a ROCK2 method when reaction becomes null) use :cpp:func:`ponio::runge_kutta::pirock::pirock_a1` or :cpp:func:`ponio::runge_kutta::pirock::pirock` with a :cpp:class:`ponio::runge_kutta::pirock::alpha_fixed` object, you can also add a `Shampine's trick` caller to get adaptive time step method.
 
-.. cpp::
+.. code-block:: cpp
 
     auto pirock = ponio::runge_kutta::pirock::pirock_a1();
 
@@ -550,7 +550,7 @@ The mainly diffusive case with :math:`\alpha=1` (to get a ROCK2 method when reac
 
 The mainly reactive case with :math:`\beta=0` (or with less computational cost) you can also choose :math:`\ell = 1`, use :cpp:func:`ponio::runge_kutta::pirock::pirock_b0` or :cpp:func:`ponio::runge_kutta::pirock::pirock` with a :cpp:class:`ponio::runge_kutta::pirock::beta_0` object, you can also add a `Shampine's trick` caller to get adaptive time step method.
 
-.. cpp::
+.. code-block:: cpp
 
     auto pirock = ponio::runge_kutta::pirock::pirock_b0();
 
