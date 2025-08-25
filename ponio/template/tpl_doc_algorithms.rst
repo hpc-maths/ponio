@@ -534,8 +534,33 @@ Following functions are useful for to build a PIROCK method with :math:`\ell=1` 
 
 With this functions you can initialize different kind of PIROCK method to solve your problem:
 
-* The mainly diffusive case with :math:`\alpha=1` (to get a ROCK2 method when reaction becomes null) use :cpp:func:`ponio::runge_kutta::pirock::pirock_a1` or :cpp:func:`ponio::runge_kutta::pirock::pirock` with a :cpp:class:`ponio::runge_kutta::pirock::alpha_fixed` object, you can also add a `Shampine's trick` caller to get adaptive time step method.
-* The mainly reactive case with :math:`\beta=0` (or with less computational cost) you can also choose :math:`\ell = 1`, use :cpp:func:`ponio::runge_kutta::pirock::pirock_b0` or :cpp:func:`ponio::runge_kutta::pirock::pirock` with a :cpp:class:`ponio::runge_kutta::pirock::beta_0` object, you can also add a `Shampine's trick` caller to get adaptive time step method.
+The mainly diffusive case with :math:`\alpha=1` (to get a ROCK2 method when reaction becomes null) use :cpp:func:`ponio::runge_kutta::pirock::pirock_a1` or :cpp:func:`ponio::runge_kutta::pirock::pirock` with a :cpp:class:`ponio::runge_kutta::pirock::alpha_fixed` object, you can also add a `Shampine's trick` caller to get adaptive time step method.
+
+.. cpp::
+
+    auto pirock = ponio::runge_kutta::pirock::pirock_a1();
+
+    // or
+
+    auto adaptive_pirock = ponio::runge_kutta::pirock::pirock<2, true>(
+      ponio::runge_kutta::pirock::alpha_fixed<double>( 1.0 ),
+      eigmax_computer,                                        // [](auto& f, double tn, auto& un, double dt, auto& du_work)
+      ponio::shampine_trick::shampine_trick<decltype( un )>() // Shampine's trick class
+    );
+
+The mainly reactive case with :math:`\beta=0` (or with less computational cost) you can also choose :math:`\ell = 1`, use :cpp:func:`ponio::runge_kutta::pirock::pirock_b0` or :cpp:func:`ponio::runge_kutta::pirock::pirock` with a :cpp:class:`ponio::runge_kutta::pirock::beta_0` object, you can also add a `Shampine's trick` caller to get adaptive time step method.
+
+.. cpp::
+
+    auto pirock = ponio::runge_kutta::pirock::pirock_b0();
+
+    // or
+
+    auto adaptive_pirock = ponio::runge_kutta::pirock::pirock<1, true>(
+      ponio::runge_kutta::pirock::beta_0<double>(),
+      eigmax_computer,                                        // [](auto& f, double tn, auto& un, double dt, auto& du_work)
+      ponio::shampine_trick::shampine_trick<decltype( un )>() // Shampine's trick class
+    );
 
 
 PIROCK for reaction-diffusion-advection problem
