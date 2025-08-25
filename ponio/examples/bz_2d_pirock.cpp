@@ -210,7 +210,7 @@ main( int argc, char** argv )
         eigmax_computer
     );
 
-    [[maybe_unused]] auto pirock_b0_st = ponio::runge_kutta::pirock::pirock<1, false>(
+    [[maybe_unused]] auto pirock_b0_st = ponio::runge_kutta::pirock::pirock<1, true>(
         ponio::runge_kutta::pirock::beta_0<double>(),
         eigmax_computer,
         ponio::shampine_trick::shampine_trick<decltype( y_ini )>()
