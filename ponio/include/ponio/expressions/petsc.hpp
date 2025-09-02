@@ -50,14 +50,14 @@ namespace ponio::expression
             double* _ptr_data;
             VecGetArray( _data, &_ptr_data );
 
-            expr.array_reader();
+            expr.raw_data_open();
 
             for ( std::size_t i = 0ul; i < expr.size(); ++i )
             {
                 _ptr_data[i] = expr[i];
             }
 
-            expr.array_restore();
+            expr.raw_data_close();
 
             VecRestoreArray( _data, &_ptr_data );
 
@@ -72,14 +72,14 @@ namespace ponio::expression
             double* _ptr_data;
             VecGetArray( _data, &_ptr_data );
 
-            expr.array_reader();
+            expr.raw_data_open();
 
             for ( std::size_t i = 0ul; i < expr.size(); ++i )
             {
                 _ptr_data[i] = expr[i];
             }
 
-            expr.array_restore();
+            expr.raw_data_close();
 
             VecRestoreArray( _data, &_ptr_data );
 
@@ -107,13 +107,13 @@ namespace ponio::expression
         }
 
         void
-        array_reader()
+        raw_data_open()
         {
             VecGetArrayRead( _data, &_reader_data );
         }
 
         void
-        array_restore()
+        raw_data_close()
         {
             VecRestoreArrayRead( _data, &_reader_data );
         }
