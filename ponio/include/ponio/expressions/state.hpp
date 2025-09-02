@@ -106,12 +106,12 @@ namespace ponio::expression
         }
 
         void
-        array_reader()
+        raw_data_open()
         {
         }
 
         void
-        array_restore()
+        raw_data_close()
         {
         }
     };
@@ -174,12 +174,12 @@ namespace ponio::expression
         }
 
         void
-        array_reader()
+        raw_data_open()
         {
         }
 
         void
-        array_restore()
+        raw_data_close()
         {
         }
     };
@@ -286,15 +286,15 @@ namespace ponio::expression
         }
 
         void
-        array_reader()
+        raw_data_open()
         {
-            lhs.array_reader();
+            lhs.raw_data_open();
         }
 
         void
-        array_restore()
+        raw_data_close()
         {
-            lhs.array_restore();
+            lhs.raw_data_close();
         }
     };
 
@@ -466,17 +466,17 @@ namespace ponio::expression
         }
 
         void
-        array_reader()
+        raw_data_open()
         {
-            lhs.array_reader();
-            rhs.array_reader();
+            lhs.raw_data_open();
+            rhs.raw_data_open();
         }
 
         void
-        array_restore()
+        raw_data_close()
         {
-            lhs.array_restore();
-            rhs.array_restore();
+            lhs.raw_data_close();
+            rhs.raw_data_close();
         }
     };
 
