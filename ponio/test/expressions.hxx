@@ -129,9 +129,8 @@ TEST_CASE( "expressions::array::expr3.0" )
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t result = { -81, -63, -45, -27, -9 };
 
-    auto va  = ponio::expression::make_state( a );
-    auto vb  = ponio::expression::make_state( b );
-    auto two = ponio::expression::make_scalar( 2.0 );
+    auto va = ponio::expression::make_state( a );
+    auto vb = ponio::expression::make_state( b );
 
     container_t r1, r2;
     auto vr1 = ponio::expression::make_state( r1 );
@@ -155,9 +154,8 @@ TEST_CASE( "expressions::array::expr3.1" )
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t result = { -81, -63, -45, -27, -9 };
 
-    auto va  = ponio::expression::make_state( a );
-    auto vb  = ponio::expression::make_state( b );
-    auto two = ponio::expression::make_scalar( 2.0 );
+    auto va = ponio::expression::make_state( a );
+    auto vb = ponio::expression::make_state( b );
 
     auto r1 = ( va - vb ) * ( va + vb );
     auto r2 = va * va - vb * vb;
@@ -289,9 +287,8 @@ TEST_CASE( "expressions::vector::expr3.0" )
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t result = { -81, -63, -45, -27, -9 };
 
-    auto va  = ponio::expression::make_state( a );
-    auto vb  = ponio::expression::make_state( b );
-    auto two = ponio::expression::make_scalar( 2.0 );
+    auto va = ponio::expression::make_state( a );
+    auto vb = ponio::expression::make_state( b );
 
     container_t r1( N ), r2( N );
     auto vr1 = ponio::expression::make_state( r1 );
@@ -314,9 +311,8 @@ TEST_CASE( "expressions::vector::expr3.1" )
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t result = { -81, -63, -45, -27, -9 };
 
-    auto va  = ponio::expression::make_state( a );
-    auto vb  = ponio::expression::make_state( b );
-    auto two = ponio::expression::make_scalar( 2.0 );
+    auto va = ponio::expression::make_state( a );
+    auto vb = ponio::expression::make_state( b );
 
     auto r1 = ( va - vb ) * ( va + vb );
     auto r2 = va * va - vb * vb;
