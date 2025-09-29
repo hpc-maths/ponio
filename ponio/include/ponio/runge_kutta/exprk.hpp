@@ -46,44 +46,51 @@ namespace ponio::runge_kutta::exponential_runge_kutta
         }
 
         template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t, std::size_t... Is>
-        constexpr state_t
+        constexpr void
         tpl_inner_product_impl( tuple_t const& a,
             array_t const& k,
             state_t const& init,
             [[maybe_unused]] linear_t const& linear_part,
             [[maybe_unused]] value_t mul_coeff,
+            state_t& output,
             std::index_sequence<Is...> )
         {
-            return (
-                init + ...
-                + ( mul_coeff * coefficient_eval( triangular_get<I, Is>( a ), mul_coeff * linear_part ) * ( k[Is] + linear_part * init ) ) );
+            output = ( init + ...
+                       + ( mul_coeff * coefficient_eval( triangular_get<I, Is>( a ), mul_coeff * linear_part )
+                           * ( k[Is] + linear_part * init ) ) );
         }
 
         template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t>
-        constexpr state_t
-        tpl_inner_product( tuple_t const& a, array_t const& k, state_t const& init, linear_t const& linear_part, value_t mul_coeff )
+        constexpr void
+        tpl_inner_product( tuple_t const& a, array_t const& k, state_t const& init, linear_t const& linear_part, value_t mul_coeff, state_t& output )
         {
-            return tpl_inner_product_impl<I>( a, k, init, linear_part, mul_coeff, std::make_index_sequence<I>() );
+            tpl_inner_product_impl<I>( a, k, init, linear_part, mul_coeff, output, std::make_index_sequence<I>() );
         }
 
         template <typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t, std::size_t... Is>
-        constexpr state_t
+        constexpr void
         tpl_inner_product_b_impl( tuple_t const& b,
             array_t const& k,
             state_t const& init,
             linear_t const& linear_part,
             value_t mul_coeff,
+            state_t& output,
             std::index_sequence<Is...> )
         {
-            return ( init + ...
-                     + ( mul_coeff * coefficient_eval( std::get<Is>( b ), mul_coeff * linear_part ) * ( k[Is] + linear_part * init ) ) );
+            output = ( init + ...
+                       + ( mul_coeff * coefficient_eval( std::get<Is>( b ), mul_coeff * linear_part ) * ( k[Is] + linear_part * init ) ) );
         }
 
         template <std::size_t I, typename state_t, typename value_t, typename linear_t, typename tuple_t, typename array_t>
-        constexpr state_t
-        tpl_inner_product_b( tuple_t const& b, array_t const& k, state_t const& init, linear_t const& linear_part, value_t mul_coeff )
+        constexpr void
+        tpl_inner_product_b( tuple_t const& b,
+            array_t const& k,
+            state_t const& init,
+            linear_t const& linear_part,
+            value_t mul_coeff,
+            state_t& output )
         {
-            return tpl_inner_product_b_impl( b, k, init, linear_part, mul_coeff, std::make_index_sequence<I>() );
+            tpl_inner_product_b_impl( b, k, init, linear_part, mul_coeff, output, std::make_index_sequence<I>() );
         }
     } // namespace detail
 
@@ -109,24 +116,25 @@ namespace ponio::runge_kutta::exponential_runge_kutta
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, std::size_t i>
         void
-        stage( Stage<i>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Kj, value_t dt, state_t& ki )
+        stage( Stage<i>, problem_t& pb, value_t tn, state_t& un, array_ki_t const& Kj, value_t dt, state_t& ui, state_t& ki )
         {
-            pb.n( tn + butcher.c[i] * dt, detail::tpl_inner_product<i>( butcher.a, Kj, un, pb.l, dt ), ki );
+            detail::tpl_inner_product<i>( butcher.a, Kj, un, pb.l, dt, ui );
+            pb.n( tn + butcher.c[i] * dt, ui, ki );
         }
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t>
         void
-        stage( Stage<N_stages>, problem_t& pb, value_t, state_t& un, array_ki_t const& Kj, value_t dt, state_t& ki )
+        stage( Stage<N_stages>, problem_t& pb, value_t, state_t& un, array_ki_t const& Kj, value_t dt, state_t&, state_t& ki )
         {
-            ki = detail::tpl_inner_product_b<N_stages>( butcher.b, Kj, un, pb.l, dt );
+            detail::tpl_inner_product_b<N_stages>( butcher.b, Kj, un, pb.l, dt, ki );
         }
 
         template <typename problem_t, typename state_t, typename value_t, typename array_ki_t, typename tab_t = tableau_t>
             requires std::same_as<tab_t, tableau_t> && is_embedded
         void
-        stage( Stage<N_stages + 1>, problem_t& pb, value_t, state_t& un, array_ki_t const& Kj, value_t dt, state_t& ki )
+        stage( Stage<N_stages + 1>, problem_t& pb, value_t, state_t& un, array_ki_t const& Kj, value_t dt, state_t&, state_t& ki )
         {
-            ki = detail::tpl_inner_product_b<N_stages>( butcher.b2, Kj, un, pb.l, dt );
+            detail::tpl_inner_product_b<N_stages>( butcher.b2, Kj, un, pb.l, dt, ki );
         }
 
         /**

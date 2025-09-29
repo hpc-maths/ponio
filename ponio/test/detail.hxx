@@ -56,8 +56,17 @@ TEST_CASE( "detail::tpl_inner_product" )
         },
         0 );
 
-    CHECK( ponio::detail::tpl_inner_product<N + 1>( tab, tab, 0, 1 ) == ( N * ( N + 1 ) * ( 2 * N + 1 ) / 6 ) );
+    {
+        int norm = 0;
+        ponio::detail::tpl_inner_product<N + 1>( tab, tab, 0, 1, norm );
+        CHECK( norm == ( N * ( N + 1 ) * ( 2 * N + 1 ) / 6 ) );
+    }
 
-    constexpr std::size_t M = 5;
-    CHECK( ponio::detail::tpl_inner_product<M + 1>( tab, tab, 0, 1 ) == ( M * ( M + 1 ) * ( 2 * M + 1 ) / 6 ) );
+    {
+        constexpr std::size_t M = 5;
+
+        int norm = 0;
+        ponio::detail::tpl_inner_product<M + 1>( tab, tab, 0, 1, norm );
+        CHECK( norm == ( M * ( M + 1 ) * ( 2 * M + 1 ) / 6 ) );
+    }
 }

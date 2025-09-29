@@ -177,6 +177,7 @@ namespace ponio::runge_kutta::chebyshev
          * @param yn current state
          * @param Yj array of temporary stages
          * @param dt current time step
+         * @param ui temporary step
          * @param yi computed output step
          *
          * @details \f$y_j = (1 - \mu_j - \nu_j)y^n + \mu_j y_{j-1} + \nu_j y_{j-2} + \tilde{\mu}_j\Delta tf(t^n + c_{j-1}\Delta t, y_{j-1})
@@ -184,7 +185,7 @@ namespace ponio::runge_kutta::chebyshev
          */
         template <typename problem_t, typename state_t, typename array_ki_t, std::size_t j>
         void
-        stage( Stage<j>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& yi )
+        stage( Stage<j>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& ui, state_t& yi )
         {
             value_t const mj   = 2. * b<j>( w0 ) / b<j - 1>( w0 ) * w0;
             value_t const nj   = -b<j>( w0 ) / b<j - 2>( w0 );
@@ -192,8 +193,8 @@ namespace ponio::runge_kutta::chebyshev
             value_t const gjt  = -( 1. - b<j - 1>( w0 ) * T<j - 1>( w0 ) ) * mjt;
             value_t const cjm1 = dT<N_stages>( w0 ) / ddT<N_stages>( w0 ) * ddT<j - 1>( w0 ) / dT<j - 1>( w0 );
 
-            f( tn + cjm1 * dt, Yj[j - 1], yi ); // first compute yi = f(t^n + c_{j-1}\Delta t, y_{j-1})
-            yi = ( 1. - mj - nj ) * yn + mj * Yj[j - 1] + nj * Yj[j - 2] + mjt * dt * yi + gjt * dt * Yj[0];
+            f( tn + cjm1 * dt, Yj[j - 1], ui ); // first compute ui = f(t^n + c_{j-1}\Delta t, y_{j-1})
+            yi = ( 1. - mj - nj ) * yn + mj * Yj[j - 1] + nj * Yj[j - 2] + mjt * dt * ui + gjt * dt * Yj[0];
         }
 
         /**
@@ -212,7 +213,7 @@ namespace ponio::runge_kutta::chebyshev
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
         void
-        stage( Stage<0>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t, state_t& yi )
+        stage( Stage<0>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t, state_t&, state_t& yi )
         {
             f( tn, yn, yi ); // be careful Yj[0] stores f(tn,yn) not yn!!!
         }
@@ -233,7 +234,7 @@ namespace ponio::runge_kutta::chebyshev
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
         void
-        stage( Stage<1>, problem_t&, value_t, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& yi )
+        stage( Stage<1>, problem_t&, value_t, state_t& yn, array_ki_t const& Yj, value_t dt, state_t&, state_t& yi )
         {
             value_t const m1t = b<1>( w0 ) * w1;
             yi                = yn + dt * m1t * Yj[0];
@@ -251,6 +252,7 @@ namespace ponio::runge_kutta::chebyshev
          * @param yn current state
          * @param Yj array of temporary stages
          * @param dt current time step
+         * @param ui temporary step
          * @param yi computed output step
          *
          * @details \f$y_2 = (1-\mu_2 -\nu_2)y^n + \mu_2y_1 + \nu_2y^n + \tilde{\mu}_2\Delta t f(t^n + c_1\Delta t, y_1) + \tilde{\gamma}_2
@@ -258,7 +260,7 @@ namespace ponio::runge_kutta::chebyshev
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
         void
-        stage( Stage<2>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& yi )
+        stage( Stage<2>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& ui, state_t& yi )
         {
             value_t const m2  = 2. * w0;
             value_t const n2  = -1.;
@@ -267,8 +269,8 @@ namespace ponio::runge_kutta::chebyshev
             value_t const c1  = c2 / dT<2>( w0 );
             value_t const g2t = -( 1. - b<1>( w0 ) * T<1>( w0 ) ) * m2t;
 
-            f( tn + c1 * dt, Yj[1], yi ); // first compute yi = f(t^n + c_1\Delta t, y_1)
-            yi = ( 1. - m2 - n2 ) * yn + m2 * Yj[1] + n2 * yn + m2t * dt * yi + g2t * dt * Yj[0];
+            f( tn + c1 * dt, Yj[1], ui ); // first compute yi = f(t^n + c_1\Delta t, y_1)
+            yi = ( 1. - m2 - n2 ) * yn + m2 * Yj[1] + n2 * yn + m2t * dt * ui + g2t * dt * Yj[0];
         }
 
         /**
