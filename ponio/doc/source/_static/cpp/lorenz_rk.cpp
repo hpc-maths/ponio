@@ -17,7 +17,7 @@ main()
 
     double sigma = 10., rho = 28., beta = 8. / 3.;
 
-    auto lorenz = [=]( double /* t */, auto&& u, state_t& du )
+    auto lorenz = [=]( double /* t */, state_t const& u, state_t& du )
     {
         du[0] = sigma * ( u[1] - u[0] );
         du[1] = rho * u[0] - u[1] - u[0] * u[2];

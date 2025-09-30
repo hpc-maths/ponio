@@ -89,16 +89,17 @@ namespace ponio::runge_kutta::legendre
          * @param yn current state
          * @param Yj array of temporary stages
          * @param dt current time step
+         * @param ui temporary step
          * @param yi computed output step
          *
          * @details \f$y^{(j)} = \mu_j y^{(j-1)} + \nu_j y^{(j-2)} + \tilde{\mu}_j \Delta t f(t^n, y^{(j-1)})\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t, std::size_t j>
         void
-        stage( Stage<j>, problem_t& f, value_t tn, state_t&, array_ki_t const& Yj, value_t dt, state_t& yi )
+        stage( Stage<j>, problem_t& f, value_t tn, state_t&, array_ki_t const& Yj, value_t dt, state_t& ui, state_t& yi )
         {
-            f( tn, Yj[j - 1], yi );
-            yi = mu<j>() * Yj[j - 1] + nu<j>() * Yj[j - 2] + mu_t<j>() * dt * yi; // be careful Yj[j] is y^{(j+1)}
+            f( tn, Yj[j - 1], ui );
+            yi = mu<j>() * Yj[j - 1] + nu<j>() * Yj[j - 2] + mu_t<j>() * dt * ui; // be careful Yj[j] is y^{(j+1)}
         }
 
         /**
@@ -114,7 +115,7 @@ namespace ponio::runge_kutta::legendre
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
         void
-        stage( Stage<0>, problem_t&, value_t, state_t& yn, array_ki_t const&, value_t, state_t& yi )
+        stage( Stage<0>, problem_t&, value_t, state_t& yn, array_ki_t const&, value_t, state_t&, state_t& yi )
         {
             yi = yn;
         }
@@ -129,16 +130,17 @@ namespace ponio::runge_kutta::legendre
          * @param tn current time
          * @param yn current state
          * @param dt current time step
+         * @param ui temporary step
          * @param yi computed output step
          *
          * @details \f$y^{(1)} = y^n + \tilde{\mu}_1 \Delta t f(t^n, y^n)\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
         void
-        stage( Stage<1>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t dt, state_t& yi )
+        stage( Stage<1>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t dt, state_t& ui, state_t& yi )
         {
-            f( tn, yn, yi );
-            yi = yn + mu_t<1>() * dt * yi;
+            f( tn, yn, ui );
+            yi = yn + mu_t<1>() * dt * ui;
         }
 
         /**
@@ -331,6 +333,7 @@ namespace ponio::runge_kutta::legendre
          * @param yn current state
          * @param Yj array of temporary stages
          * @param dt current time step
+         * @param ui temporary step
          * @param yi computed output step
          *
          * @details \f$y^{(j)} = \mu_j y^{(j-1)} + \nu_j y^{(j-2)} + (1-\mu_j-\nu_j)y^{(0)} + \tilde{\mu}_j \Delta t f(t^n, y^{(j-1)}) +
@@ -338,10 +341,10 @@ namespace ponio::runge_kutta::legendre
          */
         template <typename problem_t, typename state_t, typename array_ki_t, std::size_t j>
         void
-        stage( Stage<j>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& yi )
+        stage( Stage<j>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& ui, state_t& yi )
         {
-            f( tn, Yj[j - 1], yi );
-            yi = mu<j>() * Yj[j - 1] + nu<j>() * Yj[j - 2] + ( 1. - mu<j>() - nu<j>() ) * yn + mu_t<j>() * dt * yi + gamma_t<j>() * Yj[0];
+            f( tn, Yj[j - 1], ui );
+            yi = mu<j>() * Yj[j - 1] + nu<j>() * Yj[j - 2] + ( 1. - mu<j>() - nu<j>() ) * yn + mu_t<j>() * dt * ui + gamma_t<j>() * Yj[0];
         }
 
         /**
@@ -354,16 +357,17 @@ namespace ponio::runge_kutta::legendre
          * @param tn current time
          * @param yn current state
          * @param dt current time step
+         * @param ui temporary step
          * @param yi computed output step
          *
          * @warning first stage of RKL2 method is \f$y^n\f$ but here we compute \f$\Delta t f(t^n, y^n)\f$ term
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
         void
-        stage( Stage<0>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t dt, state_t& yi )
+        stage( Stage<0>, problem_t& f, value_t tn, state_t& yn, array_ki_t const&, value_t dt, state_t& ui, state_t& yi )
         {
-            f( tn, yn, yi );
-            yi = dt * yi; // be careful Yj[0] is dt*f(tn, yn)
+            f( tn, yn, ui );
+            yi = dt * ui; // be careful Yj[0] is dt*f(tn, yn)
         }
 
         /**
@@ -380,7 +384,7 @@ namespace ponio::runge_kutta::legendre
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
         void
-        stage( Stage<1>, problem_t&, value_t, state_t& yn, array_ki_t const& Yj, value_t, state_t& yi )
+        stage( Stage<1>, problem_t&, value_t, state_t& yn, array_ki_t const& Yj, value_t, state_t&, state_t& yi )
         {
             yi = yn + mu_t<1>() * Yj[0];
         }
@@ -396,6 +400,7 @@ namespace ponio::runge_kutta::legendre
          * @param yn current state
          * @param Yj array of temporary stages
          * @param dt current time step
+         * @param ui temporary step
          * @param yi computed output step
          *
          * @details \f$y^{(2)} = \mu_2 y^{(1)} + \nu_2y^n + (1-\mu_2-\nu_2)y^n + \tilde{\mu}_2\Delta tf(t^n, y^{(1)}) + \gamma_2\Delta t
@@ -403,10 +408,10 @@ namespace ponio::runge_kutta::legendre
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
         void
-        stage( Stage<2>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& yi )
+        stage( Stage<2>, problem_t& f, value_t tn, state_t& yn, array_ki_t const& Yj, value_t dt, state_t& ui, state_t& yi )
         {
-            f( tn, Yj[1], yi );
-            yi = mu<2>() * Yj[1] + nu<2>() * yn + ( 1. - mu<2>() - nu<2>() ) * yn + mu_t<2>() * dt * yi + gamma_t<2>() * Yj[0];
+            f( tn, Yj[1], ui );
+            yi = mu<2>() * Yj[1] + nu<2>() * yn + ( 1. - mu<2>() - nu<2>() ) * yn + mu_t<2>() * dt * ui + gamma_t<2>() * Yj[0];
         }
 
         /**

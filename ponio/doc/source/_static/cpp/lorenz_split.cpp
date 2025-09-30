@@ -19,19 +19,19 @@ main()
 
     double sigma = 10., rho = 28., beta = 8. / 3.;
 
-    auto phi_0 = [=]( double /* t */, auto&& u, state_t& du )
+    auto phi_0 = [=]( double /* t */, state_t const& u, state_t& du )
     {
         du[0] = sigma * u[1];
         du[1] = rho * u[0];
         du[2] = u[0] * u[1];
     };
-    auto phi_1 = [=]( double /* t */, auto&& u, state_t& du )
+    auto phi_1 = [=]( double /* t */, state_t const& u, state_t& du )
     {
         du[0] = -sigma * u[0];
         du[1] = -u[1];
         du[2] = -beta * u[2];
     };
-    auto phi_2 = [=]( double /* t */, auto&& u, state_t& du )
+    auto phi_2 = [=]( double /* t */, state_t const& u, state_t& du )
     {
         du[0] = 0;
         du[1] = -u[0] * u[2];
