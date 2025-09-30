@@ -346,7 +346,8 @@ TEST_CASE( "expressions::span::expr1.0" )
     auto vb  = ponio::expression::make_state( b );
     auto two = ponio::expression::make_scalar( 2.0 );
 
-    container_t r1, r2;
+    std::vector<double> raw_r1( a.size() ), raw_r2( a.size() );
+    container_t r1( raw_r1.data(), raw_r1.size() ), r2( raw_r2.data(), raw_r2.size() );
     auto vr1 = ponio::expression::make_state( r1 );
     auto vr2 = ponio::expression::make_state( r2 );
 
@@ -398,7 +399,8 @@ TEST_CASE( "expressions::span::expr2.0" )
     auto vb  = ponio::expression::make_state( b );
     auto two = ponio::expression::make_scalar( 2.0 );
 
-    container_t r1, r2;
+    std::vector<double> raw_r1( a.size() ), raw_r2( a.size() );
+    container_t r1( raw_r1.data(), raw_r1.size() ), r2( raw_r2.data(), raw_r2.size() );
     auto vr1 = ponio::expression::make_state( r1 );
     auto vr2 = ponio::expression::make_state( r2 );
 
@@ -449,7 +451,8 @@ TEST_CASE( "expressions::span::expr3.0" )
     auto va = ponio::expression::make_state( a );
     auto vb = ponio::expression::make_state( b );
 
-    container_t r1, r2;
+    std::vector<double> raw_r1( a.size() ), raw_r2( a.size() );
+    container_t r1( raw_r1.data(), raw_r1.size() ), r2( raw_r2.data(), raw_r2.size() );
     auto vr1 = ponio::expression::make_state( r1 );
     auto vr2 = ponio::expression::make_state( r2 );
 
