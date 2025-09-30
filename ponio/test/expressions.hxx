@@ -336,12 +336,10 @@ TEST_CASE( "expressions::vector::expr3.1" )
 
 TEST_CASE( "expressions::span::expr1.0" )
 {
-    static constexpr std::size_t N = 5;
-    using container_t              = std::span<double>;
+    using container_t = std::span<double>;
 
-    double raw_a[]{ 0., 1., 2., 3., 4. };
-    double raw_b[]{ 9., 8., 7., 6., 5. };
-    container_t a( raw_a, N ), b( raw_b, N );
+    std::vector<double> raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
+    container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
     double result = 81;
 
     auto va  = ponio::expression::make_state( a );
@@ -364,12 +362,10 @@ TEST_CASE( "expressions::span::expr1.0" )
 
 TEST_CASE( "expressions::span::expr1.1" )
 {
-    static constexpr std::size_t N = 5;
-    using container_t              = std::span<double>;
+    using container_t = std::span<double>;
 
-    double raw_a[]{ 0., 1., 2., 3., 4. };
-    double raw_b[]{ 9., 8., 7., 6., 5. };
-    container_t a( raw_a, N ), b( raw_b, N );
+    std::vector<double> raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
+    container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
     double result = 81;
 
     auto va  = ponio::expression::make_state( a );
@@ -392,13 +388,11 @@ TEST_CASE( "expressions::span::expr1.1" )
 
 TEST_CASE( "expressions::span::expr2.0" )
 {
-    static constexpr std::size_t N = 5;
-    using container_t              = std::span<double>;
+    using container_t = std::span<double>;
 
-    double raw_a[]{ 0., 1., 2., 3., 4. };
-    double raw_b[]{ 9., 8., 7., 6., 5. };
-    container_t a( raw_a, N ), b( raw_b, N );
-    constexpr double result[]{ 81, 49, 25, 9, 1 };
+    std::vector<double> raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
+    container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
+    std::vector<double> result{ 81, 49, 25, 9, 1 };
 
     auto va  = ponio::expression::make_state( a );
     auto vb  = ponio::expression::make_state( b );
@@ -420,13 +414,11 @@ TEST_CASE( "expressions::span::expr2.0" )
 
 TEST_CASE( "expressions::span::expr2.1" )
 {
-    static constexpr std::size_t N = 5;
-    using container_t              = std::span<double>;
+    using container_t = std::span<double>;
 
-    double raw_a[]{ 0., 1., 2., 3., 4. };
-    double raw_b[]{ 9., 8., 7., 6., 5. };
-    container_t a( raw_a, N ), b( raw_b, N );
-    constexpr double result[]{ 81, 49, 25, 9, 1 };
+    std::vector<double> raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
+    container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
+    std::vector<double> result{ 81, 49, 25, 9, 1 };
 
     auto va  = ponio::expression::make_state( a );
     auto vb  = ponio::expression::make_state( b );
@@ -448,13 +440,11 @@ TEST_CASE( "expressions::span::expr2.1" )
 
 TEST_CASE( "expressions::span::expr3.0" )
 {
-    static constexpr std::size_t N = 5;
-    using container_t              = std::span<double>;
+    using container_t = std::span<double>;
 
-    double raw_a[]{ 0., 1., 2., 3., 4. };
-    double raw_b[]{ 9., 8., 7., 6., 5. };
-    container_t a( raw_a, N ), b( raw_b, N );
-    constexpr double result[]{ -81, -63, -45, -27, -9 };
+    std::vector<double> raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
+    container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
+    std::vector<double> result{ -81, -63, -45, -27, -9 };
 
     auto va = ponio::expression::make_state( a );
     auto vb = ponio::expression::make_state( b );
@@ -475,13 +465,11 @@ TEST_CASE( "expressions::span::expr3.0" )
 
 TEST_CASE( "expressions::span::expr3.1" )
 {
-    static constexpr std::size_t N = 5;
-    using container_t              = std::span<double>;
+    using container_t = std::span<double>;
 
-    double raw_a[]{ 0., 1., 2., 3., 4. };
-    double raw_b[]{ 9., 8., 7., 6., 5. };
-    container_t a( raw_a, N ), b( raw_b, N );
-    constexpr double result[]{ -81, -63, -45, -27, -9 };
+    std::vector<double> raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
+    container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
+    std::vector<double> result{ -81, -63, -45, -27, -9 };
 
     auto va = ponio::expression::make_state( a );
     auto vb = ponio::expression::make_state( b );
