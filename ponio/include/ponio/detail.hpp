@@ -14,6 +14,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "expressions/state.hpp"
+
 namespace ponio::detail
 {
 
@@ -97,8 +99,14 @@ namespace ponio::detail
         */
     }
 
+    template <typename state_t, typename value_t, typename ArrayA_t, typename ArrayB_t>
+    concept tpl_inner_product_requirement = requires( ArrayA_t a, ArrayB_t b, state_t init, value_t mul_coeff, state_t output ) {
+                                                output = init + mul_coeff * a[0] * b[0];
+                                            };
+
     /* tpl_inner_product */
     template <typename state_t, typename value_t, typename ArrayA_t, typename ArrayB_t, std::size_t... Is>
+        requires tpl_inner_product_requirement<state_t, value_t, ArrayA_t, ArrayB_t>
     constexpr void
     tpl_inner_product_impl( ArrayA_t const& a,
         ArrayB_t const& b,
@@ -108,6 +116,20 @@ namespace ponio::detail
         std::index_sequence<Is...> )
     {
         output = ( init + ... + ( mul_coeff * ( a[Is] * b[Is] ) ) );
+    }
+
+    template <typename state_t, typename value_t, typename ArrayA_t, typename ArrayB_t, std::size_t... Is>
+    constexpr void
+    tpl_inner_product_impl( ArrayA_t const& a,
+        ArrayB_t const& b,
+        state_t const& init,
+        [[maybe_unused]] value_t const& mul_coeff,
+        state_t& output,
+        std::index_sequence<Is...> )
+    {
+        expression::make_state(
+            output ) = ( expression::make_state( init ) + ...
+                         + ( expression::make_state( mul_coeff ) * ( expression::make_state( a[Is] ) * expression::make_state( b[Is] ) ) ) );
     }
 
     /**

@@ -4,6 +4,10 @@
 
 #include <array>
 #include <cmath>
+#include <numeric>
+#include <valarray>
+#include <vector>
+
 #include <ponio/detail.hpp>
 
 TEST_CASE( "detail::power" )
@@ -46,7 +50,7 @@ TEST_CASE( "detail::init_fill_array" )
     }
 }
 
-TEST_CASE( "detail::tpl_inner_product" )
+TEST_CASE( "detail::tpl_inner_product::scalar" )
 {
     constexpr std::size_t N          = 10;
     std::array<int, N + 1> const tab = ponio::detail::init_fill_array<N + 1>(
@@ -68,5 +72,91 @@ TEST_CASE( "detail::tpl_inner_product" )
         int norm = 0;
         ponio::detail::tpl_inner_product<M + 1>( tab, tab, 0, 1, norm );
         CHECK( norm == ( M * ( M + 1 ) * ( 2 * M + 1 ) / 6 ) );
+    }
+}
+
+TEST_CASE( "detail::tpl_inner_product::valarray" )
+{
+    using container_t = std::valarray<int>;
+
+    constexpr std::size_t N          = 10;
+    std::array<int, N + 1> const tab = ponio::detail::init_fill_array<N + 1>(
+        [count = 0]( int i ) mutable
+        {
+            return i + count++;
+        },
+        0 );
+
+    std::array<container_t, N + 1> const arr = ponio::detail::init_fill_array<N + 1>(
+        [count = 0]( int i ) mutable
+        {
+            int j = i + count++;
+            return container_t{ j, j, j };
+        },
+        0 );
+
+    container_t init{ 0, 0, 0 };
+
+    {
+        container_t norm{ 0, 0, 0 };
+        ponio::detail::tpl_inner_product<N + 1>( tab, arr, init, 1, norm );
+        for ( auto xi : norm )
+        {
+            CHECK( xi == ( N * ( N + 1 ) * ( 2 * N + 1 ) / 6 ) );
+        }
+    }
+
+    {
+        constexpr std::size_t M = 5;
+
+        container_t norm{ 0, 0, 0 };
+        ponio::detail::tpl_inner_product<M + 1>( tab, arr, init, 1, norm );
+        for ( auto xi : norm )
+        {
+            CHECK( xi == ( M * ( M + 1 ) * ( 2 * M + 1 ) / 6 ) );
+        }
+    }
+}
+
+TEST_CASE( "detail::tpl_inner_product::vector" )
+{
+    using container_t = std::vector<int>;
+
+    constexpr std::size_t N          = 10;
+    std::array<int, N + 1> const tab = ponio::detail::init_fill_array<N + 1>(
+        [count = 0]( int i ) mutable
+        {
+            return i + count++;
+        },
+        0 );
+
+    std::array<container_t, N + 1> const arr = ponio::detail::init_fill_array<N + 1>(
+        [count = 0]( int i ) mutable
+        {
+            int j = i + count++;
+            return container_t{ j, j, j };
+        },
+        0 );
+
+    container_t init{ 0, 0, 0 };
+
+    {
+        container_t norm{ 0, 0, 0 };
+        ponio::detail::tpl_inner_product<N + 1>( tab, arr, init, 1, norm );
+        for ( auto xi : norm )
+        {
+            CHECK( xi == ( N * ( N + 1 ) * ( 2 * N + 1 ) / 6 ) );
+        }
+    }
+
+    {
+        constexpr std::size_t M = 5;
+
+        container_t norm{ 0, 0, 0 };
+        ponio::detail::tpl_inner_product<M + 1>( tab, arr, init, 1, norm );
+        for ( auto xi : norm )
+        {
+            CHECK( xi == ( M * ( M + 1 ) * ( 2 * M + 1 ) / 6 ) );
+        }
     }
 }
