@@ -19,7 +19,7 @@ main()
     double sigma = 10., rho = 28., beta = 8. / 3.;
 
     auto lorenz = ponio::make_simple_problem(
-        [=]( double /* t */, state_t&& u ) -> state_t
+        [=]( double /* t */, state_t const& u ) -> state_t
         {
             double dt_u0 = sigma * ( u[1] - u[0] );
             double dt_u1 = rho * u[0] - u[1] - u[0] * u[2];

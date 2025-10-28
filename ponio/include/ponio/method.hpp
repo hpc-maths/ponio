@@ -49,6 +49,7 @@ namespace ponio
 
         Algorithm_t alg;
         step_storage_t kis;
+        state_t ui;
 
         /**
          * constructor of \ref method from its stages and a \f$u_0\f$ (only for preallocation)
@@ -59,6 +60,7 @@ namespace ponio
         method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
             : alg( alg_ )
             , kis( ::ponio::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
+            , ui( shadow_of_u0 )
         {
         }
 
@@ -91,7 +93,7 @@ namespace ponio
         typename std::enable_if<( I == Algorithm_t::N_stages + 1 ), void>::type
         _call_stage( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
-            alg.stage( Stage<I>{}, f, tn, un, kis, dt, kis[I] );
+            alg.stage( Stage<I>{}, f, tn, un, kis, dt, ui, kis[I] );
         }
 
         template <std::size_t I = 0, typename Problem_t, typename value_t, typename Algo_t = Algorithm_t>
@@ -115,7 +117,7 @@ namespace ponio
         typename std::enable_if<( I < Algorithm_t::N_stages + 1 ), void>::type
         _call_stage( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
-            alg.stage( Stage<I>{}, f, tn, un, kis, dt, kis[I] );
+            alg.stage( Stage<I>{}, f, tn, un, kis, dt, ui, kis[I] );
             _call_stage<I + 1>( f, tn, un, dt );
         }
 
