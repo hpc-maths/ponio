@@ -94,7 +94,7 @@ namespace ponio::expression
          * @brief raw data accessor (const and non-const version)
          */
         container_type const&
-        data() const
+        data() const // cppcheck-suppress unusedFunction
         {
             return _data;
         }
@@ -186,7 +186,7 @@ namespace ponio::expression
 
     template <typename value_t>
         requires( std::floating_point<value_t> || std::integral<value_t> )
-    auto make_scalar( value_t const& lhs )
+    auto make_scalar( value_t const& lhs ) // cppcheck-suppress unusedFunction
     {
         return state<value_t>( lhs );
     }

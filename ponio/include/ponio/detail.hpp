@@ -127,9 +127,9 @@ namespace ponio::detail
         state_t& output,
         std::index_sequence<Is...> )
     {
-        expression::make_state(
-            output ) = ( expression::make_state( init ) + ...
-                         + ( expression::make_state( mul_coeff ) * ( expression::make_state( a[Is] ) * expression::make_state( b[Is] ) ) ) );
+        expression::make_state( output ) = ( expression::make_state( init ) + ...
+                                             + ( expression::make_scalar( mul_coeff )
+                                                 * ( expression::make_scalar( a[Is] ) * expression::make_state( b[Is] ) ) ) );
     }
 
     /**
