@@ -105,6 +105,7 @@ TEST_CASE( "expressions::array::expr1.1" )
     auto r1 = ( va + vb ) * ( va + vb );
     auto r2 = va * va + vb * vb + two * va * vb;
 
+    CHECK( r1.size() == N );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -147,6 +148,7 @@ TEST_CASE( "expressions::array::expr1.3" )
     auto r1 = ( make_state( a ) + make_state( b ) ) * ( make_state( a ) + make_state( b ) );
     auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) + make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
+    CHECK( r1.size() == N );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -199,6 +201,7 @@ TEST_CASE( "expressions::array::expr2.1" )
     auto r1 = ( va - vb ) * ( va - vb );
     auto r2 = va * va + vb * vb - two * va * vb;
 
+    CHECK( r1.size() == N );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -241,6 +244,7 @@ TEST_CASE( "expressions::array::expr2.3" )
     auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) - make_state( b ) );
     auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) - make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
+    CHECK( r1.size() == N );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -291,6 +295,7 @@ TEST_CASE( "expressions::array::expr3.1" )
     auto r1 = ( va - vb ) * ( va + vb );
     auto r2 = va * va - vb * vb;
 
+    CHECK( r1.size() == result.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -332,6 +337,7 @@ TEST_CASE( "expressions::array::expr3.3" )
     auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) + make_state( b ) );
     auto r2 = make_state( a ) * make_state( a ) - make_state( b ) * make_state( b );
 
+    CHECK( r1.size() == result.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -389,6 +395,7 @@ TEST_CASE( "expressions::vector::expr1.1" )
     auto r1 = ( va + vb ) * ( va + vb );
     auto r2 = va * va + vb * vb + two * va * vb;
 
+    CHECK( r1.size() == a.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -432,6 +439,7 @@ TEST_CASE( "expressions::vector::expr1.3" )
     auto r1 = ( make_state( a ) + make_state( b ) ) * ( make_state( a ) + make_state( b ) );
     auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) + make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
+    CHECK( r1.size() == a.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -483,6 +491,7 @@ TEST_CASE( "expressions::vector::expr2.1" )
     auto r1 = ( va - vb ) * ( va - vb );
     auto r2 = va * va + vb * vb - two * va * vb;
 
+    CHECK( r1.size() == result.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -526,6 +535,7 @@ TEST_CASE( "expressions::vector::expr2.3" )
     auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) - make_state( b ) );
     auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) - make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
+    CHECK( r1.size() == result.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -575,6 +585,7 @@ TEST_CASE( "expressions::vector::expr3.1" )
     auto r1 = ( va - vb ) * ( va + vb );
     auto r2 = va * va - vb * vb;
 
+    CHECK( r1.size() == result.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -617,6 +628,7 @@ TEST_CASE( "expressions::vector::expr3.3" )
     auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) + make_state( b ) );
     auto r2 = make_state( a ) * make_state( a ) - make_state( b ) * make_state( b );
 
+    CHECK( r1.size() == result.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -678,6 +690,7 @@ TEST_CASE( "expressions::span::expr1.1" )
     auto r1 = ( va + vb ) * ( va + vb );
     auto r2 = va * va + vb * vb + two * va * vb;
 
+    CHECK( r1.size() == a.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -727,6 +740,7 @@ TEST_CASE( "expressions::span::expr1.3" )
     auto r1 = ( make_state( a ) + make_state( b ) ) * ( make_state( a ) + make_state( b ) );
     auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) + make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
+    CHECK( r1.size() == a.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -782,6 +796,7 @@ TEST_CASE( "expressions::span::expr2.1" )
     auto r1 = ( va - vb ) * ( va - vb );
     auto r2 = va * va + vb * vb - two * va * vb;
 
+    CHECK( r1.size() == result.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -831,6 +846,7 @@ TEST_CASE( "expressions::span::expr2.3" )
     auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) - make_state( b ) );
     auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) - make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
+    CHECK( r1.size() == result.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -884,6 +900,7 @@ TEST_CASE( "expressions::span::expr3.1" )
     auto r1 = ( va - vb ) * ( va + vb );
     auto r2 = va * va - vb * vb;
 
+    CHECK( r1.size() == result.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -932,6 +949,7 @@ TEST_CASE( "expressions::span::expr3.3" )
     auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) + make_state( b ) );
     auto r2 = make_state( a ) * make_state( a ) - make_state( b ) * make_state( b );
 
+    CHECK( r1.size() == result.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
