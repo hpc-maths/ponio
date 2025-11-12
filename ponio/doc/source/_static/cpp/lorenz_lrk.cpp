@@ -27,7 +27,7 @@ main()
         { rho,   -1,    0    },
         { 0,     0,     -beta}
     };
-    auto N = [=]( double, auto&& u, state_t& du )
+    auto N = [=]( double, state_t const& u, state_t& du )
     {
         du[0] = 0.;
         du[1] = -u[0] * u[2];

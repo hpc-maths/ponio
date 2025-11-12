@@ -3,7 +3,7 @@
 The following table gives an overview over all examples.
 
 | Section                                                                                             | Brief Description                                                  | File                                                                                                                           |
-|-----------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
 | [Arenstorf orbit](#arenstorf-orbit)                                                                 | This example shows how to use multiple adaptive time step methods  | [arenstorf.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/arenstorf.cpp)                                     |
 | [Brownian movement](#brownian-movement)                                                             | This example shows how to use random in an ODE                     | [brownian.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/brownian.cpp)                                       |
 | [Brusselator equations](#brusselator-equations)                                                     | The chemistry example of Brusselator (2 equations model)           | [brusselator.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/brusselator.cpp)                                 |
@@ -113,11 +113,11 @@ $$
 In this example we solve this system with some explicit adaptive time step methods from [Dormand, J.R., Prince, P.J., A family of embedded Runge-Kutta formulae (1980) *Journal of Computational and Applied Mathematics*](http://dx.doi.org/10.1016/0771-050x(80)90013-3)
 
 | Arenstorf orbit                          | Arenstorf velocity                          |
-|------------------------------------------|---------------------------------------------|
+| ---------------------------------------- | ------------------------------------------- |
 | ![Arenstorf orbit](img/arenstorf/01.png) | ![Arenstorf velocity](img/arenstorf/02.png) |
 
 | Time step history                          | Error over time                          |
-|--------------------------------------------|------------------------------------------|
+| ------------------------------------------ | ---------------------------------------- |
 | ![Time step history](img/arenstorf/03.png) | ![Error over time](img/arenstorf/04.png) |
 
 All example in [arenstorf.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/arenstorf.cpp), and run
@@ -140,7 +140,7 @@ $$
 where $X(t)$ and $Y(t)$ are random variable (juste a `std::rand` at each iteration).
 
 | Some Brownian movement in 2D              |
-|-------------------------------------------|
+| ----------------------------------------- |
 | ![brownian movement](img/brownian/01.png) |
 
 All example in [brownian.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/brownian.cpp), and run
@@ -163,7 +163,7 @@ $$
 We solve this model with a hight order explicit Runge-Kutta method: RK(8, 6).
 
 | Brusselator concentration                            | Brusselator concentration in phase space                            |
-|------------------------------------------------------|---------------------------------------------------------------------|
+| ---------------------------------------------------- | ------------------------------------------------------------------- |
 | ![Brusselator concentration](img/brusselator/01.png) | ![Brusselator concentration in phase space](img/brusselator/02.png) |
 
 All example in [brusselator.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/brusselator.cpp), and run
@@ -192,7 +192,7 @@ $$
 $$
 
 | Brusselator concentration                                 | Brusselator concentration in phase space                                 |
-|-----------------------------------------------------------|--------------------------------------------------------------------------|
+| --------------------------------------------------------- | ------------------------------------------------------------------------ |
 | ![Brusselator concentration](img/brusselator_dirk/01.png) | ![Brusselator concentration in phase space](img/brusselator_dirk/02.png) |
 
 All example in [brusselator_dirk.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/brusselator_dirk.cpp), and run
@@ -241,7 +241,7 @@ or with a range-based for loop:
 Only in the first case you can control time step before increment (with your adaptive time step heuristic) with modification of `it->time_step` data member.
 
 | Curtiss-Hirschfelder solution                                     |
-|-------------------------------------------------------------------|
+| ----------------------------------------------------------------- |
 | ![Curtiss-Hirschfelder solution](img/curtiss_hirschfelder/01.png) |
 
 All example in [curtiss_hirschfelder.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/curtiss_hirschfelder.cpp), and run
@@ -263,7 +263,7 @@ with $k>1$ and $y(0) = y_0$. We choose $k = 50$ and $y_0 = 2$.
 In this example we solve the equation with Krogstad method (an exponential Runge-Kutta method), and LRK(4, 4) method (a Lawson method). In both methods, you need to define a `ponio::lawson_problem` with a linear and non-linear part. We choose the linear part $-k$ and the non-linear part as $N:t, y\mapsto k\cos(t)$. Exponential Runge-Kutta methods and Lawson methods are build to solve exactly the linear part when the non-linear part goes to 0.
 
 | Curtiss-Hirschfelder solution                                           |
-|-------------------------------------------------------------------------|
+| ----------------------------------------------------------------------- |
 | ![Curtiss-Hirschfelder solution](img/curtiss_hirschfelder_exprk/01.png) |
 
 All example in [curtiss_hirschfelder_exprk.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/curtiss_hirschfelder_exprk.cpp), and run
@@ -283,7 +283,7 @@ $$
 with $y(0) = 1$. After a lot of calculus we can find the exact solution $y(t) = e^t$, or we can approximate it with RK NSSP (2, 1) method.
 
 | Exponential function                    |
-|-----------------------------------------|
+| --------------------------------------- |
 | ![Exponential function](img/exp/01.png) |
 
 All example in [exp.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/exp.cpp), and run
@@ -307,7 +307,7 @@ with $y(0) = 1$ and $\lambda = 0.3$. In this example we solve this equation with
 * a RK(2,2) Ralston method.
 
 | Exponential function                              |
-|---------------------------------------------------|
+| ------------------------------------------------- |
 | ![Exponential function](img/exp_splitting/01.png) |
 
 All example in [exp_splitting.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/exp_splitting.cpp), and run
@@ -335,7 +335,7 @@ In ponio, the `state_t` should propose arithmetic operations as addition and mul
 The heat equation is quite complicated to solve with an explicit Runge-Kutta method but we do it with a extended stability method with the Runge-Kutta Chebyshev of order 2. In ponio you could choose the number of stages of this method : `ponio::runge_kutta::explicit_rkc2<15>()` (for 15 stages).
 
 | Solution of heat equation                     |
-|-----------------------------------------------|
+| --------------------------------------------- |
 | ![Solution of heat equation](img/heat/01.png) |
 
 All example in [heat.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat.cpp), and run
@@ -363,7 +363,7 @@ In ponio, the `state_t` should propose arithmetic operations as addition and mul
 An optimization of RKC2 is the ROCK2 method from [Abdulle, A., Medovikov, A. Second order Chebyshev methods based on orthogonal polynomials. *Numer. Math* (2001)](https://doi.org/10.1007/s002110100292), and its extension to order 4, ROCK4 method presented in [Abdulle, A. Fourth Order Chebyshev Methods with Recurrence Relation. *SIAM Journal on Scientific Computing* (2002)](https://doi.org/10.1137/S106482750037954).
 
 | Solution of heat equation                          | Mesure of order of ROCK2 and ROCK4       |
-|----------------------------------------------------|------------------------------------------|
+| -------------------------------------------------- | ---------------------------------------- |
 | ![Solution of heat equation](img/heat_rock/01.png) | ![Mesure of order](img/heat_rock/02.png) |
 
 All example in [heat_rock.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat_rock.cpp), and run
@@ -392,7 +392,7 @@ In this example we coupling the mesh refinement library [samurai](https://github
 
 
 | Solution of heat equation with levels of adaptive mesh |
-|--------------------------------------------------------|
+| ------------------------------------------------------ |
 | ![Solution of heat equation](img/heat_samurai/01.png)  |
 
 All example in [heat_samurai.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/heat_samurai.cpp), and run
@@ -413,8 +413,10 @@ $$
   \end{cases}
 $$
 
+> In this example we use a `std::vector<double>` to store the current state $(x, y, z)$ vector.
+
 | Solution in 3D                       | Solution by composant                       |
-|--------------------------------------|---------------------------------------------|
+| ------------------------------------ | ------------------------------------------- |
 | ![Solution in 3D](img/lorenz/01.png) | ![Solution by composant](img/lorenz/02.png) |
 
 All example in [lorenz.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz.cpp), and run
@@ -436,7 +438,7 @@ $$
 $$
 
 | Solution in 3D                            | Solution by composant                            |
-|-------------------------------------------|--------------------------------------------------|
+| ----------------------------------------- | ------------------------------------------------ |
 | ![Solution in 3D](img/lorenz_tuto/01.png) | ![Solution by composant](img/lorenz_tuto/02.png) |
 
 All example in [lorenz_tuto.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz_tuto.cpp), and run
@@ -458,7 +460,7 @@ $$
 $$
 
 | Solution in 3D                           |
-|------------------------------------------|
+| ---------------------------------------- |
 | ![Solution in 3D](img/lorenz_all/01.gif) |
 
 All example in [lorenz_all.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lorenz_all.cpp), and run
@@ -481,7 +483,7 @@ $$
 with parameters $\alpha=\frac{2}{3}$, $\beta=\frac{4}{3}$, $\gamma = \delta = 1$, and with the initial condition $(x, y) = (x_0, x_0)$, with different values of $x_0$.
 
 | Prey predator history                               | Solution in phase space                               |
-|-----------------------------------------------------|-------------------------------------------------------|
+| --------------------------------------------------- | ----------------------------------------------------- |
 | ![Prey predator history](img/lotka_volterra/01.png) | ![Solution in phase space](img/lotka_volterra/02.png) |
 
 All example in [lotka_volterra.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/lotka_volterra.cpp), and run
@@ -512,7 +514,7 @@ $$
 
 
 | Solution with RKC(20, 2)              | Absolute error                       |
-|---------------------------------------|--------------------------------------|
+| ------------------------------------- | ------------------------------------ |
 | ![Nagumo solution](img/nagumo/01.png) | ![Absolute error](img/nagumo/02.png) |
 
 All example in [nagumo.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/nagumo.cpp), and run
@@ -542,7 +544,7 @@ $$
 $$
 
 | Pendulum equation (solved with RK (4,4))                         |
-|------------------------------------------------------------------|
+| ---------------------------------------------------------------- |
 | ![Pendulum equation (solved with RK (4,4))](img/pendulum/01.png) |
 
 All example in [pendulum.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/pendulum.cpp), and run
@@ -580,7 +582,7 @@ $$
 In this example we coupling the mesh refinement library [samurai](https://github.com/hpc-maths/samurai) with ponio, and the system is solved by PIROCK method.
 
 | Belousov Zhabotinsky system solved by PIROCK method                                            |
-|------------------------------------------------------------------------------------------------|
+| ---------------------------------------------------------------------------------------------- |
 | ![Belousov Zhabotinsky system solved by PIROCK method](img/belousov_zhabotinsky_pirock/01.png) |
 
 All example in [belousov_zhabotinsky_pirock.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/belousov_zhabotinsky_pirock.cpp), and run
@@ -618,7 +620,7 @@ $$
 In this example we coupling the mesh refinement library [samurai](https://github.com/hpc-maths/samurai) with ponio, and the system is solved by PIROCK method.
 
 | Solution $b$ and $c$                         | Levels of adapted mesh on solution                             |
-|----------------------------------------------|----------------------------------------------------------------|
+| -------------------------------------------- | -------------------------------------------------------------- |
 | ![Solution b and c](img/bz_2d_pirock/01.png) | ![Levels of adapted mesh on solution](img/bz_2d_pirock/02.png) |
 
 All example in [bz_2d_pirock.cpp](https://github.com/hpc-maths/ponio/blob/main/ponio/examples/bz_2d_pirock.cpp), and run
