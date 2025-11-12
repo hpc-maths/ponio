@@ -6,7 +6,7 @@
 
 #include <filesystem>
 #include <string>
-#include <valarray>
+#include <vector>
 
 #include <ponio/observer.hpp>
 #include <ponio/problem.hpp>
@@ -23,7 +23,7 @@ main( int, char** )
     auto filename             = std::filesystem::path( dirname ) / "lorenz.dat";
     ponio::observer::file_observer fobs( filename );
 
-    using state_t = std::valarray<double>;
+    using state_t = std::vector<double>;
 
     double const sigma = 10.;
     double const rho   = 28.;
