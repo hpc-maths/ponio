@@ -117,18 +117,15 @@ TEST_CASE( "expressions::array::expr1.2" )
 {
     static constexpr std::size_t N = 5;
     using container_t              = std::array<double, N>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t r1, r2;
     double result = 81;
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    state( r1 ) = ( state( a ) + state( b ) ) * ( state( a ) + state( b ) );
-    state( r2 ) = state( a ) * state( a ) + state( b ) * state( b ) + state( 2.0 ) * state( a ) * state( b );
+    make_state( r1 ) = ( make_state( a ) + make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    make_state( r2 ) = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b )
+                     + make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -142,17 +139,13 @@ TEST_CASE( "expressions::array::expr1.3" )
 {
     static constexpr std::size_t N = 5;
     using container_t              = std::array<double, N>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     double result = 81;
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    auto r1 = ( state( a ) + state( b ) ) * ( state( a ) + state( b ) );
-    auto r2 = state( a ) * state( a ) + state( b ) * state( b ) + state( 2.0 ) * state( a ) * state( b );
+    auto r1 = ( make_state( a ) + make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) + make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -218,18 +211,15 @@ TEST_CASE( "expressions::array::expr2.2" )
 {
     static constexpr std::size_t N = 5;
     using container_t              = std::array<double, N>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t r1, r2;
     container_t result = { 81, 49, 25, 9, 1 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    state( r1 ) = ( state( a ) - state( b ) ) * ( state( a ) - state( b ) );
-    state( r2 ) = state( a ) * state( a ) + state( b ) * state( b ) - state( 2.0 ) * state( a ) * state( b );
+    make_state( r1 ) = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) - make_state( b ) );
+    make_state( r2 ) = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b )
+                     - make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -243,17 +233,13 @@ TEST_CASE( "expressions::array::expr2.3" )
 {
     static constexpr std::size_t N = 5;
     using container_t              = std::array<double, N>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t result = { 81, 49, 25, 9, 1 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    auto r1 = ( state( a ) - state( b ) ) * ( state( a ) - state( b ) );
-    auto r2 = state( a ) * state( a ) + state( b ) * state( b ) - state( 2.0 ) * state( a ) * state( b );
+    auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) - make_state( b ) );
+    auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) - make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -317,18 +303,14 @@ TEST_CASE( "expressions::array::expr3.2" )
 {
     static constexpr std::size_t N = 5;
     using container_t              = std::array<double, N>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t r1, r2;
     container_t result = { -81, -63, -45, -27, -9 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    state( r1 ) = ( state( a ) - state( b ) ) * ( state( a ) + state( b ) );
-    state( r2 ) = state( a ) * state( a ) - state( b ) * state( b );
+    make_state( r1 ) = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    make_state( r2 ) = make_state( a ) * make_state( a ) - make_state( b ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -342,17 +324,13 @@ TEST_CASE( "expressions::array::expr3.3" )
 {
     static constexpr std::size_t N = 5;
     using container_t              = std::array<double, N>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t result = { -81, -63, -45, -27, -9 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    auto r1 = ( state( a ) - state( b ) ) * ( state( a ) + state( b ) );
-    auto r2 = state( a ) * state( a ) - state( b ) * state( b );
+    auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    auto r2 = make_state( a ) * make_state( a ) - make_state( b ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -422,21 +400,18 @@ TEST_CASE( "expressions::vector::expr1.1" )
 TEST_CASE( "expressions::vector::expr1.2" )
 {
     using container_t = std::vector<double>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t r1, r2;
     double result = 81;
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
     r1.reserve( a.size() );
     r2.reserve( a.size() );
 
-    state( r1 ) = ( state( a ) + state( b ) ) * ( state( a ) + state( b ) );
-    state( r2 ) = state( a ) * state( a ) + state( b ) * state( b ) + state( 2.0 ) * state( a ) * state( b );
+    make_state( r1 ) = ( make_state( a ) + make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    make_state( r2 ) = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b )
+                     + make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -449,17 +424,13 @@ TEST_CASE( "expressions::vector::expr1.2" )
 TEST_CASE( "expressions::vector::expr1.3" )
 {
     using container_t = std::vector<double>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     double result = 81;
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    auto r1 = ( state( a ) + state( b ) ) * ( state( a ) + state( b ) );
-    auto r2 = state( a ) * state( a ) + state( b ) * state( b ) + state( 2.0 ) * state( a ) * state( b );
+    auto r1 = ( make_state( a ) + make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) + make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -523,21 +494,18 @@ TEST_CASE( "expressions::vector::expr2.1" )
 TEST_CASE( "expressions::vector::expr2.2" )
 {
     using container_t = std::vector<double>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t r1, r2;
     container_t result = { 81, 49, 25, 9, 1 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
     r1.reserve( a.size() );
     r2.reserve( a.size() );
 
-    state( r1 ) = ( state( a ) - state( b ) ) * ( state( a ) - state( b ) );
-    state( r2 ) = state( a ) * state( a ) + state( b ) * state( b ) - state( 2.0 ) * state( a ) * state( b );
+    make_state( r1 ) = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) - make_state( b ) );
+    make_state( r2 ) = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b )
+                     - make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -550,17 +518,13 @@ TEST_CASE( "expressions::vector::expr2.2" )
 TEST_CASE( "expressions::vector::expr2.3" )
 {
     using container_t = std::vector<double>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t result = { 81, 49, 25, 9, 1 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    auto r1 = ( state( a ) - state( b ) ) * ( state( a ) - state( b ) );
-    auto r2 = state( a ) * state( a ) + state( b ) * state( b ) - state( 2.0 ) * state( a ) * state( b );
+    auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) - make_state( b ) );
+    auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) - make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -622,21 +586,17 @@ TEST_CASE( "expressions::vector::expr3.1" )
 TEST_CASE( "expressions::vector::expr3.2" )
 {
     using container_t = std::vector<double>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t r1, r2;
     container_t result = { -81, -63, -45, -27, -9 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
     r1.reserve( a.size() );
     r2.reserve( a.size() );
 
-    state( r1 ) = ( state( a ) - state( b ) ) * ( state( a ) + state( b ) );
-    state( r2 ) = state( a ) * state( a ) - state( b ) * state( b );
+    make_state( r1 ) = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    make_state( r2 ) = make_state( a ) * make_state( a ) - make_state( b ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -649,17 +609,13 @@ TEST_CASE( "expressions::vector::expr3.2" )
 TEST_CASE( "expressions::vector::expr3.3" )
 {
     using container_t = std::vector<double>;
+    using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
     container_t result = { -81, -63, -45, -27, -9 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    auto r1 = ( state( a ) - state( b ) ) * ( state( a ) + state( b ) );
-    auto r2 = state( a ) * state( a ) - state( b ) * state( b );
+    auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    auto r2 = make_state( a ) * make_state( a ) - make_state( b ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -734,6 +690,7 @@ TEST_CASE( "expressions::span::expr1.2" )
 {
     using raw_container_t = std::vector<double>;
     using container_t     = std::span<double>;
+    using namespace ponio::expression;
 
     raw_container_t raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
     raw_container_t raw_r1, raw_r2;
@@ -744,13 +701,9 @@ TEST_CASE( "expressions::span::expr1.2" )
     container_t r1( raw_r1.data(), raw_r1.size() ), r2( raw_r2.data(), raw_r2.size() );
     double result = 81;
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    state( r1 ) = ( state( a ) + state( b ) ) * ( state( a ) + state( b ) );
-    state( r2 ) = state( a ) * state( a ) + state( b ) * state( b ) + state( 2.0 ) * state( a ) * state( b );
+    make_state( r1 ) = ( make_state( a ) + make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    make_state( r2 ) = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b )
+                     + make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -764,19 +717,15 @@ TEST_CASE( "expressions::span::expr1.3" )
 {
     using raw_container_t = std::vector<double>;
     using container_t     = std::span<double>;
+    using namespace ponio::expression;
 
     raw_container_t raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
 
     container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
     double result = 81;
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    auto r1 = ( state( a ) + state( b ) ) * ( state( a ) + state( b ) );
-    auto r2 = state( a ) * state( a ) + state( b ) * state( b ) + state( 2.0 ) * state( a ) * state( b );
+    auto r1 = ( make_state( a ) + make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) + make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -845,6 +794,7 @@ TEST_CASE( "expressions::span::expr2.2" )
 {
     using raw_container_t = std::vector<double>;
     using container_t     = std::span<double>;
+    using namespace ponio::expression;
 
     raw_container_t raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
     raw_container_t raw_r1, raw_r2;
@@ -855,13 +805,9 @@ TEST_CASE( "expressions::span::expr2.2" )
     container_t r1( raw_r1.data(), raw_r1.size() ), r2( raw_r2.data(), raw_r2.size() );
     raw_container_t result{ 81, 49, 25, 9, 1 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    state( r1 ) = ( state( a ) - state( b ) ) * ( state( a ) - state( b ) );
-    state( r2 ) = state( a ) * state( a ) + state( b ) * state( b ) - state( 2.0 ) * state( a ) * state( b );
+    make_state( r1 ) = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) - make_state( b ) );
+    make_state( r2 ) = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b )
+                     - make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -875,19 +821,15 @@ TEST_CASE( "expressions::span::expr2.3" )
 {
     using raw_container_t = std::vector<double>;
     using container_t     = std::span<double>;
+    using namespace ponio::expression;
 
     raw_container_t raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
 
     container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
     raw_container_t result{ 81, 49, 25, 9, 1 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    auto r1 = ( state( a ) - state( b ) ) * ( state( a ) - state( b ) );
-    auto r2 = state( a ) * state( a ) + state( b ) * state( b ) - state( 2.0 ) * state( a ) * state( b );
+    auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) - make_state( b ) );
+    auto r2 = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b ) - make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -954,6 +896,7 @@ TEST_CASE( "expressions::span::expr3.2" )
 {
     using raw_container_t = std::vector<double>;
     using container_t     = std::span<double>;
+    using namespace ponio::expression;
 
     raw_container_t raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
     raw_container_t raw_r1, raw_r2;
@@ -964,13 +907,8 @@ TEST_CASE( "expressions::span::expr3.2" )
     container_t r1( raw_r1.data(), raw_r1.size() ), r2( raw_r2.data(), raw_r2.size() );
     raw_container_t result{ -81, -63, -45, -27, -9 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    state( r1 ) = ( state( a ) - state( b ) ) * ( state( a ) + state( b ) );
-    state( r2 ) = state( a ) * state( a ) - state( b ) * state( b );
+    make_state( r1 ) = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    make_state( r2 ) = make_state( a ) * make_state( a ) - make_state( b ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
@@ -984,19 +922,15 @@ TEST_CASE( "expressions::span::expr3.3" )
 {
     using raw_container_t = std::vector<double>;
     using container_t     = std::span<double>;
+    using namespace ponio::expression;
 
     raw_container_t raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
 
     container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
     raw_container_t result{ -81, -63, -45, -27, -9 };
 
-    auto state = []( auto&& c )
-    {
-        return ponio::expression::make_state( c );
-    };
-
-    auto r1 = ( state( a ) - state( b ) ) * ( state( a ) + state( b ) );
-    auto r2 = state( a ) * state( a ) - state( b ) * state( b );
+    auto r1 = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) + make_state( b ) );
+    auto r2 = make_state( a ) * make_state( a ) - make_state( b ) * make_state( b );
 
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
