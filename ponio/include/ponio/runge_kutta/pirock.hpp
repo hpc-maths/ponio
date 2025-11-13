@@ -1214,9 +1214,21 @@ namespace ponio::runge_kutta::pirock
                     };
 
                     // TODO: this couple of lines works only with samurai (because of err_D.array())
-                    value_t err_R_scalar = norm_error( err_R, un, u_np1, _info.absolute_tolerance, _info.relative_tolerance );
-                    value_t err_D_scalar = norm_error( err_D, un, u_np1, _info.absolute_tolerance, _info.relative_tolerance );
-                    value_t err_A_scalar = norm_error( err_A, un, u_np1, _info.absolute_tolerance, _info.relative_tolerance );
+                    value_t err_R_scalar = shampine_trick_caller.norm_error( err_R,
+                        un,
+                        u_np1,
+                        _info.absolute_tolerance,
+                        _info.relative_tolerance );
+                    value_t err_D_scalar = shampine_trick_caller.norm_error( err_D,
+                        un,
+                        u_np1,
+                        _info.absolute_tolerance,
+                        _info.relative_tolerance );
+                    value_t err_A_scalar = shampine_trick_caller.norm_error( err_A,
+                        un,
+                        u_np1,
+                        _info.absolute_tolerance,
+                        _info.relative_tolerance );
 
                     _info.error   = std::max( err_D_scalar, err_R_scalar, std::pow( err_A_scalar, 2. / 3. ) );
                     _info.success = _info.error < 1.0;

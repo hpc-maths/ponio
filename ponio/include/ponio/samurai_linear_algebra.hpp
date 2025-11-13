@@ -187,6 +187,16 @@ namespace ponio::shampine_trick
         /**
          * @brief return a error norm given by: \f$$\sum_i \left(\frac{x_i}{a_{tol} + r_{tol}\max(|y_i|, |z_i|)}\right)^2\Delta x_i\f$$
          *
+         * This function computes a error norm for a samurai field (ScalarField or VectorField).
+         *
+         * First step is to compute volume of domain \f$|\Omega|=\sum_k \Delta x_k ^d\f$ where \f$d\f$ is the dimension of field, and
+         * normalization coefficients \f$sc_i = \max_k(|y_{i,k}|, |z_{i,k}|)\f$ for composant \f$i\f$i in cell \f$k\f$.
+         *
+         * Next we compute an error foreach composant : \f$err_i = \sum_k\left(\frac{x_{i,k}}{a_{tol} + r_{tol}sc_i}\Delta x_k\right)^2\f$
+         * where \f$x_{i,k}\f$ is the value of composant \f$i\f$ in cell \f$k\f$.
+         *
+         * Then the computed error is given by \f$err = \frac{1}{|\omega| N_{comp}}\sum_i err_i\f$.
+         *
          * @tparam value_t type of tolerances
          * @tparam state_t type of vectors \f$x\f$, \f$y\f$ and \f$z\f$
          * @param x mainly the estimate error
