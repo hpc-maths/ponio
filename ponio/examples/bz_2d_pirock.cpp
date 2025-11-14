@@ -144,7 +144,7 @@ main( int argc, char** argv )
     // diffusion terme
     auto diff_coeff = samurai::DiffCoeff<3>( { da, db, dc } );
     auto diff       = samurai::make_multi_diffusion_order2<decltype( y_ini )>( diff_coeff );
-    auto fd         = [&]( double /* t */, auto&& y, auto& dy )
+    auto fd         = [&]( double /* t */, auto& y, auto& dy )
     {
         samurai::update_ghost_mr( y );
         dy = -diff( y );
@@ -189,7 +189,7 @@ main( int argc, char** argv )
     {
         return react;
     };
-    auto fr = [&]( double t, auto&& uv, auto& dt_uv )
+    auto fr = [&]( double t, auto& uv, auto& dt_uv )
     {
         // samurai::update_ghost_mr( uv );
         dt_uv = fr_t( t )( uv );
