@@ -8,6 +8,7 @@ import subprocess
 import os
 import dataclasses
 import glob
+import argparse
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -16,6 +17,18 @@ import numpy.typing as npt
 
 name = "lorenz_all"
 data_dir = name+"_data"
+img_dir = data_dir
+
+parser = argparse.ArgumentParser(
+    description=f"Compile, launch and plot results of example `{name}`")
+parser.add_argument('--only-save', action='store_true',
+                    help="Just save output in img directory")
+
+arguments = parser.parse_args()
+
+if arguments.only_save:
+    img_dir = os.path.join("img", name)
+    os.makedirs(img_dir, exist_ok=True)
 
 
 @dataclasses.dataclass
@@ -101,48 +114,47 @@ print("!")
 
 #####################################################################
 # full 3d plot
-fig = plt.figure(figsize=(8, 8))
-fig.subplots_adjust(top=1., bottom=0., left=-0.5, right=1.5)
-gs = fig.add_gridspec(1, 1)
-axlist = []
+if not arguments.only_save:
+    fig = plt.figure(figsize=(8, 8))
+    fig.subplots_adjust(top=1., bottom=0., left=-0.5, right=1.5)
+    gs = fig.add_gridspec(1, 1)
+    axlist = []
 
-ax = fig.add_subplot(gs[:, 0], projection='3d')
-ax.set_xlim3d([-20, 20])
-ax.set_ylim3d([-20, 20])
-ax.set_zlim3d(bottom=0, top=50)
+    ax = fig.add_subplot(gs[:, 0], projection='3d')
+    ax.set_xlim3d([-20, 20])
+    ax.set_ylim3d([-20, 20])
+    ax.set_zlim3d(bottom=0, top=50)
 
-ax.xaxis.pane.fill = False
-ax.yaxis.pane.fill = False
-ax.zaxis.pane.fill = False
-ax.xaxis.pane.set_edgecolor('w')
-ax.yaxis.pane.set_edgecolor('w')
-ax.zaxis.pane.set_edgecolor('w')
-plt.axis('off')
-ax.grid(False)
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+    ax.xaxis.pane.set_edgecolor('w')
+    ax.yaxis.pane.set_edgecolor('w')
+    ax.zaxis.pane.set_edgecolor('w')
+    plt.axis('off')
+    ax.grid(False)
 
-lines = [ax.plot(d.x()[0], d.y()[0], d.z()[0], linewidth=0.375, color=f"C{i}")[0]
-         for i, d in enumerate(data)]
-points = [ax.plot(d.x()[0], d.y()[0], d.z()[0], "o", linewidth=0.375, color=f"C{i}")[0]
-          for i, d in enumerate(data)]
+    lines = [ax.plot(d.x()[0], d.y()[0], d.z()[0], linewidth=0.375, color=f"C{i}")[0]
+             for i, d in enumerate(data)]
+    points = [ax.plot(d.x()[0], d.y()[0], d.z()[0], "o", linewidth=0.375, color=f"C{i}")[0]
+              for i, d in enumerate(data)]
 
-N_frames = 256
+    N_frames = 256
 
+    def update(frame):
+        for p, l, d in zip(points, lines, data):
+            len_simu = len(d.time())
+            i = int(frame/N_frames*len_simu)
+            j = 0  # max(0, i-200)
+            p.set_data_3d([d.x()[i]], [d.y()[i]], [d.z()[i]])
+            l.set_data_3d(d.x()[j:i], d.y()[j:i], d.z()[j:i])
 
-def update(frame):
-    for p, l, d in zip(points, lines, data):
-        len_simu = len(d.time())
-        i = int(frame/N_frames*len_simu)
-        j = 0  # max(0, i-200)
-        p.set_data_3d([d.x()[i]], [d.y()[i]], [d.z()[i]])
-        l.set_data_3d(d.x()[j:i], d.y()[j:i], d.z()[j:i])
+        return lines
 
-    return lines
+    ani = animation.FuncAnimation(
+        fig=fig, func=update, frames=N_frames, interval=1)
 
+    axlist.append(ax)
 
-ani = animation.FuncAnimation(
-    fig=fig, func=update, frames=N_frames, interval=1)
-
-axlist.append(ax)
-
-ax.set_title("Lorenz Attractor")
-plt.show()
+    ax.set_title("Lorenz Attractor")
+    plt.show()

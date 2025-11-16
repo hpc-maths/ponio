@@ -43,10 +43,15 @@ foreach(demo IN LISTS demos)
 endforeach()
 
 set(visu_list "")
+set(save_visu_list "")
 foreach(demo IN LISTS demos)
     add_custom_target(visu_${demo} python ${CMAKE_SOURCE_DIR}/ponio/examples/${demo}.py)
     add_custom_target(${demo}_visu make visu_${demo})
     list(APPEND visu_list visu_${demo})
+
+    add_custom_target(save_visu_${demo} python ${CMAKE_SOURCE_DIR}/ponio/examples/${demo}.py --only-save)
+    add_custom_target(${demo}_save_visu make save_visu_${demo})
+    list(APPEND save_visu_list save_visu_${demo})
 endforeach()
 
-add_custom_target(visu DEPENDS ${visu_list})
+add_custom_target(save_visu DEPENDS ${save_visu_list})

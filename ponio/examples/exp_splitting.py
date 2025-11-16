@@ -6,12 +6,26 @@
 
 import subprocess
 import os
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 name = "exp_splitting"
 data_dir = name+"_data"
+img_dir = data_dir
+
+parser = argparse.ArgumentParser(
+    description=f"Compile, launch and plot results of example `{name}`")
+parser.add_argument('--only-save', action='store_true',
+                    help="Just save output in img directory")
+
+arguments = parser.parse_args()
+
+if arguments.only_save:
+    img_dir = os.path.join("img", name)
+    os.makedirs(img_dir, exist_ok=True)
+
 
 make = subprocess.Popen(["make", name])
 make.wait()
@@ -34,7 +48,8 @@ for tag, label in test_cases:
 plt.plot(data[:, 0], np.exp(data[:, 0]), "--", label="exact solution")
 plt.legend()
 
-plt.savefig(os.path.join(data_dir, "01.png"))
+plt.savefig(os.path.join(img_dir, "01.png"))
 
-plt.title(r"$\dot{u} = \lambda u + (1-\lambda) u$, $u(t=0)=1$")
-plt.show()
+if not arguments.only_save:
+    plt.title(r"$\dot{u} = \lambda u + (1-\lambda) u$, $u(t=0)=1$")
+    plt.show()

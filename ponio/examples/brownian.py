@@ -6,12 +6,25 @@
 
 import subprocess
 import os
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 name = "brownian"
 data_dir = name+"_data"
+img_dir = data_dir
+
+parser = argparse.ArgumentParser(
+    description=f"Compile, launch and plot results of example `{name}`")
+parser.add_argument('--only-save', action='store_true',
+                    help="Just save output in img directory")
+
+arguments = parser.parse_args()
+
+if arguments.only_save:
+    img_dir = os.path.join("img", name)
+    os.makedirs(img_dir, exist_ok=True)
 
 make = subprocess.Popen(["make", name])
 make.wait()
@@ -32,7 +45,8 @@ for i in range(n):
 plt.xlim(-.5, .5)
 plt.ylim(-.5, .5)
 
-plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
+plt.savefig(os.path.join(img_dir, "01.png"), dpi=200)
 
-plt.title("Brownian motion")
-plt.show()
+if not arguments.only_save:
+    plt.title("Brownian motion")
+    plt.show()

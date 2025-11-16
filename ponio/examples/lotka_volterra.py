@@ -7,6 +7,7 @@
 import subprocess
 import os
 import dataclasses
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,6 +16,18 @@ import numpy.typing as npt
 name = "lotka_volterra"
 data_dir = name+"_data"
 filename_fmt = f"{name}_{{:0.2f}}.dat"
+img_dir = data_dir
+
+parser = argparse.ArgumentParser(
+    description=f"Compile, launch and plot results of example `{name}`")
+parser.add_argument('--only-save', action='store_true',
+                    help="Just save output in img directory")
+
+arguments = parser.parse_args()
+
+if arguments.only_save:
+    img_dir = os.path.join("img", name)
+    os.makedirs(img_dir, exist_ok=True)
 
 
 @dataclasses.dataclass
@@ -71,10 +84,11 @@ ax2.set_position([box2.x0, box2.y0, box2.width * 0.95, box2.height])
 ax1.legend(bbox_to_anchor=(1.01, 1),
            loc='upper left', borderaxespad=0.)
 
-plt.savefig(os.path.join(data_dir, "01.png"))
+plt.savefig(os.path.join(img_dir, "01.png"))
 
-fig.suptitle("Lotka-Volterra system (solved witk RK (11,8))")
-plt.show()
+if not arguments.only_save:
+    fig.suptitle("Lotka-Volterra system (solved witk RK (11,8))")
+    plt.show()
 
 
 for i, d in enumerate(data):
@@ -85,7 +99,8 @@ plt.xlabel("$x$")
 plt.ylabel("$y$")
 plt.legend()
 
-plt.savefig(os.path.join(data_dir, "02.png"))
+plt.savefig(os.path.join(img_dir, "02.png"))
 
-plt.title("Lotka-Volterra system (solved witk RK (11,8))")
-plt.show()
+if not arguments.only_save:
+    plt.title("Lotka-Volterra system (solved witk RK (11,8))")
+    plt.show()

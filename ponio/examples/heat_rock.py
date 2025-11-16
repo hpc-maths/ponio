@@ -6,12 +6,26 @@
 
 import subprocess
 import os
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 name = "heat_rock"
 data_dir = name+"_data"
+img_dir = data_dir
+
+parser = argparse.ArgumentParser(
+    description=f"Compile, launch and plot results of example `{name}`")
+parser.add_argument('--only-save', action='store_true',
+                    help="Just save output in img directory")
+
+arguments = parser.parse_args()
+
+if arguments.only_save:
+    img_dir = os.path.join("img", name)
+    os.makedirs(img_dir, exist_ok=True)
+
 
 make = subprocess.Popen(["make", name])
 make.wait()
@@ -36,10 +50,11 @@ plt.plot(data[:, 0], data[:, 1], ":", label="initial solution")
 plt.legend(loc="lower left")
 plt.ylim(bottom=-0.4)
 
-plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
+plt.savefig(os.path.join(img_dir, "01.png"), dpi=200)
 
-plt.title("Heat equation")
-plt.show()
+if not arguments.only_save:
+    plt.title("Heat equation")
+    plt.show()
 
 data = np.loadtxt(os.path.join(data_dir, "errors.dat"))
 plt.plot(data[:, 0], data[:, 1], "+-", label="ROCK2 errors in $\|\cdot\|_2$")
@@ -52,6 +67,7 @@ plt.yscale('log')
 plt.grid(True)
 plt.legend()
 
-plt.savefig(os.path.join(data_dir, "02.png"), dpi=200)
+plt.savefig(os.path.join(img_dir, "02.png"), dpi=200)
 
-plt.show()
+if not arguments.only_save:
+    plt.show()

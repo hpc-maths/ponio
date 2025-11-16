@@ -21,7 +21,7 @@
 #include <ponio/time_span.hpp>
 
 #include <samurai/field.hpp>
-#include <samurai/hdf5.hpp>
+#include <samurai/io/hdf5.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
 #include <samurai/samurai.hpp>
@@ -37,12 +37,12 @@ namespace samurai
      */
     template <class Field>
     auto
-    make_multi_convection_weno5( std::array<samurai::VelocityVector<Field::dim>, Field::size> const& velocities )
+    make_multi_convection_weno5( std::array<samurai::VelocityVector<Field::dim>, Field::n_comp> const& velocities )
     {
         static_assert( Field::mesh_t::config::ghost_width >= 3, "WENO5 requires at least 3 ghosts." );
 
         static constexpr std::size_t dim               = Field::dim;
-        static constexpr std::size_t field_size        = Field::size;
+        static constexpr std::size_t field_size        = Field::n_comp;
         static constexpr std::size_t output_field_size = field_size;
         static constexpr std::size_t stencil_size      = 6;
 
@@ -63,7 +63,7 @@ namespace samurai
                 weno5[d].cons_flux_function = [&velocities]( auto& cells, Field const& u )
                 {
                     samurai::FluxValue<cfg> flux;
-                    for ( std::size_t c = 0; c < Field::size; ++c )
+                    for ( std::size_t c = 0; c < Field::n_comp; ++c )
                     {
                         auto& velocity = velocities[c];
                         if ( velocity( d ) >= 0 )
@@ -71,14 +71,16 @@ namespace samurai
                             samurai::Array<double, 5> f(
                                 { u[cells[0]]( c ), u[cells[1]]( c ), u[cells[2]]( c ), u[cells[3]]( c ), u[cells[4]]( c ) } );
                             f *= velocity( d );
-                            flux( c ) = samurai::compute_weno5_flux( f );
+                            // flux( c ) = samurai::compute_weno5_flux( f );
+                            samurai::compute_weno5_flux( flux( c ), f );
                         }
                         else
                         {
                             samurai::Array<double, 5> f(
                                 { u[cells[5]]( c ), u[cells[4]]( c ), u[cells[3]]( c ), u[cells[2]]( c ), u[cells[1]]( c ) } );
                             f *= velocity( d );
-                            flux( c ) = samurai::compute_weno5_flux( f );
+                            // flux( c ) = samurai::compute_weno5_flux( f );
+                            samurai::compute_weno5_flux( flux( c ), f );
                         }
                     }
                     return flux;
@@ -175,7 +177,7 @@ main( int argc, char** argv )
 
     // diffusion terme
     auto diff = samurai::make_diffusion_order2<decltype( uv_ini )>( nu );
-    auto fd   = [&]( double /* t */, auto&& uv, auto& dt_uv )
+    auto fd   = [&]( double /* t */, auto& uv, auto& dt_uv )
     {
         samurai::update_ghost_mr( uv );
         dt_uv = -diff( uv );
@@ -209,7 +211,7 @@ main( int argc, char** argv )
     {
         return react;
     };
-    auto fr = [&]( double t, auto&& uv, auto& dt_uv )
+    auto fr = [&]( double t, auto& uv, auto& dt_uv )
     {
         // samurai::update_ghost_mr( uv );
         dt_uv = fr_t( t )( uv );
