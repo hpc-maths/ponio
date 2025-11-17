@@ -118,6 +118,8 @@ jobs:
           pixi run test
       - name: Execute notebooks
         run: pixi run nbval
+      - name: Execute examples
+        run: pixi run save_visu
   # check compilation on multi-os
   multi-os-check:
     needs: [pre-commit, cppcheck]
