@@ -12,30 +12,39 @@ configure = { cmd = [
   ".",
   # generator
   "-G",
-  "Ninja Multi-Config",
+  "Ninja",
   # build directory
   "-B",
   "./build",
 ] }
-configure_test = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON" }
-configure_long_test = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
-configure_debug = { cmd = "cmake . -G 'Ninja Multi-Config' -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_DEMOS=ON" }
+configure_test = { cmd = "cmake -S . -G 'Ninja' -B ./build -DBUILD_TESTS=ON" }
+configure_long_test = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
+configure_examples = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_DEMOS=ON" }
+configure_all_examples = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_DEMOS=ON -DBUILD_SAMURAI_DEMOS=ON -DBUILD_TESTS=ON" }
+configure_debug = { cmd = "cmake . -G 'Ninja' -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_DEMOS=ON" }
 
 build_ninja = { cmd = "cmake --build ./build --config Release" }                 # don't call this rule alone
 build = { depends-on = ["configure", "build_ninja"] }
 build_test = { depends-on = ["configure_test", "build_ninja"] }
 build_long_test = { depends-on = ["configure_long_test", "build_ninja"] }
+build_examples = { depends-on = ["configure_examples", "build_ninja"] }
+build_all_examples = { depends-on = ["configure_all_examples", "build_ninja"] }
 build_debug = { cmd = "ninja -C build ponio", depends-on = ["configure_debug"] }
 
-test = { cmd = "./build/ponio/test/Release/ponio_tests", depends-on = [
-  "build_test",
-] }
-long_test = { cmd = "./build/ponio/test/Release/ponio_tests", depends-on = [
+test = { cmd = "./build/ponio/test/ponio_tests", depends-on = ["build_test"] }
+long_test = { cmd = "./build/ponio/test/ponio_tests", depends-on = [
   "build_long_test",
 ] }
 nbval = { cmd = "pytest --nbval --nbval-current-env -p no:warnings", cwd = "./ponio/notebooks", depends-on = [
   "build",
 ] }
+visu = { cmd = "cmake --build ./build --target visu", depends-on = [
+  "build_examples",
+] }
+save_visu = { cmd = "cmake --build ./build --target save_visu", depends-on = [
+  "build_examples",
+] }
+mpl_test = {}
 cppcheck = { cmd = "cppcheck --enable=all --check-level=exhaustive -q --project=./build/compile_commands.json --suppressions-list=.cppcheck --inline-suppr 2> cppcheck_err.txt", depends-on = [
   "build_debug",
 ] }

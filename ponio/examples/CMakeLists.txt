@@ -54,4 +54,5 @@ foreach(demo IN LISTS demos)
     list(APPEND save_visu_list save_visu_${demo})
 endforeach()
 
+add_custom_target(visu DEPENDS ${visu_list})
 add_custom_target(save_visu DEPENDS ${save_visu_list})
