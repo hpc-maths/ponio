@@ -32,7 +32,7 @@ class brusselator_model
     }
 
     void
-    operator()( double, std::valarray<double>&& u, std::valarray<double>& du ) const
+    operator()( double, std::valarray<double> const& u, std::valarray<double>& du ) const
     {
         du[0] = m_a - ( m_b + 1 ) * u[0] + u[0] * u[0] * u[1];
         du[1] = m_b * u[0] - u[0] * u[0] * u[1];

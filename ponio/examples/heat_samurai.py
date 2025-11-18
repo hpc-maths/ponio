@@ -7,6 +7,7 @@
 import subprocess
 import os
 import glob
+import argparse
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -15,6 +16,19 @@ import h5py
 
 name = "heat_samurai"
 data_dir = name+"_data"
+img_dir = data_dir
+
+parser = argparse.ArgumentParser(
+    description=f"Compile, launch and plot results of example `{name}`")
+parser.add_argument('--only-save', action='store_true',
+                    help="Just save output in img directory")
+
+arguments = parser.parse_args()
+
+if arguments.only_save:
+    img_dir = os.path.join("img", name)
+    os.makedirs(img_dir, exist_ok=True)
+
 
 make = subprocess.Popen(["make", name])
 make.wait()
@@ -68,10 +82,11 @@ ax2.set_ylabel("level")
 
 ax1.legend()
 
-plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
+plt.savefig(os.path.join(img_dir, "01.png"), dpi=200)
 
-fig.suptitle("Heat equation")
-plt.show()
+if not arguments.only_save:
+    fig.suptitle("Heat equation")
+    plt.show()
 
 # animation
 fig, (ax1, ax2) = plt.subplots(2)
@@ -95,6 +110,7 @@ N_frames = len(data)
 ani = animation.FuncAnimation(
     fig=fig, func=update, frames=N_frames, interval=10)
 
-ani.save(filename=os.path.join(data_dir, "01.gif"), dpi=100, writer="pillow")
+ani.save(filename=os.path.join(img_dir, "01.gif"), dpi=100, writer="pillow")
 
-plt.show()
+if not arguments.only_save:
+    plt.show()

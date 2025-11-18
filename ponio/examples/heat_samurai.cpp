@@ -102,7 +102,7 @@ main( int argc, char** argv )
     {
         return -diff;
     };
-    auto f = [&]( [[maybe_unused]] double t, auto&& u, auto& du )
+    auto f = [&]( [[maybe_unused]] double t, auto& u, auto& du )
     {
         samurai::make_bc<samurai::Neumann<1>>( u, 0. );
         samurai::update_ghost_mr( u );

@@ -2,7 +2,7 @@ set(demos arenstorf brownian brusselator brusselator_dirk exp exp_splitting heat
 set(demos_eigen brusselator_dirk lorenz_tuto lorenz_all)
 set(demos_cli11 brownian lotka_volterra)
 
-set(demos_samurai heat_samurai nagumo_pirock belousov_zhabotinsky_pirock brusselator_advection_2d bz_2d_pirock)
+set(demos_samurai heat_samurai nagumo_pirock belousov_zhabotinsky_pirock bz_2d_pirock)
 
 if(BUILD_SAMURAI_DEMOS)
     list(APPEND demos ${demos_samurai})
@@ -43,10 +43,16 @@ foreach(demo IN LISTS demos)
 endforeach()
 
 set(visu_list "")
+set(save_visu_list "")
 foreach(demo IN LISTS demos)
     add_custom_target(visu_${demo} python ${CMAKE_SOURCE_DIR}/ponio/examples/${demo}.py)
     add_custom_target(${demo}_visu make visu_${demo})
     list(APPEND visu_list visu_${demo})
+
+    add_custom_target(save_visu_${demo} python ${CMAKE_SOURCE_DIR}/ponio/examples/${demo}.py --only-save)
+    add_custom_target(${demo}_save_visu make save_visu_${demo})
+    list(APPEND save_visu_list save_visu_${demo})
 endforeach()
 
 add_custom_target(visu DEPENDS ${visu_list})
+add_custom_target(save_visu DEPENDS ${save_visu_list})

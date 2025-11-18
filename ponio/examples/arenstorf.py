@@ -7,6 +7,7 @@
 import subprocess
 import os
 import dataclasses
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +15,18 @@ import numpy.typing as npt
 
 name = "arenstorf"
 data_dir = name+"_data"
+img_dir = data_dir
+
+parser = argparse.ArgumentParser(
+    description=f"Compile, launch and plot results of example `{name}`")
+parser.add_argument('--only-save', action='store_true',
+                    help="Just save output in img directory")
+
+arguments = parser.parse_args()
+
+if arguments.only_save:
+    img_dir = os.path.join("img", name)
+    os.makedirs(img_dir, exist_ok=True)
 
 
 @dataclasses.dataclass
@@ -104,10 +117,11 @@ plt.ylabel("$y$")
 plt.tight_layout(pad=1.0)
 plt.legend()
 
-plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
+plt.savefig(os.path.join(img_dir, "01.png"), dpi=200)
 
-plt.title("Arenstorf orbit")
-plt.show()
+if not arguments.only_save:
+    plt.title("Arenstorf orbit")
+    plt.show()
 
 plt.rcParams["figure.figsize"] = plt.rcParamsDefault["figure.figsize"]
 
@@ -132,10 +146,11 @@ plt.ylabel(r"$\dot{{y}}$")
 plt.tight_layout(pad=1.0)
 plt.legend()
 
-plt.savefig(os.path.join(data_dir, "02.png"), dpi=200)
+plt.savefig(os.path.join(img_dir, "02.png"), dpi=200)
 
-plt.title("Arenstorf velocity")
-plt.show()
+if not arguments.only_save:
+    plt.title("Arenstorf velocity")
+    plt.show()
 
 plt.rcParams["figure.figsize"] = plt.rcParamsDefault["figure.figsize"]
 
@@ -150,10 +165,12 @@ plt.xlabel(r"$t$")
 plt.ylabel(r"$\Delta t$")
 plt.legend()
 
-plt.savefig(os.path.join(data_dir, "03.png"))
+plt.savefig(os.path.join(img_dir, "03.png"))
 
-plt.title("Arenstorf orbit, time step size")
-plt.show()
+
+if not arguments.only_save:
+    plt.title("Arenstorf orbit, time step size")
+    plt.show()
 
 # error throw time
 plot_error(rk546m, rk118)
@@ -166,7 +183,8 @@ plt.xlabel(r"$t$")
 plt.ylabel(r"$\|\cdot\|_2$")
 plt.legend()
 
-plt.savefig(os.path.join(data_dir, "04.png"))
+plt.savefig(os.path.join(img_dir, "04.png"))
 
-plt.title("Arenstorf orbit, error over time")
-plt.show()
+if not arguments.only_save:
+    plt.title("Arenstorf orbit, error over time")
+    plt.show()

@@ -7,6 +7,7 @@
 import subprocess
 import os
 import glob
+import argparse
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -15,6 +16,18 @@ import h5py
 
 name = "belousov_zhabotinsky_pirock"
 data_dir = name+"_data"
+img_dir = data_dir
+
+parser = argparse.ArgumentParser(
+    description=f"Compile, launch and plot results of example `{name}`")
+parser.add_argument('--only-save', action='store_true',
+                    help="Just save output in img directory")
+
+arguments = parser.parse_args()
+
+if arguments.only_save:
+    img_dir = os.path.join("img", name)
+    os.makedirs(img_dir, exist_ok=True)
 
 make = subprocess.Popen(["make", name])
 make.wait()
@@ -97,65 +110,66 @@ ax_c.set_ylim(-1e-3, 0.12)
 ax_a.legend(loc="lower left", bbox_to_anchor=(
     0.01, 1.1), ncol=5, fontsize='x-small')
 
-plt.savefig("16-belousov-zhabotinsky_01.png", dpi=200)
+plt.savefig(os.path.join(img_dir, "01.png"), dpi=200)
 
-plt.show()
-
-fig, (ax_a, ax_b, ax_c, ax_level) = plt.subplots(4)
-
-a = data[0][1][0]
-b = data[0][1][1]
-c = data[0][1][2]
-x = data[0][0]
-sol_a = ax_a.plot(x, a, label="a", color="C0")[0]
-sol_a_eq = ax_a.plot(x, a_eq(b, c), "--", alpha=0.5,
-                     label="a equilibre", color="C0")[0]
-sol_b = ax_b.plot(x, b, label="b", color="C1")[0]
-sol_c = ax_c.plot(x, c, label="c", color="C2")[0]
-
-ax_a.get_xaxis().set_ticklabels([])
-ax_b.get_xaxis().set_ticklabels([])
-ax_c.get_xaxis().set_ticklabels([])
-
-ax_a.set_ylabel("a")
-ax_b.set_ylabel("b")
-ax_c.set_ylabel("c")
-ax_level.set_ylabel("level")
-
-ax_a.set_ylim(-50, 850)
-ax_b.set_ylim(-1e-2, 0.8)
-ax_c.set_ylim(-1e-3, 0.12)
-
-levels = ax_level.plot(data[0][0], data[0][2])[0]
+if not arguments.only_save:
+    plt.show()
 
 
-def update(frame):
-    a = data[frame][1][0]
-    b = data[frame][1][1]
-    c = data[frame][1][2]
-    x = data[frame][0]
+if not arguments.only_save:
+    fig, (ax_a, ax_b, ax_c, ax_level) = plt.subplots(4)
 
-    sol_a.set_xdata(x)
-    sol_a.set_ydata(a)
+    a = data[0][1][0]
+    b = data[0][1][1]
+    c = data[0][1][2]
+    x = data[0][0]
+    sol_a = ax_a.plot(x, a, label="a", color="C0")[0]
+    sol_a_eq = ax_a.plot(x, a_eq(b, c), "--", alpha=0.5,
+                         label="a equilibre", color="C0")[0]
+    sol_b = ax_b.plot(x, b, label="b", color="C1")[0]
+    sol_c = ax_c.plot(x, c, label="c", color="C2")[0]
 
-    sol_a_eq.set_xdata(x)
-    sol_a_eq.set_ydata(a_eq(b, c))
+    ax_a.get_xaxis().set_ticklabels([])
+    ax_b.get_xaxis().set_ticklabels([])
+    ax_c.get_xaxis().set_ticklabels([])
 
-    sol_b.set_xdata(x)
-    sol_b.set_ydata(b)
+    ax_a.set_ylabel("a")
+    ax_b.set_ylabel("b")
+    ax_c.set_ylabel("c")
+    ax_level.set_ylabel("level")
 
-    sol_c.set_xdata(x)
-    sol_c.set_ydata(c)
+    ax_a.set_ylim(-50, 850)
+    ax_b.set_ylim(-1e-2, 0.8)
+    ax_c.set_ylim(-1e-3, 0.12)
 
-    levels.set_xdata(x)
-    levels.set_ydata(data[frame][2])
+    levels = ax_level.plot(data[0][0], data[0][2])[0]
 
-    return (sol_a, sol_b, sol_c, levels)
+    def update(frame):
+        a = data[frame][1][0]
+        b = data[frame][1][1]
+        c = data[frame][1][2]
+        x = data[frame][0]
 
+        sol_a.set_xdata(x)
+        sol_a.set_ydata(a)
 
-N_frames = len(data)
+        sol_a_eq.set_xdata(x)
+        sol_a_eq.set_ydata(a_eq(b, c))
 
-ani = animation.FuncAnimation(
-    fig=fig, func=update, frames=N_frames, interval=1)
+        sol_b.set_xdata(x)
+        sol_b.set_ydata(b)
 
-plt.show()
+        sol_c.set_xdata(x)
+        sol_c.set_ydata(c)
+
+        levels.set_xdata(x)
+        levels.set_ydata(data[frame][2])
+
+        return (sol_a, sol_b, sol_c, levels)
+
+    N_frames = len(data)
+
+    ani = animation.FuncAnimation(
+        fig=fig, func=update, frames=N_frames, interval=1)
+
+    plt.show()

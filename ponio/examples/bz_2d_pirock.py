@@ -6,6 +6,7 @@
 
 import subprocess
 import os
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -51,6 +52,18 @@ class bz_data:
 
 name = "bz_2d_pirock"
 data_dir = name+"_data"
+img_dir = data_dir
+
+parser = argparse.ArgumentParser(
+    description=f"Compile, launch and plot results of example `{name}`")
+parser.add_argument('--only-save', action='store_true',
+                    help="Just save output in _img directory")
+
+arguments = parser.parse_args()
+
+if arguments.only_save:
+    img_dir = os.path.join("img", name)
+    os.makedirs(img_dir, exist_ok=True)
 
 make = subprocess.Popen(["make", name])
 make.wait()
@@ -77,9 +90,10 @@ ax.legend()
 ax.set_xlabel("$x$")
 ax.set_ylabel("$y$")
 
-plt.savefig(os.path.join(data_dir, "01.png"), dpi=200)
+plt.savefig(os.path.join(img_dir, "01.png"), dpi=200)
 
-plt.show()
+if not arguments.only_save:
+    plt.show()
 
 # levels plot
 fig, ax = plt.subplots()
@@ -97,6 +111,7 @@ ax.legend()
 ax.set_xlabel("$x$")
 ax.set_ylabel("$y$")
 
-plt.savefig(os.path.join(data_dir, "02.png"), dpi=200)
+plt.savefig(os.path.join(img_dir, "02.png"), dpi=200)
 
-plt.show()
+if not arguments.only_save:
+    plt.show()

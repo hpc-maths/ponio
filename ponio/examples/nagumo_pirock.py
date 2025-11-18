@@ -7,6 +7,7 @@
 import subprocess
 import os
 import glob
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +15,18 @@ import h5py
 
 name = "nagumo_pirock"
 data_dir = name+"_data"
+img_dir = data_dir
+
+parser = argparse.ArgumentParser(
+    description=f"Compile, launch and plot results of example `{name}`")
+parser.add_argument('--only-save', action='store_true',
+                    help="Just save output in img directory")
+
+arguments = parser.parse_args()
+
+if arguments.only_save:
+    img_dir = os.path.join("img", name)
+    os.makedirs(img_dir, exist_ok=True)
 
 
 def import_h5(filename_f5):
@@ -87,7 +100,8 @@ for i, dat in enumerate(data):
 
 plt.legend()
 
-plt.savefig(os.path.join(data_dir, "01.png"))
+plt.savefig(os.path.join(img_dir, "01.png"))
 
-plt.title("Nagumo solution")
-plt.show()
+if not arguments.only_save:
+    plt.title("Nagumo solution")
+    plt.show()

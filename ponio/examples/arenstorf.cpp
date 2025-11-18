@@ -33,7 +33,7 @@ struct arenstorf_model
     }
 
     void
-    phi_1( double, state_t&& y, state_t& dy ) const
+    phi_1( double, state_t const& y, state_t& dy ) const
     {
         double const y3 = y[2];
         double const y4 = y[3];
@@ -45,7 +45,7 @@ struct arenstorf_model
     }
 
     void
-    phi_2( double, state_t&& y, state_t& dy ) const
+    phi_2( double, state_t const& y, state_t& dy ) const
     {
         double const y1 = y[0];
         double const y2 = y[1];
@@ -62,7 +62,7 @@ struct arenstorf_model
     }
 
     void
-    operator()( double, state_t&& y, state_t& dy ) const
+    operator()( double, state_t const& y, state_t& dy ) const
     {
         double const y1 = y[0];
         double const y2 = y[1];
@@ -110,13 +110,13 @@ main( int, char** )
 
     // adaptive Strang method with Lipschitz estimate
     using namespace std::placeholders;
-    auto phi_1 = [&]( double t, state_t&& y, state_t& dy )
+    auto phi_1 = [&]( double t, state_t const& y, state_t& dy )
     {
-        arenstorf_pb.phi_1( t, std::forward<state_t>( y ), dy );
+        arenstorf_pb.phi_1( t, y, dy );
     };
-    auto phi_2 = [&]( double t, state_t&& y, state_t& dy )
+    auto phi_2 = [&]( double t, state_t const& y, state_t& dy )
     {
-        arenstorf_pb.phi_2( t, std::forward<state_t>( y ), dy );
+        arenstorf_pb.phi_2( t, y, dy );
     };
 
     auto arenstorf_splitting_pb = ponio::make_problem( phi_1, phi_2 );

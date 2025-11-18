@@ -7,6 +7,7 @@
 import subprocess
 import os
 import dataclasses
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +15,18 @@ import numpy.typing as npt
 
 name = "lorenz_tuto"
 data_dir = name+"_data"
+img_dir = data_dir
+
+parser = argparse.ArgumentParser(
+    description=f"Compile, launch and plot results of example `{name}`")
+parser.add_argument('--only-save', action='store_true',
+                    help="Just save output in img directory")
+
+arguments = parser.parse_args()
+
+if arguments.only_save:
+    img_dir = os.path.join("img", name)
+    os.makedirs(img_dir, exist_ok=True)
 
 
 @dataclasses.dataclass
@@ -78,10 +91,11 @@ for d in data:
 ax.legend()
 axlist.append(ax)
 
-plt.savefig(os.path.join(data_dir, "01.png"))
+plt.savefig(os.path.join(img_dir, "01.png"))
 
-ax.set_title("Lorenz Attractor")
-plt.show()
+if not arguments.only_save:
+    ax.set_title("Lorenz Attractor")
+    plt.show()
 
 # 2d plot
 fig, (ax1, ax2, ax3) = plt.subplots(nrows=3)
@@ -113,7 +127,8 @@ ax3.set_ylabel("$z$")
 ax3.set_xlabel("$t$")
 ax3.set_xlim(d.time()[0], d.time()[-1])
 
-plt.savefig(os.path.join(data_dir, "02.png"))
+plt.savefig(os.path.join(img_dir, "02.png"))
 
-fig.suptitle("Composantes of Lorenz Attractor")
-plt.show()
+if not arguments.only_save:
+    fig.suptitle("Composantes of Lorenz Attractor")
+    plt.show()

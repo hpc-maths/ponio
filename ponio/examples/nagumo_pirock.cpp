@@ -114,7 +114,7 @@ main( int argc, char** argv )
 
     // diffusion terme
     auto diff = samurai::make_diffusion_order2<decltype( u_ini )>( d );
-    auto fd   = [&]( double /* t */, auto&& u, auto& du )
+    auto fd   = [&]( double /* t */, auto& u, auto& du )
     {
         samurai::make_bc<samurai::Neumann<1>>( u, 0. );
         samurai::update_ghost_mr( u );
@@ -141,7 +141,7 @@ main( int argc, char** argv )
     {
         return react;
     };
-    auto fr = [&]( double t, auto&& u, auto& du )
+    auto fr = [&]( double t, auto& u, auto& du )
     {
         samurai::make_bc<samurai::Neumann<1>>( u, 0. );
         samurai::update_ghost_mr( u );

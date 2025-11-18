@@ -77,7 +77,7 @@ main( int argc, char** argv )
     constexpr double t_end     = 1.;
 
     // multiresolution parameters
-    std::size_t const min_level = 0;
+    std::size_t const min_level = 2;
     std::size_t const max_level = 8;
     double const mr_epsilon     = 1e-5; // Threshold used by multiresolution
     double const mr_regularity  = 1.;   // Regularity guess for multiresolution
@@ -148,7 +148,7 @@ main( int argc, char** argv )
     // diffusion terme
     auto d    = samurai::DiffCoeff<3>( { Da, Db, Dc } );
     auto diff = samurai::make_multi_diffusion_order2<decltype( u_ini )>( d );
-    auto fd   = [&]( double /* t */, auto&& u, auto& du )
+    auto fd   = [&]( double /* t */, auto& u, auto& du )
     {
         samurai::make_bc<samurai::Neumann<1>>( u, 0., 0., 0. );
         samurai::update_ghost_mr( u );
