@@ -43,9 +43,11 @@ namespace ponio
         requires stages::has_static_number_of_stages<Algorithm_t>
     struct method<Algorithm_t, state_t>
     {
-        static constexpr bool is_embedded = Algorithm_t::is_embedded;
-        using step_storage_t              = typename std::
-            conditional_t<is_embedded, std::array<state_t, Algorithm_t::N_stages + 2>, std::array<state_t, Algorithm_t::N_stages + 1>>;
+        static constexpr bool is_embedded              = Algorithm_t::is_embedded;
+        static constexpr std::size_t step_storage_size = std::conditional_t<is_embedded,
+            std::integral_constant<std::size_t, Algorithm_t::N_stages + 2>,
+            std::integral_constant<std::size_t, Algorithm_t::N_stages + 1>>();
+        using step_storage_t                           = std::array<state_t, step_storage_size>;
 
         Algorithm_t alg;
         step_storage_t kis;
