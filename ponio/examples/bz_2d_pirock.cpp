@@ -54,7 +54,8 @@ save( fs::path const& path, std::string const& filename, field_t& u, std::string
 int
 main( int argc, char** argv )
 {
-    PetscInitialize( &argc, &argv, nullptr, nullptr );
+    auto& app = samurai::initialize( "Example for the Belousov-Zhabotinsky equation with samurai solved with PIROCK method", argc, argv );
+    SAMURAI_PARSE( argc, argv );
 
     constexpr std::size_t dim = 2; // cppcheck-suppress unreadVariable
     using config_t            = samurai::MRConfig<dim, 3>;
@@ -78,8 +79,6 @@ main( int argc, char** argv )
     // multiresolution parameters
     std::size_t const min_level = 2;
     std::size_t const max_level = 6;
-    double const mr_epsilon     = 1e-3; // Threshold used by multiresolution
-    double const mr_regularity  = 1.;   // Regularity guess for multiresolution
 
     // output parameters
     std::string const dirname  = "bz_2d_pirock_data";
@@ -151,18 +150,18 @@ main( int argc, char** argv )
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( y_ini )::n_comp, decltype( y_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( y_ini ), decltype( y_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
-        [&]( auto const& cell, auto const& y ) -> samurai::SchemeValue<cfg>
+        [&]( auto& scheme_value, auto const& cell, auto const& y )
         {
             auto& aij = y[cell][0];
             auto& bij = y[cell][1];
             auto& cij = y[cell][2];
 
             // clang-format off
-            return {
+            scheme_value = {
                 (-q*aij - aij*bij + f*cij)/mu,
                 (q*aij - aij*bij + bij*(1. - bij))/eps,
                 bij - cij
@@ -171,18 +170,18 @@ main( int argc, char** argv )
         } );
     // or set option in command line with : -snes_fd -pc_type none
     react.set_jacobian_function(
-        [&]( auto const& cell, auto const& y ) -> samurai::JacobianMatrix<cfg>
+        [&]( auto& jacobian_matrix, auto const& cell, auto const& y )
         {
             auto& aij = y[cell][0];
             auto& bij = y[cell][1];
             // auto& cij = y[cell][2];
 
             // clang-format off
-            return {
+            jacobian_matrix = std::remove_cvref_t<decltype(jacobian_matrix)>({
                 { (-q - bij)/mu, -aij/mu                 , f/mu },
                 { (q - bij)/eps, (-aij - 2.*bij + 1.)/eps, 0.   },
                 { 0.           , 1.                      , -1.  }
-            };
+            });
             // clang-format on
         } );
     auto fr_t = [&]( double /* t */ )
@@ -221,7 +220,7 @@ main( int argc, char** argv )
 
     // time loop  -------------------------------------------------------------
     ponio::time_span<double> const t_span = { t_ini, t_end };
-    double const dt                       = ( t_end - t_ini ) / 1000;
+    double const dt                       = 5e-5;
 
     auto sol_range = ponio::make_solver_range( pb, method, y_ini, t_span, dt );
     auto it_sol    = sol_range.begin();
@@ -239,7 +238,8 @@ main( int argc, char** argv )
 
     // auto mr_adaptation = samurai::make_MRAdapt( it_sol->state );
     auto mr_adaptation = samurai::make_MRAdapt( b_field );
-    mr_adaptation( mr_epsilon, mr_regularity, it_sol->state );
+    auto mra_config    = samurai::mra_config().epsilon( 1e-3 ).regularity( 1. );
+    mr_adaptation( mra_config );
     samurai::update_ghost_mr( it_sol->state );
 
     std::size_t n_save = 0;
@@ -263,7 +263,7 @@ main( int argc, char** argv )
                 b_field( level, i, idx ) = it_sol->state( 1, level, i, idx );
             } );
 
-        mr_adaptation( mr_epsilon, mr_regularity, it_sol->state );
+        mr_adaptation( mra_config );
         samurai::update_ghost_mr( it_sol->state );
 
         // save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save ) );
@@ -271,7 +271,7 @@ main( int argc, char** argv )
     std::cout << std::endl;
     save( path, filename, it_sol->state, fmt::format( "_final", n_save++ ) );
 
-    PetscFinalize();
+    samurai::finalize();
 
     return 0;
 }

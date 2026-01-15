@@ -8,10 +8,8 @@
 
 #include "linear_algebra.hpp"
 
-#if __has_include( <samurai/petsc.hpp>)
-#include <xtensor/xfixed.hpp>
-
-#include <samurai/petsc.hpp>
+#if __has_include( <samurai/schemes/fv.hpp> )
+#include <samurai/schemes/fv.hpp>
 #include <samurai/utils.hpp>
 #else
 #error "Samurai should be included"
@@ -19,9 +17,6 @@
 
 namespace samurai
 {
-    template <class mesh_t_, class value_t, std::size_t size_, bool SOA>
-    class Field;
-
     template <class mesh_t, class value_t, std::size_t n_comp, bool SOA>
     class VectorField;
 
@@ -31,10 +26,6 @@ namespace samurai
 
 namespace ponio_samurai
 {
-    template <typename field_t>
-    concept is_field = std::same_as<field_t,
-        ::samurai::Field<typename field_t::mesh_t, typename field_t::value_type, field_t::size, field_t::is_soa>>;
-
     template <typename field_t>
     concept is_scalar_field = std::same_as<field_t, ::samurai::ScalarField<typename field_t::mesh_t, typename field_t::value_type>>;
 
@@ -49,7 +40,7 @@ namespace ponio_samurai
     concept is_vector_field = is_vector_field_soa<field_t> || is_vector_field_aos<field_t>;
 
     template <typename field_t>
-    concept is_samurai_field = is_field<field_t> || is_scalar_field<field_t> || is_vector_field<field_t>;
+    concept is_samurai_field = is_scalar_field<field_t> || is_vector_field<field_t>;
 }
 
 namespace ponio::linear_algebra
