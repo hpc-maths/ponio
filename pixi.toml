@@ -18,10 +18,10 @@ configure = { cmd = [
   "./build",
 ] }
 configure_test = { cmd = "cmake -S . -G 'Ninja' -B ./build -DBUILD_TESTS=ON" }
-configure_long_test = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
-configure_examples = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_DEMOS=ON" }
-configure_all_examples = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_DEMOS=ON -DBUILD_SAMURAI_DEMOS=ON -DBUILD_TESTS=ON" }
-configure_debug = { cmd = "cmake . -G 'Ninja' -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_DEMOS=ON" }
+configure_long_test = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_EXAMPLES=ON" }
+configure_examples = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_EXAMPLES=ON" }
+configure_all_examples = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_ALL_EXAMPLES=ON -DBUILD_TESTS=ON" }
+configure_debug = { cmd = "cmake . -G 'Ninja' -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXAMPLES=ON" }
 
 build_ninja = { cmd = "cmake --build ./build --config Release" }                 # don't call this rule alone
 build = { depends-on = ["configure", "build_ninja"] }
@@ -54,7 +54,7 @@ analysis_json = { cmd = "python analysis/analysis.py -o html/api -v -s database/
 [target.win-64.tasks]
 configure = { cmd = "cmake . -G 'Visual Studio 17 2022' -B ./build" }
 configure_test = { cmd = "cmake . -G 'Visual Studio 17 2022' -B ./build -DBUILD_TESTS=ON" }
-configure_test_samurai = { cmd = "cmake . -G 'Visual Studio 17 2022' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_DEMOS=ON" }
+configure_test_samurai = { cmd = "cmake . -G 'Visual Studio 17 2022' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_EXAMPLES=ON" }
 test = { cmd = "./build/ponio/test/Release/ponio_tests", depends-on = [
   "build_test",
 ] }
