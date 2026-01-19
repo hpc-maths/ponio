@@ -1,7 +1,7 @@
 noExplicitConstructor
 duplInheritedMember
 missingIncludeSystem
-preprocessorErrorDirective
+#preprocessorErrorDirective
 checkersReport
 # suppress unusedFunction in butcher_methods.hpp
 unusedFunction:ponio/include/ponio/runge_kutta/butcher_methods.hpp
