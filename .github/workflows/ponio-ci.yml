@@ -133,9 +133,9 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - windows-2022
-          - ubuntu-22.04
-          - macos-13
+          - windows-2025
+          - ubuntu-24.04
+          - macos-26
     steps:
       - uses: actions/checkout@v4
       - uses: prefix-dev/setup-pixi@v0.8.8
