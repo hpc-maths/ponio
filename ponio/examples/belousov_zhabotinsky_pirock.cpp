@@ -54,7 +54,8 @@ save( fs::path const& path, std::string const& filename, field_t& u, std::string
 int
 main( int argc, char** argv )
 {
-    PetscInitialize( &argc, &argv, nullptr, nullptr );
+    auto& app = samurai::initialize( "Example for the Belousov-Zhabotinsky equation with samurai solved with PIROCK method", argc, argv );
+    SAMURAI_PARSE( argc, argv );
 
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
     using config_t            = samurai::MRConfig<dim>;
@@ -79,8 +80,6 @@ main( int argc, char** argv )
     // multiresolution parameters
     std::size_t const min_level = 2;
     std::size_t const max_level = 8;
-    double const mr_epsilon     = 1e-5; // Threshold used by multiresolution
-    double const mr_regularity  = 1.;   // Regularity guess for multiresolution
 
     // output parameters
     std::string const dirname  = "belousov_zhabotinsky_pirock_data";
@@ -156,29 +155,29 @@ main( int argc, char** argv )
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::n_comp, decltype( u_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini ), decltype( u_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
-        [&]( auto const& cell, auto const& field ) -> samurai::SchemeValue<cfg>
+        [&]( auto& scheme_value, auto const& cell, auto const& field )
         {
             auto u  = field[cell];
             auto& a = u[0];
             auto& b = u[1];
             auto& c = u[2];
 
-            return { 1. / mu * ( -q * a - a * b + f * c ), 1. / epsilon * ( q * a - a * b + b * ( 1. - b ) ), b - c };
+            scheme_value = { 1. / mu * ( -q * a - a * b + f * c ), 1. / epsilon * ( q * a - a * b + b * ( 1. - b ) ), b - c };
         } );
     // or set option in command line with : -snes_fd -pc_type none
     react.set_jacobian_function(
-        [&]( auto const& cell, auto const& field ) -> samurai::JacobianMatrix<cfg>
+        [&]( auto& jacobian_matrix, auto const& cell, auto const& field )
         {
             auto u  = field[cell];
             auto& a = u[0];
             auto& b = u[1];
             // auto& c = u[2];
 
-            return {
+            jacobian_matrix = {
                 {( -q - b ) / mu,      -a / mu,                           f / mu},
                 { ( q - b ) / epsilon, 1. / epsilon * ( -a - 2 * b + 1 ), 0.    },
                 { 0.,                  1.,                                -1.   }
@@ -219,7 +218,8 @@ main( int argc, char** argv )
     // preapre MR for solution on iterator
     auto mr_adaptation = samurai::make_MRAdapt( it_sol->state );
     samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0., 0., 0. );
-    mr_adaptation( mr_epsilon, mr_regularity );
+    auto mra_config = samurai::mra_config().epsilon( 1e-5 ).regularity( 1. );
+    mr_adaptation( mra_config );
     samurai::update_ghost_mr( it_sol->state );
 
     std::size_t n_save = 0;
@@ -238,14 +238,13 @@ main( int argc, char** argv )
         ++it_sol;
         std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << n_save << "\r";
 
-        mr_adaptation( mr_epsilon, mr_regularity );
+        mr_adaptation( mra_config );
         samurai::update_ghost_mr( it_sol->state );
 
         save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save++ ) );
     }
     std::cout << std::endl;
 
-    PetscFinalize();
-
+    samurai::finalize();
     return 0;
 }
