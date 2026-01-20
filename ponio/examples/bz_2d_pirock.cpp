@@ -220,7 +220,7 @@ main( int argc, char** argv )
 
     // time loop  -------------------------------------------------------------
     ponio::time_span<double> const t_span = { t_ini, t_end };
-    double const dt                       = 5e-5;
+    double const dt                       = 1e-3;
 
     auto sol_range = ponio::make_solver_range( pb, method, y_ini, t_span, dt );
     auto it_sol    = sol_range.begin();
@@ -229,16 +229,8 @@ main( int argc, char** argv )
     samurai::make_bc<samurai::Neumann<>>( it_sol->state, 0., 0., 0. );
 
     // preapre MR for solution on iterator
-    auto b_field = samurai::make_scalar_field<double>( "b", mesh );
-    samurai::for_each_interval( mesh,
-        [&]( auto level, auto& i, auto& idx )
-        {
-            b_field( level, i, idx ) = it_sol->state( 1, level, i, idx );
-        } );
-
-    // auto mr_adaptation = samurai::make_MRAdapt( it_sol->state );
-    auto mr_adaptation = samurai::make_MRAdapt( b_field );
-    auto mra_config    = samurai::mra_config().epsilon( 1e-3 ).regularity( 1. );
+    auto mr_adaptation = samurai::make_MRAdapt( it_sol->state );
+    auto mra_config    = samurai::mra_config().epsilon( 1e-3 ).regularity( 1. ).relative_detail( true );
     mr_adaptation( mra_config );
     samurai::update_ghost_mr( it_sol->state );
 
@@ -256,12 +248,6 @@ main( int argc, char** argv )
 
         ++it_sol;
         std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << ++n_save << "\r";
-
-        samurai::for_each_interval( mesh,
-            [&]( auto level, auto& i, auto& idx )
-            {
-                b_field( level, i, idx ) = it_sol->state( 1, level, i, idx );
-            } );
 
         mr_adaptation( mra_config );
         samurai::update_ghost_mr( it_sol->state );
