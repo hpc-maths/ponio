@@ -3,15 +3,12 @@ name: ponio
 channels:
   - conda-forge
 dependencies:
-  - cmake
-  - ninja
+  - jinja2
   - sympy
   - numpy
+  - cmake
+  - ninja
   - scipy
   - matplotlib
   - notebook
-  - jinja2
-  - eigen
-  - samurai
-  - cli11
   - cxx-compiler
