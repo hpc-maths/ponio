@@ -203,4 +203,4 @@ jobs:
           cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON
       - name: Execute all examples
         shell: bash -l {0}
-        run: cmake --build build --target all_save_visu
+        run: cmake --build build --target save_visu
