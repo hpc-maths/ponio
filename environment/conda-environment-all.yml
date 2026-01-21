@@ -17,6 +17,7 @@ dependencies:
   - eigen
   - samurai
   - cli11
+  - h5py
   # tests
   - notebook
   - nbval

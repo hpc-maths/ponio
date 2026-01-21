@@ -188,10 +188,10 @@ jobs:
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: environment/conda-environment-all.yml
-          environment-name: ponio-env
+          environment-name: ponio-complete-env
       - name: Install compiler and Python
         run: conda install -y python cxx-compiler
       - name: Build
-        run: cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON
+        run: cmake . -Bbuild -DCMAKE_PREFIX_PATH=${CONDA_PREFIX} -DBUILD_ALL_EXAMPLES=ON
       - name: Execute all examples
         run: cmake --build --target all_save_visu
