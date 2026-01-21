@@ -178,7 +178,7 @@ jobs:
       - name: Run tests
         run: pixi run test
   dependencies-from-conda-check:
-    #needs: [pre-commit, cppcheck]
+    needs: [pre-commit, cppcheck]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
