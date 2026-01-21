@@ -78,7 +78,7 @@ main( int argc, char** argv )
     constexpr double t_end     = 1.;
 
     // multiresolution parameters
-    std::size_t const min_level = 2;
+    std::size_t const min_level = 8;
     std::size_t const max_level = 8;
 
     // output parameters
