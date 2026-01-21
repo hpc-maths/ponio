@@ -61,7 +61,6 @@ main( int argc, char** argv )
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
     using config_t            = samurai::MRConfig<dim>;
     using box_t               = samurai::Box<double, dim>;
-    using point_t             = typename box_t::point_t;
 
     // simulation parameters --------------------------------------------------
     constexpr double d  = .1;

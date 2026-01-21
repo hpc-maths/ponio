@@ -99,47 +99,49 @@ main( int argc, char** argv )
     // auto u_ini = init( mesh );
     auto u_ini = samurai::make_vector_field<double, 3>( "u", mesh );
 
-    double a = 0.;
-    double b = 0.;
-    double c = 0.;
-    u_ini.fill( 0 );
-    samurai::for_each_cell( mesh,
-        [&]( auto& cell )
-        {
-            if ( cell.center()[0] < ( right_box - left_box ) / 20. )
+    { // init sol scope
+        double a = 0.;
+        double b = 0.;
+        double c = 0.;
+        u_ini.fill( 0 );
+        samurai::for_each_cell( mesh,
+            [&]( auto& cell )
             {
-                double const y_lim  = 0.05;
-                double const x_coor = 0.5;
-                double const y_coor = 20.0 * cell.center()[0] - y_lim;
-
-                if ( y_coor >= 0. && y_coor <= 0.3 * x_coor )
+                if ( cell.center()[0] < ( right_box - left_box ) / 20. )
                 {
-                    b = 0.8;
-                }
-                else
-                {
-                    b = q * ( f + 1. ) / ( f - 1. );
+                    double const y_lim  = 0.05;
+                    double const x_coor = 0.5;
+                    double const y_coor = 20.0 * cell.center()[0] - y_lim;
+
+                    if ( y_coor >= 0. && y_coor <= 0.3 * x_coor )
+                    {
+                        b = 0.8;
+                    }
+                    else
+                    {
+                        b = q * ( f + 1. ) / ( f - 1. );
+                    }
+
+                    if ( y_coor >= 0. )
+                    {
+                        c = q * ( f + 1. ) / ( f - 1. ) + std::atan( y_coor / x_coor ) / ( 8. * std::numbers::pi * f );
+                    }
+                    else
+                    {
+                        c = q * ( f + 1. ) / ( f - 1. )
+                          + ( std::atan( y_coor / x_coor ) + 2. * std::numbers::pi ) / ( 8. * std::numbers::pi * f );
+                    }
                 }
 
-                if ( y_coor >= 0. )
-                {
-                    c = q * ( f + 1. ) / ( f - 1. ) + std::atan( y_coor / x_coor ) / ( 8. * std::numbers::pi * f );
-                }
-                else
-                {
-                    c = q * ( f + 1. ) / ( f - 1. )
-                      + ( std::atan( y_coor / x_coor ) + 2. * std::numbers::pi ) / ( 8. * std::numbers::pi * f );
-                }
-            }
+                a = ( f * c ) / ( q + b );
 
-            a = ( f * c ) / ( q + b );
+                // std::cout << cell.center()[0] << "\t a:" << a << " b:" << b << " c:" << c << "\n";
 
-            // std::cout << cell.center()[0] << "\t a:" << a << " b:" << b << " c:" << c << "\n";
-
-            u_ini[cell]( 0 ) = a;
-            u_ini[cell]( 1 ) = b;
-            u_ini[cell]( 2 ) = c;
-        } );
+                u_ini[cell]( 0 ) = a;
+                u_ini[cell]( 1 ) = b;
+                u_ini[cell]( 2 ) = c;
+            } );
+    }
     samurai::make_bc<samurai::Neumann<1>>( u_ini, 0., 0., 0. );
 
     // define problem ---------------------------------------------------------
@@ -161,10 +163,10 @@ main( int argc, char** argv )
     react.set_scheme_function(
         [&]( auto& scheme_value, auto const& cell, auto const& field )
         {
-            auto u  = field[cell];
-            auto& a = u[0];
-            auto& b = u[1];
-            auto& c = u[2];
+            auto u = field[cell];
+            auto a = u[0];
+            auto b = u[1];
+            auto c = u[2];
 
             scheme_value = { 1. / mu * ( -q * a - a * b + f * c ), 1. / epsilon * ( q * a - a * b + b * ( 1. - b ) ), b - c };
         } );
