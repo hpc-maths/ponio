@@ -178,7 +178,7 @@ jobs:
       - name: Run tests
         run: pixi run test
   dependencies-from-conda-check:
-    needs: [pre-commit, cppcheck]
+    #needs: [pre-commit, cppcheck]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -189,13 +189,18 @@ jobs:
         with:
           environment-file: environment/conda-environment-all.yml
           environment-name: ponio-complete-env
+          cache-environment: true
+          cache-environment-key: ${{ hashFiles('environment/conda-environment-all.yml') }}
       - name: Install compiler and Python
+        shell: bash -l {0}
         run: conda install -y python cxx-compiler
       - name: Build
+        shell: bash -l {0}
         run: |
           export Eigen3_DIR="${CONDA_PREFIX}/share/eigen3/cmake"
           echo ${Eigen3_DIR}
           ls ${Eigen3_DIR}
           cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON
       - name: Execute all examples
+        shell: bash -l {0}
         run: cmake --build --target all_save_visu
