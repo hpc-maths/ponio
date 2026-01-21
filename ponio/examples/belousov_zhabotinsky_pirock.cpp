@@ -186,21 +186,12 @@ main( int argc, char** argv )
             // auto& c = u[2];
 
             // clang-format off
-            // jacobian_matrix = {
-            //     {( -q - b ) / mu,      -a / mu,                           f / mu},
-            //     { ( q - b ) / epsilon, 1. / epsilon * ( -a - 2 * b + 1 ), 0.    },
-            //     { 0.,                  1.,                                -1.   }
-            // };
+            jacobian_matrix = {
+                {( -q - b ) / mu,      -a / mu,                           f / mu},
+                { ( q - b ) / epsilon, 1. / epsilon * ( -a - 2 * b + 1 ), 0.    },
+                { 0.,                  1.,                                -1.   }
+            };
             // clang-format on
-            jacobian_matrix( 0, 0 ) = ( -q - b ) / mu;
-            jacobian_matrix( 0, 1 ) = -a / mu;
-            jacobian_matrix( 0, 2 ) = f / mu;
-            jacobian_matrix( 1, 0 ) = ( q - b ) / epsilon;
-            jacobian_matrix( 1, 1 ) = 1. / epsilon * ( -a - 2 * b + 1 );
-            jacobian_matrix( 1, 2 ) = 0.;
-            jacobian_matrix( 2, 0 ) = 0.;
-            jacobian_matrix( 2, 1 ) = 1.;
-            jacobian_matrix( 2, 2 ) = -1.;
         } );
     auto fr_t = [&]( double /* t */ )
     {
