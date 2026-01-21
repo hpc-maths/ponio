@@ -29,15 +29,12 @@ if arguments.only_save:
     img_dir = os.path.join("img", name)
     os.makedirs(img_dir, exist_ok=True)
 
-print(f"[🪵] ------------> make {name}")
 make = subprocess.Popen(["make", name])
 make.wait()
 
-print(f"[🪵] ------------> launch {name}")
-args = [os.path.join(".", name)]
+args = [os.path.join(".", name), "-snes_fd"]
 process = subprocess.Popen(args)
 process.wait()
-print(f"[🪵] ------------> data analysis {name}")
 
 
 def read_file(filename: str):
