@@ -236,6 +236,7 @@ main( int argc, char** argv )
                 ki.fill( 0. );
             } );
 
+        std::cout << "..." << std::endl;
         ++it_sol;
         std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << n_save << "\n";
 

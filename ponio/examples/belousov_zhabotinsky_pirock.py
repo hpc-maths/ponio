@@ -34,7 +34,7 @@ make = subprocess.Popen(["make", name])
 make.wait()
 
 print(f"[🪵] ------------> launch {name}")
-args = [os.path.join(".", name)]
+args = [os.path.join(".", name), "-snes_fd", "-snes_view"]
 process = subprocess.Popen(args)
 process.wait()
 print(f"[🪵] ------------> data analysis {name}")
