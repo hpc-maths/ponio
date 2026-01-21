@@ -220,7 +220,7 @@ main( int argc, char** argv )
     // preapre MR for solution on iterator
     auto mr_adaptation = samurai::make_MRAdapt( it_sol->state );
     samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0., 0., 0. );
-    auto mra_config = samurai::mra_config().epsilon( 1e-5 ).regularity( 1. );
+    auto mra_config = samurai::mra_config().epsilon( 1e-5 ).regularity( 1. ).relative_detail( true );
     mr_adaptation( mra_config );
     samurai::update_ghost_mr( it_sol->state );
 
@@ -229,7 +229,6 @@ main( int argc, char** argv )
 
     while ( it_sol->time < t_end )
     {
-        samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0., 0., 0. );
         it_sol.callback_on_stages(
             []( auto& ki )
             {
