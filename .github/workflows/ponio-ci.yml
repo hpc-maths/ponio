@@ -193,7 +193,8 @@ jobs:
         run: conda install -y python cxx-compiler
       - name: Build
         run: |
-          export Eigen3_DIR=$CONDA_PREFIX/share/eigen3/cmake
+          export Eigen3_DIR="${CONDA_PREFIX}/share/eigen3/cmake"
+          echo ${Eigen3_DIR}
           cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON
       - name: Execute all examples
         run: cmake --build --target all_save_visu
