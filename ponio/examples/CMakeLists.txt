@@ -13,7 +13,7 @@ endif()
 
 if(BUILD_EIGEN_EXAMPLES)
     list(APPEND examples_list ${examples_eigen})
-    find_package (Eigen3 3.4 REQUIRED NO_MODULE)
+    find_package (Eigen3 REQUIRED NO_MODULE)
 endif()
 
 if(BUILD_CLI11_EXAMPLES)
