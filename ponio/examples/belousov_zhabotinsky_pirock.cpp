@@ -237,7 +237,7 @@ main( int argc, char** argv )
             } );
 
         ++it_sol;
-        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << n_save << "\r";
+        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << n_save << "\n";
 
         mr_adaptation( mra_config );
         samurai::update_ghost_mr( it_sol->state );
