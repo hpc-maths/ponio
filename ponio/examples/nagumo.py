@@ -66,9 +66,11 @@ make.wait()
 args = [os.path.join(".", name)]
 process = subprocess.Popen(args)
 process.wait()
+print("finish nagumo")
 
 data = sorted([load_data(file) for file in glob.glob(
     os.path.join(data_dir, "*.dat"))], key=lambda d: d.time)
+print(data)
 
 for i, dat in enumerate(data):
     plt.plot(dat.x(), dat.u(), color=f"C{i}", label=f"$t^n = {dat.time}$")
