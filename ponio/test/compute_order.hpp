@@ -53,14 +53,16 @@ template <typename T = double>
 auto
 error( T u, T v )
 {
-    return std::abs( u - v );
+    using namespace std;
+    return abs( u - v );
 }
 
 template <typename T = double>
 auto
 relative_error( T u, T v )
 {
-    return std::abs( ( u - v ) / u );
+    using namespace std;
+    return abs( ( u - v ) / u );
 }
 
 namespace explicit_method

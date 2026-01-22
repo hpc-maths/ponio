@@ -36,23 +36,28 @@ namespace ponio::detail
             zero,
             []( auto const& acc, auto const& xi )
             {
-                return acc + std::abs( xi ) * std::abs( xi );
+                using namespace std;
+                return acc + abs( xi ) * abs( xi );
             } );
-        return std::sqrt( accu );
+
+        using namespace std;
+        return sqrt( accu );
     }
 
     template <typename state_t>
     auto
     norm( state_t const& x )
     {
-        return std::abs( x );
+        using namespace std;
+        return abs( x );
     }
 
     template <typename state_t>
     auto
     error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
     {
-        return std::abs( ( unp1 - unp1bis ) / ( 1.0 + std::max( std::abs( un ), std::abs( unp1 ) ) ) );
+        using namespace std;
+        return abs( ( unp1 - unp1bis ) / ( 1.0 + std::max( abs( un ), abs( unp1 ) ) ) );
     }
 
     /**
@@ -78,12 +83,14 @@ namespace ponio::detail
         using value_t = std::remove_cvref_t<decltype( *it_unp1 )>;
         auto r        = static_cast<value_t>( 0. );
 
+        using namespace std;
         for ( auto it_un = std::ranges::cbegin( un ); it_un != last; ++it_un, ++it_unp1, ++it_unp1bis )
         {
-            auto tmp = std::abs( *it_unp1 - *it_unp1bis ) / ( 1.0 + std::max( std::abs( *it_un ), std::abs( *it_unp1 ) ) );
+            auto tmp = abs( *it_unp1 - *it_unp1bis ) / ( 1.0 + max( abs( *it_un ), abs( *it_unp1 ) ) );
             r += tmp * tmp;
         }
-        return std::sqrt( ( 1. / static_cast<double>( n_elm ) ) * r );
+
+        return sqrt( ( 1. / static_cast<double>( n_elm ) ) * r );
 
         /*
         return std::sqrt(

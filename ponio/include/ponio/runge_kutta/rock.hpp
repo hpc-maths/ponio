@@ -47,7 +47,8 @@ namespace ponio::runge_kutta::rock
         auto
         norm_2( state_t const& u )
         {
-            return std::abs( u );
+            using namespace std;
+            return abs( u );
         }
 
         /**
@@ -61,12 +62,13 @@ namespace ponio::runge_kutta::rock
         auto
         norm_2( state_t const& u )
         {
-            return std::sqrt( std::accumulate( std::ranges::begin( u ),
+            using namespace std;
+            return sqrt( std::accumulate( std::ranges::begin( u ),
                 std::ranges::end( u ),
                 0.,
                 []( auto sum, auto x )
                 {
-                    return sum + ::ponio::detail::power<2>( std::abs( x ) );
+                    return sum + ::ponio::detail::power<2>( abs( x ) );
                 } ) );
         }
 
@@ -161,7 +163,8 @@ namespace ponio::runge_kutta::rock
                         z = un - ( z - un );
                     }
 
-                    necessary = ( iter < max_iter ) && !( iter > 2 && std::abs( eigmax - eigmaxo ) <= 0.05 * eigmax );
+                    using namespace std;
+                    necessary = ( iter < max_iter ) && !( iter > 2 && abs( eigmax - eigmaxo ) <= 0.05 * eigmax );
                     ++iter;
                 }
 
@@ -378,9 +381,9 @@ namespace ponio::runge_kutta::rock
         auto
         error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
-            return std::abs(
-                std::forward<state_t>( tmp )
-                / ( a_tol + r_tol * std::max( std::abs( std::forward<state_t>( unp1 ) ), std::abs( std::forward<state_t>( un ) ) ) ) );
+            using namespace std;
+            return abs( std::forward<state_t>( tmp )
+                        / ( a_tol + r_tol * max( abs( std::forward<state_t>( unp1 ) ), abs( std::forward<state_t>( un ) ) ) ) );
         }
 
         // same with ranges
@@ -392,14 +395,15 @@ namespace ponio::runge_kutta::rock
             auto it_un  = std::ranges::begin( std::forward<state_t>( un ) );
             auto it_tmp = std::ranges::begin( std::forward<state_t>( tmp ) );
 
-            return std::sqrt( std::accumulate( std::ranges::begin( std::forward<state_t>( unp1 ) ),
-                                  std::ranges::end( std::forward<state_t>( unp1 ) ),
-                                  0.,
-                                  [&]( auto sum, auto unp1_i )
-                                  {
-                                      return sum + ::ponio::detail::power<2>( error( unp1_i, *it_un++, *it_tmp++ ) );
-                                  } )
-                              / static_cast<value_t>( std::size( unp1 ) ) );
+            using namespace std;
+            return sqrt( std::accumulate( std::ranges::begin( std::forward<state_t>( unp1 ) ),
+                             std::ranges::end( std::forward<state_t>( unp1 ) ),
+                             0.,
+                             [&]( auto sum, auto unp1_i )
+                             {
+                                 return sum + ::ponio::detail::power<2>( error( unp1_i, *it_un++, *it_tmp++ ) );
+                             } )
+                         / static_cast<value_t>( std::size( unp1 ) ) );
         }
 
         // same with something which contains a range
@@ -638,7 +642,8 @@ namespace ponio::runge_kutta::rock
         auto
         error( state_t const& unp1, state_t const& tmp )
         {
-            return std::abs( tmp / ( a_tol + r_tol * std::abs( unp1 ) ) );
+            using namespace std;
+            return abs( tmp / ( a_tol + r_tol * abs( unp1 ) ) );
         }
 
         // same with ranges
@@ -649,14 +654,15 @@ namespace ponio::runge_kutta::rock
         {
             auto it_tmp = std::ranges::begin( tmp );
 
-            return std::sqrt( std::accumulate( std::ranges::begin( unp1 ),
-                                  std::ranges::end( unp1 ),
-                                  0.,
-                                  [&]( auto sum, auto unp1_i )
-                                  {
-                                      return sum + ::ponio::detail::power<2>( error( unp1_i, *it_tmp++ ) );
-                                  } )
-                              / static_cast<value_t>( std::size( unp1 ) ) );
+            using namespace std;
+            return sqrt( std::accumulate( std::ranges::begin( unp1 ),
+                             std::ranges::end( unp1 ),
+                             0.,
+                             [&]( auto sum, auto unp1_i )
+                             {
+                                 return sum + ::ponio::detail::power<2>( error( unp1_i, *it_tmp++ ) );
+                             } )
+                         / static_cast<value_t>( std::size( unp1 ) ) );
         }
 
         // same with something which contains a range
