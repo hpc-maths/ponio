@@ -60,7 +60,8 @@ jobs:
         uses: JacobDomagala/StaticAnalysis@master
         with:
           language: c++
-          cppcheck_args: --enable=all --check-level=exhaustive -q --project=./build/compile_commands.json --suppressions-list=.cppcheck --inline-suppr
+          compile_commands: ./build/compile_commands.json
+          cppcheck_args: --enable=all --check-level=exhaustive -q --suppressions-list=.cppcheck --inline-suppr
   # check compilation on gcc and clang compiler
   compiler-check:
     needs: [pre-commit, cppcheck]
