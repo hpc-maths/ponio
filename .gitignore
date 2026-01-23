@@ -293,3 +293,12 @@ ponio/doc/source/_static/cpp/*.png
 ponio/doc/source/compare/*/*.txt
 ponio/doc/source/compare/*/*.out
 ponio/doc/source/compare/*/*.png
+ponio/doc/source/compare/*.png
+ponio/doc/source/compare/*.html
+ponio/doc/source/compare/ascent/Ascent
+ponio/doc/source/user/time_iterator.png
+ponio/doc/source/_build
+ponio/doc/source/plantuml.jar
+
+# html generation
+html/api
