@@ -6,27 +6,27 @@ Installation
 
 **From conda:**
 
-.. code-block: sh
+.. code-block:: sh
 
   conda install conda-forge::ponio
 
 
 **From sources:**
 
-.. code-block: sh
+.. code-block:: sh
 
   git clone https://github.com/hpc-maths/ponio.git
   cd ponio
 
 and install dependencies from conda
 
-.. code-block: sh
+.. code-block:: sh
 
   conda env create -f environment/conda-environment.yml
 
 next install ponio
 
-.. code-block: sh
+.. code-block:: sh
 
   cmake . -B build -DCMAKE_BUILD_TYPE=Release
   cmake --build build --target install
@@ -35,13 +35,13 @@ next install ponio
 
   You can install and launch all examples and theirs dependencies with following lines
 
-  .. code-block: sh
+  .. code-block:: sh
 
     conda env create -f environment/conda-environment-all.yml
 
   and compile all examples with
 
-  .. code-block: sh
+  .. code-block:: sh
 
     cmake . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_ALL_EXAMPLES=ON
     cd build
@@ -51,13 +51,13 @@ next install ponio
 
   For every example in ponio their is a source file in C++ and a Python script to compile, launch and plot results. You can compile an example with
 
-  .. code-block: sh
+  .. code-block:: sh
 
     make lotka_volterra
 
   You can also launch the Python script associated with the example to see results with
 
-  .. code-block: sh
+  .. code-block:: sh
 
     make visu_lotka_volterra
     # or
@@ -65,7 +65,7 @@ next install ponio
 
 You can also install dependencies with `pixi <https://pixi.prefix.dev/latest/>`_ with
 
-.. code-block: sh
+.. code-block:: sh
 
   pixi install
 
