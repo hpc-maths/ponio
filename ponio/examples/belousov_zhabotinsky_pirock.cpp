@@ -55,7 +55,7 @@ save( fs::path const& path, std::string const& filename, field_t& u, std::string
 int
 main( int argc, char** argv )
 {
-    auto& app = samurai::initialize( "Example for the Belousov-Zhabotinsky equation with samurai solved with PIROCK method", argc, argv );
+    samurai::initialize( "Example for the Belousov-Zhabotinsky equation with samurai solved with PIROCK method", argc, argv );
     SAMURAI_PARSE( argc, argv );
 
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
