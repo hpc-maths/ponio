@@ -44,5 +44,5 @@ plt.legend()
 plt.savefig(os.path.join(img_dir, "01.png"))
 
 if not arguments.only_save:
-    plt.title("$\dot{u} = u$, $u(t=0)=1$")
+    plt.title("$\\dot{u} = u$, $u(t=0)=1$")
     plt.show()

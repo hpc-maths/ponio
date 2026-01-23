@@ -454,6 +454,7 @@ namespace ponio::splitting::strang
             // we find positive root of this polynomial to compute C0
 
             using ::ponio::detail::power;
+            using namespace std;
 
             value_t alpha = power<6>( c2 * dt ) * power<2>( power<3>( a1 ) - power<3>( b1 ) )
                           - power<6>( c1 * dt ) * power<2>( power<3>( a2 ) - power<3>( b2 ) );
@@ -463,9 +464,9 @@ namespace ponio::splitting::strang
             value_t gamma = power<6>( c2 ) * power<2>( e1 ) - power<6>( c1 ) * power<2>( e2 );
 
             value_t discriminent = 2. * beta * beta - alpha * gamma;
-            value_t C0           = ( -beta - std::sqrt( discriminent ) ) / ( 2. * alpha );
+            value_t C0           = ( -beta - sqrt( discriminent ) ) / ( 2. * alpha );
 
-            value_t omega = std::abs( e1 - ( power<3>( a1 ) - power<3>( b1 ) ) * C0 * power<3>( dt ) ) / ( C0 * power<3>( c1 * dt ) );
+            value_t omega = abs( e1 - ( power<3>( a1 ) - power<3>( b1 ) ) * C0 * power<3>( dt ) ) / ( C0 * power<3>( c1 * dt ) );
 
             return std::make_pair( omega, C0 );
         }

@@ -57,8 +57,8 @@ if not arguments.only_save:
     plt.show()
 
 data = np.loadtxt(os.path.join(data_dir, "errors.dat"))
-plt.plot(data[:, 0], data[:, 1], "+-", label="ROCK2 errors in $\|\cdot\|_2$")
-plt.plot(data[:, 0], data[:, 2], "+-", label="ROCK4 errors in $\|\cdot\|_2$")
+plt.plot(data[:, 0], data[:, 1], "+-", label=r"ROCK2 errors in $\|\cdot\|_2$")
+plt.plot(data[:, 0], data[:, 2], "+-", label=r"ROCK4 errors in $\|\cdot\|_2$")
 plt.plot(data[:, 0], data[:, 0]**2, "--", label="slope order 2")
 plt.plot(data[:, 0], (2.25*data[:, 0])**4, "--", label="slope order 4")
 

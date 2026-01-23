@@ -22,6 +22,7 @@
 
 #include <samurai/field.hpp>
 #include <samurai/io/hdf5.hpp>
+#include <samurai/mesh_config.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
 #include <samurai/samurai.hpp>
@@ -55,12 +56,11 @@ save( fs::path const& path, std::string const& filename, field_t& u, std::string
 int
 main( int argc, char** argv )
 {
-    PetscInitialize( &argc, &argv, nullptr, nullptr );
+    samurai::initialize( "Example for the Nagumo equation with samurai", argc, argv );
+    SAMURAI_PARSE( argc, argv );
 
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
-    using config_t            = samurai::MRConfig<dim>;
     using box_t               = samurai::Box<double, dim>;
-    using point_t             = typename box_t::point_t;
 
     // simulation parameters --------------------------------------------------
     constexpr double d  = .1;
@@ -72,12 +72,6 @@ main( int argc, char** argv )
     constexpr double t_ini     = 0.;
     constexpr double t_end     = 35.;
 
-    // multiresolution parameters
-    std::size_t const min_level = 7;
-    std::size_t const max_level = 7;
-    double const mr_epsilon     = 1e-5; // Threshold used by multiresolution
-    double const mr_regularity  = 1.;   // Regularity guess for multiresolution
-
     // output parameters
     std::string const dirname  = "nagumo_pirock_data";
     fs::path const path        = std::filesystem::path( dirname );
@@ -85,12 +79,9 @@ main( int argc, char** argv )
     fs::create_directories( path );
 
     // define mesh
-    point_t box_corner1;
-    point_t box_corner2;
-    box_corner1.fill( left_box );
-    box_corner2.fill( right_box );
-    box_t const box( box_corner1, box_corner2 );
-    samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
+    box_t const box( { left_box }, { right_box } );
+    auto config = samurai::mesh_config<dim>().min_level( 2 ).max_level( 7 );
+    auto mesh   = samurai::mra::make_mesh( box, config );
 
     // init solution ----------------------------------------------------------
     auto u_ini = samurai::make_scalar_field<double>( "u", mesh );
@@ -122,20 +113,20 @@ main( int argc, char** argv )
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::n_comp, decltype( u_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini ), decltype( u_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
-        [&]( auto const& cell, auto const& field )
+        [&]( auto& scheme_value, auto const& cell, auto const& field )
         {
-            auto u = field[cell];
-            return k * u * u * ( 1 - u );
+            auto u       = field[cell];
+            scheme_value = k * u * u * ( 1 - u );
         } );
     react.set_jacobian_function(
-        [&]( auto const& cell, auto const& field )
+        [&]( auto& jacobian_matrix, auto const& cell, auto const& field )
         {
-            auto u = field[cell];
-            return k * ( 2 * u * ( 1 - u ) - u * u );
+            auto u          = field[cell];
+            jacobian_matrix = k * ( 2 * u * ( 1 - u ) - u * u );
         } );
     auto fr_t = [&]( double /* t */ )
     {
@@ -170,8 +161,9 @@ main( int argc, char** argv )
 
     // preapre MR for solution on iterator
     auto mr_adaptation = samurai::make_MRAdapt( it_sol->state );
+    auto mra_config    = samurai::mra_config().epsilon( 1e-5 ).regularity( 1. );
     samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
-    mr_adaptation( mr_epsilon, mr_regularity );
+    mr_adaptation( mra_config );
     samurai::update_ghost_mr( it_sol->state );
 
     std::size_t n_save = 0;
@@ -192,14 +184,13 @@ main( int argc, char** argv )
         ++it_sol;
         std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << n_save << "\r";
 
-        mr_adaptation( mr_epsilon, mr_regularity );
+        mr_adaptation( mra_config );
         samurai::update_ghost_mr( it_sol->state );
 
         save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save++ ) );
     }
     std::cout << std::endl;
 
-    PetscFinalize();
-
+    samurai::finalize();
     return 0;
 }

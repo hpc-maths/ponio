@@ -1,0 +1,26 @@
+name: ponio-complete-env
+
+channels:
+  - conda-forge
+dependencies:
+  # ponio dependencies
+  - jinja2
+  - sympy
+  - numpy
+  # build dependencies
+  - cmake
+  - make
+  # visu dependencies
+  - scipy
+  - matplotlib
+  # all examples dependencies
+  - eigen
+  - samurai
+  - petsc
+  - cli11
+  - h5py
+  # tests
+  - notebook
+  - nbval
+  - doctest
+  - pytest

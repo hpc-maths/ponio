@@ -516,8 +516,8 @@ namespace ponio::runge_kutta::pirock
                     {
                         return [=, it_yn = yn.begin(), it_ynp1 = ynp1.begin()]( value_t const& acc, value_t const err_i ) mutable
                         {
-                            return acc
-                                 + detail::power<2>( err_i / ( a_tol + r_tol * std::max( std::abs( *it_yn++ ), std::abs( *it_ynp1++ ) ) ) );
+                            using namespace std;
+                            return acc + detail::power<2>( err_i / ( a_tol + r_tol * max( abs( *it_yn++ ), abs( *it_ynp1++ ) ) ) );
                         };
                     };
 
@@ -1183,8 +1183,8 @@ namespace ponio::runge_kutta::pirock
                     {
                         return [=, it_yn = yn.begin(), it_ynp1 = ynp1.begin()]( value_t const& acc, value_t const err_i ) mutable
                         {
-                            return acc
-                                 + detail::power<2>( err_i / ( a_tol + r_tol * std::max( std::abs( *it_yn++ ), std::abs( *it_ynp1++ ) ) ) );
+                            using namespace std;
+                            return acc + detail::power<2>( err_i / ( a_tol + r_tol * max( abs( *it_yn++ ), abs( *it_ynp1++ ) ) ) );
                         };
                     };
 

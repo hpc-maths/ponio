@@ -4,8 +4,10 @@
 
 #include <samurai/field.hpp>
 #include <samurai/io/hdf5.hpp>
+#include <samurai/mesh_config.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
+#include <samurai/samurai.hpp>
 #include <samurai/schemes/fv.hpp>
 
 #include <ponio/observer.hpp>
@@ -64,22 +66,16 @@ init( Mesh& mesh )
 int
 main( int argc, char** argv )
 {
-    PetscInitialize( &argc, &argv, nullptr, nullptr );
+    samurai::initialize( "Example for the heat equation with samurai", argc, argv );
+    SAMURAI_PARSE( argc, argv );
 
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
-    using Config              = samurai::MRConfig<dim>;
 
     // Simulation parameters
     double const left_box  = -5;
     double const right_box = 5;
     double const Tf        = 0.5;
     double const cfl       = 0.5;
-
-    // Multiresolution parameters
-    std::size_t const min_level = 2;
-    std::size_t const max_level = 5;
-    double const mr_epsilon     = 2.e-4; // Threshold used by multiresolution
-    double const mr_regularity  = 1.;    // Regularity guess for multiresolution
 
     // Output parameters
     std::string const dirname  = "heat_samurai_data";
@@ -88,7 +84,8 @@ main( int argc, char** argv )
 
     // Define mesh
     samurai::Box<double, dim> const box( { left_box }, { right_box } );
-    samurai::MRMesh<Config> mesh( box, min_level, max_level );
+    auto config = samurai::mesh_config<dim>().min_level( 2 ).max_level( 5 );
+    auto mesh   = samurai::mra::make_mesh( box, config );
 
     // Initial condition
     auto un_ini = init( mesh );
@@ -128,8 +125,9 @@ main( int argc, char** argv )
     samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0. );
 
     // Prepare MR for solution on iterator
-    auto MRadaptation = samurai::make_MRAdapt( it_sol->state );
-    MRadaptation( mr_epsilon, mr_regularity );
+    auto mr_adaptation = samurai::make_MRAdapt( it_sol->state );
+    auto mra_config    = samurai::mra_config().epsilon( 2e-4 ).regularity( 1. );
+    mr_adaptation( mra_config );
     samurai::update_ghost_mr( it_sol->state );
 
     std::size_t n_save = 0;
@@ -152,14 +150,13 @@ main( int argc, char** argv )
         std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ")  "
                   << "N stages:" << it_sol.info().number_of_stages << "   \r";
 
-        MRadaptation( mr_epsilon, mr_regularity );
+        mr_adaptation( mra_config );
         samurai::update_ghost_mr( it_sol->state );
 
         save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save++ ) );
     }
     std::cout << std::endl;
 
-    PetscFinalize();
-
+    samurai::finalize();
     return 0;
 }

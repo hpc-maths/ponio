@@ -22,6 +22,7 @@
 
 #include <samurai/field.hpp>
 #include <samurai/io/hdf5.hpp>
+#include <samurai/mesh_config.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
 #include <samurai/samurai.hpp>
@@ -54,10 +55,10 @@ save( fs::path const& path, std::string const& filename, field_t& u, std::string
 int
 main( int argc, char** argv )
 {
-    PetscInitialize( &argc, &argv, nullptr, nullptr );
+    samurai::initialize( "Example for the Belousov-Zhabotinsky equation with samurai solved with PIROCK method", argc, argv );
+    SAMURAI_PARSE( argc, argv );
 
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
-    using config_t            = samurai::MRConfig<dim>;
     using box_t               = samurai::Box<double, dim>;
     using point_t             = typename box_t::point_t;
 
@@ -76,12 +77,6 @@ main( int argc, char** argv )
     constexpr double t_ini     = 0.;
     constexpr double t_end     = 1.;
 
-    // multiresolution parameters
-    std::size_t const min_level = 2;
-    std::size_t const max_level = 8;
-    double const mr_epsilon     = 1e-5; // Threshold used by multiresolution
-    double const mr_regularity  = 1.;   // Regularity guess for multiresolution
-
     // output parameters
     std::string const dirname  = "belousov_zhabotinsky_pirock_data";
     fs::path const path        = std::filesystem::path( dirname );
@@ -94,53 +89,56 @@ main( int argc, char** argv )
     box_corner1.fill( left_box );
     box_corner2.fill( right_box );
     box_t const box( box_corner1, box_corner2 );
-    samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
+    auto config = samurai::mesh_config<dim>().min_level( 2 ).max_level( 8 );
+    auto mesh   = samurai::mra::make_mesh( box, config );
 
     // init solution ----------------------------------------------------------
     // auto u_ini = init( mesh );
     auto u_ini = samurai::make_vector_field<double, 3>( "u", mesh );
 
-    double a = 0.;
-    double b = 0.;
-    double c = 0.;
-    u_ini.fill( 0 );
-    samurai::for_each_cell( mesh,
-        [&]( auto& cell )
-        {
-            if ( cell.center()[0] < ( right_box - left_box ) / 20. )
+    { // init sol scope
+        double a = 0.;
+        double b = 0.;
+        double c = 0.;
+        u_ini.fill( 0 );
+        samurai::for_each_cell( mesh,
+            [&]( auto& cell )
             {
-                double const y_lim  = 0.05;
-                double const x_coor = 0.5;
-                double const y_coor = 20.0 * cell.center()[0] - y_lim;
-
-                if ( y_coor >= 0. && y_coor <= 0.3 * x_coor )
+                if ( cell.center()[0] < ( right_box - left_box ) / 20. )
                 {
-                    b = 0.8;
-                }
-                else
-                {
-                    b = q * ( f + 1. ) / ( f - 1. );
+                    double const y_lim  = 0.05;
+                    double const x_coor = 0.5;
+                    double const y_coor = 20.0 * cell.center()[0] - y_lim;
+
+                    if ( y_coor >= 0. && y_coor <= 0.3 * x_coor )
+                    {
+                        b = 0.8;
+                    }
+                    else
+                    {
+                        b = q * ( f + 1. ) / ( f - 1. );
+                    }
+
+                    if ( y_coor >= 0. )
+                    {
+                        c = q * ( f + 1. ) / ( f - 1. ) + std::atan( y_coor / x_coor ) / ( 8. * std::numbers::pi * f );
+                    }
+                    else
+                    {
+                        c = q * ( f + 1. ) / ( f - 1. )
+                          + ( std::atan( y_coor / x_coor ) + 2. * std::numbers::pi ) / ( 8. * std::numbers::pi * f );
+                    }
                 }
 
-                if ( y_coor >= 0. )
-                {
-                    c = q * ( f + 1. ) / ( f - 1. ) + std::atan( y_coor / x_coor ) / ( 8. * std::numbers::pi * f );
-                }
-                else
-                {
-                    c = q * ( f + 1. ) / ( f - 1. )
-                      + ( std::atan( y_coor / x_coor ) + 2. * std::numbers::pi ) / ( 8. * std::numbers::pi * f );
-                }
-            }
+                a = ( f * c ) / ( q + b );
 
-            a = ( f * c ) / ( q + b );
+                // std::cout << cell.center()[0] << "\t a:" << a << " b:" << b << " c:" << c << "\n";
 
-            // std::cout << cell.center()[0] << "\t a:" << a << " b:" << b << " c:" << c << "\n";
-
-            u_ini[cell]( 0 ) = a;
-            u_ini[cell]( 1 ) = b;
-            u_ini[cell]( 2 ) = c;
-        } );
+                u_ini[cell]( 0 ) = a;
+                u_ini[cell]( 1 ) = b;
+                u_ini[cell]( 2 ) = c;
+            } );
+    }
     samurai::make_bc<samurai::Neumann<1>>( u_ini, 0., 0., 0. );
 
     // define problem ---------------------------------------------------------
@@ -156,33 +154,41 @@ main( int argc, char** argv )
     };
 
     // reaction terme
-    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini )::n_comp, decltype( u_ini )>;
+    using cfg  = samurai::LocalCellSchemeConfig<samurai::SchemeType::NonLinear, decltype( u_ini ), decltype( u_ini )>;
     auto react = samurai::make_cell_based_scheme<cfg>();
     react.set_name( "Reaction" );
     react.set_scheme_function(
-        [&]( auto const& cell, auto const& field ) -> samurai::SchemeValue<cfg>
+        [&]( auto& scheme_value, auto const& cell, auto const& field )
         {
-            auto u  = field[cell];
-            auto& a = u[0];
-            auto& b = u[1];
-            auto& c = u[2];
+            auto u = field[cell];
+            auto a = u[0];
+            auto b = u[1];
+            auto c = u[2];
 
-            return { 1. / mu * ( -q * a - a * b + f * c ), 1. / epsilon * ( q * a - a * b + b * ( 1. - b ) ), b - c };
+            // clang-format off
+            scheme_value = {
+                1. / mu * ( -q * a - a * b + f * c ),
+                1. / epsilon * ( q * a - a * b + b * ( 1. - b ) ),
+                b - c
+            };
+            // clang-format on
         } );
     // or set option in command line with : -snes_fd -pc_type none
     react.set_jacobian_function(
-        [&]( auto const& cell, auto const& field ) -> samurai::JacobianMatrix<cfg>
+        [&]( auto& jacobian_matrix, auto const& cell, auto const& field )
         {
             auto u  = field[cell];
             auto& a = u[0];
             auto& b = u[1];
             // auto& c = u[2];
 
-            return {
+            // clang-format off
+            jacobian_matrix = {
                 {( -q - b ) / mu,      -a / mu,                           f / mu},
                 { ( q - b ) / epsilon, 1. / epsilon * ( -a - 2 * b + 1 ), 0.    },
                 { 0.,                  1.,                                -1.   }
             };
+            // clang-format on
         } );
     auto fr_t = [&]( double /* t */ )
     {
@@ -219,7 +225,8 @@ main( int argc, char** argv )
     // preapre MR for solution on iterator
     auto mr_adaptation = samurai::make_MRAdapt( it_sol->state );
     samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0., 0., 0. );
-    mr_adaptation( mr_epsilon, mr_regularity );
+    auto mra_config = samurai::mra_config().epsilon( 1e-5 ).regularity( 1. ).relative_detail( true );
+    mr_adaptation( mra_config );
     samurai::update_ghost_mr( it_sol->state );
 
     std::size_t n_save = 0;
@@ -227,7 +234,6 @@ main( int argc, char** argv )
 
     while ( it_sol->time < t_end )
     {
-        samurai::make_bc<samurai::Neumann<1>>( it_sol->state, 0., 0., 0. );
         it_sol.callback_on_stages(
             []( auto& ki )
             {
@@ -238,14 +244,13 @@ main( int argc, char** argv )
         ++it_sol;
         std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << n_save << "\r";
 
-        mr_adaptation( mr_epsilon, mr_regularity );
+        mr_adaptation( mra_config );
         samurai::update_ghost_mr( it_sol->state );
 
         save( path, filename, it_sol->state, fmt::format( "_ite_{}", n_save++ ) );
     }
     std::cout << std::endl;
 
-    PetscFinalize();
-
+    samurai::finalize();
     return 0;
 }

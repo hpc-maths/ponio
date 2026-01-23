@@ -246,7 +246,8 @@ TEST_CASE( "samurai::order::pirock" )
                 samurai::for_each_cell( mesh,
                     [&]( auto& cell )
                     {
-                        error += std::abs( it_sol->state[cell] - exact_solution( cell.center( 0. ), t_end ) ) * cell.length;
+                        using namespace std;
+                        error += abs( it_sol->state[cell] - exact_solution( cell.center( 0. ), t_end ) ) * cell.length;
                     } );
                 errors.push_back( std::log( error ) );
                 time_steps.push_back( std::log( dt ) );

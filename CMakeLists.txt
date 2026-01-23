@@ -45,7 +45,7 @@ option(IWYU "Activate include-what-you-use" OFF)
 option(SANITIZERS "Activate sanitizers" OFF)
 option(ENABLE_COVERAGE "Activate coverage" OFF)
 
-project(ponio VERSION ${PONIO_VERSION} LANGUAGES CXX)
+project(ponio VERSION ${PONIO_VERSION} LANGUAGES CXX C)
 
 SET(FEATURES)
 
@@ -139,14 +139,24 @@ set(PONIO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/ponio/include)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 option(BUILD_TESTS "build the tests" OFF)
-option(BUILD_DEMOS "build the examples" OFF)
-option(BUILD_SAMURAI_DEMOS "build examples working with samurai" OFF)
+option(BUILD_EXAMPLES "build the examples" OFF)
+option(BUILD_EIGEN_EXAMPLES "build examples working with eigen" OFF)
+option(BUILD_CLI11_EXAMPLES "build examples working with cli11" OFF)
+option(BUILD_SAMURAI_EXAMPLES "build examples working with samurai" OFF)
+option(BUILD_ALL_EXAMPLES "build all examples" OFF)
 
 if (BUILD_TESTS)
     add_subdirectory(ponio/test)
 endif()
 
-if (BUILD_DEMOS)
+if (BUILD_ALL_EXAMPLES)
+  set(BUILD_EXAMPLES ON)
+  set(BUILD_EIGEN_EXAMPLES ON)
+  set(BUILD_CLI11_EXAMPLES ON)
+  set(BUILD_SAMURAI_EXAMPLES ON)
+endif()
+
+if ((BUILD_EXAMPLES) OR (BUILD_EIGEN_EXAMPLES) OR (BUILD_CLI11_EXAMPLES) OR (BUILD_SAMURAI_EXAMPLES) OR (BUILD_ALL_EXAMPLES))
   add_subdirectory(ponio/examples)
 endif()
 
