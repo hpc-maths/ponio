@@ -73,6 +73,17 @@ You can also install dependencies with `pixi <https://pixi.prefix.dev/latest/>`_
 List of variables available in ``CMakeLists.txt``
 -------------------------------------------------
 
+========================== =============  =====================================
+Variable                   Default value  Description
+========================== =============  =====================================
+``BUILD_TESTS``            ``OFF``        Set to ``ON`` to build the tests with `doctest <https://github.com/doctest/doctest>`_
+``BUILD_EXAMPLES``         ``OFF``        Set to ``ON`` to build examples (without other dependencies)
+``BUILD_EIGEN_EXAMPLES``   ``OFF``        Set to ``ON`` to build examples with `Eigen <https://libeigen.gitlab.io/>`_
+``BUILD_CLI11_EXAMPLES``   ``OFF``        Set to ``ON`` to build examples with `CLI11 <https://github.com/CLIUtils/CLI11>`_
+``BUILD_SAMURAI_EXAMPLES`` ``OFF``        Set to ``ON`` to build examples with `samurai <https://github.com/hpc-maths/samurai>`_
+``BUILD_ALL_EXAMPLES``     ``OFF``        Set to ``ON`` to build all examples with extra dependencies
+========================== =============  =====================================
+
 ``BUILD_TESTS``
   Set to ``ON`` to build the tests with `doctest <https://github.com/doctest/doctest>`_ (default ``OFF``).
 
