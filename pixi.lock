@@ -55,7 +55,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.3.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/executing-2.2.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/fftw-3.3.10-mpi_mpich_h084ba78_11.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/fmt-11.2.0-h07f6e7f_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/fmt-12.1.0-hff5e90c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-inconsolata-3.000-h77eed37_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-source-code-pro-2.038-h77eed37_0.tar.bz2
@@ -262,7 +262,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/rfc3987-syntax-1.1.0-pyhe01879c_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/rhash-1.4.6-hb9d3cd8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/rpds-py-0.30.0-py314h2e6c369_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/samurai-0.27.1-h02a2619_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/samurai-0.28.0-h8d81809_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scalapack-2.2.0-h6b1b6a3_5.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.17.0-py314hf07bd8e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/send2trash-2.1.0-pyha191276_0.conda
@@ -365,7 +365,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.3.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/executing-2.2.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/fftw-3.3.10-mpi_mpich_hfa5bf39_11.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/fmt-11.2.0-hbf61d64_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/fmt-12.1.0-hda137b5_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/fonttools-4.61.1-py313h0f4d31d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fqdn-1.5.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/freetype-2.14.1-h694c41f_0.conda
@@ -532,7 +532,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/rfc3987-syntax-1.1.0-pyhe01879c_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/rhash-1.4.6-h6e16a3a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/rpds-py-0.30.0-py313hcc225dc_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/samurai-0.27.1-h7c28032_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/samurai-0.28.0-hdacbc9d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/scalapack-2.2.0-h09cd2b2_5.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/scipy-1.17.0-py313h2bd7e7a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/send2trash-2.1.0-pyh5552912_0.conda
@@ -612,7 +612,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.3.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/executing-2.2.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/fftw-3.3.10-mpi_openmpi_h5bdcf48_11.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/fmt-11.2.0-h440487c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/fmt-12.1.0-h403dcb5_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fonttools-4.61.1-pyh7db6752_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fqdn-1.5.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/freetype-2.14.1-hce30654_0.conda
@@ -785,7 +785,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/rfc3987-syntax-1.1.0-pyhe01879c_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/rhash-1.4.6-h5505292_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/rpds-py-0.30.0-py314haad56a0_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/samurai-0.27.1-h98f1de7_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/samurai-0.28.0-ha61bed9_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scalapack-2.2.0-hde218b5_5.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scipy-1.17.0-py314hfc1f868_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/send2trash-2.1.0-pyh5552912_0.conda
@@ -865,7 +865,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/eigen-3.4.0-h477610d_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.3.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/executing-2.2.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/fmt-11.2.0-h1d4551f_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/fmt-12.1.0-h7f4e812_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-inconsolata-3.000-h77eed37_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-source-code-pro-2.038-h77eed37_0.tar.bz2
@@ -1016,7 +1016,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/rfc3986-validator-0.1.1-pyh9f0ad1d_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/rfc3987-syntax-1.1.0-pyhe01879c_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/rpds-py-0.30.0-py314h9f07db2_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/samurai-0.27.1-hb99f4c8_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/samurai-0.28.0-heec0376_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.17.0-py314h221f224_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/send2trash-2.1.0-pyh6dadd2b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-80.9.0-pyhff2d567_0.conda
@@ -2255,48 +2255,48 @@ packages:
   license_family: GPL
   size: 792724
   timestamp: 1763157548250
-- conda: https://conda.anaconda.org/conda-forge/linux-64/fmt-11.2.0-h07f6e7f_0.conda
-  sha256: e0f53b7801d0bcb5d61a1ddcb873479bfe8365e56fd3722a232fbcc372a9ac52
-  md5: 0c2f855a88fab6afa92a7aa41217dc8e
+- conda: https://conda.anaconda.org/conda-forge/linux-64/fmt-12.1.0-hff5e90c_0.conda
+  sha256: d4e92ba7a7b4965341dc0fca57ec72d01d111b53c12d11396473115585a9ead6
+  md5: f7d7a4104082b39e3b3473fbd4a38229
   depends:
   - __glibc >=2.17,<3.0.a0
-  - libgcc >=13
-  - libstdcxx >=13
+  - libgcc >=14
+  - libstdcxx >=14
   license: MIT
   license_family: MIT
-  size: 192721
-  timestamp: 1751277120358
-- conda: https://conda.anaconda.org/conda-forge/osx-64/fmt-11.2.0-hbf61d64_0.conda
-  sha256: ba1b1187d6e6ed32a6da0ff4c46658168c16b7dfa1805768d3f347e0c306b804
-  md5: 1883d88d80cb91497b7c2e4f69f2e5e3
+  size: 198107
+  timestamp: 1767681153946
+- conda: https://conda.anaconda.org/conda-forge/osx-64/fmt-12.1.0-hda137b5_0.conda
+  sha256: 3c56fc4b3528acb29d89d139f9800b86425e643be8d9caddd4d6f4a8b09a8db4
+  md5: 265ec3c628a7e2324d86a08205ada7a8
   depends:
   - __osx >=10.13
-  - libcxx >=18
+  - libcxx >=19
   license: MIT
   license_family: MIT
-  size: 184106
-  timestamp: 1751277237783
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/fmt-11.2.0-h440487c_0.conda
-  sha256: 1449ec46468860f6fb77edba87797ce22d4f6bfe8d5587c46fd5374c4f7383ee
-  md5: 24109723ac700cce5ff96ea3e63a83a3
+  size: 188352
+  timestamp: 1767681462452
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/fmt-12.1.0-h403dcb5_0.conda
+  sha256: dba5d4a93dc62f20e4c2de813ccf7beefed1fb54313faff9c4f2383e4744c8e5
+  md5: ae2f556fbb43e5a75cc80a47ac942a8e
   depends:
   - __osx >=11.0
-  - libcxx >=18
+  - libcxx >=19
   license: MIT
   license_family: MIT
-  size: 177090
-  timestamp: 1751277262419
-- conda: https://conda.anaconda.org/conda-forge/win-64/fmt-11.2.0-h1d4551f_0.conda
-  sha256: 890f2789e55b509ff1f14592a5b20a0d0ec19f6da463eff96e378a5d70f882da
-  md5: 15b63c3fb5b7d67b1cb63553a33e6090
+  size: 180970
+  timestamp: 1767681372955
+- conda: https://conda.anaconda.org/conda-forge/win-64/fmt-12.1.0-h7f4e812_0.conda
+  sha256: cce96406ec353692ab46cd9d992eddb6923979c1a342cbdba33521a7c234176f
+  md5: 6e226b58e18411571aaa57a16ad10831
   depends:
   - ucrt >=10.0.20348.0
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   license: MIT
   license_family: MIT
-  size: 185995
-  timestamp: 1751277236879
+  size: 186390
+  timestamp: 1767681264793
 - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2
   sha256: 58d7f40d2940dd0a8aa28651239adbf5613254df0f75789919c4e6762054403b
   md5: 0c96522c6bdaed4b1566d11387caaf45
@@ -8350,58 +8350,55 @@ packages:
   license_family: MIT
   size: 235780
   timestamp: 1764543046065
-- conda: https://conda.anaconda.org/conda-forge/linux-64/samurai-0.27.1-h02a2619_0.conda
-  sha256: 62afcdd0fcd1e841c2babe26ff9c01ac187ef2177040ffb92df94f93409dfe8c
-  md5: f5d734074cbe3673b8e1da70fe29b1c6
+- conda: https://conda.anaconda.org/conda-forge/linux-64/samurai-0.28.0-h8d81809_0.conda
+  sha256: a199f3a25f077c2b46c470296ead505dd83dd09b26668ca5169538075cf83c95
+  md5: 0137bf34938e97093ceb50c32f2ef9e1
   depends:
   - __glibc >=2.17,<3.0.a0
   - cli11 <2.5
-  - fmt >=11.2.0,<11.3.0a0
+  - fmt >=12.1.0,<12.2.0a0
   - highfive >=3
   - libgcc >=14
   - libstdcxx >=14
   - pugixml >=1.15,<1.16.0a0
   - xtensor >=0.26
   license: BSD-3-Clause
-  license_family: BSD
-  size: 171682
-  timestamp: 1764016845182
-- conda: https://conda.anaconda.org/conda-forge/osx-64/samurai-0.27.1-h7c28032_0.conda
-  sha256: 42fccdbe86f304a941162a6fac999432c2b2315b18862a8c2fba8fafe80a2521
-  md5: 1e4b21382ebc86e2ce5a1b5beee26ae7
+  size: 185968
+  timestamp: 1769145257001
+- conda: https://conda.anaconda.org/conda-forge/osx-64/samurai-0.28.0-hdacbc9d_0.conda
+  sha256: 5e63310490c0914fe56d2779a64c7a26cd03fd45dfde8baf4fc9511a9f1c303d
+  md5: 523da20070eb46f09224b6d30ca71bf7
   depends:
   - __osx >=10.13
   - cli11 <2.5
-  - fmt >=11.2.0,<11.3.0a0
+  - fmt >=12.1.0,<12.2.0a0
   - highfive >=3
   - libcxx >=19
   - pugixml >=1.15,<1.16.0a0
   - xtensor >=0.26
   license: BSD-3-Clause
-  license_family: BSD
-  size: 171526
-  timestamp: 1764017105781
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/samurai-0.27.1-h98f1de7_0.conda
-  sha256: d2f948cbddc03f0d9a3f6416b496022677f19153375ba3bac231d21daf903cf0
-  md5: 3d5af996fa2106c558483a4335c53f24
+  size: 185578
+  timestamp: 1769145601059
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/samurai-0.28.0-ha61bed9_0.conda
+  sha256: 05452fcff25e06cbbe92acf0806f6694725cb424c3d70441b599f9e486a1c2df
+  md5: e690d9b14359d9818520777d9158408f
   depends:
   - __osx >=11.0
   - cli11 <2.5
-  - fmt >=11.2.0,<11.3.0a0
+  - fmt >=12.1.0,<12.2.0a0
   - highfive >=3
   - libcxx >=19
   - pugixml >=1.15,<1.16.0a0
   - xtensor >=0.26
   license: BSD-3-Clause
-  license_family: BSD
-  size: 171509
-  timestamp: 1764017083086
-- conda: https://conda.anaconda.org/conda-forge/win-64/samurai-0.27.1-hb99f4c8_0.conda
-  sha256: e444093e450186009a9806ecf7672adef4832c62335047c8aa476fd4c1d395d1
-  md5: 870aca14ca5059751b3ec61684bf262d
+  size: 185676
+  timestamp: 1769145565636
+- conda: https://conda.anaconda.org/conda-forge/win-64/samurai-0.28.0-heec0376_0.conda
+  sha256: 3d1441bbad5aa4a72331b47b29dc1e48296eacf0249eb6da44f88ffb3ec9b311
+  md5: 4b761b4aa6d352bff3351ba82d48c47e
   depends:
   - cli11 <2.5
-  - fmt >=11.2.0,<11.3.0a0
+  - fmt >=12.1.0,<12.2.0a0
   - highfive >=3
   - pugixml >=1.15,<1.16.0a0
   - ucrt >=10.0.20348.0
@@ -8409,9 +8406,8 @@ packages:
   - vc14_runtime >=14.44.35208
   - xtensor >=0.26
   license: BSD-3-Clause
-  license_family: BSD
-  size: 171521
-  timestamp: 1764017091477
+  size: 186244
+  timestamp: 1769145352632
 - conda: https://conda.anaconda.org/conda-forge/linux-64/scalapack-2.2.0-h6b1b6a3_5.conda
   sha256: 2082c1f77ce88004a837f76c735560a5bd61b4693b745f74c428721ac1c6ffed
   md5: 6b978406219e5aaa34342afff38ddb04

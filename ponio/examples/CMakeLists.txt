@@ -2,8 +2,7 @@ set(examples_list arenstorf brusselator exp exp_splitting heat heat_rock pendulu
 
 set(examples_eigen brusselator_dirk lorenz_tuto lorenz_all)
 set(examples_cli11 brownian lotka_volterra)
-#set(examples_samurai heat_samurai nagumo_pirock belousov_zhabotinsky_pirock bz_2d_pirock)
-set(examples_samurai heat_samurai nagumo_pirock belousov_zhabotinsky_pirock)
+set(examples_samurai heat_samurai nagumo_pirock belousov_zhabotinsky_pirock bz_2d_pirock)
 
 if(BUILD_ALL_EXAMPLES)
     set(BUILD_EIGEN_EXAMPLES ON)

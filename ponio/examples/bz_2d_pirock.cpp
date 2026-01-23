@@ -22,6 +22,7 @@
 
 #include <samurai/field.hpp>
 #include <samurai/io/hdf5.hpp>
+#include <samurai/mesh_config.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
 #include <samurai/samurai.hpp>
@@ -58,7 +59,6 @@ main( int argc, char** argv )
     SAMURAI_PARSE( argc, argv );
 
     constexpr std::size_t dim = 2; // cppcheck-suppress unreadVariable
-    using config_t            = samurai::MRConfig<dim, 3>;
     using box_t               = samurai::Box<double, dim>;
     using point_t             = typename box_t::point_t;
 
@@ -76,10 +76,6 @@ main( int argc, char** argv )
     constexpr double t_ini     = 0.;
     constexpr double t_end     = 1.;
 
-    // multiresolution parameters
-    std::size_t const min_level = 2;
-    std::size_t const max_level = 6;
-
     // output parameters
     std::string const dirname  = "bz_2d_pirock_data";
     fs::path const path        = std::filesystem::path( dirname );
@@ -92,8 +88,8 @@ main( int argc, char** argv )
     box_corner1.fill( left_box );
     box_corner2.fill( right_box );
     box_t const box( box_corner1, box_corner2 );
-    std::array<bool, dim> const periodic = { false, false };
-    samurai::MRMesh<config_t> mesh{ box, min_level, max_level, periodic };
+    auto config = samurai::mesh_config<dim>().min_level( 2 ).max_level( 6 );
+    auto mesh   = samurai::mra::make_mesh( box, config );
 
     // init solution ----------------------------------------------------------
     auto y_ini = samurai::make_vector_field<double, 3>( "y", mesh );
@@ -197,7 +193,7 @@ main( int argc, char** argv )
     // spectral radius estimator for diffusion term
     auto eigmax_computer = [&]( auto&, double, auto&, double, auto& )
     {
-        double const dx = mesh.cell_length( max_level );
+        double const dx = mesh.min_cell_length();
         return da * 4. / ( dx * dx );
     };
 

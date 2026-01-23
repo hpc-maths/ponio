@@ -22,6 +22,7 @@
 
 #include <samurai/field.hpp>
 #include <samurai/io/hdf5.hpp>
+#include <samurai/mesh_config.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
 #include <samurai/samurai.hpp>
@@ -55,11 +56,10 @@ save( fs::path const& path, std::string const& filename, field_t& u, std::string
 int
 main( int argc, char** argv )
 {
-    auto& app = samurai::initialize( "Example for the Nagumo equation with samurai", argc, argv );
+    samurai::initialize( "Example for the Nagumo equation with samurai", argc, argv );
     SAMURAI_PARSE( argc, argv );
 
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
-    using config_t            = samurai::MRConfig<dim>;
     using box_t               = samurai::Box<double, dim>;
 
     // simulation parameters --------------------------------------------------
@@ -72,10 +72,6 @@ main( int argc, char** argv )
     constexpr double t_ini     = 0.;
     constexpr double t_end     = 35.;
 
-    // multiresolution parameters
-    std::size_t const min_level = 7;
-    std::size_t const max_level = 7;
-
     // output parameters
     std::string const dirname  = "nagumo_pirock_data";
     fs::path const path        = std::filesystem::path( dirname );
@@ -84,10 +80,11 @@ main( int argc, char** argv )
 
     // define mesh
     box_t const box( { left_box }, { right_box } );
-    samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
+    auto config = samurai::mesh_config<dim>().min_level( 2 ).max_level( 7 );
+    auto mesh   = samurai::mra::make_mesh( box, config );
 
     // init solution ----------------------------------------------------------
-    auto u_ini = samurai::make_vector_field<double, 1>( "u", mesh );
+    auto u_ini = samurai::make_scalar_field<double>( "u", mesh );
 
     auto exact_solution = [&]( double x, double t )
     {

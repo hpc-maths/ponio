@@ -29,36 +29,28 @@ if arguments.only_save:
     os.makedirs(img_dir, exist_ok=True)
 
 
-def import_h5(filename_f5):
-    file = h5py.File(filename_f5, 'r')
-    mesh = file['mesh']
+def read_file(filename: str):
+    # filename = os.path.join(data_dir, f"sol_1d_ite_{frame}.h5")
+    frame = int(os.path.basename(filename).split("_")[-1][:-3])
+
+    mesh = h5py.File(filename, 'r')['mesh']
     points = mesh['points']
     connectivity = mesh['connectivity']
-    squares = np.array([points[connectivity[i]][:, :-1]
-                       for i in range(connectivity.shape[0])])
-    centers = np.array([np.mean(pts, axis=0) for pts in squares])
+
+    segments = np.zeros((connectivity.shape[0], 2, 2))
+    segments[:, :, 0] = points[:][connectivity[:]][:, :, 0]
+
+    centers = .5*(segments[:, 0, 0] + segments[:, 1, 0])
+    index = np.argsort(centers)
+
     fields = {
-        key: mesh['fields'][key][:]
+        key: mesh['fields'][key][:][index]
         for key in mesh['fields'].keys()
     }
-    file.close()
 
-    return squares, centers, fields
+    x = centers[index]
 
-
-class h5_data:
-    def __init__(self, filename_h5):
-        self.squares, self.centers, self.fields = import_h5(filename_h5)
-
-    @property
-    def x(self):
-        return self.centers[:, 0][:]
-
-    def __getitem__(self, field):
-        return self.fields[field][:]
-
-    def keys(self):
-        return self.fields.keys()
+    return x, fields, frame
 
 
 def exact_sol_gen(d, k, x_0):
@@ -83,25 +75,22 @@ args = [os.path.join(".", name)]
 process = subprocess.Popen(args)
 process.wait()
 
-# assume we want read all h5 files in this directory and they all finish with `***_n.h5` with `n` the number of iteration
-# 1. list all "*.h5" files in given directory
-# 2. filter data which doesn't finish with `_n.h5` pattern (`n` is not a digit)
-# 3. sort data by `n`
-files = sorted(
-    filter(lambda f: f.split(
-        "/")[-1].split("_")[-1][:-3].isdigit(), glob.glob(os.path.join(data_dir, "*.h5"))),
-    key=lambda filename: int(filename.split("/")[-1].split("_")[-1][:-3])
-)
+data = sorted([read_file(file) for file in glob.glob(
+    os.path.join(data_dir, "u_ite_*.h5"))], key=lambda tmp: tmp[-1])
 
-data = [h5_data(filename) for filename in files[::int(len(files)/10)]]
 
-for i, dat in enumerate(data):
-    plt.plot(dat.x, dat['u'], color=f"C{i}", label=f"iteration = {i}")
+fig, (ax_sol, ax_lvl) = plt.subplots(2)
 
-plt.legend()
+for x, dat, i in data[::len(data)//9-1]:
+    ax_sol.plot(x, dat['u'], color=f"C{i}", label=f"iteration = {i}")
+    ax_lvl.plot(x, dat['level'], color=f"C{i}", label=f"iteration = {i}")
+
+ax_sol.set_ylabel("solution")
+ax_sol.legend(loc="upper left", fontsize='x-small')
+ax_lvl.set_ylabel("levels")
 
 plt.savefig(os.path.join(img_dir, "01.png"))
 
 if not arguments.only_save:
-    plt.title("Nagumo solution")
+    fig.suptitle("Nagumo solution")
     plt.show()

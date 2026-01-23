@@ -32,7 +32,7 @@ if arguments.only_save:
 make = subprocess.Popen(["make", name])
 make.wait()
 
-args = [os.path.join(".", name), "-snes_view"]
+args = [os.path.join(".", name)]
 process = subprocess.Popen(args)
 process.wait()
 

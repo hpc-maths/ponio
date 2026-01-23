@@ -22,6 +22,7 @@
 
 #include <samurai/field.hpp>
 #include <samurai/io/hdf5.hpp>
+#include <samurai/mesh_config.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
 #include <samurai/samurai.hpp>
@@ -58,7 +59,6 @@ main( int argc, char** argv )
     SAMURAI_PARSE( argc, argv );
 
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
-    using config_t            = samurai::MRConfig<dim>;
     using box_t               = samurai::Box<double, dim>;
     using point_t             = typename box_t::point_t;
 
@@ -77,10 +77,6 @@ main( int argc, char** argv )
     constexpr double t_ini     = 0.;
     constexpr double t_end     = 1.;
 
-    // multiresolution parameters
-    std::size_t const min_level = 8;
-    std::size_t const max_level = 8;
-
     // output parameters
     std::string const dirname  = "belousov_zhabotinsky_pirock_data";
     fs::path const path        = std::filesystem::path( dirname );
@@ -93,7 +89,8 @@ main( int argc, char** argv )
     box_corner1.fill( left_box );
     box_corner2.fill( right_box );
     box_t const box( box_corner1, box_corner2 );
-    samurai::MRMesh<config_t> mesh{ box, min_level, max_level };
+    auto config = samurai::mesh_config<dim>().min_level( 2 ).max_level( 8 );
+    auto mesh   = samurai::mra::make_mesh( box, config );
 
     // init solution ----------------------------------------------------------
     // auto u_ini = init( mesh );
@@ -244,9 +241,8 @@ main( int argc, char** argv )
                 ki.fill( 0. );
             } );
 
-        std::cout << "..." << std::endl;
         ++it_sol;
-        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << n_save << "\n";
+        std::cout << "tⁿ: " << std::setw( 8 ) << it_sol->time << " (Δt: " << it_sol->time_step << ") " << n_save << "\r";
 
         mr_adaptation( mra_config );
         samurai::update_ghost_mr( it_sol->state );

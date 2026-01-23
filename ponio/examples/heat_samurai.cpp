@@ -4,6 +4,7 @@
 
 #include <samurai/field.hpp>
 #include <samurai/io/hdf5.hpp>
+#include <samurai/mesh_config.hpp>
 #include <samurai/mr/adapt.hpp>
 #include <samurai/mr/mesh.hpp>
 #include <samurai/samurai.hpp>
@@ -65,21 +66,16 @@ init( Mesh& mesh )
 int
 main( int argc, char** argv )
 {
-    auto& app = samurai::initialize( "Example for the heat equation with samurai", argc, argv );
+    samurai::initialize( "Example for the heat equation with samurai", argc, argv );
     SAMURAI_PARSE( argc, argv );
 
     constexpr std::size_t dim = 1; // cppcheck-suppress unreadVariable
-    using Config              = samurai::MRConfig<dim>;
 
     // Simulation parameters
     double const left_box  = -5;
     double const right_box = 5;
     double const Tf        = 0.5;
     double const cfl       = 0.5;
-
-    // Multiresolution parameters
-    std::size_t const min_level = 2;
-    std::size_t const max_level = 5;
 
     // Output parameters
     std::string const dirname  = "heat_samurai_data";
@@ -88,7 +84,8 @@ main( int argc, char** argv )
 
     // Define mesh
     samurai::Box<double, dim> const box( { left_box }, { right_box } );
-    samurai::MRMesh<Config> mesh( box, min_level, max_level );
+    auto config = samurai::mesh_config<dim>().min_level( 2 ).max_level( 5 );
+    auto mesh   = samurai::mra::make_mesh( box, config );
 
     // Initial condition
     auto un_ini = init( mesh );
