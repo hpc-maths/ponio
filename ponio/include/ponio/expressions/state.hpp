@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <type_traits>
