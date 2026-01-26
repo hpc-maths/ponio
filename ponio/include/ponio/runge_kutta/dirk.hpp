@@ -10,8 +10,6 @@
 #include <concepts>
 #include <cstddef>
 #include <functional> // NOLINT(misc-include-cleaner)
-#include <numeric>
-#include <ranges>
 #include <string_view>
 #include <type_traits>
 
