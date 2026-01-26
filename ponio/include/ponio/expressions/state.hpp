@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <concepts>
+#include <cstdint>
 #include <limits>
 #include <type_traits>
 
@@ -195,7 +196,7 @@ namespace ponio::expression
     // UNARY OPERATOR
     /////////////////////////////////////////////////////////////////
 
-    enum struct unary_operation
+    enum struct unary_operation : std::uint8_t
     {
         plus,
         minus
@@ -330,7 +331,7 @@ namespace ponio::expression
     // BINARY OPERATOR
     /////////////////////////////////////////////////////////////////
 
-    enum struct binary_operation
+    enum struct binary_operation : std::uint8_t
     {
         add,
         sub,
