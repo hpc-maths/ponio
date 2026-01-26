@@ -364,7 +364,10 @@ namespace ponio
     lawson_problem<Linear_t, Nonlinear_t>
     make_lawson_problem( Linear_t&& l, Nonlinear_t&& n )
     {
-        return lawson_problem<Linear_t, Nonlinear_t>( std::forward<Linear_t>( l ), std::forward<Nonlinear_t>( n ) );
+        using linear_type    = std::remove_cvref_t<Linear_t>;
+        using nonlinear_type = std::remove_cvref_t<Nonlinear_t>;
+
+        return lawson_problem<linear_type, nonlinear_type>( std::forward<linear_type>( l ), std::forward<nonlinear_type>( n ) );
     }
 
     // --- PROBLEM -----------------------------------------------------------------

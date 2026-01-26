@@ -57,8 +57,8 @@ namespace ponio
          * @param alg_         a `Algorithm_t` objet with predifined stages of the method
          * @param shadow_of_u0 an object with the same size of computed value for allocation
          */
-        method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
-            : alg( alg_ )
+        method( Algorithm_t alg_, state_t const& shadow_of_u0 )
+            : alg( std::move( alg_ ) )
             , kis( ::ponio::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
             , ui( shadow_of_u0 )
         {
