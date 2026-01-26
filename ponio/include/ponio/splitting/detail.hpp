@@ -82,16 +82,16 @@ namespace ponio::splitting::detail
         template <bool _has_optional_args = has_optional_args>
             requires std::same_as<std::bool_constant<has_optional_args>, std::true_type>
         splitting_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts, optional_args_container args )
-            : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
-            , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
+            : algos( std::move( algs ) )
+            , time_steps( std::move( dts ) )
             , optional_arguments( std::move( args ) )
         {
         }
 
         template <bool _has_optional_args = has_optional_args>
         splitting_tuple( std::tuple<Algorithms_t...>&& algs, std::array<value_t, sizeof...( Algorithms_t )>&& dts )
-            : algos( std::forward<std::tuple<Algorithms_t...>>( algs ) )
-            , time_steps( std::forward<std::array<value_t, sizeof...( Algorithms_t )>>( dts ) )
+            : algos( std::move( algs ) )
+            , time_steps( std::move( dts ) )
             , optional_arguments( false )
         {
         }
