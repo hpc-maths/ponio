@@ -34,7 +34,7 @@ namespace ponio::expression
         static constexpr bool is_ponio_expression = true;
 
         using container_type = container_t;
-        container_type& _data; // store only a reference on data
+        container_type& _data; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 
         /**
          * @brief Construct a new state object from the reference on a container
