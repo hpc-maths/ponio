@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "../detail.hpp" // NOLINT(misc-include-cleaner)
+#include "../iteration_info.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
 #include "detail.hpp"
