@@ -5,6 +5,7 @@
 // NOLINTBEGIN(misc-include-cleaner)
 
 #include <cmath>
+#include <cstddef>
 #include <filesystem>
 #include <string>
 #include <valarray>
@@ -33,7 +34,7 @@ struct arenstorf_model
     }
 
     void
-    phi_1( double, state_t const& y, state_t& dy ) const
+    phi_1( double, state_t const& y, state_t& dy ) const // NOLINT(readability-convert-member-functions-to-static)
     {
         double const y3 = y[2];
         double const y4 = y[3];
@@ -132,11 +133,16 @@ main( int, char** )
 
     auto obs = ponio::observer::file_observer( filename );
 
-    std::size_t N_delta     = 50;
-    std::size_t n_iteration = 0;
-    double dt_star          = 10;
-    double beta = 0.1, gamma = 0.95;
-    double C_delta = 0., C_0;
+    static constexpr std::size_t N_delta = 50;
+    std::size_t n_iteration              = 0;
+
+    // constant for safety factor
+    static constexpr double beta  = 0.1;
+    static constexpr double gamma = 0.95;
+
+    double dt_star = 10;
+    double C_delta = 0.;
+    double C_0     = 0.;
 
     while ( it_sol->time < tf )
     {
