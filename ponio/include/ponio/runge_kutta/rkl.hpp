@@ -205,7 +205,7 @@ namespace ponio::runge_kutta::legendre
         };
 
         template <typename value_t, std::size_t j>
-        constexpr std::size_t b_v = b<value_t, j>::value;
+        constexpr value_t b_v = b<value_t, j>::value;
 
         /**
          * @brief compute \f$a_j\f$ coefficient
@@ -222,7 +222,7 @@ namespace ponio::runge_kutta::legendre
         };
 
         template <typename value_t, std::size_t j>
-        constexpr std::size_t a_v = a<value_t, j>::value;
+        constexpr value_t a_v = a<value_t, j>::value;
     } // namespace details
 
     /** @class explicit_rkl2
