@@ -456,17 +456,17 @@ namespace ponio::splitting::strang
             using ::ponio::detail::power;
             using namespace std;
 
-            value_t alpha = power<6>( c2 * dt ) * power<2>( power<3>( a1 ) - power<3>( b1 ) )
-                          - power<6>( c1 * dt ) * power<2>( power<3>( a2 ) - power<3>( b2 ) );
-            value_t beta = -2.0 * power<3>( dt )
-                         * ( power<6>( c2 ) * ( power<3>( a1 ) - power<3>( b1 ) ) * e1
-                             + power<6>( c1 ) * ( power<3>( a2 ) - power<3>( b2 ) ) * e2 );
-            value_t gamma = power<6>( c2 ) * power<2>( e1 ) - power<6>( c1 ) * power<2>( e2 );
+            value_t const alpha = power<6>( c2 * dt ) * power<2>( power<3>( a1 ) - power<3>( b1 ) )
+                                - power<6>( c1 * dt ) * power<2>( power<3>( a2 ) - power<3>( b2 ) );
+            value_t const beta = -2.0 * power<3>( dt )
+                               * ( power<6>( c2 ) * ( power<3>( a1 ) - power<3>( b1 ) ) * e1
+                                   + power<6>( c1 ) * ( power<3>( a2 ) - power<3>( b2 ) ) * e2 );
+            value_t const gamma = power<6>( c2 ) * power<2>( e1 ) - power<6>( c1 ) * power<2>( e2 );
 
-            value_t discriminent = 2. * beta * beta - alpha * gamma;
-            value_t C0           = ( -beta - sqrt( discriminent ) ) / ( 2. * alpha );
+            value_t const discriminent = 2. * beta * beta - alpha * gamma;
+            value_t const C0           = ( -beta - sqrt( discriminent ) ) / ( 2. * alpha );
 
-            value_t omega = abs( e1 - ( power<3>( a1 ) - power<3>( b1 ) ) * C0 * power<3>( dt ) ) / ( C0 * power<3>( c1 * dt ) );
+            value_t const omega = abs( e1 - ( power<3>( a1 ) - power<3>( b1 ) ) * C0 * power<3>( dt ) ) / ( C0 * power<3>( c1 * dt ) );
 
             return std::make_pair( omega, C0 );
         }
