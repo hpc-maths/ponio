@@ -215,7 +215,7 @@ namespace ponio::detail
      * @tparam tuple_args_t type of tuple to unpack
      */
     template <typename function_t, typename tuple_args_t>
-    concept applyable = applyable_impl<function_t, tuple_args_t>( std::make_index_sequence<std::tuple_size<tuple_args_t>::value>{} );
+    concept applyable = applyable_impl<function_t, tuple_args_t>( std::make_index_sequence<std::tuple_size_v<tuple_args_t>>{} );
 
 #ifndef IN_DOXYGEN
     // second version with a invocable parameter and its arguments

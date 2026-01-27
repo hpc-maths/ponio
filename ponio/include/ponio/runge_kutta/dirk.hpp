@@ -80,8 +80,6 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             requires detail::has_newton_method<lin_alg_t>
         diagonal_implicit_rk_butcher( args_t... args )
             : butcher()
-            , tol( ponio::default_config::newton_tolerance )
-            , max_iter( ponio::default_config::newton_max_iterations )
             , linalg( args... )
         {
         }
