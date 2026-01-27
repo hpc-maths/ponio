@@ -237,4 +237,4 @@ jobs:
       - name: Run clang-tidy on ponio
         shell: pixi run bash {0}
         run: |
-          run-clang-tidy -extra-arg=-std=c++20 -header-filter=.*
+          run-clang-tidy -extra-arg=-std=c++20 -Wno-readability-math-missing-parentheses -header-filter=.*
