@@ -42,7 +42,7 @@ for_each( tuple_t const& t, func_t&& f )
 {
     return detail::for_each_impl( t,
         std::forward<func_t>( f ),
-        std::make_index_sequence<std::tuple_size<std::remove_reference_t<tuple_t>>::value>{} );
+        std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<tuple_t>>>{} );
 }
 
 int

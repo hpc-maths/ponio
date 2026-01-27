@@ -204,6 +204,9 @@ namespace ponio::runge_kutta::legendre
             static constexpr value_t value = static_cast<value_t>( 1. / 3. );
         };
 
+        template <typename value_t, std::size_t j>
+        constexpr std::size_t b_v = b<value_t, j>::value;
+
         /**
          * @brief compute \f$a_j\f$ coefficient
          *
@@ -215,8 +218,11 @@ namespace ponio::runge_kutta::legendre
         template <typename value_t, std::size_t j>
         struct a
         {
-            static constexpr value_t value = static_cast<value_t>( 1. ) - b<value_t, j>::value;
+            static constexpr value_t value = static_cast<value_t>( 1. ) - b_v<value_t, j>;
         };
+
+        template <typename value_t, std::size_t j>
+        constexpr std::size_t a_v = a<value_t, j>::value;
     } // namespace details
 
     /** @class explicit_rkl2
@@ -262,8 +268,7 @@ namespace ponio::runge_kutta::legendre
         static constexpr value_t
         mu()
         {
-            return static_cast<value_t>( 2 * j - 1 ) * details::b<value_t, j>::value
-                 / static_cast<value_t>( j * details::b<value_t, j - 1>::value );
+            return static_cast<value_t>( 2 * j - 1 ) * details::b_v<value_t, j> / static_cast<value_t>( j * details::b_v<value_t, j - 1> );
         }
 
         /**
@@ -277,8 +282,7 @@ namespace ponio::runge_kutta::legendre
         static constexpr value_t
         nu()
         {
-            return -static_cast<value_t>( ( j - 1 ) * details::b<value_t, j>::value )
-                 / static_cast<value_t>( j * details::b<value_t, j - 2>::value );
+            return -static_cast<value_t>( ( j - 1 ) * details::b_v<value_t, j> ) / static_cast<value_t>( j * details::b_v<value_t, j - 2> );
         }
 
         /**
@@ -294,7 +298,7 @@ namespace ponio::runge_kutta::legendre
         {
             if constexpr ( j == 1 )
             {
-                return details::b<value_t, 1>::value * w1();
+                return details::b_v<value_t, 1> * w1();
             }
             else
             {
@@ -313,7 +317,7 @@ namespace ponio::runge_kutta::legendre
         static constexpr value_t
         gamma_t()
         {
-            return -details::a<value_t, j - 1>::value * mu_t<j>();
+            return -details::a_v<value_t, j - 1> * mu_t<j>();
         }
 
         explicit_rkl2()
