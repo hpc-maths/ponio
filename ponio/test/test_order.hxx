@@ -85,7 +85,7 @@ struct test_order
     static void
     on_impl( std::index_sequence<Is...> )
     {
-        ( ( method_order<typename std::tuple_element<Is, rk_tuple>::type>() ), ... );
+        ( ( method_order<typename std::tuple_element_t<Is, rk_tuple>>() ), ... );
     }
 
     template <typename rk_tuple>
