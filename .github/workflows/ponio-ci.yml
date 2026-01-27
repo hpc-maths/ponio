@@ -224,9 +224,10 @@ jobs:
           cache: true
       - name: Install Python
         run: pixi add python
-      - name: Install compdb
+      - name: Install compdb and clang tools
         shell: pixi run bash {0}
         run: |
+          pixi add clang-tools cxx-compiler clang clangxx
           pip install compdb
       - name: Configure
         shell: pixi run bash {0}
