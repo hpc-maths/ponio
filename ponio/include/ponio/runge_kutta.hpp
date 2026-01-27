@@ -6,12 +6,15 @@
 
 // NOLINTBEGIN(misc-include-cleaner)
 
+// IWYU pragma: begin_exports
 #include "runge_kutta/dirk.hpp"
 #include "runge_kutta/erk.hpp"
 #include "runge_kutta/exprk.hpp"
 #include "runge_kutta/lrk.hpp"
 #include "runge_kutta/rkc.hpp"
 #include "runge_kutta/rkl.hpp"
+
+// IWYU pragma: end_exports
 
 // NOLINTEND(misc-include-cleaner)
 
