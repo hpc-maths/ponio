@@ -45,24 +45,24 @@ namespace ponio
          *
          * @param tol tolerance for adaptive time step method
          */
-        iteration_info( value_t tol = static_cast<value_t>( 0 ) )
+        iteration_info( value_t a_tol = static_cast<value_t>( 0 ), value_t r_tol = static_cast<value_t>( 0 ) )
             : error( static_cast<value_t>( 0 ) )
             , number_of_stages( 0 )
             , number_of_eval( 0 )
-            , tolerance( tol )
-            , absolute_tolerance( tol )
-            , relative_tolerance( tol )
+            , tolerance( a_tol )
+            , absolute_tolerance( a_tol )
+            , relative_tolerance( r_tol )
         {
         }
 
-        iteration_info( value_t tol = static_cast<value_t>( 0 ) )
+        iteration_info( value_t a_tol = static_cast<value_t>( 0 ), value_t r_tol = static_cast<value_t>( 0 ) )
             requires stages::has_static_number_of_stages<tableau_t>
             : error( static_cast<value_t>( 0 ) )
             , number_of_stages( tableau_t::N_stages )
             , number_of_eval( 0 )
-            , tolerance( tol )
-            , absolute_tolerance( tol )
-            , relative_tolerance( tol )
+            , tolerance( a_tol )
+            , absolute_tolerance( a_tol )
+            , relative_tolerance( r_tol )
         {
         }
 

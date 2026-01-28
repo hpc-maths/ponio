@@ -83,6 +83,36 @@ namespace ponio::runge_kutta::explicit_runge_kutta
             return _info;
         }
 
+        /**
+         * @brief set absolute tolerance in chained config
+         *
+         * @param tol tolerance
+         * @return auto& returns this object
+         */
+        template <typename tab_t = tableau_t>
+            requires std::same_as<tab_t, tableau_t> && is_embedded
+        auto&
+        abs_tol( value_t tol )
+        {
+            info().absolute_tolerance = tol;
+            return *this;
+        }
+
+        /**
+         * @brief set relative tolerance in chained config
+         *
+         * @param tol tolerance
+         * @return auto& returns this object
+         */
+        template <typename tab_t = tableau_t>
+            requires std::same_as<tab_t, tableau_t> && is_embedded
+        auto&
+        r_tol( value_t tol )
+        {
+            info().relative_tolerance = tol;
+            return *this;
+        }
+
         iteration_info<tableau_t> _info;
     };
 

@@ -154,6 +154,36 @@ namespace ponio::runge_kutta::exponential_runge_kutta
         {
             return _info;
         }
+
+        /**
+         * @brief set absolute tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename tab_t = tableau_t>
+            requires std::same_as<tab_t, tableau_t> && is_embedded
+        auto&
+        abs_tol( value_t tol_ )
+        {
+            info().absolute_tolerance = tol_;
+            return *this;
+        }
+
+        /**
+         * @brief set relative tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename tab_t = tableau_t>
+            requires std::same_as<tab_t, tableau_t> && is_embedded
+        auto&
+        rel_tol( value_t tol_ )
+        {
+            info().relative_tolerance = tol_;
+            return *this;
+        }
     };
 
 } // namespace ponio::runge_kutta::exponential_runge_kutta

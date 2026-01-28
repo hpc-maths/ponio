@@ -606,6 +606,36 @@ namespace ponio::runge_kutta::pirock
         {
             return _info;
         }
+
+        /**
+         * @brief set absolute tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        abs_tol( value_t tol_ )
+        {
+            info().absolute_tolerance = tol_;
+            return *this;
+        }
+
+        /**
+         * @brief set relative tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        rel_tol( value_t tol_ )
+        {
+            info().relative_tolerance = tol_;
+            return *this;
+        }
     };
 
     // cppcheck-suppress-begin unusedFunction
@@ -1272,6 +1302,36 @@ namespace ponio::runge_kutta::pirock
         info() const
         {
             return _info;
+        }
+
+        /**
+         * @brief set absolute tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        abs_tol( value_t tol_ )
+        {
+            info().absolute_tolerance = tol_;
+            return *this;
+        }
+
+        /**
+         * @brief set relative tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        rel_tol( value_t tol_ )
+        {
+            info().relative_tolerance = tol_;
+            return *this;
         }
     };
 
