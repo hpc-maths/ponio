@@ -24,7 +24,7 @@ main()
     double const y0 = 1.0;
     double const dt = 0.1;
 
-    ponio::solve( f, ponio::runge_kutta::euler(), y0, { 0., 2.0 }, dt, "exp.txt"_fobs );
+    ponio::solve( f, ponio::runge_kutta::euler(), y0, { 0., 2.0 }, dt, "how_to_solve_exp.txt"_fobs );
 
     return 0;
 }

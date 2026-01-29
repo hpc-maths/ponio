@@ -44,7 +44,7 @@ Next we solve this equation with explicit Euler method defines in ponio as :cpp:
   :lineno-start: 27
   :linenos:
 
-In this line we call :cpp:func:`ponio::solve` function, with a :cpp:class:`observer::file_observer` to store the output in :code:`exp.txt` text file.
+In this line we call :cpp:func:`ponio::solve` function, with a :cpp:class:`observer::file_observer` to store the output in :code:`how_to_solve_exp.txt` text file.
 
 .. note::
 
@@ -94,7 +94,7 @@ Next we solve this equation with explicit Euler method defines in ponio as :cpp:
   :lineno-start: 33
   :linenos:
 
-In this line we call :cpp:func:`ponio::solve` function, with a :cpp:class:`observer::file_observer` to store the output in :code:`exp_impl.txt` text file.
+In this line we call :cpp:func:`ponio::solve` function, with a :cpp:class:`observer::file_observer` to store the output in :code:`how_to_solve_impl_exp.txt` text file.
 
 
 How-to: make a :cpp:class:`ponio::solver_range`
