@@ -119,8 +119,9 @@ now the :cpp:func:`ponio::solve` function can takes this lambda without underlyi
     :language: text
     :lines: 32
 
+.. seealso::
 
-The full example can be found in :download:`lorenz_rk.cpp <../_static/cpp/lorenz_rk.cpp>`.
+  The full example can be found in :download:`lorenz_rk.cpp <../_static/cpp/lorenz_rk.cpp>`.
 
 You can compile this example
 
