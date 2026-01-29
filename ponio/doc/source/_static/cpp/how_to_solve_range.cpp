@@ -21,7 +21,7 @@ main()
     double const dt = 0.1;
     auto obs        = "how_to_solve_range.txt"_fobs;
 
-    auto sol_range = ponio::make_solver_range( f, ponio::runge_kutta::euler(), y0, { 0., 2.0 }, dt );
+    auto sol_range = ponio::make_solver_range( f, ponio::runge_kutta::rk_33(), y0, { 0., 2.0 }, dt );
     auto it_sol    = sol_range.begin();
 
     while ( it_sol->time < 2.0 )
