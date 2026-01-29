@@ -64,7 +64,9 @@ The :cpp:class:`ponio::observer::file_observer` class can be build with a `std::
 
   Data are not flushed into the output file, you have to wait the flush of the buffer.
 
-The full example can be found in :download:`lotka_volterra_fobs.cpp <../_static/cpp/lotka_volterra_fobs.cpp>`.
+.. seealso::
+
+  The full example can be found in :download:`lotka_volterra_fobs.cpp <../_static/cpp/lotka_volterra_fobs.cpp>`.
 
 
 .. figure:: ../_static/cpp/lotka_volterra_fobs.png
@@ -89,7 +91,9 @@ In this example we export data into the standard output with :cpp:class:`ponio::
 
   Data are not flushed into the standard output, you have to wait the flush of the buffer.
 
-The full example can be found in :download:`lotka_volterra_cobs.cpp <../_static/cpp/lotka_volterra_cobs.cpp>`.
+.. seealso::
+
+  The full example can be found in :download:`lotka_volterra_cobs.cpp <../_static/cpp/lotka_volterra_cobs.cpp>`.
 
 
 .. figure:: ../_static/cpp/lotka_volterra_cobs.png
@@ -119,8 +123,9 @@ Next we get all informations into the observer or our buffer.
   :lineno-start: 41
   :linenos:
 
+.. seealso::
 
-The full example can be found in :download:`lotka_volterra_sobs.cpp <../_static/cpp/lotka_volterra_sobs.cpp>`.
+  The full example can be found in :download:`lotka_volterra_sobs.cpp <../_static/cpp/lotka_volterra_sobs.cpp>`.
 
 
 .. figure:: ../_static/cpp/lotka_volterra_sobs.png
@@ -168,7 +173,9 @@ The output of this observer looks like this
   :language: text
   :lines: 1-5
 
-The full example can be found in :download:`lotka_volterra_uobs.cpp <../_static/cpp/lotka_volterra_uobs.cpp>`.
+.. seealso::
+
+  The full example can be found in :download:`lotka_volterra_uobs.cpp <../_static/cpp/lotka_volterra_uobs.cpp>`.
 
 .. figure:: ../_static/cpp/lotka_volterra_uobs.png
     :width: 500 px
