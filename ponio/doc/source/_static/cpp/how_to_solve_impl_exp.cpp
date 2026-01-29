@@ -24,7 +24,7 @@ main()
         },
         []( double /* t */, double /* y */ )
         {
-            return -1;
+            return -1.;
         } );
 
     double const y0 = 1.0;

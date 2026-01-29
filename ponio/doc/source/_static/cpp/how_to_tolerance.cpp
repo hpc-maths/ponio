@@ -6,6 +6,7 @@
 #include <string>
 
 #include <ponio/observer.hpp>
+#include <ponio/problem.hpp>
 #include <ponio/runge_kutta.hpp>
 #include <ponio/solver.hpp>
 
@@ -23,7 +24,7 @@ main()
         },
         []( double /* t */, double /* y */ )
         {
-            return -1;
+            return -1.;
         } );
 
     double const y0 = 1.0;

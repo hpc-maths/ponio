@@ -149,16 +149,16 @@ where :math:`u^n`, :math:`u^{n+1}` and :math:`\tilde{u}^{n+1}` are respectively 
 
 .. literalinclude:: ../_static/cpp/how_to_tolerance.cpp
   :language: cpp
-  :lines: 33-34
-  :lineno-start: 33
+  :lines: 34-35
+  :lineno-start: 34
   :linenos:
 
 You can also change the parameters of Newton method in diagonal implicit method, the tolerance and the maximum number of iteration with respectively :code:`newton_tol` and :code:`newton_max_iter` member functions.
 
 .. literalinclude:: ../_static/cpp/how_to_tolerance.cpp
   :language: cpp
-  :lines: 37-38
-  :lineno-start: 37
+  :lines: 38-39
+  :lineno-start: 38
   :linenos:
 
 .. seealso::

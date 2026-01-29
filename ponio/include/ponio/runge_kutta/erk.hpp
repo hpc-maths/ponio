@@ -107,7 +107,7 @@ namespace ponio::runge_kutta::explicit_runge_kutta
         template <typename tab_t = tableau_t>
             requires std::same_as<tab_t, tableau_t> && is_embedded
         auto&
-        r_tol( value_t tol )
+        rel_tol( value_t tol )
         {
             info().relative_tolerance = tol;
             return *this;
