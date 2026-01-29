@@ -5,6 +5,8 @@ How-to guides
 .. toctree::
    :caption: How-to guides
 
+   how_to
+
 
 How-to: solve a simple ODE
 --------------------------
@@ -54,8 +56,11 @@ In this line we call :cpp:func:`ponio::solve` function, with a :cpp:class:`obser
     :language: cpp
     :lines: 17
 
-The full example can be found in :download:`how_to_solve_exp.cpp <../_static/cpp/how_to_solve_exp.cpp>`.
+.. seealso::
 
+  The full example can be found in :download:`how_to_solve_exp.cpp <../_static/cpp/how_to_solve_exp.cpp>`.
+
+---
 
 How-to: solve an ODE with an implicit method
 --------------------------------------------
@@ -80,7 +85,7 @@ We first define the function :math:`f:(t,y)\mapsto f(t, y) = -y`, in ponio we de
 
 We also define initial condition and time step:
 
-.. literalinclude:: ../_static/cpp/how_to_solve_exp.cpp
+.. literalinclude:: ../_static/cpp/how_to_solve_impl_exp.cpp
   :language: cpp
   :lines: 30-31
   :lineno-start: 30
@@ -88,7 +93,7 @@ We also define initial condition and time step:
 
 Next we solve this equation with explicit Euler method defines in ponio as :cpp:type:`ponio::runge_kutta::euler`.
 
-.. literalinclude:: ../_static/cpp/how_to_solve_exp.cpp
+.. literalinclude:: ../_static/cpp/how_to_solve_impl_exp.cpp
   :language: cpp
   :lines: 33
   :lineno-start: 33
@@ -96,10 +101,66 @@ Next we solve this equation with explicit Euler method defines in ponio as :cpp:
 
 In this line we call :cpp:func:`ponio::solve` function, with a :cpp:class:`observer::file_observer` to store the output in :code:`how_to_solve_impl_exp.txt` text file.
 
+.. seealso::
+
+  The full example can be found in :download:`how_to_solve_impl_exp.cpp <../_static/cpp/how_to_solve_impl_exp.cpp>`.
+
 
 How-to: make a :cpp:class:`ponio::solver_range`
 ----------------------------------------------
 
+This looks like the same signature of :cpp:func:`ponio::solve` function, without the last parameter (the observer):
+
+* The problem
+* The algorithm used to solve the problem
+* The initial condition
+* The time interval
+* The initial time step
+
+.. literalinclude:: ../_static/cpp/how_to_solve_range.cpp
+  :language: cpp
+  :lines: 24
+  :lineno-start: 24
+  :linenos:
+
+Next we can get an iterator on :cpp:class:`ponio::solver_range` and loop until the end
+
+.. literalinclude:: ../_static/cpp/how_to_solve_range.cpp
+  :language: cpp
+  :lines: 25-31
+  :lineno-start: 25
+  :linenos:
+
+.. seealso::
+
+  The full example can be found in :download:`how_to_solve_range.cpp <../_static/cpp/how_to_solve_range.cpp>`.
+
 
 How-to: change tolerances for adaptive time step methods
 --------------------------------------------------------
+
+Adaptive time step methods provide an error estimator such as:
+
+.. math::
+
+  \sum_i \left( \frac{|u^{n+1}_i - \tilde{u}^{n+1}_i|}{a_{tol} + \max(|u^n_i|, |u^{n+1}_i||)} \right)
+
+where :math:`u^n`, :math:`u^{n+1}` and :math:`\tilde{u}^{n+1}` are respectively the solution at time :math:`t^n`, time :math:`t^{n+1}=t^n+\Delta t` and an other estimation at time :math:`t^{n+1}=t^n+\Delta t`. We also get two tolerances: the absolute one :math:`a_{tol}` and relative one :math:`r_{tol}`, we can set them with respectively :code:`abs_tol` and :code:`rel_tol` member function of algorithm.
+
+.. literalinclude:: ../_static/cpp/how_to_tolerance.cpp
+  :language: cpp
+  :lines: 33-34
+  :lineno-start: 33
+  :linenos:
+
+You can also change the parameters of Newton method in diagonal implicit method, the tolerance and the maximum number of iteration with respectively :code:`newton_tol` and :code:`newton_max_iter` member functions.
+
+.. literalinclude:: ../_static/cpp/how_to_tolerance.cpp
+  :language: cpp
+  :lines: 37-38
+  :lineno-start: 37
+  :linenos:
+
+.. seealso::
+
+  The full example can be found in :download:`how_to_tolerance.cpp <../_static/cpp/how_to_tolerance.cpp>`.
