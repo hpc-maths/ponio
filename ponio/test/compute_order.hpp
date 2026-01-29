@@ -530,7 +530,7 @@ namespace diagonal_implicit_method
         ponio::time_span<T> t_span = { 0., Tf };
 
         auto obs = []( T, state_t, T ) {};
-        return ::ponio::solve( pb, algo, y0, t_span, dt, obs );
+        return ::ponio::solve( pb, algo.abs_tol( 1e-3 ).rel_tol( 1e-5 ), y0, t_span, dt, obs );
     }
 
     template <typename Algorithm_t, typename T = double>
