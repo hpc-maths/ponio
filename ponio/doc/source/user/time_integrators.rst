@@ -86,6 +86,8 @@ This function is defined in :cpp:func:`ponio::detail::error_estimate`. Now compa
     \Delta t            &= \min\left( \max\left( \Delta t_\text{new}, 0.2\Delta t \right) , 5\Delta t \right)
   \end{aligned}
 
+Most common embedded Runge-Kutta methods come from :cite:`dormand:1980` and :cite:`prince:1981`, that why tey are sometime call Dormand-Prince methods.
+
 
 Diagonal implicit methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -168,7 +170,10 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
     \varphi_\ell(z) = \frac{e^z - \sum_{k=0}^{\ell-1} \frac{1}{k!}z^k }{z^\ell}
 
 
-  and we use the notations :\math:`\varphi_\ell = \varphi_\ell(\Delta t L)` and :math:`\varphi_{\ell,j} = \varphi_\ell(c_j \Delta t L)`.
+  and we use the notations :math:`\varphi_\ell = \varphi_\ell(\Delta t L)` and :math:`\varphi_{\ell,j} = \varphi_\ell(c_j \Delta t L)`.
+
+
+----
 
 
 Extended stability methods
@@ -333,6 +338,9 @@ and
 where :math:`s` is the number of stages of the method
 
 
+----
+
+
 Splitting methods
 -----------------
 
@@ -418,6 +426,9 @@ The difficulty in adaptive time step Strang splitting method is to find a good s
    .. math::
 
       \Delta t^\star \approx \frac{\delta C_\delta}{C_0}
+
+
+----
 
 
 IMEX methods with extended stability method
@@ -522,6 +533,9 @@ Still keep two free parameters :math:`\ell` and :math:`\alpha` given free to use
 
 * :math:`\ell=2` and :math:`\alpha=1`, in this case, if :math:`F_A=0` and :math:`F_R=0` we have the standard ROCK2 method;
 * :math:`\ell=1` and :math:`\alpha = \frac{1}{2P'_{s-2+\ell}(0)}`, so :math:`\beta=0` to minimized computation cost.
+
+
+----
 
 
 Bibliography
