@@ -32,11 +32,11 @@ main()
 
     {
         auto meth = ponio::runge_kutta::rk54_7s().abs_tol( 1e-4 ).rel_tol( 1e-5 );
-        ponio::solve( pb, meth, y0, { 0., 2.0 }, dt, "how_to_solve_exp.txt"_fobs );
+        ponio::solve( pb, meth, y0, { 0., 2.0 }, dt, "how_to_tolerance.txt"_fobs );
     }
     {
         auto meth = ponio::runge_kutta::backward_euler().newton_tol( 1e-3 ).newton_max_iter( 1000 );
-        ponio::solve( pb, meth, y0, { 0., 2.0 }, dt, "how_to_solve_exp.txt"_fobs );
+        ponio::solve( pb, meth, y0, { 0., 2.0 }, dt, "how_to_tolerance.txt"_fobs );
     }
 
     return 0;
