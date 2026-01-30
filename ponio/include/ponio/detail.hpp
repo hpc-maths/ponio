@@ -52,16 +52,17 @@ namespace ponio::detail
         return abs( x );
     }
 
-    template <typename state_t>
+    template <typename state_t, typename value_t>
     auto
-    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
+    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis, value_t a_tol, value_t r_tol )
     {
         using namespace std;
-        return abs( ( unp1 - unp1bis ) / ( 1.0 + std::max( abs( un ), abs( unp1 ) ) ) );
+        return abs( ( unp1 - unp1bis ) / ( a_tol + r_tol * std::max( abs( un ), abs( unp1 ) ) ) );
     }
 
     /**
-     * @brief compute an error \f$\sqrt{\frac{1}{N}\sum_i \left( \frac{|u^{n+1} - \tilde{u}^{n+1}_i|}{1+\max(|u^n_i|, |u^{n+1}_i|)}
+     * @brief compute an error \f$\sqrt{\frac{1}{N}\sum_i \left( \frac{|u^{n+1} - \tilde{u}^{n+1}_i|}{a_{tol}+ r_{tol} \max(|u^n_i|,
+     * |u^{n+1}_i|)}
      * \right^2}\f$
      *
      * @tparam state_t type of computed value
@@ -69,10 +70,10 @@ namespace ponio::detail
      * @param unp1     state \f$u^{n+1}\f$
      * @param unp1bis  state \f$\tilde{u}^{n+1}\f$
      */
-    template <typename state_t>
+    template <typename state_t, typename value_t>
         requires std::ranges::range<state_t>
     auto
-    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
+    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis, value_t a_tol, value_t r_tol )
     {
         auto it_unp1    = std::ranges::cbegin( unp1 );
         auto it_unp1bis = std::ranges::cbegin( unp1bis );
@@ -80,13 +81,13 @@ namespace ponio::detail
 
         auto n_elm = std::distance( std::ranges::cbegin( un ), last );
 
-        using value_t = std::remove_cvref_t<decltype( *it_unp1 )>;
-        auto r        = static_cast<value_t>( 0. );
+        // using value_t = std::remove_cvref_t<decltype( *it_unp1 )>;
+        auto r = static_cast<value_t>( 0. );
 
         using namespace std;
         for ( auto it_un = std::ranges::cbegin( un ); it_un != last; ++it_un, ++it_unp1, ++it_unp1bis )
         {
-            auto tmp = abs( *it_unp1 - *it_unp1bis ) / ( 1.0 + max( abs( *it_un ), abs( *it_unp1 ) ) );
+            auto tmp = abs( *it_unp1 - *it_unp1bis ) / ( a_tol + r_tol * max( abs( *it_un ), abs( *it_unp1 ) ) );
             r += tmp * tmp;
         }
 
