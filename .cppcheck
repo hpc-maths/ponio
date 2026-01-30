@@ -15,5 +15,5 @@ unusedFunction:ponio/include/ponio/runge_kutta/exprk.hpp:43 # auto triangular_ge
 unusedFunction:ponio/include/ponio/splitting/lie.hpp:168 # auto make_lie_tuple( std::pair<algorithms_t, value_t>&&... args )
 unusedFunction:ponio/include/ponio/splitting/strang.hpp:372 # auto lipschitz_constant_estimate( Problem_t& f, value_t tn, state_t& un, value_t dt )
 unusedFunction:ponio/include/ponio/splitting/strang.hpp:489 # auto make_adaptive_strang_tuple( value_t delta, value_t tolerance, std::pair<Algorithms_t, value_t>&&... args )
-unusedFunction:ponio/include/ponio/time_span.hpp:34 # auto linspace( value_t start, value_t stop, std::size_t num = 50, bool endpoint = true )
+unusedFunction:ponio/include/ponio/time_span.hpp:54 # auto linspace( value_t start, value_t stop, std::size_t num = 50, bool endpoint = true )
 ctuOneDefinitionRuleViolation:ponio/examples/heat.cpp
