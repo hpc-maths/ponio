@@ -144,13 +144,17 @@ namespace ponio
         void
         _return( value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
         {
-            alg.info().error = ::ponio::detail::error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
+            alg.info().error = ::ponio::detail::error_estimate( un,
+                kis[Algorithm_t::N_stages],
+                kis[Algorithm_t::N_stages + 1],
+                info().absolute_tolerance,
+                info().relative_tolerance );
             // std::cout << "alg.info().error = " << alg.info().error << std::endl;
 
             value_t new_dt = 0.9 * std::pow( alg.info().tolerance / alg.info().error, 1. / static_cast<value_t>( Algorithm_t::order ) ) * dt;
             new_dt = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
 
-            if ( alg.info().error > alg.info().tolerance )
+            if ( alg.info().error > static_cast<value_t>( 1.0 ) )
             {
                 alg.info().success = false;
 
