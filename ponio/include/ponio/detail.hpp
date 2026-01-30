@@ -19,6 +19,16 @@
 namespace ponio::detail
 {
 
+#ifndef IN_DOXYGEN
+    template <typename state_t>
+    auto
+    norm( state_t const& x )
+    {
+        using namespace std;
+        return abs( x );
+    }
+#endif
+
     /**
      * @brief compute \f$L_1\f$ norm of a container: \f$\sum_i |x_i|\f$
      *
@@ -44,14 +54,7 @@ namespace ponio::detail
         return sqrt( accu );
     }
 
-    template <typename state_t>
-    auto
-    norm( state_t const& x )
-    {
-        using namespace std;
-        return abs( x );
-    }
-
+#ifndef IN_DOXYGEN
     template <typename state_t, typename value_t>
     auto
     error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis, value_t a_tol, value_t r_tol )
@@ -59,6 +62,7 @@ namespace ponio::detail
         using namespace std;
         return abs( ( unp1 - unp1bis ) / ( a_tol + r_tol * std::max( abs( un ), abs( unp1 ) ) ) );
     }
+#endif
 
     /**
      * @brief compute an error \f$\sqrt{\frac{1}{N}\sum_i \left( \frac{|u^{n+1} - \tilde{u}^{n+1}_i|}{a_{tol}+ r_{tol} \max(|u^n_i|,
