@@ -11,7 +11,7 @@
 namespace ponio
 {
 
-    /**
+    /** @class time_span
      * @brief Class to manage time interval between the start and the end of simulation with optional intermediate values
      *
      * @tparam value_t type of time
