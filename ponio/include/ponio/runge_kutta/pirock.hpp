@@ -229,21 +229,17 @@ namespace ponio::runge_kutta::pirock
          * @param _alpha_beta_computer   alpha and beta computer object
          * @param _eig_computer          eigenvalue computer functor
          * @param _shampine_trick_caller Shampine's trick functor
-         * @param a_tol                  absolute tolerance
-         * @param r_tol                  relative tolerance
          */
         template <typename _shampine_trick_caller_t_>
             requires std::same_as<_shampine_trick_caller_t_, shampine_trick_caller_t>
                       && std::same_as<std::bool_constant<shampine_trick_enable>, std::true_type>
         pirock_impl( alpha_beta_computer_t&& _alpha_beta_computer,
             eig_computer_t&& _eig_computer,
-            _shampine_trick_caller_t_&& _shampine_trick_caller,
-            value_t a_tol = default_config::tol,
-            value_t r_tol = default_config::tol )
+            _shampine_trick_caller_t_&& _shampine_trick_caller )
             : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
             , shampine_trick_caller( std::forward<_shampine_trick_caller_t_>( _shampine_trick_caller ) )
-            , _info( a_tol, r_tol )
+            , _info()
         {
         }
 
@@ -865,21 +861,17 @@ namespace ponio::runge_kutta::pirock
          * @param _alpha_beta_computer   alpha and beta computer object
          * @param _eig_computer          eigenvalue computer functor
          * @param _shampine_trick_caller Shampine's trick functor
-         * @param a_tol                  absolute tolerance
-         * @param r_tol                  relative tolerance
          */
         template <typename _shampine_trick_caller_t_>
             requires std::same_as<_shampine_trick_caller_t_, shampine_trick_caller_t>
                       && std::same_as<std::bool_constant<shampine_trick_enable>, std::true_type>
         pirock_RDA_impl( alpha_beta_computer_t&& _alpha_beta_computer,
             eig_computer_t&& _eig_computer,
-            _shampine_trick_caller_t_&& _shampine_trick_caller,
-            value_t a_tol = default_config::tol,
-            value_t r_tol = default_config::tol )
+            _shampine_trick_caller_t_&& _shampine_trick_caller )
             : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
             , shampine_trick_caller( std::forward<_shampine_trick_caller_t_>( _shampine_trick_caller ) )
-            , _info( a_tol, r_tol )
+            , _info()
         {
         }
 
