@@ -43,7 +43,11 @@ The method, with the previous Butcher tableau, reads as
 Explicit methods
 ~~~~~~~~~~~~~~~~
 
-When the matrix :math:`A` is strictly lower triangular, the Runge-Kutta method is called explicit. The only think you need to provide to solve a problem with this kind of method is the function :math:`f`. See the list of explicit Runge-Kutta methods in ponio.
+When the matrix :math:`A` is strictly lower triangular, the Runge-Kutta method is called explicit. The only think you need to provide to solve a problem with this kind of method is the function :math:`f`.
+
+.. seealso::
+
+   See the `list of explicit Runge-Kutta methods <../api/list_alg_erk>`_ in ponio.
 
 
 Embedded methods
@@ -88,11 +92,19 @@ This function is defined in :cpp:func:`ponio::detail::error_estimate`. Now compa
 
 Most common embedded Runge-Kutta methods come from :cite:`dormand:1980` and :cite:`prince:1981`, that why tey are sometime call Dormand-Prince methods.
 
+.. seealso::
+
+   See the `list of embedded Runge-Kutta methods <../api/list_alg_dp>`_ in ponio.
+
 
 Diagonal implicit methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When the matrix :math:`A` is lower triangular with a diagonal, the Runge-Kutta method is called diagonal implicit (or DIRK). You have to provide a Jacobian function that returns the Jacobian matrix in point :math:`(t, u)` (see :cpp:class:`ponio::implicit_problem`). You can also provide an operator base definition (see :cpp:class:`ponio::implicit_operator_problem`).
+
+.. seealso::
+
+   See the `list of diagonal implicit Runge-Kutta methods <../api/list_alg_dirk>`_ in ponio.
 
 
 Lawson methods
@@ -135,6 +147,10 @@ We solve this equation with a classical Runge-Kutta method RK(:math:`s`, :math:`
 
 In ponio, Lawson methods have the same name of the underlying explicit Runge-Kutta method prefixed by ``l``.
 
+.. seealso::
+
+   See the `list of Lawson Runge-Kutta methods <../api/list_alg_lrk>`_ in ponio.
+
 
 Exponential Runge-Kutta methods
 -------------------------------
@@ -171,6 +187,10 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
 
 
   and we use the notations :math:`\varphi_\ell = \varphi_\ell(\Delta t L)` and :math:`\varphi_{\ell,j} = \varphi_\ell(c_j \Delta t L)`.
+
+.. seealso::
+
+   See the `list of exponential Runge-Kutta methods <../api/list_alg_exprk>`_ in ponio.
 
 
 ----
