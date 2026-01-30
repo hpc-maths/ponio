@@ -47,7 +47,7 @@ When the matrix :math:`A` is strictly lower triangular, the Runge-Kutta method i
 
 .. seealso::
 
-   See the `list of explicit Runge-Kutta methods <../api/list_alg_erk>`_ in ponio.
+   See the :doc:`list of explicit Runge-Kutta methods <../api/list_alg_erk>` in ponio.
 
 
 Embedded methods
@@ -94,7 +94,7 @@ Most common embedded Runge-Kutta methods come from :cite:`dormand:1980` and :cit
 
 .. seealso::
 
-   See the `list of embedded Runge-Kutta methods <../api/list_alg_dp>`_ in ponio.
+   See the :doc:`list of embedded Runge-Kutta methods <../api/list_alg_dp>` in ponio.
 
 
 Diagonal implicit methods
@@ -104,7 +104,7 @@ When the matrix :math:`A` is lower triangular with a diagonal, the Runge-Kutta m
 
 .. seealso::
 
-   See the `list of diagonal implicit Runge-Kutta methods <../api/list_alg_dirk>`_ in ponio.
+   See the :doc:`list of diagonal implicit Runge-Kutta methods <../api/list_alg_dirk>` in ponio.
 
 
 Lawson methods
@@ -149,7 +149,7 @@ In ponio, Lawson methods have the same name of the underlying explicit Runge-Kut
 
 .. seealso::
 
-   See the `list of Lawson Runge-Kutta methods <../api/list_alg_lrk>`_ in ponio.
+   See the :doc:`list of Lawson Runge-Kutta methods <../api/list_alg_lrk>` in ponio.
 
 
 Exponential Runge-Kutta methods
@@ -190,7 +190,7 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
 
 .. seealso::
 
-   See the `list of exponential Runge-Kutta methods <../api/list_alg_exprk>`_ in ponio.
+   See the :doc:`list of exponential Runge-Kutta methods <../api/list_alg_exprk>` in ponio.
 
 
 ----
