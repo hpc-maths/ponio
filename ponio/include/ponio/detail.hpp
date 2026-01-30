@@ -65,9 +65,8 @@ namespace ponio::detail
 #endif
 
     /**
-     * @brief compute an error \f$\sqrt{\frac{1}{N}\sum_i \left( \frac{|u^{n+1} - \tilde{u}^{n+1}_i|}{a_{tol}+ r_{tol} \max(|u^n_i|,
-     * |u^{n+1}_i|)}
-     * \right^2}\f$
+     * @brief compute an error \f$\sqrt{\frac{1}{N}\sum_i \left( \frac{|u^{n+1}_i - \tilde{u}^{n+1}_i|}{a_{tol}+ r_{tol} \max(|u^n_i|,
+     * |u^{n+1}_i|)}\right)^2}\f$
      *
      * @tparam state_t type of computed value
      * @param un       state \f$u^n\f$
