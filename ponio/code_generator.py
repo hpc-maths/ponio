@@ -321,7 +321,7 @@ parser.add_argument('--Ndigit', type=int, default=36, required=False,
 parser.add_argument('-d', '--doc', required=False, action='store_true',
                     help="generate also Sphinx documentation (api/algorithm.rst file)")
 parser.add_argument('-do', '--doc-output', type=str, required=False,
-                    help="Name of output RST file")
+                    help="Name of output RST directory")
 parser.add_argument('--offline', required=False, action='store_true',
                     help="make an offline generation (without bibliography research in Doxygen comments)")
 
@@ -354,10 +354,21 @@ if __name__ == '__main__':
         )
 
     if args.doc:
+        # main list
         template_doc = env.get_template("template/tpl_doc_algorithms.rst")
 
-        with open(args.doc_output, 'w') as file:
+        with open(f"{args.doc_output}/algorithm.rst", 'w') as file:
             file.write(
                 template_doc.render(
                     list_erk=cg_list_erk, list_exprk=cg_list_exprk, list_dirk=cg_list_dirk)
             )
+
+        # sublists
+        for tpl in ("erk", "dirk", "lrk", "dp", "exprk"):
+            template_doc = env.get_template(f"template/tpl_doc_{tpl}.rst")
+
+            with open(f"{args.doc_output}/list_alg_{tpl}.rst", 'w') as file:
+                file.write(
+                    template_doc.render(
+                        list_erk=cg_list_erk, list_exprk=cg_list_exprk, list_dirk=cg_list_dirk)
+                )
