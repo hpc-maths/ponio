@@ -6,6 +6,8 @@
 
 #include <algorithm>
 #include <concepts>
+#include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <type_traits>
 
@@ -33,7 +35,7 @@ namespace ponio::expression
         static constexpr bool is_ponio_expression = true;
 
         using container_type = container_t;
-        container_type& _data; // store only a reference on data
+        container_type& _data; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 
         /**
          * @brief Construct a new state object from the reference on a container
@@ -195,7 +197,7 @@ namespace ponio::expression
     // UNARY OPERATOR
     /////////////////////////////////////////////////////////////////
 
-    enum struct unary_operation
+    enum struct unary_operation : std::uint8_t
     {
         plus,
         minus
@@ -330,7 +332,7 @@ namespace ponio::expression
     // BINARY OPERATOR
     /////////////////////////////////////////////////////////////////
 
-    enum struct binary_operation
+    enum struct binary_operation : std::uint8_t
     {
         add,
         sub,

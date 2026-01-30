@@ -361,10 +361,13 @@ namespace ponio
      * @param n        nonlinerar part \f$N(t,u)\f$ of Lawson problem
      */
     template <typename Linear_t, typename Nonlinear_t>
-    lawson_problem<Linear_t, Nonlinear_t>
-    make_lawson_problem( Linear_t&& l, Nonlinear_t&& n )
+    auto
+    make_lawson_problem( Linear_t l, Nonlinear_t n )
     {
-        return lawson_problem<Linear_t, Nonlinear_t>( std::forward<Linear_t>( l ), std::forward<Nonlinear_t>( n ) );
+        using linear_type    = std::remove_cvref_t<Linear_t>;
+        using nonlinear_type = std::remove_cvref_t<Nonlinear_t>;
+
+        return lawson_problem<linear_type, nonlinear_type>( std::move( l ), std::move( n ) );
     }
 
     // --- PROBLEM -----------------------------------------------------------------

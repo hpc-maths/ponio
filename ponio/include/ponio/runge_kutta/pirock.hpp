@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// IWYU pragma: private, include "../runge_kutta.hpp"
+// IWYU pragma: private
 
 #pragma once
 
@@ -229,21 +229,17 @@ namespace ponio::runge_kutta::pirock
          * @param _alpha_beta_computer   alpha and beta computer object
          * @param _eig_computer          eigenvalue computer functor
          * @param _shampine_trick_caller Shampine's trick functor
-         * @param a_tol                  absolute tolerance
-         * @param r_tol                  relative tolerance
          */
         template <typename _shampine_trick_caller_t_>
             requires std::same_as<_shampine_trick_caller_t_, shampine_trick_caller_t>
                       && std::same_as<std::bool_constant<shampine_trick_enable>, std::true_type>
         pirock_impl( alpha_beta_computer_t&& _alpha_beta_computer,
             eig_computer_t&& _eig_computer,
-            _shampine_trick_caller_t_&& _shampine_trick_caller,
-            value_t a_tol = default_config::tol,
-            value_t r_tol = default_config::tol )
+            _shampine_trick_caller_t_&& _shampine_trick_caller )
             : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
             , shampine_trick_caller( std::forward<_shampine_trick_caller_t_>( _shampine_trick_caller ) )
-            , _info( a_tol, r_tol )
+            , _info()
         {
         }
 
@@ -606,6 +602,36 @@ namespace ponio::runge_kutta::pirock
         {
             return _info;
         }
+
+        /**
+         * @brief set absolute tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        abs_tol( value_t tol_ )
+        {
+            info().absolute_tolerance = tol_;
+            return *this;
+        }
+
+        /**
+         * @brief set relative tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        rel_tol( value_t tol_ )
+        {
+            info().relative_tolerance = tol_;
+            return *this;
+        }
     };
 
     // cppcheck-suppress-begin unusedFunction
@@ -622,23 +648,15 @@ namespace ponio::runge_kutta::pirock
      * @param alpha_beta_computer      \f$\alpha\f$ and \f$\beta\f$ computer object
      * @param eig_computer             Eigenvalue computer of explicit part of the problem
      * @param shampine_trick_caller    Shampine's trick computer
-     * @param absolute_tolerance       Absolute tolerance for adaptive time step method (default: ponio::default_config::tol)
-     * @param relative_tolerance       Relative tolerance for adaptive time step method (default: ponio::default_config::tol)
      */
     template <std::size_t l = 1, bool is_embedded = false, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t, typename shampine_trick_caller_t>
     auto
-    pirock( alpha_beta_computer_t&& alpha_beta_computer,
-        eig_computer_t&& eig_computer,
-        shampine_trick_caller_t&& shampine_trick_caller,
-        value_t absolute_tolerance = default_config::tol,
-        value_t relative_tolerance = default_config::tol )
+    pirock( alpha_beta_computer_t&& alpha_beta_computer, eig_computer_t&& eig_computer, shampine_trick_caller_t&& shampine_trick_caller )
     {
         return pirock_impl<l, alpha_beta_computer_t, eig_computer_t, shampine_trick_caller_t, is_embedded, value_t>(
             std::forward<alpha_beta_computer_t>( alpha_beta_computer ),
             std::forward<eig_computer_t>( eig_computer ),
-            std::forward<shampine_trick_caller_t>( shampine_trick_caller ),
-            absolute_tolerance,
-            relative_tolerance );
+            std::forward<shampine_trick_caller_t>( shampine_trick_caller ) );
     }
 
     /**
@@ -835,21 +853,17 @@ namespace ponio::runge_kutta::pirock
          * @param _alpha_beta_computer   alpha and beta computer object
          * @param _eig_computer          eigenvalue computer functor
          * @param _shampine_trick_caller Shampine's trick functor
-         * @param a_tol                  absolute tolerance
-         * @param r_tol                  relative tolerance
          */
         template <typename _shampine_trick_caller_t_>
             requires std::same_as<_shampine_trick_caller_t_, shampine_trick_caller_t>
                       && std::same_as<std::bool_constant<shampine_trick_enable>, std::true_type>
         pirock_RDA_impl( alpha_beta_computer_t&& _alpha_beta_computer,
             eig_computer_t&& _eig_computer,
-            _shampine_trick_caller_t_&& _shampine_trick_caller,
-            value_t a_tol = default_config::tol,
-            value_t r_tol = default_config::tol )
+            _shampine_trick_caller_t_&& _shampine_trick_caller )
             : alpha_beta_computer( std::forward<alpha_beta_computer_t>( _alpha_beta_computer ) )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
             , shampine_trick_caller( std::forward<_shampine_trick_caller_t_>( _shampine_trick_caller ) )
-            , _info( a_tol, r_tol )
+            , _info()
         {
         }
 
@@ -1273,6 +1287,36 @@ namespace ponio::runge_kutta::pirock
         {
             return _info;
         }
+
+        /**
+         * @brief set absolute tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        abs_tol( value_t tol_ )
+        {
+            info().absolute_tolerance = tol_;
+            return *this;
+        }
+
+        /**
+         * @brief set relative tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        rel_tol( value_t tol_ )
+        {
+            info().relative_tolerance = tol_;
+            return *this;
+        }
     };
 
     // cppcheck-suppress-begin unusedFunction
@@ -1289,8 +1333,6 @@ namespace ponio::runge_kutta::pirock
      * @param alpha_beta_computer      \f$\alpha\f$ and \f$\beta\f$ computer object
      * @param eig_computer             Eigenvalue computer of explicit part of the problem
      * @param shampine_trick_caller    Shampine's trick computer
-     * @param absolute_tolerance       Absolute tolerance for adaptive time step method (default: ponio::default_config::tol)
-     * @param relatove_tolerance       Relative tolerance for adaptive time step method (default: ponio::default_config::tol)
      */
     template <std::size_t l = 1, bool is_embedded = false, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t, typename shampine_trick_caller_t>
     auto
@@ -1303,9 +1345,7 @@ namespace ponio::runge_kutta::pirock
         return pirock_RDA_impl<l, alpha_beta_computer_t, eig_computer_t, shampine_trick_caller_t, is_embedded, value_t>(
             std::forward<alpha_beta_computer_t>( alpha_beta_computer ),
             std::forward<eig_computer_t>( eig_computer ),
-            std::forward<shampine_trick_caller_t>( shampine_trick_caller ),
-            absolute_tolerance,
-            relative_tolerance );
+            std::forward<shampine_trick_caller_t>( shampine_trick_caller ) );
     }
 
     /**

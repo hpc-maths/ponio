@@ -4,8 +4,11 @@
 
 #pragma once
 
+// IWYU pragma: begin_exports
 #include "splitting/lie.hpp"
 #include "splitting/strang.hpp"
+
+// IWYU pragma: end_exports
 
 namespace ponio::splitting
 {

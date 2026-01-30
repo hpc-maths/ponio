@@ -39,7 +39,10 @@ The standard function to solve a ODE in ponio is with the :cpp:func:`ponio::solv
   :lineno-start: 27
   :linenos:
 
-The full example can be found in :download:`curtiss_hirschfelder_solve.cpp <../_static/cpp/curtiss_hirschfelder_solve.cpp>`.
+
+.. seealso::
+
+  The full example can be found in :download:`curtiss_hirschfelder_solve.cpp <../_static/cpp/curtiss_hirschfelder_solve.cpp>`.
 
 .. figure:: ../_static/cpp/curtiss_hirschfelder_solve.png
     :width: 500 px
@@ -82,7 +85,9 @@ To manage the time loop we write a while loop
 
 We can access in read and write to data in iterator.
 
-The full example can be found in :download:`curtiss_hirschfelder_while.cpp <../_static/cpp/curtiss_hirschfelder_while.cpp>`.
+.. seealso::
+
+  The full example can be found in :download:`curtiss_hirschfelder_while.cpp <../_static/cpp/curtiss_hirschfelder_while.cpp>`.
 
 .. figure:: ../_static/cpp/curtiss_hirschfelder_while.png
     :width: 500 px
@@ -123,7 +128,9 @@ The complet for loop is the following
   :lineno-start: 31
   :linenos:
 
-The full example can be found in :download:`curtiss_hirschfelder_for.cpp <../_static/cpp/curtiss_hirschfelder_for.cpp>`.
+.. seealso::
+
+  The full example can be found in :download:`curtiss_hirschfelder_for.cpp <../_static/cpp/curtiss_hirschfelder_for.cpp>`.
 
 .. figure:: ../_static/cpp/curtiss_hirschfelder_for.png
     :width: 500 px

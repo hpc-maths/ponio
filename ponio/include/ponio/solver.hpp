@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstddef>
 #include <iterator>
 #include <limits>
 #include <optional>
@@ -383,9 +384,9 @@ namespace ponio
         {
             for ( auto& ki : stages() )
             {
-                f( ki );
+                std::forward<lambda_t>( f )( ki );
             }
-            f( u_tmp );
+            std::forward<lambda_t>( f )( u_tmp );
         }
 
         template <std::size_t I, typename lambda_t>
@@ -394,9 +395,9 @@ namespace ponio
         {
             for ( auto& ki : stages( subI ) )
             {
-                f( ki );
+                std::forward<lambda_t>( f )( ki );
             }
-            f( u_tmp );
+            std::forward<lambda_t>( f )( u_tmp );
         }
     };
 
@@ -555,6 +556,12 @@ namespace ponio
          * @param begin initial iterator on solver_range
          * @param end   end iterator on solver_range (sentinel)
          */
+        solver_range( iterator_type&& begin, sentinel_type&& end )
+            : _begin( std::move( begin ) )
+            , _end( std::move( end ) )
+        {
+        }
+
         solver_range( iterator_type const& begin, sentinel_type const& end )
             : _begin( begin )
             , _end( end )

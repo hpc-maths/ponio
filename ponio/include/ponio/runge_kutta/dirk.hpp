@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// IWYU pragma: private, include "../runge_kutta.hpp"
+// IWYU pragma: private
 
 #pragma once
 
@@ -10,8 +10,6 @@
 #include <concepts>
 #include <cstddef>
 #include <functional> // NOLINT(misc-include-cleaner)
-#include <numeric>
-#include <ranges>
 #include <string_view>
 #include <type_traits>
 
@@ -82,8 +80,6 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             requires detail::has_newton_method<lin_alg_t>
         diagonal_implicit_rk_butcher( args_t... args )
             : butcher()
-            , tol( ponio::default_config::newton_tolerance )
-            , max_iter( ponio::default_config::newton_max_iterations )
             , linalg( args... )
         {
         }
@@ -218,6 +214,62 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         info() const
         {
             return _info;
+        }
+
+        /**
+         * @brief set absolute tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename tab_t = tableau_t>
+            requires std::same_as<tab_t, tableau_t> && is_embedded
+        auto&
+        abs_tol( value_t tol_ )
+        {
+            info().absolute_tolerance = tol_;
+            return *this;
+        }
+
+        /**
+         * @brief set relative tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename tab_t = tableau_t>
+            requires std::same_as<tab_t, tableau_t> && is_embedded
+        auto&
+        rel_tol( value_t tol_ )
+        {
+            info().relative_tolerance = tol_;
+            return *this;
+        }
+
+        /**
+         * @brief set tolerance for Newton method (for default Newton method)
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        auto&
+        newton_tol( value_t tol_ )
+        {
+            tol = tol_;
+            return *this;
+        }
+
+        /**
+         * @brief set maximum of iterations for Newton method (for default Newton method)
+         *
+         * @param max_iter_ maximum of iterations
+         * @return auto& returns this object
+         */
+        auto&
+        newton_max_iter( std::size_t max_iter_ )
+        {
+            max_iter = max_iter_;
+            return *this;
         }
 
         double tol           = ponio::default_config::newton_tolerance;      // tolerance of Newton method

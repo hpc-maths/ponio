@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// IWYU pragma: private, include "../runge_kutta.hpp"
+// IWYU pragma: private
 
 #pragma once
 
@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "../detail.hpp"
+#include "../iteration_info.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
 
@@ -339,16 +340,12 @@ namespace ponio::runge_kutta::rock
         using rock_coeff      = rock2_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
 
-        value_t a_tol; // absolute tolerance
-        value_t r_tol; // relative tolerance
-
         iteration_info<rock2_impl> _info;
 
         eig_computer_t eig_computer;
 
         rock2_impl()
-            : a_tol( default_config::tol )
-            , r_tol( default_config::tol )
+            : _info( default_config::tol, default_config::tol )
             , eig_computer( detail::power_method() )
         {
         }
@@ -357,13 +354,9 @@ namespace ponio::runge_kutta::rock
          * @brief Construct a new ROCK2 algorithm object
          *
          * @param _eig_computer estimator of spectral radius
-         * @param _a_tol        absolute tolerance (for adaptive time step method)
-         * @param _r_tol        relative tolerance (for adaptive time step method)
          */
-        rock2_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
-            : a_tol( _a_tol )
-            , r_tol( _r_tol )
-            , _info()
+        rock2_impl( eig_computer_t&& _eig_computer )
+            : _info( default_config::tol, default_config::tol )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
         {
         }
@@ -383,7 +376,8 @@ namespace ponio::runge_kutta::rock
         {
             using namespace std;
             return abs( std::forward<state_t>( tmp )
-                        / ( a_tol + r_tol * max( abs( std::forward<state_t>( unp1 ) ), abs( std::forward<state_t>( un ) ) ) ) );
+                        / ( info().absolute_tolerance
+                            + info().relative_tolerance * max( abs( std::forward<state_t>( unp1 ) ), abs( std::forward<state_t>( un ) ) ) ) );
         }
 
         // same with ranges
@@ -550,6 +544,36 @@ namespace ponio::runge_kutta::rock
         {
             return _info;
         }
+
+        /**
+         * @brief set absolute tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        abs_tol( value_t tol_ )
+        {
+            info().absolute_tolerance = tol_;
+            return *this;
+        }
+
+        /**
+         * @brief set relative tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        rel_tol( value_t tol_ )
+        {
+            info().relative_tolerance = tol_;
+            return *this;
+        }
     };
 
     /**
@@ -600,17 +624,12 @@ namespace ponio::runge_kutta::rock
         using rock_coeff      = rock4_coeff<value_t>;
         using degree_computer = detail::degree_computer<value_t, rock_coeff>;
 
-        value_t a_tol; // absolute tolerance
-        value_t r_tol; // relative tolerance
-
         iteration_info<rock4_impl> _info;
 
         eig_computer_t eig_computer;
 
         rock4_impl()
-            : a_tol( default_config::tol )
-            , r_tol( default_config::tol )
-            , _info()
+            : _info( default_config::tol, default_config::tol )
             , eig_computer( detail::power_method() )
         {
         }
@@ -619,13 +638,9 @@ namespace ponio::runge_kutta::rock
          * @brief Construct a new ROCK4 algorithm object
          *
          * @param _eig_computer estimator of spectral radius
-         * @param _a_tol        absolute tolerance (for adaptive time step method)
-         * @param _r_tol        relative tolerance (for adaptive time step method)
          */
-        rock4_impl( eig_computer_t&& _eig_computer, value_t _a_tol = 1e-4, value_t _r_tol = 1e-4 )
-            : a_tol( _a_tol )
-            , r_tol( _r_tol )
-            , _info()
+        rock4_impl( eig_computer_t&& _eig_computer )
+            : _info( default_config::tol, default_config::tol )
             , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
         {
         }
@@ -643,7 +658,7 @@ namespace ponio::runge_kutta::rock
         error( state_t const& unp1, state_t const& tmp )
         {
             using namespace std;
-            return abs( tmp / ( a_tol + r_tol * abs( unp1 ) ) );
+            return abs( tmp / ( info().absolute_tolerance + info().relative_tolerance * abs( unp1 ) ) );
         }
 
         // same with ranges
@@ -840,6 +855,36 @@ namespace ponio::runge_kutta::rock
         info() const
         {
             return _info;
+        }
+
+        /**
+         * @brief set absolute tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        abs_tol( value_t tol_ )
+        {
+            info().absolute_tolerance = tol_;
+            return *this;
+        }
+
+        /**
+         * @brief set relative tolerance in chained config
+         *
+         * @param tol_ tolerance
+         * @return auto& returns this object
+         */
+        template <typename rock_t = rock_coeff>
+            requires std::same_as<rock_t, rock_coeff> && is_embedded
+        auto&
+        rel_tol( value_t tol_ )
+        {
+            info().relative_tolerance = tol_;
+            return *this;
         }
     };
 

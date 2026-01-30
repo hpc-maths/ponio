@@ -154,7 +154,7 @@ namespace ponio::observer
     {
         std::basic_ofstream<char_t> out;
 
-        file_observer( std::filesystem::path path );
+        file_observer( std::filesystem::path const& path );
 
         // file_observer( file_observer const& ) = delete;
 
@@ -170,7 +170,7 @@ namespace ponio::observer
      * @note this class creates folder if needed
      */
     template <typename char_t>
-    file_observer<char_t>::file_observer( std::filesystem::path path )
+    file_observer<char_t>::file_observer( std::filesystem::path const& path )
         : out( create_directory_if_needed( path ) )
     {
     }
@@ -194,7 +194,7 @@ namespace ponio::observer
     /**
      * litteral to convert a string into \ref file_observer
      */
-    inline file_observer<char> operator"" _fobs( char const* str, std::size_t len )
+    inline file_observer<char> operator""_fobs( char const* str, std::size_t len )
     {
         return { std::string_view( str, len ) };
     }

@@ -119,8 +119,9 @@ now the :cpp:func:`ponio::solve` function can takes this lambda without underlyi
     :language: text
     :lines: 32
 
+.. seealso::
 
-The full example can be found in :download:`lorenz_rk.cpp <../_static/cpp/lorenz_rk.cpp>`.
+  The full example can be found in :download:`lorenz_rk.cpp <../_static/cpp/lorenz_rk.cpp>`.
 
 You can compile this example
 
@@ -199,7 +200,9 @@ We use the Lawson method given by the underlying RK(4,4) method: :cpp:var:`ponio
 
   List of all Lawson methods can be found in the :doc:`algorithms section <../api/algorithm>`.
 
-The full example can be found in :download:`lorenz_lrk.cpp <../_static/cpp/lorenz_lrk.cpp>`.
+.. seealso::
+
+  The full example can be found in :download:`lorenz_lrk.cpp <../_static/cpp/lorenz_lrk.cpp>`.
 
 
 ----
@@ -251,7 +254,9 @@ We use the DIRK(3, 4) method: :cpp:func:`ponio::runge_kutta::dirk34_t`.
 
   List of all DIRK methods can be found in the :doc:`algorithms section <../api/algorithm>`.
 
-The full example can be found in :download:`lorenz_dirk.cpp <../_static/cpp/lorenz_dirk.cpp>`.
+.. seealso::
+
+  The full example can be found in :download:`lorenz_dirk.cpp <../_static/cpp/lorenz_dirk.cpp>`.
 
 
 ----
@@ -347,8 +352,9 @@ Finally we call :cpp:func:`ponio::solve` function, as previous solver
   :lineno-start: 46
   :linenos:
 
+.. seealso::
 
-The full example can be found in :download:`lorenz_split.cpp <../_static/cpp/lorenz_split.cpp>`.
+  The full example can be found in :download:`lorenz_split.cpp <../_static/cpp/lorenz_split.cpp>`.
 
 
 .. figure:: ../_static/cpp/lorenz.png

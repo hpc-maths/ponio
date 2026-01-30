@@ -36,6 +36,8 @@ process = subprocess.Popen(args)
 process.wait()
 
 methods = {
+    "rk_33_ralston_cst": "RK(3,3) Ralston fixed $\\Delta t$",
+    "dirk23_cst": "DIRK(2, 3) fixed $\\Delta t$",
     "rk_33_ralston": "RK(3,3) Ralston",
     "rk54_6m": "RK5(4) 6m"
 }
@@ -57,7 +59,7 @@ axs[0].set_ylabel("$y$")
 axs[1].set_ylabel("$\\Delta t$")
 axs[1].set_xlabel('time')
 
-plt.legend()
+plt.legend(loc="lower right")
 
 plt.savefig(os.path.join(img_dir, "01.png"), dpi=200)
 

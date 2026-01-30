@@ -34,12 +34,12 @@ namespace ponio // NOLINT(modernize-concat-nested-namespaces)
          */
         template <typename Algorithm_t>
         concept has_static_number_of_stages = requires( Algorithm_t alg ) {
-                                                  {
-                                                      Algorithm_t::N_stages
-                                                      } -> std::convertible_to<std::size_t>;
-                                                  {
-                                                      std::bool_constant<Algorithm_t::N_stages != dynamic>()
-                                                      } -> std::same_as<std::true_type>;
+                                                  // clang-format off
+            // NOLINTBEGIN(clang-diagnostic-error)
+            { Algorithm_t::N_stages } -> std::convertible_to<std::size_t>;
+            { std::bool_constant<Algorithm_t::N_stages != dynamic>() } -> std::same_as<std::true_type>;
+            // NOLINTEND(clang-diagnostic-error)
+                                                  // clang-format on
                                               };
 
         /**
@@ -49,12 +49,12 @@ namespace ponio // NOLINT(modernize-concat-nested-namespaces)
          */
         template <typename Algorithm_t>
         concept has_dynamic_number_of_stages = requires( Algorithm_t alg ) {
-                                                   {
-                                                       std::bool_constant<!has_static_number_of_stages<Algorithm_t>>()
-                                                       } -> std::same_as<std::true_type>;
-                                                   {
-                                                       Algorithm_t::N_storage
-                                                       } -> std::convertible_to<std::size_t>;
+                                                   // clang-format off
+            // NOLINTBEGIN(clang-diagnostic-error)
+            { Algorithm_t::N_storage } -> std::convertible_to<std::size_t>;
+            { std::bool_constant<!has_static_number_of_stages<Algorithm_t>>() } -> std::same_as<std::true_type>;
+            // NOLINTEND(clang-diagnostic-error)
+                                                   // clang-format on
                                                };
 
     } // namespace stages

@@ -19,6 +19,16 @@
 namespace ponio::detail
 {
 
+#ifndef IN_DOXYGEN
+    template <typename state_t>
+    auto
+    norm( state_t const& x )
+    {
+        using namespace std;
+        return abs( x );
+    }
+#endif
+
     /**
      * @brief compute \f$L_1\f$ norm of a container: \f$\sum_i |x_i|\f$
      *
@@ -44,35 +54,29 @@ namespace ponio::detail
         return sqrt( accu );
     }
 
-    template <typename state_t>
+#ifndef IN_DOXYGEN
+    template <typename state_t, typename value_t>
     auto
-    norm( state_t const& x )
+    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis, value_t a_tol, value_t r_tol )
     {
         using namespace std;
-        return abs( x );
+        return abs( ( unp1 - unp1bis ) / ( a_tol + r_tol * std::max( abs( un ), abs( unp1 ) ) ) );
     }
-
-    template <typename state_t>
-    auto
-    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
-    {
-        using namespace std;
-        return abs( ( unp1 - unp1bis ) / ( 1.0 + std::max( abs( un ), abs( unp1 ) ) ) );
-    }
+#endif
 
     /**
-     * @brief compute an error \f$\sqrt{\frac{1}{N}\sum_i \left( \frac{|u^{n+1} - \tilde{u}^{n+1}_i|}{1+\max(|u^n_i|, |u^{n+1}_i|)}
-     * \right^2}\f$
+     * @brief compute an error \f$\sqrt{\frac{1}{N}\sum_i \left( \frac{|u^{n+1}_i - \tilde{u}^{n+1}_i|}{a_{tol}+ r_{tol} \max(|u^n_i|,
+     * |u^{n+1}_i|)}\right)^2}\f$
      *
      * @tparam state_t type of computed value
      * @param un       state \f$u^n\f$
      * @param unp1     state \f$u^{n+1}\f$
      * @param unp1bis  state \f$\tilde{u}^{n+1}\f$
      */
-    template <typename state_t>
+    template <typename state_t, typename value_t>
         requires std::ranges::range<state_t>
     auto
-    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis )
+    error_estimate( state_t const& un, state_t const& unp1, state_t const& unp1bis, value_t a_tol, value_t r_tol )
     {
         auto it_unp1    = std::ranges::cbegin( unp1 );
         auto it_unp1bis = std::ranges::cbegin( unp1bis );
@@ -80,13 +84,13 @@ namespace ponio::detail
 
         auto n_elm = std::distance( std::ranges::cbegin( un ), last );
 
-        using value_t = std::remove_cvref_t<decltype( *it_unp1 )>;
-        auto r        = static_cast<value_t>( 0. );
+        // using value_t = std::remove_cvref_t<decltype( *it_unp1 )>;
+        auto r = static_cast<value_t>( 0. );
 
         using namespace std;
         for ( auto it_un = std::ranges::cbegin( un ); it_un != last; ++it_un, ++it_unp1, ++it_unp1bis )
         {
-            auto tmp = abs( *it_unp1 - *it_unp1bis ) / ( 1.0 + max( abs( *it_un ), abs( *it_unp1 ) ) );
+            auto tmp = abs( *it_unp1 - *it_unp1bis ) / ( a_tol + r_tol * max( abs( *it_un ), abs( *it_unp1 ) ) );
             r += tmp * tmp;
         }
 
@@ -215,7 +219,7 @@ namespace ponio::detail
      * @tparam tuple_args_t type of tuple to unpack
      */
     template <typename function_t, typename tuple_args_t>
-    concept applyable = applyable_impl<function_t, tuple_args_t>( std::make_index_sequence<std::tuple_size<tuple_args_t>::value>{} );
+    concept applyable = applyable_impl<function_t, tuple_args_t>( std::make_index_sequence<std::tuple_size_v<tuple_args_t>>{} );
 
 #ifndef IN_DOXYGEN
     // second version with a invocable parameter and its arguments

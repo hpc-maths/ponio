@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// IWYU pragma: private, include "../splitting.hpp"
+// IWYU pragma: private
 
 #pragma once
 
@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "../detail.hpp" // NOLINT(misc-include-cleaner)
+#include "../iteration_info.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
 #include "detail.hpp"
@@ -320,8 +321,7 @@ namespace ponio::splitting::strang
             _call_inc( f, tn, u_n, dt, 0., u_np1 );
             _call_inc( f, tn, u_n_shift, dt, _info.delta, u_np1_shift );
 
-            //_info.error = ::ponio::detail::error_estimate( un, u_np1_ref, u_np1_shift );
-            _info.error = ::ponio::detail::error_estimate( un, u_np1, u_np1_shift );
+            _info.error = ::ponio::detail::error_estimate( un, u_np1, u_np1_shift, info().absolute_tolerance, info().relative_tolerance );
 
             value_t new_dt = 0.9 * std::sqrt( _info.tolerance / _info.error ) * dt;
             new_dt         = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
@@ -456,17 +456,17 @@ namespace ponio::splitting::strang
             using ::ponio::detail::power;
             using namespace std;
 
-            value_t alpha = power<6>( c2 * dt ) * power<2>( power<3>( a1 ) - power<3>( b1 ) )
-                          - power<6>( c1 * dt ) * power<2>( power<3>( a2 ) - power<3>( b2 ) );
-            value_t beta = -2.0 * power<3>( dt )
-                         * ( power<6>( c2 ) * ( power<3>( a1 ) - power<3>( b1 ) ) * e1
-                             + power<6>( c1 ) * ( power<3>( a2 ) - power<3>( b2 ) ) * e2 );
-            value_t gamma = power<6>( c2 ) * power<2>( e1 ) - power<6>( c1 ) * power<2>( e2 );
+            value_t const alpha = power<6>( c2 * dt ) * power<2>( power<3>( a1 ) - power<3>( b1 ) )
+                                - power<6>( c1 * dt ) * power<2>( power<3>( a2 ) - power<3>( b2 ) );
+            value_t const beta = -2.0 * power<3>( dt )
+                               * ( power<6>( c2 ) * ( power<3>( a1 ) - power<3>( b1 ) ) * e1
+                                   + power<6>( c1 ) * ( power<3>( a2 ) - power<3>( b2 ) ) * e2 );
+            value_t const gamma = power<6>( c2 ) * power<2>( e1 ) - power<6>( c1 ) * power<2>( e2 );
 
-            value_t discriminent = 2. * beta * beta - alpha * gamma;
-            value_t C0           = ( -beta - sqrt( discriminent ) ) / ( 2. * alpha );
+            value_t const discriminent = 2. * beta * beta - alpha * gamma;
+            value_t const C0           = ( -beta - sqrt( discriminent ) ) / ( 2. * alpha );
 
-            value_t omega = abs( e1 - ( power<3>( a1 ) - power<3>( b1 ) ) * C0 * power<3>( dt ) ) / ( C0 * power<3>( c1 * dt ) );
+            value_t const omega = abs( e1 - ( power<3>( a1 ) - power<3>( b1 ) ) * C0 * power<3>( dt ) ) / ( C0 * power<3>( c1 * dt ) );
 
             return std::make_pair( omega, C0 );
         }

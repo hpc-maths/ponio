@@ -36,17 +36,35 @@ main()
     using state_t = double;
 
     double const tf = 2.0;
-    double const dt = 0.01;
+    double const dt = 0.05;
 
     double const k = 50;
 
-    auto ch_pb = ponio::make_simple_problem(
-        [=]( double t, double y )
+    auto ch_pb = ponio::implicit_problem(
+        [=]( double t, double y, double& dy )
         {
-            return k * ( std::cos( t ) - y );
+            dy = k * ( std::cos( t ) - y );
+        },
+        [=]( double /* t */, double /* y */ )
+        {
+            return -k;
         } );
 
     state_t const y_0 = 2.0;
+
+    { // simple use case with explicit method
+        auto filename = std::filesystem::path( dirname ) / "sol_rk_33_ralston_cst.dat";
+        auto obs      = ponio::observer::file_observer( filename );
+
+        ponio::solve( ch_pb, ponio::runge_kutta::rk_33_ralston(), y_0, { 0., tf }, dt, obs );
+    }
+
+    { // simple use case with diagonal implicit method
+        auto filename = std::filesystem::path( dirname ) / "sol_dirk23_cst.dat";
+        auto obs      = ponio::observer::file_observer( filename );
+
+        ponio::solve( ch_pb, ponio::runge_kutta::dirk23().newton_tol( 1e-5 ).newton_max_iter( 1000 ), y_0, { 0., tf }, dt, obs );
+    }
 
     { // example of time loop with while loop controlled by user
         auto filename = std::filesystem::path( dirname ) / "sol_rk_33_ralston.dat";
@@ -62,6 +80,7 @@ main()
             // pseudo adaptive time-step method
             if ( it_sol->time < 0.5 )
             {
+                it_sol->time_step = 0.01;
                 ++it_sol;
             }
             else
@@ -77,7 +96,7 @@ main()
         auto filename = std::filesystem::path( dirname ) / "sol_rk54_6m.dat";
         auto obs      = ponio::observer::file_observer( filename );
 
-        auto sol_range = ponio::make_solver_range( ch_pb, ponio::runge_kutta::rk54_6m(), y_0, { 0., 0.464, tf }, dt );
+        auto sol_range = ponio::make_solver_range( ch_pb, ponio::runge_kutta::rk54_6m(), y_0, { 0., tf }, dt );
 
         for ( auto ui : sol_range )
         {

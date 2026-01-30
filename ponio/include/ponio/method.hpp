@@ -57,9 +57,9 @@ namespace ponio
          * @param alg_         a `Algorithm_t` objet with predifined stages of the method
          * @param shadow_of_u0 an object with the same size of computed value for allocation
          */
-        method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
-            : alg( alg_ )
-            , kis( ::ponio::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
+        method( Algorithm_t alg_, state_t const& shadow_of_u0 )
+            : alg( std::move( alg_ ) )
+            , kis( ::ponio::detail::init_fill_array<std::tuple_size_v<step_storage_t>>( shadow_of_u0 ) )
             , ui( shadow_of_u0 )
         {
         }
@@ -144,13 +144,17 @@ namespace ponio
         void
         _return( value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
         {
-            alg.info().error = ::ponio::detail::error_estimate( un, kis[Algorithm_t::N_stages], kis[Algorithm_t::N_stages + 1] );
+            alg.info().error = ::ponio::detail::error_estimate( un,
+                kis[Algorithm_t::N_stages],
+                kis[Algorithm_t::N_stages + 1],
+                info().absolute_tolerance,
+                info().relative_tolerance );
             // std::cout << "alg.info().error = " << alg.info().error << std::endl;
 
             value_t new_dt = 0.9 * std::pow( alg.info().tolerance / alg.info().error, 1. / static_cast<value_t>( Algorithm_t::order ) ) * dt;
             new_dt = std::min( std::max( 0.2 * dt, new_dt ), 5. * dt );
 
-            if ( alg.info().error > alg.info().tolerance )
+            if ( alg.info().error > static_cast<value_t>( 1.0 ) )
             {
                 alg.info().success = false;
 
@@ -224,7 +228,7 @@ namespace ponio
 
         method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
             : alg( alg_ )
-            , kis( ::ponio::detail::init_fill_array<std::tuple_size<step_storage_t>::value>( shadow_of_u0 ) )
+            , kis( ::ponio::detail::init_fill_array<std::tuple_size_v<step_storage_t>>( shadow_of_u0 ) )
         {
         }
 

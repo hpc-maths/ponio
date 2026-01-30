@@ -10,3 +10,4 @@ In this section we will present how to use ponio step by step, with tutorials.
    lorenz
    lotka_volterra
    curtiss_hirschfelder
+   how_to

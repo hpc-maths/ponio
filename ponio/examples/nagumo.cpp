@@ -68,8 +68,7 @@ struct nagumo
     }
 };
 
-void
-save( std::valarray<double> const& x, std::valarray<double> const& y, std::filesystem::path const& dir, double t )
+void static save( std::valarray<double> const& x, std::valarray<double> const& y, std::filesystem::path const& dir, double t )
 {
     auto printer_xy = []( double a, double b )
     {

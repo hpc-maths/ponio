@@ -22,6 +22,8 @@ Checks: "*,
         -hicpp-uppercase-literal-suffix,
         -readability-uppercase-literal-suffix,
         -cppcoreguidelines-pro-bounds-constant-array-index,
+        -readability-math-missing-parentheses,
+        -portability-avoid-pragma-once
 "
 WarningsAsErrors: '*'
 HeaderFilterRegex: 'ponio/include/ponio/*.hpp'
