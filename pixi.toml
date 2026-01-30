@@ -47,7 +47,7 @@ save_visu = { cmd = "cmake --build ./build --target save_visu", depends-on = [
 all_visu = { cmd = "cmake --build ./build --target visu", depends-on = [
   "build_all_examples",
 ] }
-all_save_visu = { cmd = "cmake --build ./build --target save_visu", depends-on = [
+all_save_visu = { cmd = "cmake --build ./build -j2 --target save_visu", depends-on = [
   "build_all_examples",
 ] }
 mpl_test = {}
