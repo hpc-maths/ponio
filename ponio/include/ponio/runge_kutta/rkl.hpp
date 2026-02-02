@@ -86,7 +86,6 @@ namespace ponio::runge_kutta::legendre
          * @tparam j          integer of stage
          * @param f  operator \f$f\f$
          * @param tn current time
-         * @param yn current state
          * @param Yj array of temporary stages
          * @param dt current time step
          * @param ui temporary step

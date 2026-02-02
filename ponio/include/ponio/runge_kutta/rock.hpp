@@ -232,6 +232,7 @@ namespace ponio::runge_kutta::rock
              * @param tn           current time
              * @param un           current state
              * @param dt           current time step
+             * @param du_work      temporary array with work values
              * @param s_min        minimal number of stages (3 for ROCK2, 5 for ROCK4)
              */
             template <typename rock_method, typename eig_computer_t, typename problem_t, typename state_t, typename array_work_t>
@@ -415,11 +416,12 @@ namespace ponio::runge_kutta::rock
          * @tparam problem_t  type of \f$f\f$
          * @tparam state_t    type of current state
          * @tparam array_ki_t type of temporary stages (only 3 needed for ROCK2)
-         * @param f  operator \f$f\f$
-         * @param tn current time
-         * @param un current state
-         * @param G  array of temporary stages
-         * @param dt current time step
+         * @param f    operator \f$f\f$
+         * @param tn   current time
+         * @param un   current state
+         * @param G    array of temporary stages
+         * @param dt   current time step
+         * @param unp1 returns solution at time \f$t^{n+1} = t^n + \Delta t\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
         // std::tuple<value_t, state_t, value_t>
@@ -700,7 +702,7 @@ namespace ponio::runge_kutta::rock
          * @param un    current state
          * @param G     array of temporary stages
          * @param dt    current time step
-         * @param u_np1 solution \f$u^{n+1}\f$ at time \f$t^{n+1} = t^n + \Delta t\f$
+         * @param unp1  solution \f$u^{n+1}\f$ at time \f$t^{n+1} = t^n + \Delta t\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
         void

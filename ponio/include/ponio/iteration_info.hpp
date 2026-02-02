@@ -313,8 +313,6 @@ namespace ponio
 
         /**
          * @brief Construct a new iteration info object
-         *
-         * @param tol tolerance for adaptive time step method
          */
         iteration_info() = default;
 

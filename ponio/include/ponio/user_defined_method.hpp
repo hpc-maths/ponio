@@ -49,8 +49,8 @@ namespace ponio
      * @brief helper function to build a user_defined_method
      *
      * @tparam user_function_t type of function (lambda, function or functor)
-     * @param algo     function that takes $(f, t^n, u^n, \Delta t)$ (could be by reference) and returns a tuple $(t^{n+1}, u^{n+1}, \Delta
-     * t)$
+     * @param algo     function that takes $(f, t^n, u^n, \Delta t)$ (could be by reference) and returns a tuple \f$(t^{n+1}, u^{n+1},
+     * \Delta t)\f$
      */
     template <typename user_function_t>
     auto

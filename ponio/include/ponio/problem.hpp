@@ -341,10 +341,11 @@ namespace ponio
     }
 
     /**
-     * call operator to evaluate \f$f(t,u)\f$
-     * @param t time value \f$t\f$
-     * @param u variable of the problem value \f$u\f$
-     * @return Returns \f$Lu + N(t,u)\f$
+     * call operator to evaluate \f$f(t,y)\f$
+     *
+     * @param t  time value \f$t\f$
+     * @param y  variable of the problem value \f$y\f$
+     * @param dy returns where store \f$Ly+N(t,y)\f$
      */
     template <typename Linear_t, typename Nonlinear_t>
     template <typename state_t, typename value_t, typename state_expr_t>
@@ -437,10 +438,11 @@ namespace ponio
 
     /**
      * sum all call of each sub-problem
+     *
      * @tparam Is index sequence to iterate over tuple of sub-problems
-     * @param t time \f$t\f$
-     * @param u time \f$u(t)\f$
-     * @return returns \f$\sum_i f_i(t,u)\f$
+     * @param t  time \f$t\f$
+     * @param y  solution \f$y\f$ at time \f$t\f$
+     * @param dy returns \f$\sum_i f_i(t,y)\f$
      */
     template <typename... Callables_t>
     template <typename value_t, typename state_t, typename state_expr_t, std::size_t... Is>
@@ -463,6 +465,14 @@ namespace ponio
      * @param t time \f$t\f$
      * @param u time \f$u(t)\f$
      * @return returns \f$\sum_i f_i(t,u)\f$
+     */
+
+    /**
+     * call operator
+     *
+     * @param t  time \f$t\f$
+     * @param y  solution \f$y\f$ at time \f$t\f$
+     * @param dy returns \f$\sum_i f_i(t,y)\f$
      */
     template <typename... Callables_t>
     template <typename state_t, typename value_t, typename state_expr_t>
@@ -487,6 +497,15 @@ namespace ponio
      * @param t   time \f$t\f$
      * @param u   time \f$u(t)\f$
      * @return    returns \f$f_i(t,u)\f$
+     */
+
+    /**
+     * call operator for the I operator in Callables_t
+     *
+     * @tparam I  Index index of tuple of sub-problems to call
+     * @param t  time \f$t\f$
+     * @param y  solution \f$y\f$ at time \f$t\f$
+     * @param dy returns \f$f_i(t,y)\f$
      */
     template <typename... Callables_t>
     template <std::size_t I, typename state_t, typename value_t, typename state_expr_t>
@@ -516,8 +535,9 @@ namespace ponio
      * call the `I` sub-problem
      * @tparam I index of tuple of sub-problems to call
      * @param t time \f$t\f$
-     * @param u time \f$u(t)\f$
-     * @return returns \f$f_i(t,u)\f$
+     * @param y solution \f$y(t)\f$
+     * @param dy returns \f$f(t, y)\f$
+     * @return returns \f$f(t, y)\f$
      */
     template <typename... Callables_t>
     template <std::size_t I, typename state_t, typename value_t, typename state_expr_t>
