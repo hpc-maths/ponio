@@ -6,5 +6,6 @@ This section is the api documentation of ponio for developers who would like to 
 .. toctree::
    :caption: Developer Documentation
    :glob:
+   :maxdepth: 1
 
    *
