@@ -43,7 +43,8 @@ namespace ponio
         /**
          * @brief Construct a new iteration info object
          *
-         * @param tol tolerance for adaptive time step method
+         * @param a_tol absolute tolerance
+         * @param r_tol relative tolerance
          */
         iteration_info( value_t a_tol = static_cast<value_t>( 0 ), value_t r_tol = static_cast<value_t>( 0 ) )
             : error( static_cast<value_t>( 0 ) )
@@ -116,18 +117,6 @@ namespace ponio
         /**
          * @brief Construct a new iteration info object
          *
-         * @param tol tolerance (same for absolute or relative one)
-         */
-        iteration_info( value_t tol )
-            : number_of_stages( 0 )
-            , absolute_tolerance( tol )
-            , relative_tolerance( tol )
-        {
-        }
-
-        /**
-         * @brief Construct a new iteration info object
-         *
          * @param a_tol absolute tolerance
          * @param r_tol relative tolerance
          */
@@ -143,14 +132,6 @@ namespace ponio
             : number_of_stages( tableaus_t::N_stages )
             , absolute_tolerance( default_config::tol )
             , relative_tolerance( default_config::tol )
-        {
-        }
-
-        iteration_info( value_t tol )
-            requires stages::has_static_number_of_stages<tableaus_t>
-            : number_of_stages( tableaus_t::N_stages )
-            , absolute_tolerance( tol )
-            , relative_tolerance( tol )
         {
         }
 
@@ -321,27 +302,21 @@ namespace ponio
          */
         using value_t = typename user_defined_method_t::value_t;
 
-        value_t error;                        /**< error makes on time iteration for adaptive time step method */
-        bool success                 = true;  /**< sets as true only for success iteration */
-        bool is_step                 = false; /**< sets as true only if iterator is on a step given in solver */
-        std::size_t number_of_stages = 0;     /**< number of stages of method */
-        std::size_t number_of_eval   = 1;     /**< number of evaluation of function */
-        value_t tolerance;                    /**< tolerance for the method (for adaptive time step method) */
-        value_t absolute_tolerance;           /**< absolute tolerance for the method (for adaptive time step method) */
-        value_t relative_tolerance;           /**< relative tolerance for the method (for adaptive time step method) */
+        value_t error                = static_cast<value_t>( 0 ); /**< error makes on time iteration for adaptive time step method */
+        bool success                 = true;                      /**< sets as true only for success iteration */
+        bool is_step                 = false;                     /**< sets as true only if iterator is on a step given in solver */
+        std::size_t number_of_stages = 0;                         /**< number of stages of method */
+        std::size_t number_of_eval   = 1;                         /**< number of evaluation of function */
+        value_t tolerance;                                        /**< tolerance for the method (for adaptive time step method) */
+        value_t absolute_tolerance = static_cast<value_t>( 0 );   /**< absolute tolerance for the method (for adaptive time step method) */
+        value_t relative_tolerance = static_cast<value_t>( 0 );   /**< relative tolerance for the method (for adaptive time step method) */
 
         /**
          * @brief Construct a new iteration info object
          *
          * @param tol tolerance for adaptive time step method
          */
-        iteration_info( value_t tol = static_cast<value_t>( 0 ) )
-            : error( static_cast<value_t>( 0 ) )
-            , tolerance( tol )
-            , absolute_tolerance( tol )
-            , relative_tolerance( tol )
-        {
-        }
+        iteration_info() = default;
 
         /**
          * @brief reset number of evaluations to zero
