@@ -462,13 +462,6 @@ namespace ponio
 
     /**
      * call operator
-     * @param t time \f$t\f$
-     * @param u time \f$u(t)\f$
-     * @return returns \f$\sum_i f_i(t,u)\f$
-     */
-
-    /**
-     * call operator
      *
      * @param t  time \f$t\f$
      * @param y  solution \f$y\f$ at time \f$t\f$
@@ -489,15 +482,6 @@ namespace ponio
     {
         dy = _sum_components_impl( t, y, dy, std::make_index_sequence<size>{} );
     }
-
-    /**
-     * call operator for the I operator in Callables_t
-     *
-     * @tparam I  Index index of tuple of sub-problems to call
-     * @param t   time \f$t\f$
-     * @param u   time \f$u(t)\f$
-     * @return    returns \f$f_i(t,u)\f$
-     */
 
     /**
      * call operator for the I operator in Callables_t

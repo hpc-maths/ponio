@@ -27,8 +27,9 @@ namespace ponio::splitting::detail
      * @param ui   initial state
      * @param ti   initial time
      * @param tf   final time
-     * @param uip1 final state
      * @param dt   time step
+     * @param uip1 final state
+     * @param info iteration information for sub-solver ``I``
      */
     template <std::size_t I, typename Problem_t, typename Method_t, typename state_t, typename value_t, typename iteration_info_t>
     void

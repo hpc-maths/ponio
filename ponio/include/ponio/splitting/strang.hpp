@@ -295,11 +295,11 @@ namespace ponio::splitting::strang
 
         /**
          * call operator to initiate adaptive Strang splitting recursion
-         * @param f    \ref problem to solve
-         * @param tn   current time \f$t^n\f$
-         * @param un   current solution \f$u^n \approx u(t^n)\f$
-         * @param dt   time step \f$\Delta t\f$
-         * @param unp1 solution at time \f$t^{n+1} = t^n + \Delta t\f$
+         * @param f     \ref problem to solve
+         * @param tn    current time \f$t^n\f$
+         * @param un    current solution \f$u^n \approx u(t^n)\f$
+         * @param dt    time step \f$\Delta t\f$
+         * @param u_np1 solution at time \f$t^{n+1} = t^n + \Delta t\f$
          */
         template <typename Problem_t, typename state_t>
         void

@@ -89,6 +89,7 @@ namespace ponio::runge_kutta::rock
              * @param tn         current time where estimate spectral radius
              * @param un         current state where estimate spectral radius
              * @param dt         current time step (unused in power method)
+             * @param du_work    temporary array with work values
              * @return value_t   estimation of spectral radius
              */
             template <typename problem_t, typename value_t, typename state_t, typename array_work_t>
@@ -297,6 +298,7 @@ namespace ponio::runge_kutta::rock
              * @param tn           current time
              * @param un           current state
              * @param dt           current time step
+             * @param du_work      temporary array with work values
              * @param s_min        minimal number of stages (3 for ROCK2, 5 for ROCK4)
              * @return std::tuple<std::size_t, std::size_t, std::size_t> tuple with number of stages of ROCK method, shift index for last
              * stages, shift index of ROCK stages
