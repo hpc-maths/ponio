@@ -165,7 +165,7 @@ namespace ponio::runge_kutta::legendre
     namespace details
     {
         /**
-         * @brief compute \f$b_j\f$ for $j\geq 2$
+         * @brief compute \f$b_j\f$ for \f$j\geq 2\f$
          *
          * @tparam value_t type of coefficient
          * @tparam j       index \f$j\f$
