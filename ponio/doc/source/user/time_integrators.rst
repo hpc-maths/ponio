@@ -108,7 +108,7 @@ When the matrix :math:`A` is lower triangular with a diagonal, the Runge-Kutta m
 
 
 Lawson methods
---------------
+~~~~~~~~~~~~~~
 
 Lawson methods was initially propose into :cite:`lawson:1967`. Lawson methods are build to solve a problem with a linear and nonlinear part, to solve exactly the problem when the nonlinear part goes to zero. This class of problem can be write as
 
@@ -153,7 +153,7 @@ In ponio, Lawson methods have the same name of the underlying explicit Runge-Kut
 
 
 Exponential Runge-Kutta methods
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Like Lawson methods, exponential Runge-Kutta methods are build to solve a problem with a linear and non-linear part, to solve exactly the problem when the nonlinear part goes to zero. This class of problem can be write as
 

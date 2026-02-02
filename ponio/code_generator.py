@@ -357,7 +357,7 @@ if __name__ == '__main__':
         # main list
         template_doc = env.get_template("template/tpl_doc_algorithms.rst")
 
-        with open(f"{args.doc_output}/algorithm.rst", 'w') as file:
+        with open(f"{args.doc_output}/list_algorithm.rst", 'w') as file:
             file.write(
                 template_doc.render(
                     list_erk=cg_list_erk, list_exprk=cg_list_exprk, list_dirk=cg_list_dirk)

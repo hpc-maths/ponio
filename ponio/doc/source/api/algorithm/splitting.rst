@@ -1,5 +1,5 @@
-Splitting methods
-=================
+List of splitting methods
+=========================
 
 Some methods to solve a problem of the form:
 
