@@ -23,12 +23,17 @@ configure_examples = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_EXAMPLES=ON"
 configure_all_examples = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_ALL_EXAMPLES=ON -DBUILD_TESTS=ON" }
 configure_debug = { cmd = "cmake . -G 'Ninja' -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXAMPLES=ON" }
 
-build_ninja = { cmd = "cmake --build ./build --config Release" }                 # don't call this rule alone
+build_ninja = { cmd = "cmake --build ./build --config Release" } # don't call this rule alone
+build_ninja_j1 = { cmd = "cmake --build ./build -j1 --config Release" } # don't call this rule alone
 build = { depends-on = ["configure", "build_ninja"] }
-build_test = { depends-on = ["configure_test", "build_ninja"] }
-build_long_test = { depends-on = ["configure_long_test", "build_ninja"] }
+build_test = { depends-on = ["configure_test", "build_ninja_j1"] }
+build_long_test = { depends-on = ["configure_long_test", "build_ninja_j1"] }
 build_examples = { depends-on = ["configure_examples", "build_ninja"] }
 build_all_examples = { depends-on = ["configure_all_examples", "build_ninja"] }
+build_all_examples_j1 = { depends-on = [
+  "configure_all_examples",
+  "build_ninja_j1",
+] }
 build_debug = { cmd = "ninja -C build ponio", depends-on = ["configure_debug"] }
 
 test = { cmd = "./build/ponio/test/ponio_tests", depends-on = ["build_test"] }
@@ -48,7 +53,7 @@ all_visu = { cmd = "cmake --build ./build --target visu", depends-on = [
   "build_all_examples",
 ] }
 all_save_visu = { cmd = "cmake --build ./build -j1 --target save_visu", depends-on = [
-  "build_all_examples",
+  "build_all_examples_j1",
 ] }
 mpl_test = {}
 cppcheck = { cmd = "cppcheck --enable=all --check-level=exhaustive -q --project=./build/compile_commands.json --suppressions-list=.cppcheck --inline-suppr 2> cppcheck_err.txt", depends-on = [
