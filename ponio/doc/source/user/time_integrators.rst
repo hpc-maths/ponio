@@ -47,7 +47,7 @@ When the matrix :math:`A` is strictly lower triangular, the Runge-Kutta method i
 
 .. seealso::
 
-   See the :doc:`list of explicit Runge-Kutta methods <../api/list_alg_erk>` in ponio.
+   See the :doc:`list of explicit Runge-Kutta methods <../api/algorithm/list_alg_erk>` in ponio.
 
 
 Embedded methods
@@ -94,7 +94,7 @@ Most common embedded Runge-Kutta methods come from :cite:`dormand:1980` and :cit
 
 .. seealso::
 
-   See the :doc:`list of embedded Runge-Kutta methods <../api/list_alg_dp>` in ponio.
+   See the :doc:`list of embedded Runge-Kutta methods <../api/algorithm/list_alg_dp>` in ponio.
 
 
 Diagonal implicit methods
@@ -104,7 +104,7 @@ When the matrix :math:`A` is lower triangular with a diagonal, the Runge-Kutta m
 
 .. seealso::
 
-   See the :doc:`list of diagonal implicit Runge-Kutta methods <../api/list_alg_dirk>` in ponio.
+   See the :doc:`list of diagonal implicit Runge-Kutta methods <../api/algorithm/list_alg_dirk>` in ponio.
 
 
 Lawson methods
@@ -149,7 +149,7 @@ In ponio, Lawson methods have the same name of the underlying explicit Runge-Kut
 
 .. seealso::
 
-   See the :doc:`list of Lawson Runge-Kutta methods <../api/list_alg_lrk>` in ponio.
+   See the :doc:`list of Lawson Runge-Kutta methods <../api/algorithm/list_alg_lrk>` in ponio.
 
 
 Exponential Runge-Kutta methods
@@ -190,7 +190,7 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
 
 .. seealso::
 
-   See the :doc:`list of exponential Runge-Kutta methods <../api/list_alg_exprk>` in ponio.
+   See the :doc:`list of exponential Runge-Kutta methods <../api/algorithm/list_alg_exprk>` in ponio.
 
 
 ----
@@ -200,6 +200,11 @@ Extended stability methods
 --------------------------
 
 Some problems, like heat equation, require methods stabilized on the negative real axis. The ponio library provides a Runge-Kutta Chebyshev method of order 2, ROCK2 method (of order 2), ROCK4 method (of order 4) and a Runge-Kutta Legendre method of order 1 or 2.
+
+.. seealso::
+
+   See the :doc:`list of extended stability Runge-Kutta methods <../api/algorithm/list_alg_stab_rk>` in ponio.
+
 
 Runge-Kutta Chebyshev method
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -371,6 +376,11 @@ Some methods to solve a problem of the form:
   \dot{u} = \sum_i f_i(t,u)
 
 with the initial condition :math:`u(t=0)=u_0`. We note with :math:`\phi_{\tau}^{[f_i]}(t^n,\tilde{u}^n)` the solution at time :math:`t^n+\tau` of the subproblem :math:`\dot{u}=f_i(t,u)` with the initial condition :math:`u(t^n)=\tilde{u}^n`.
+
+.. seealso::
+
+   See the :doc:`list of splitting methods <../api/algorithm/splitting>` in ponio.
+
 
 Lie Splitting method
 ~~~~~~~~~~~~~~~~~~~~
@@ -554,6 +564,9 @@ Still keep two free parameters :math:`\ell` and :math:`\alpha` given free to use
 * :math:`\ell=2` and :math:`\alpha=1`, in this case, if :math:`F_A=0` and :math:`F_R=0` we have the standard ROCK2 method;
 * :math:`\ell=1` and :math:`\alpha = \frac{1}{2P'_{s-2+\ell}(0)}`, so :math:`\beta=0` to minimized computation cost.
 
+.. seealso::
+
+   See the :doc:`list of IMEX methods with extended stability method <../api/algorithm/list_alg_pirock>` in ponio.
 
 ----
 
