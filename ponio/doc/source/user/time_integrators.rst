@@ -22,6 +22,12 @@ with stiff parameter :math:`k=50`, initial condition :math:`y(0) = y_0 = 2` and 
   :lineno-start: 30
   :linenos:
 
+We will solve this problem with different kind of methods just to present how to use them.
+
+.. raw:: html
+    :file: ../_static/cpp/ch_all.html
+
+
 Runge-Kutta methods from Butcher tableau
 ----------------------------------------
 
@@ -88,7 +94,8 @@ Some Butcher tableaus provide a second :math:`b` line:
    \begin{array}{c|c}
       c & A \\
       \hline
-        & b^\top
+        & b^\top \\
+      \hline
         & \hat{b}^\top
    \end{array}
 
@@ -274,7 +281,7 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
 
    See the :doc:`list of exponential Runge-Kutta methods <../api/algorithm/list_alg_exprk>` in ponio.
 
-For a problem split into a linear and nonlinear part, we need to define linear part as a scalar or a matrix and the nonlinear part as a function, and store them into a :cpp:class:`ponio::laxson_problem`.
+For a problem split into a linear and nonlinear part, we need to define linear part as a scalar or a matrix and the nonlinear part as a function, and store them into a :cpp:class:`ponio::lawson_problem`.
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
@@ -282,7 +289,7 @@ For a problem split into a linear and nonlinear part, we need to define linear p
   :lineno-start: 87
   :linenos:
 
- And next call the :cpp:func:`ponio::solve` function with
+And next call the :cpp:func:`ponio::solve` function with
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
@@ -799,6 +806,23 @@ Still keep two free parameters :math:`\ell` and :math:`\alpha` given free to use
 .. seealso::
 
    See the :doc:`list of IMEX methods with extended stability method <../api/algorithm/list_alg_pirock>` in ponio.
+
+For a PIROCK method to solve only reaction-diffusion problem, we need two functions :math:`F_D` and :math:`F_R` and the Jacobian function :math:`\partial_u F_R`, and store them into a :cpp:class:`ponio::imex_problem`.
+
+.. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
+  :language: cpp
+  :lines: 198-211
+  :lineno-start: 198
+  :linenos:
+
+And next call the :cpp:func:`ponio::solve` function with
+
+.. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
+  :language: cpp
+  :lines: 213
+  :lineno-start: 213
+  :linenos:
+
 
 ----
 

@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 ### Lorenz ##########################################################
 
@@ -155,18 +156,48 @@ def curtiss_hirschfelder_fig():
 
 ### Curtiss-Hirschfelder all ########################################
 
+# def plot_ch_demos(ch_demo, output: str):
+#     fig, ax = plt.subplots(figsize=(8, 4))
+
+#     for label, subfix in ch_demo.items():
+#         data = np.loadtxt(f"ch_{subfix}.txt")
+#         ax.plot(data[:, 0], data[:, 1], "+-", label=label)
+
+#     ax.set_xlabel("time")
+#     ax.set_ylabel("$y$")
+#     ax.legend(loc="upper right")
+
+#     plt.savefig(output)
+
 def plot_ch_demos(ch_demo, output: str):
-    fig, ax = plt.subplots(figsize=(8, 4))
+    fig = go.Figure()
 
-    for label, subfix in ch_demo.items():
+    colors = [
+        "#1f77b4",
+        "#ff7f0e",
+        "#2ca02c",
+        "#d62728",
+        "#9467bd",
+        "#8c564b",
+        "#e377c2",
+        "#7f7f7f",
+        "#bcbd22",
+        "#17becf"
+    ]
+
+    for i, (label, subfix) in enumerate(ch_demo.items()):
         data = np.loadtxt(f"ch_{subfix}.txt")
-        ax.plot(data[:, 0], data[:, 1], "+-", label=label)
+        fig.add_trace(go.Scatter(
+            x=data[:, 0], y=data[:, 1],
+            marker=dict(size=1),
+            line=dict(
+                color=colors[i % len(colors)],
+                width=2
+            ),
+            name=label
+        ))
 
-    ax.set_xlabel("time")
-    ax.set_ylabel("$y$")
-    ax.legend(loc="upper right")
-
-    plt.savefig(output)
+    fig.write_html(output)
 
 
 def ch_demos_fig():
@@ -183,13 +214,14 @@ def ch_demos_fig():
         'RKL(5,2)': 'rkl2',
         'Lie splitting': 'lie',
         'Strang splitting': 'strang',
+        'PIROCK': 'pirock',
     }
-    plot_ch_demos(ch_demos, "ch_all.png")
+    plot_ch_demos(ch_demos, "ch_all.html")
 
 #####################################################################
 
 
-# lorenz_fig()
-# lotka_volterra_fig()
-# curtiss_hirschfelder_fig()
+lorenz_fig()
+lotka_volterra_fig()
+curtiss_hirschfelder_fig()
 ch_demos_fig()
