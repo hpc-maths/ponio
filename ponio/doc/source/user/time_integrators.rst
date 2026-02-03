@@ -826,6 +826,10 @@ And next call the :cpp:func:`ponio::solve` function with
 
 ----
 
+.. seealso::
+
+  The full example with all methods can be found in :download:`curtiss_hirschfelder.cpp <../_static/cpp/curtiss_hirschfelder.cpp>`.
+
 
 Bibliography
 ------------
