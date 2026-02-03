@@ -197,6 +197,7 @@ def plot_ch_demos(ch_demo, output: str):
             name=label
         ))
 
+    fig.update_layout(height=500, legend=dict(orientation="h", y=1.1))
     fig.write_html(output)
 
 
