@@ -153,6 +153,43 @@ def curtiss_hirschfelder_fig():
     plot_ch("curtiss_hirschfelder_for.txt", "curtiss_hirschfelder_for.png")
 
 
-lorenz_fig()
-lotka_volterra_fig()
-curtiss_hirschfelder_fig()
+### Curtiss-Hirschfelder all ########################################
+
+def plot_ch_demos(ch_demo, output: str):
+    fig, ax = plt.subplots(figsize=(8, 4))
+
+    for label, subfix in ch_demo.items():
+        data = np.loadtxt(f"ch_{subfix}.txt")
+        ax.plot(data[:, 0], data[:, 1], "+-", label=label)
+
+    ax.set_xlabel("time")
+    ax.set_ylabel("$y$")
+    ax.legend(loc="upper right")
+
+    plt.savefig(output)
+
+
+def ch_demos_fig():
+    ch_demos = {
+        'RK(3,3)': 'erk',
+        'RK(5,4) 6m': 'dp',
+        'RK(3,4)': 'dirk',
+        'LRK(3,3)': 'lrk',
+        'expRK(2,2)': 'exprk',
+        'RKC(5,2)': 'rkc',
+        'ROCK2': 'rock2',
+        'ROCK4': 'rock4',
+        'RKL(5,1)': 'rkl1',
+        'RKL(5,2)': 'rkl2',
+        'Lie splitting': 'lie',
+        'Strang splitting': 'strang',
+    }
+    plot_ch_demos(ch_demos, "ch_all.png")
+
+#####################################################################
+
+
+# lorenz_fig()
+# lotka_volterra_fig()
+# curtiss_hirschfelder_fig()
+ch_demos_fig()

@@ -3,6 +3,11 @@ Algorithms
 
 The ponio library provides multiple algorithms to solve ODE which must be specify in :cpp:func:`ponio::solve` or :cpp:func:`ponio::make_solver_range` functions.
 
+.. seealso::
+
+  For the explaination of different methods, you can read the :doc:`time integrators desciption <.../user/time_integrators>`.
+
+
 .. toctree::
    :caption: List of algorithms
    :maxdepth: 2

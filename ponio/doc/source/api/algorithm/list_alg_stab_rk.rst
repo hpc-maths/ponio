@@ -1,4 +1,4 @@
-List of explicit stabilized Runge-Kutta methods
+List of extended stabilized Runge-Kutta methods
 ===============================================
 
 Some problems, like heat equation, require methods stabilized on the negative real axis. The ponio library provides a Runge-Kutta Chebyshev method of order 2, ROCK2 method (of order 2), ROCK4 method (of order 4) and a Runge-Kutta Legendre method of order 1 or 2.
