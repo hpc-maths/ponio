@@ -75,7 +75,12 @@ main()
 
         auto pb = ponio::make_lawson_problem( L, N );
 
-        ponio::solve( pb, ponio::runge_kutta::lrk_33( std::exp<double> ), y_0, t_span, dt, "ch_lrk.txt"_fobs );
+        auto my_exp = []( double x )
+        {
+            return std::exp( x );
+        };
+
+        ponio::solve( pb, ponio::runge_kutta::lrk_33( my_exp ), y_0, t_span, dt, "ch_lrk.txt"_fobs );
     }
 
     { // exponential Runge-Kutta method

@@ -218,12 +218,20 @@ For a problem split into a linear and nonlinear part, we need to define linear p
   :lineno-start: 70
   :linenos:
 
-Because sometime we want to define exponential function with a Pade approximant, we need to specify an exponential function. In this case we use :code:`std::exp<double>` standard function. And next call the :cpp:func:`ponio::solve` function with
+Because sometime we want to define exponential function with a Pade approximant, we need to specify an exponential function.
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 78
+  :lines: 78-81
   :lineno-start: 78
+  :linenos:
+
+And next call the :cpp:func:`ponio::solve` function with
+
+.. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
+  :language: cpp
+  :lines: 83
+  :lineno-start: 83
   :linenos:
 
 Exponential Runge-Kutta methods
@@ -270,16 +278,16 @@ For a problem split into a linear and nonlinear part, we need to define linear p
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 82-88
-  :lineno-start: 82
+  :lines: 87-93
+  :lineno-start: 87
   :linenos:
 
  And next call the :cpp:func:`ponio::solve` function with
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 90
-  :lineno-start: 90
+  :lines: 95
+  :lineno-start: 95
   :linenos:
 
 ----
@@ -347,16 +355,16 @@ Runge-Kutta Chebyshev method is an explicit method, so we only need to define :m
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 94-97
-  :lineno-start: 94
+  :lines: 99-102
+  :lineno-start: 99
   :linenos:
 
 We need to specify how many stages we want (we choose 5), and next call the :cpp:func:`ponio::solve` function with
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 99
-  :lineno-start: 99
+  :lines: 104
+  :lineno-start: 104
   :linenos:
 
 
@@ -382,16 +390,16 @@ ROCK2 method is an explicit method, so we only need to define :math:`f` function
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 103-106
-  :lineno-start: 103
+  :lines: 108-111
+  :lineno-start: 108
   :linenos:
 
 Next call the :cpp:func:`ponio::solve` function with
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 108
-  :lineno-start: 108
+  :lines: 113
+  :lineno-start: 113
   :linenos:
 
 .. hint::
@@ -421,16 +429,16 @@ ROCK4 method is an explicit method, so we only need to define :math:`f` function
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 112-115
-  :lineno-start: 112
+  :lines: 117-120
+  :lineno-start: 117
   :linenos:
 
 Next call the :cpp:func:`ponio::solve` function with
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 117
-  :lineno-start: 117
+  :lines: 122
+  :lineno-start: 122
   :linenos:
 
 .. hint::
@@ -470,16 +478,16 @@ Runge-Kutta Legendre first-order method is an explicit method, so we only need t
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 121-124
-  :lineno-start: 121
+  :lines: 126-129
+  :lineno-start: 126
   :linenos:
 
 We need to specify how many stages we want (we choose 5), and next call the :cpp:func:`ponio::solve` function with
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 126
-  :lineno-start: 126
+  :lines: 131
+  :lineno-start: 131
   :linenos:
 
 The algorithm of RKL2 is the following:
@@ -526,16 +534,16 @@ Runge-Kutta Legendre second-order method is an explicit method, so we only need 
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 130-133
-  :lineno-start: 130
+  :lines: 135-138
+  :lineno-start: 135
   :linenos:
 
 We need to specify how many stages we want (we choose 5), and next call the :cpp:func:`ponio::solve` function with
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 135
-  :lineno-start: 135
+  :lines: 140
+  :lineno-start: 140
   :linenos:
 
 ----
@@ -570,24 +578,24 @@ For splitting methods in ponio, we first need to define all sub-problem (here on
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 139-148
-  :lineno-start: 139
+  :lines: 144-153
+  :lineno-start: 144
   :linenos:
 
 We also define the Lie splitting method and the method to solve each substep. In this example we use two RK(3,3) methods, and we specify the time step for subcycle
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 150-151
-  :lineno-start: 150
+  :lines: 155-156
+  :lineno-start: 155
   :linenos:
 
 Next call the :cpp:func:`ponio::solve` function with
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 153
-  :lineno-start: 153
+  :lines: 158
+  :lineno-start: 158
   :linenos:
 
 
@@ -607,24 +615,24 @@ For splitting methods in ponio, we first need to define all sub-problem (here on
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 157-166
-  :lineno-start: 157
+  :lines: 162-171
+  :lineno-start: 162
   :linenos:
 
 We also define the Strang splitting method and the method to solve each substep. In this example we use two RK(3,3) methods, and we specify the time step for subcycle
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 168-169
-  :lineno-start: 168
+  :lines: 173-174
+  :lineno-start: 173
   :linenos:
 
 Next call the :cpp:func:`ponio::solve` function with
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 171
-  :lineno-start: 171
+  :lines: 176
+  :lineno-start: 176
   :linenos:
 
 Adaptive time step Strang splitting method
