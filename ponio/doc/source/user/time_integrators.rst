@@ -811,16 +811,16 @@ For a PIROCK method to solve only reaction-diffusion problem, we need two functi
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 198-211
-  :lineno-start: 198
+  :lines: 199-212
+  :lineno-start: 199
   :linenos:
 
 And next call the :cpp:func:`ponio::solve` function with
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder.cpp
   :language: cpp
-  :lines: 213
-  :lineno-start: 213
+  :lines: 214
+  :lineno-start: 214
   :linenos:
 
 
