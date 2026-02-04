@@ -298,8 +298,8 @@ namespace ponio
     {
         static constexpr bool is_embedded = Algorithm_t::is_embedded;
         static constexpr std::size_t
-            step_storage_size = detail::conditional_v<is_embedded, std::size_t, Algorithm_t::N_stages + 2, Algorithm_t::N_stages + 1>::value;
-        using step_storage_t = std::array<state_t, step_storage_size>;
+            step_storage_size = detail::conditional_v<is_embedded, std::size_t, Algorithm_t::N_stages + 2, Algorithm_t::N_stages + 1>;
+        using step_storage_t  = std::array<state_t, step_storage_size>;
 
         Algorithm_t alg;
         step_storage_t k_ex_is;

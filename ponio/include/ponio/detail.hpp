@@ -358,16 +358,14 @@ namespace ponio::detail
     struct conditional_value
     {
         using value_type                  = T;
-        using type                        = std::integral_constant<T, value_true>;
-        static constexpr value_type value = type();
+        static constexpr value_type value = value_true;
     };
 
     template <typename T, T value_true, T value_false>
     struct conditional_value<false, T, value_true, value_false>
     {
         using value_type                  = T;
-        using type                        = std::integral_constant<T, value_false>;
-        static constexpr value_type value = type();
+        static constexpr value_type value = value_false;
     };
 
     template <bool expression, typename T, T value_true, T value_false>
