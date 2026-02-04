@@ -179,9 +179,9 @@ namespace ponio::runge_kutta::butcher
         static constexpr bool is_imex_method     = true;
         static constexpr std::size_t N_operators = 2;
 
-        using value_t  = tableau_im_t::value_t;
-        using matrix_t = tableau_im_t::matrix_t;
-        using vector_t = tableau_im_t::vector_t;
+        using value_t  = typename tableau_im_t::value_t;
+        using matrix_t = typename tableau_im_t::matrix_t;
+        using vector_t = typename tableau_im_t::vector_t;
 
         pair_butcher_tableau() = default;
 
