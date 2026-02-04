@@ -344,6 +344,35 @@ namespace ponio::detail
         static constexpr std::string_view id = sep;
     };
 
+    /**
+     * @brief conditional constexpr value
+     *
+     * @tparam expression   constant expression to evaluate
+     * @tparam T            type of value
+     * @tparam value_true   value if ``expression == true``
+     * @tparam value_false  value if ``expression == false``
+     *
+     * This is similar to :code:`std::conditional_type` but with values
+     */
+    template <bool expression, typename T, T value_true, T value_false>
+    struct conditional_value
+    {
+        using value_type                  = T;
+        using type                        = std::integral_constant<T, value_true>;
+        static constexpr value_type value = type();
+    };
+
+    template <typename T, T value_true, T value_false>
+    struct conditional_value<false, T, value_true, value_false>
+    {
+        using value_type                  = T;
+        using type                        = std::integral_constant<T, value_false>;
+        static constexpr value_type value = type();
+    };
+
+    template <bool expression, typename T, T value_true, T value_false>
+    constexpr T conditional_v = conditional_value<expression, T, value_true, value_false>::value;
+
     // some concepts
     template <typename T>
     concept has_identity_method = std::is_member_function_pointer_v<decltype( &T::identity )>;
