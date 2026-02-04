@@ -442,49 +442,49 @@ namespace ponio
             return alg.info();
         }
 
-        /**
-         * @brief returns array of stages
-         *
-         * @return auto&
-         */
-        auto&
-        stages_ex()
-        {
-            return k_ex_is;
-        }
+        // /**
+        //  * @brief returns array of stages
+        //  *
+        //  * @return auto&
+        //  */
+        // auto&
+        // stages_ex()
+        // {
+        //     return k_ex_is;
+        // }
 
-        /**
-         * @brief returns array of stages
-         *
-         * @return auto const&
-         */
-        auto const&
-        stages_ex() const
-        {
-            return k_ex_is;
-        }
+        // /**
+        //  * @brief returns array of stages
+        //  *
+        //  * @return auto const&
+        //  */
+        // auto const&
+        // stages_ex() const
+        // {
+        //     return k_ex_is;
+        // }
 
-        /**
-         * @brief returns array of stages
-         *
-         * @return auto&
-         */
-        auto&
-        stages_im()
-        {
-            return k_im_is;
-        }
+        // /**
+        //  * @brief returns array of stages
+        //  *
+        //  * @return auto&
+        //  */
+        // auto&
+        // stages_im()
+        // {
+        //     return k_im_is;
+        // }
 
-        /**
-         * @brief returns array of stages
-         *
-         * @return auto const&
-         */
-        auto const&
-        stages_im() const
-        {
-            return k_im_is;
-        }
+        // /**
+        //  * @brief returns array of stages
+        //  *
+        //  * @return auto const&
+        //  */
+        // auto const&
+        // stages_im() const
+        // {
+        //     return k_im_is;
+        // }
     };
 
     ///////////////////////////////////////////////////////////////////////////
