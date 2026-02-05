@@ -278,7 +278,11 @@ _deps
 
 # generated files by code_generator.py
 butcher_methods.hpp
-algorithm.rst
+list_algorithm.rst
+list_alg_erk.rst
+list_alg_dirk.rst
+list_alg_lrk.rst
+list_alg_dp.rst
 
 # pixi environments
 .pixi
@@ -290,6 +294,7 @@ ponio/doc/source/gallery/notebook
 ponio/doc/source/_static/cpp/*.txt
 ponio/doc/source/_static/cpp/*.out
 ponio/doc/source/_static/cpp/*.png
+ponio/doc/source/_static/cpp/*.html
 ponio/doc/source/compare/*/*.txt
 ponio/doc/source/compare/*/*.out
 ponio/doc/source/compare/*/*.png

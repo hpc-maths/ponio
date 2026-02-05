@@ -65,13 +65,16 @@ namespace ponio::detail
 #endif
 
     /**
-     * @brief compute an error \f$\sqrt{\frac{1}{N}\sum_i \left( \frac{|u^{n+1}_i - \tilde{u}^{n+1}_i|}{a_{tol}+ r_{tol} \max(|u^n_i|,
-     * |u^{n+1}_i|)}\right)^2}\f$
+     * @brief compute an error \f[\sqrt{\frac{1}{N}\sum_i \left( \frac{|u^{n+1}_i - \tilde{u}^{n+1}_i|}{a_{tol}+ r_{tol} \max(|u^n_i|,
+     * |u^{n+1}_i|)}\right)^2}\f]
      *
      * @tparam state_t type of computed value
+     * @tparam value_t type of tolerances
      * @param un       state \f$u^n\f$
      * @param unp1     state \f$u^{n+1}\f$
      * @param unp1bis  state \f$\tilde{u}^{n+1}\f$
+     * @param a_tol    absolute tolerance
+     * @param r_tol    relative tolerance
      */
     template <typename state_t, typename value_t>
         requires std::ranges::range<state_t>

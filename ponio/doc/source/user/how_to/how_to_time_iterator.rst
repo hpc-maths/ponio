@@ -3,7 +3,7 @@ How-to: understand :cpp:class:`ponio::time_iterator`
 
 After create a :cpp:class:`ponio::solver_range` with :cpp:func:`ponio::make_solver_range` as:
 
-.. literalinclude:: ../../_static/cpp/how_to_solve_range.cpp
+.. literalinclude:: ../../_static/cpp/how_to_solver_range.cpp
   :language: cpp
   :lines: 24
   :lineno-start: 24
@@ -11,7 +11,7 @@ After create a :cpp:class:`ponio::solver_range` with :cpp:func:`ponio::make_solv
 
 you want to create a :cpp:class:`ponio::time_iterator` to loop over the solver_range
 
-.. literalinclude:: ../../_static/cpp/how_to_solve_range.cpp
+.. literalinclude:: ../../_static/cpp/how_to_solver_range.cpp
   :language: cpp
   :lines: 25-31
   :lineno-start: 25
@@ -24,4 +24,4 @@ The :code:`it_sol` object has the following structure
 
 .. seealso::
 
-  The full example can be found in :download:`how_to_solve_range.cpp <../../_static/cpp/how_to_solve_range.cpp>`.
+  The full example can be found in :download:`how_to_solver_range.cpp <../../_static/cpp/how_to_solver_range.cpp>`.

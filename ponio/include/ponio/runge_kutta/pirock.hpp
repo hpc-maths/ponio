@@ -1336,11 +1336,7 @@ namespace ponio::runge_kutta::pirock
      */
     template <std::size_t l = 1, bool is_embedded = false, typename value_t = double, typename alpha_beta_computer_t, typename eig_computer_t, typename shampine_trick_caller_t>
     auto
-    pirock_RDA( alpha_beta_computer_t&& alpha_beta_computer,
-        eig_computer_t&& eig_computer,
-        shampine_trick_caller_t&& shampine_trick_caller,
-        value_t absolute_tolerance = default_config::tol,
-        value_t relative_tolerance = default_config::tol )
+    pirock_RDA( alpha_beta_computer_t&& alpha_beta_computer, eig_computer_t&& eig_computer, shampine_trick_caller_t&& shampine_trick_caller )
     {
         return pirock_RDA_impl<l, alpha_beta_computer_t, eig_computer_t, shampine_trick_caller_t, is_embedded, value_t>(
             std::forward<alpha_beta_computer_t>( alpha_beta_computer ),
