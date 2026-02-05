@@ -168,7 +168,7 @@ namespace ponio::runge_kutta::butcher
                                      };
 
     template <typename _tableau_im_t, typename _tableau_ex_t>
-        requires is_compatible_tableaus<_tableau_im_t, _tableau_ex_t>
+    // requires is_compatible_tableaus<_tableau_im_t, _tableau_ex_t>
     struct pair_butcher_tableau
     {
         using tableau_im_t = _tableau_im_t;

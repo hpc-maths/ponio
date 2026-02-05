@@ -14,8 +14,10 @@
 #include "../butcher_tableau.hpp"
 #include "../detail.hpp"
 #include "../iteration_info.hpp"
+#include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp" // NOLINT(misc-include-cleaner)
+#include "dirk.hpp"
 
 namespace ponio::runge_kutta::additive_runge_kutta
 {
@@ -82,7 +84,7 @@ namespace ponio::runge_kutta::additive_runge_kutta
             std::size_t n_eval = 0;
             ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_i, ui, rhs, n_eval );
 
-            _info.number_of_eval += n_eval + 1;
+            _info.number_of_eval[1] += n_eval + 1;
 
             // call explicit and implicit function on stage ui
             pb.explicit_part( tn + butcher_ex.c[I] * dt, ui, k_ex_i );
@@ -90,7 +92,7 @@ namespace ponio::runge_kutta::additive_runge_kutta
         }
 
         template <typename problem_t, typename state_t, typename array_kj_t, std::size_t I>
-            requires detail::problem_jacobian<problem_t, value_t, state_t>
+            requires detail::problem_jacobian<decltype( std::declval<problem_t>().implicit_part ), value_t, state_t>
         void
         stage( Stage<I>,
             problem_t& pb,
@@ -138,19 +140,19 @@ namespace ponio::runge_kutta::additive_runge_kutta
             auto F = [&]( state_t const& u ) -> state_t
             {
                 double const ti = tn + dt * butcher_im.c[I];
-                _info.number_of_eval += 1;
+                _info.number_of_eval[1] += 1;
                 pb.implicit_part( ti, u, ui );
                 return u - dt * butcher_im.A[I][I] * ui - u_tmp;
             };
             auto dF = [&]( state_t const& u ) -> matrix_t
             {
                 double const ti = tn + dt * butcher_im.c[I];
-                identity - dt* butcher_im.A[I][I] * pb.implicit_part.df( ti, u );
+                return identity - dt * butcher_im.A[I][I] * pb.implicit_part.df( ti, u );
             };
 
             // call newton method
-            if constexpr ( detail::has_newton_method<lin_alg_t, decltype( g ), decltype( dg )>
-                           || detail::has_newton_method<lin_alg_t, decltype( g ), decltype( dg ), state_t> )
+            if constexpr ( detail::has_newton_method<lin_alg_t, decltype( F ), decltype( dF )>
+                           || detail::has_newton_method<lin_alg_t, decltype( F ), decltype( dF ), state_t> )
             {
                 ui = linalg.newton( F, dF, un );
             }
@@ -168,7 +170,7 @@ namespace ponio::runge_kutta::additive_runge_kutta
                         return &::ponio::linear_algebra::linear_algebra<matrix_t>::solver;
                     }
                 }();
-                ui = newton<value_t>( F, dF, un, solver, tol, max_iter );
+                ui = diagonal_implicit_runge_kutta::newton<value_t>( F, dF, un, solver, tol, max_iter );
             }
 
             // call explicit and implicit function on stage ui
@@ -196,8 +198,8 @@ namespace ponio::runge_kutta::additive_runge_kutta
             detail::tpl_inner_product<N_stages>( butcher_im.b, K_im_j, ui, dt, unp1 );
         }
 
-        template <typename problem_t, typename state_t, typename array_kj_t, typename tab_t = tableau_t>
-            requires std::same_as<tab_t, tableau_t> && is_embedded
+        template <typename problem_t, typename state_t, typename array_kj_t, typename tab_t = tableau_pair_t>
+            requires std::same_as<tab_t, tableau_pair_t> && is_embedded
         void
         stage( Stage<N_stages + 1>,
             problem_t& pb,
@@ -241,8 +243,8 @@ namespace ponio::runge_kutta::additive_runge_kutta
          * @param tol_ tolerance
          * @return auto& returns this object
          */
-        template <typename tab_t = tableau_t>
-            requires std::same_as<tab_t, tableau_t> && is_embedded
+        template <typename tab_t = tableau_pair_t>
+            requires std::same_as<tab_t, tableau_pair_t> && is_embedded
         auto&
         abs_tol( value_t tol_ )
         {
@@ -256,8 +258,8 @@ namespace ponio::runge_kutta::additive_runge_kutta
          * @param tol_ tolerance
          * @return auto& returns this object
          */
-        template <typename tab_t = tableau_t>
-            requires std::same_as<tab_t, tableau_t> && is_embedded
+        template <typename tab_t = tableau_pair_t>
+            requires std::same_as<tab_t, tableau_pair_t> && is_embedded
         auto&
         rel_tol( value_t tol_ )
         {
@@ -295,7 +297,14 @@ namespace ponio::runge_kutta::additive_runge_kutta
         std::size_t max_iter = ponio::default_config::newton_max_iterations; // max iterations of Newton method
 
         linear_algebra_t linalg;
-        iteration_info<tableau_t> _info;
+        iteration_info<tableau_pair_t> _info;
     };
+
+    template <typename tableau_im_t, typename tableau_ex_t, typename lin_alg_t, typename... args_t>
+    auto
+    make_ark( args_t... args )
+    {
+        return additive_runge_kutta<butcher::pair_butcher_tableau<tableau_im_t, tableau_ex_t>, lin_alg_t>( args... );
+    }
 
 } // namespace ponio::runge_kutta::additive_runge_kutta

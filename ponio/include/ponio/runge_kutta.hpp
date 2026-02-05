@@ -7,6 +7,7 @@
 // NOLINTBEGIN(misc-include-cleaner)
 
 // IWYU pragma: begin_exports
+#include "runge_kutta/ark.hpp"
 #include "runge_kutta/dirk.hpp"
 #include "runge_kutta/erk.hpp"
 #include "runge_kutta/exprk.hpp"
