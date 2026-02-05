@@ -19,6 +19,7 @@
 #include "../stage.hpp" // NOLINT(misc-include-cleaner)
 #include "dirk.hpp"
 
+// cppcheck-suppress-begin unusedFunction
 namespace ponio::runge_kutta::additive_runge_kutta
 {
 
@@ -308,3 +309,5 @@ namespace ponio::runge_kutta::additive_runge_kutta
     }
 
 } // namespace ponio::runge_kutta::additive_runge_kutta
+
+// cppcheck-suppress-end unusedFunction
