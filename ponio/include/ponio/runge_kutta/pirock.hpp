@@ -508,24 +508,35 @@ namespace ponio::runge_kutta::pirock
 
                     u_np1 = us_s - err_D + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
 
-                    auto accumulator_error_gen = []( auto const& yn, auto const& ynp1, value_t a_tol, value_t r_tol )
-                    {
-                        return [=, it_yn = yn.begin(), it_ynp1 = ynp1.begin()]( value_t const& acc, value_t const err_i ) mutable
-                        {
-                            using namespace std;
-                            return acc + detail::power<2>( err_i / ( a_tol + r_tol * max( abs( *it_yn++ ), abs( *it_ynp1++ ) ) ) );
-                        };
-                    };
+                    // auto accumulator_error_gen = []( auto const& yn, auto const& ynp1, value_t a_tol, value_t r_tol )
+                    // {
+                    //     return [=, it_yn = yn.begin(), it_ynp1 = ynp1.begin()]( value_t const& acc, value_t const err_i ) mutable
+                    //     {
+                    //         using namespace std;
+                    //         return acc + detail::power<2>( err_i / ( a_tol + r_tol * max( abs( *it_yn++ ), abs( *it_ynp1++ ) ) ) );
+                    //     };
+                    // };
 
                     // TODO: this couple of lines works only with samurai (because of err_D.array())
-                    value_t err_R_scalar = std::accumulate( err_R.array().begin(),
-                        err_R.array().end(),
-                        static_cast<value_t>( 0. ),
-                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
-                    value_t err_D_scalar = std::accumulate( err_D.array().begin(),
-                        err_D.array().end(),
-                        static_cast<value_t>( 0. ),
-                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
+                    // value_t err_R_scalar = std::accumulate( err_R.array().begin(),
+                    //     err_R.array().end(),
+                    //     static_cast<value_t>( 0. ),
+                    //     accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
+                    // value_t err_D_scalar = std::accumulate( err_D.array().begin(),
+                    //     err_D.array().end(),
+                    //     static_cast<value_t>( 0. ),
+                    //     accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
+
+                    value_t err_R_scalar = shampine_trick_caller.norm_error( err_R,
+                        un,
+                        u_np1,
+                        _info.absolute_tolerance,
+                        _info.relative_tolerance );
+                    value_t err_D_scalar = shampine_trick_caller.norm_error( err_D,
+                        un,
+                        u_np1,
+                        _info.absolute_tolerance,
+                        _info.relative_tolerance );
 
                     _info.error   = std::max( err_D_scalar, err_R_scalar );
                     _info.success = _info.error < 1.0;
@@ -1203,18 +1214,21 @@ namespace ponio::runge_kutta::pirock
                     };
 
                     // TODO: this couple of lines works only with samurai (because of err_D.array())
-                    value_t err_R_scalar = std::accumulate( err_R.array().begin(),
-                        err_R.array().end(),
-                        static_cast<value_t>( 0. ),
-                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
-                    value_t err_D_scalar = std::accumulate( err_D.array().begin(),
-                        err_D.array().end(),
-                        static_cast<value_t>( 0. ),
-                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
-                    value_t err_A_scalar = std::accumulate( err_A.array().begin(),
-                        err_A.array().end(),
-                        static_cast<value_t>( 0. ),
-                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
+                    value_t err_R_scalar = shampine_trick_caller.norm_error( err_R,
+                        un,
+                        u_np1,
+                        _info.absolute_tolerance,
+                        _info.relative_tolerance );
+                    value_t err_D_scalar = shampine_trick_caller.norm_error( err_D,
+                        un,
+                        u_np1,
+                        _info.absolute_tolerance,
+                        _info.relative_tolerance );
+                    value_t err_A_scalar = shampine_trick_caller.norm_error( err_A,
+                        un,
+                        u_np1,
+                        _info.absolute_tolerance,
+                        _info.relative_tolerance );
 
                     _info.error   = std::max( err_D_scalar, err_R_scalar, std::pow( err_A_scalar, 2. / 3. ) );
                     _info.success = _info.error < 1.0;

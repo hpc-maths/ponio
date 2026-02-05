@@ -6,6 +6,7 @@
 
 #include <cassert>
 
+#include "detail.hpp"
 #include "linear_algebra.hpp"
 
 #if __has_include( <samurai/schemes/fv.hpp> )
@@ -181,6 +182,69 @@ namespace ponio::shampine_trick
             VecDestroy( &rhs_petsc );
             KSPDestroy( &ksp );
             MatDestroy( &J_R );
+        }
+
+        /**
+         * @brief return a error norm given by: \f$$\sum_i \left(\frac{x_i}{a_{tol} + r_{tol}\max(|y_i|, |z_i|)}\right)^2\Delta x_i\f$$
+         *
+         * This function computes a error norm for a samurai field (ScalarField or VectorField).
+         *
+         * First step is to compute volume of domain \f$|\Omega|=\sum_k \Delta x_k ^d\f$ where \f$d\f$ is the dimension of field, and
+         * normalization coefficients \f$sc_i = \max_k(|y_{i,k}|, |z_{i,k}|)\f$ for composant \f$i\f$i in cell \f$k\f$.
+         *
+         * Next we compute an error foreach composant : \f$err_i = \sum_k\left(\frac{x_{i,k}}{a_{tol} + r_{tol}sc_i}\Delta x_k\right)^2\f$
+         * where \f$x_{i,k}\f$ is the value of composant \f$i\f$ in cell \f$k\f$.
+         *
+         * Then the computed error is given by \f$err = \frac{1}{|\omega| N_{comp}}\sum_i err_i\f$.
+         *
+         * @tparam value_t type of tolerances
+         * @tparam state_t type of vectors \f$x\f$, \f$y\f$ and \f$z\f$
+         * @param x mainly the estimate error
+         * @param y mainly the solution at time \f$t^n\f$
+         * @param z mainly the estimation of solution at time \f$t^{n+1}\f$
+         * @param a_tol absolute tolerance
+         * @param r_tol relative tolerance
+         */
+        value_t
+        norm_error( field_t const& x, field_t const& y, field_t const& z, value_t a_tol, value_t r_tol )
+        {
+            std::array<value_t, field_t::n_comp> sc;
+            sc.fill( static_cast<value_t>( 0. ) );
+            std::array<value_t, field_t::n_comp> err_comp;
+            err_comp.fill( static_cast<value_t>( 0. ) );
+            auto volume = static_cast<value_t>( 0. );
+
+            samurai::for_each_cell( x.mesh(),
+                [&]( auto& cell )
+                {
+                    volume += detail::power<field_t::dim>( cell.length );
+
+                    for ( std::size_t i = 0ul; i < field_t::n_comp; ++i )
+                    {
+                        value_t y_i = samurai::field_value( y, cell, i );
+                        value_t z_i = samurai::field_value( z, cell, i );
+
+                        value_t tmp_i = std::max( std::abs( y_i ), std::abs( z_i ) );
+
+                        sc[i] = std::max( tmp_i, sc[i] );
+                    }
+                } );
+
+            samurai::for_each_cell( x.mesh(),
+                [&]( auto& cell )
+                {
+                    for ( std::size_t i = 0ul; i < field_t::n_comp; ++i )
+                    {
+                        value_t x_i = samurai::field_value( x, cell, i );
+
+                        err_comp[i] += detail::power<2>( x_i / ( a_tol + r_tol * sc[i] ) ) * cell.length;
+                    }
+                } );
+
+            auto err = std::sqrt( ( 1. / ( volume * static_cast<value_t>( field_t::n_comp ) ) )
+                                  * std::accumulate( err_comp.begin(), err_comp.end(), static_cast<value_t>( 0. ) ) );
+
+            return err;
         }
     };
 
