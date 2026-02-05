@@ -59,19 +59,15 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         using value_t = typename tableau_t::value_t;
 
         template <typename>
-        diagonal_implicit_rk_butcher( double tol_, std::size_t max_iter_ )
+        diagonal_implicit_rk_butcher()
             : butcher()
-            , tol( tol_ )
-            , max_iter( max_iter_ )
             , linalg( false )
         {
         }
 
         template <typename... args_t>
-        diagonal_implicit_rk_butcher( double tol_, std::size_t max_iter_, args_t... args )
+        diagonal_implicit_rk_butcher( args_t... args )
             : butcher()
-            , tol( tol_ )
-            , max_iter( max_iter_ )
             , linalg( args... )
         {
         }
@@ -287,17 +283,13 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
      * @tparam tableau_t type of Butcher tableau
      * @tparam lin_alg_t type of linear algebra
      * @tparam args_t    optional and variadic types of arguments
-     * @param tol      tolenrence of Newton's method
-     * @param max_iter maximum iteration of Newton's method
      * @param args     optional arguments to initialize an instance of type lin_alg_t
      */
     template <typename tableau_t, typename lin_alg_t, typename... args_t>
     auto
-    make_dirk( double tol    = ponio::default_config::newton_tolerance,
-        std::size_t max_iter = ponio::default_config::newton_max_iterations,
-        args_t... args )
+    make_dirk( args_t... args )
     {
-        return diagonal_implicit_rk_butcher<tableau_t, lin_alg_t>( tol, max_iter, args... );
+        return diagonal_implicit_rk_butcher<tableau_t, lin_alg_t>( args... );
     }
 
 } // namespace ponio::runge_kutta::diagonal_implicit_runge_kutta

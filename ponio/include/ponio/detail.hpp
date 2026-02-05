@@ -285,6 +285,92 @@ namespace ponio::detail
         return power_impl( std::forward<Arithmetic_t>( value ), std::make_index_sequence<Iexp>() );
     }
 
+    /**
+     * @brief join id of a list of Butcher tableaus
+     *
+     * @tparam tableau_ts list of Butcher tableaus type
+     */
+    template <typename... tableau_ts>
+    struct join_id
+    {
+        using size       = std::integral_constant<std::size_t, ( tableau_ts::id.size() + ... + 0 )>;
+        using c_str_type = std::array<char, size() + 1>;
+
+        static constexpr c_str_type
+        join_as_array() noexcept
+        {
+            c_str_type data{};
+
+            auto append = [i = 0, &data]( auto const& id ) mutable
+            {
+                for ( auto character : id )
+                {
+                    data[i++] = character;
+                }
+            };
+
+            ( append( tableau_ts::id ), ... );
+
+            data[size()] = 0; // last character is null like c-string
+            return data;
+        }
+
+        static constexpr c_str_type c_str = join_as_array();
+        static constexpr std::string_view value{ c_str.data(), size() };
+    };
+
+    /**
+     * @brief helper for join_id structure
+     *
+     * @tparam tableau_ts list of Butcher tableaus type
+     */
+    template <typename... tableau_ts>
+    static constexpr auto join_id_v = join_id<tableau_ts...>::value;
+
+    /**
+     * @brief just a classical separator in a constant expression variable
+     *
+     */
+    static constexpr std::string_view underscore = "_";
+
+    /**
+     * @brief a simple separator for join_id structure
+     *
+     * @tparam sep string_view to use as separator
+     */
+    template <std::string_view const& sep = underscore>
+    struct separator
+    {
+        static constexpr std::string_view id = sep;
+    };
+
+    /**
+     * @brief conditional constexpr value
+     *
+     * @tparam expression   constant expression to evaluate
+     * @tparam T            type of value
+     * @tparam value_true   value if ``expression == true``
+     * @tparam value_false  value if ``expression == false``
+     *
+     * This is similar to :code:`std::conditional_type` but with values
+     */
+    template <bool expression, typename T, T value_true, T value_false>
+    struct conditional_value
+    {
+        using value_type                  = T;
+        static constexpr value_type value = value_true;
+    };
+
+    template <typename T, T value_true, T value_false>
+    struct conditional_value<false, T, value_true, value_false>
+    {
+        using value_type                  = T;
+        static constexpr value_type value = value_false;
+    };
+
+    template <bool expression, typename T, T value_true, T value_false>
+    constexpr T conditional_v = conditional_value<expression, T, value_true, value_false>::value;
+
     // some concepts
     template <typename T>
     concept has_identity_method = std::is_member_function_pointer_v<decltype( &T::identity )>;

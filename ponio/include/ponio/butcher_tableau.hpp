@@ -37,7 +37,7 @@ namespace ponio::runge_kutta::butcher
     };
 
     template <typename Tableau>
-    concept is_butcher_tableau = std::derived_from<butcher_tableau<Tableau::N_stages, typename Tableau::value_t>, Tableau>;
+    concept is_butcher_tableau = std::derived_from<Tableau, butcher_tableau<Tableau::N_stages, typename Tableau::value_t>>;
 
     template <std::size_t N, typename _value_t = double>
     struct adaptive_butcher_tableau : public butcher_tableau<N, _value_t>
@@ -115,5 +115,78 @@ namespace ponio::runge_kutta::butcher
                                   std::bool_constant<is_explicit_impl<Tableau>()>()
                                   } -> std::same_as<std::true_type>;
                           };
+
+    template <typename Tableau>
+    constexpr bool
+    is_diagonal_implicit_impl()
+    {
+        if constexpr ( is_exprk_tableau<Tableau> )
+        {
+            return true;
+        }
+        else
+        {
+            using value_t       = typename Tableau::value_t;
+            value_t partial_sum = 0;
+
+            for ( std::size_t i = 0ul; i < Tableau::N_stages; ++i )
+            {
+                for ( std::size_t j = 0ul; j < Tableau::N_stages - 1; ++j )
+                {
+                    partial_sum += ponio::detail::power<2>( Tableau::A[i][j] );
+                }
+            }
+
+            return partial_sum == static_cast<value_t>( 0. );
+        }
+    }
+
+    template <typename Tableau>
+    concept is_diagonal_implicit = requires( Tableau t ) {
+                                       {
+                                           std::bool_constant<is_diagonal_implicit_impl<Tableau>()>()
+                                           } -> std::same_as<std::true_type>;
+                                   };
+
+    template <typename tableau_im_t, typename tableau_ex_t>
+    concept is_compatible_tableaus = requires( tableau_im_t t_im, tableau_ex_t t_ex ) {
+                                         // check if arguments are Butcher tableaus
+                                         requires is_butcher_tableau<tableau_im_t>;
+                                         requires is_butcher_tableau<tableau_ex_t>;
+
+                                         // check size of each tableau
+                                         {
+                                             std::bool_constant<tableau_im_t::N_stages == tableau_ex_t::N_stages>()
+                                             } -> std::same_as<std::true_type>;
+
+                                         // check type stored in tableau
+                                         requires std::same_as<typename tableau_im_t::value_t, typename tableau_ex_t::value_t>;
+
+                                         // check compatibility in ponio
+                                         requires is_diagonal_implicit<tableau_ex_t>;
+                                         requires is_explicit<tableau_ex_t>;
+                                     };
+
+    template <typename _tableau_im_t, typename _tableau_ex_t>
+    // requires is_compatible_tableaus<_tableau_im_t, _tableau_ex_t>
+    struct pair_butcher_tableau
+    {
+        using tableau_im_t = _tableau_im_t;
+        using tableau_ex_t = _tableau_ex_t;
+
+        static constexpr std::size_t N_stages    = tableau_im_t::N_stages;
+        static constexpr bool is_embedded        = is_embedded_tableau<tableau_im_t> && is_embedded_tableau<tableau_ex_t>;
+        static constexpr bool is_imex_method     = true;
+        static constexpr std::size_t N_operators = 2;
+
+        using value_t  = typename tableau_im_t::value_t;
+        using matrix_t = typename tableau_im_t::matrix_t;
+        using vector_t = typename tableau_im_t::vector_t;
+
+        pair_butcher_tableau() = default;
+
+        tableau_im_t tableau_im;
+        tableau_ex_t tableau_ex;
+    };
 
 } // namespace ponio::runge_kutta::butcher
