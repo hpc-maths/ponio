@@ -302,15 +302,14 @@ namespace ponio
         using step_storage_t  = std::array<state_t, step_storage_size>;
 
         Algorithm_t alg;
-        step_storage_t k_ex_is;
-        step_storage_t k_im_is;
+        std::array<step_storage_t, Algorithm_t::N_operators> kis;
         state_t ui;
         state_t u_tmp;
 
         method( Algorithm_t const& alg_, state_t const& shadow_of_u0 )
             : alg( alg_ )
-            , k_ex_is( ::ponio::detail::init_fill_array<std::tuple_size_v<step_storage_t>>( shadow_of_u0 ) )
-            , k_im_is( ::ponio::detail::init_fill_array<std::tuple_size_v<step_storage_t>>( shadow_of_u0 ) )
+            , kis( { ::ponio::detail::init_fill_array<std::tuple_size_v<step_storage_t>>( shadow_of_u0 ),
+                  ::ponio::detail::init_fill_array<std::tuple_size_v<step_storage_t>>( shadow_of_u0 ) } )
             , ui( shadow_of_u0 )
             , u_tmp( shadow_of_u0 )
         {
@@ -345,7 +344,7 @@ namespace ponio
         typename std::enable_if<( I == Algorithm_t::N_stages + 1 ), void>::type
         _call_stage( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
-            alg.stage( Stage<I>{}, f, tn, un, k_ex_is, k_im_is, dt, ui, u_tmp, k_ex_is[I], k_im_is[I] );
+            alg.stage( Stage<I>{}, f, tn, un, kis[0], kis[1], dt, ui, u_tmp, kis[0][I], kis[1][I] );
         }
 
         template <std::size_t I = 0, typename Problem_t, typename value_t, typename Algo_t = Algorithm_t>
@@ -369,7 +368,7 @@ namespace ponio
         typename std::enable_if<( I < Algorithm_t::N_stages + 1 ), void>::type
         _call_stage( Problem_t& f, value_t tn, state_t& un, value_t dt )
         {
-            alg.stage( Stage<I>{}, f, tn, un, k_ex_is, k_im_is, dt, ui, u_tmp, k_ex_is[I], k_im_is[I] );
+            alg.stage( Stage<I>{}, f, tn, un, kis[0], kis[1], dt, ui, u_tmp, kis[0][I], kis[1][I] );
             _call_stage<I + 1>( f, tn, un, dt );
         }
 
@@ -388,7 +387,7 @@ namespace ponio
         _return( value_t& tn, [[maybe_unused]] state_t& un, value_t& dt, state_t& unp1 )
         {
             tn = tn + dt;
-            std::swap( k_ex_is.back(), unp1 );
+            std::swap( kis[0].back(), unp1 );
         }
 
         template <typename value_t, typename Algo_t = Algorithm_t>
@@ -397,8 +396,8 @@ namespace ponio
         _return( value_t& tn, state_t& un, value_t& dt, state_t& unp1 )
         {
             alg.info().error = ::ponio::detail::error_estimate( un,
-                k_ex_is[Algorithm_t::N_stages],
-                k_ex_is[Algorithm_t::N_stages + 1],
+                kis[0][Algorithm_t::N_stages],
+                kis[0][Algorithm_t::N_stages + 1],
                 info().absolute_tolerance,
                 info().relative_tolerance );
             // std::cout << "alg.info().error = " << alg.info().error << std::endl;
@@ -419,7 +418,7 @@ namespace ponio
                 alg.info().success = true;
 
                 tn = tn + dt;
-                std::swap( k_ex_is[Algorithm_t::N_stages], unp1 );
+                std::swap( kis[0][Algorithm_t::N_stages], unp1 );
                 dt = new_dt;
             }
         }
@@ -442,49 +441,27 @@ namespace ponio
             return alg.info();
         }
 
-        // /**
-        //  * @brief returns array of stages
-        //  *
-        //  * @return auto&
-        //  */
-        // auto&
-        // stages_ex()
-        // {
-        //     return k_ex_is;
-        // }
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto&
+         */
+        auto&
+        stages()
+        {
+            return kis;
+        }
 
-        // /**
-        //  * @brief returns array of stages
-        //  *
-        //  * @return auto const&
-        //  */
-        // auto const&
-        // stages_ex() const
-        // {
-        //     return k_ex_is;
-        // }
-
-        // /**
-        //  * @brief returns array of stages
-        //  *
-        //  * @return auto&
-        //  */
-        // auto&
-        // stages_im()
-        // {
-        //     return k_im_is;
-        // }
-
-        // /**
-        //  * @brief returns array of stages
-        //  *
-        //  * @return auto const&
-        //  */
-        // auto const&
-        // stages_im() const
-        // {
-        //     return k_im_is;
-        // }
+        /**
+         * @brief returns array of stages
+         *
+         * @return auto const&
+         */
+        auto const&
+        stages() const
+        {
+            return kis;
+        }
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -575,7 +552,7 @@ namespace ponio
      * factory of tuple of methods from a tuple of `Algorithm_t`
      * @param algos        a tuple of `Algorithm_t` objets with predifined stages
      * @param shadow_of_u0 an object with the same size of computed value for allocation
-     * @details this factory is to prevent duplucation of code in factory of methods for
+     * @details this factory is to prevent duplication of code in factory of methods for
      * splitting methods (Lie or Strang method).
      */
     template <typename value_t, typename state_t, typename... Algorithms_t>
