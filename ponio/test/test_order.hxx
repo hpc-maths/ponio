@@ -40,8 +40,12 @@ struct test_order
         }
         else if constexpr ( type == class_method::diagonal_implicit_method )
         {
-            INFO( "not implemented test for DIRK method" );
-            WARN( diagonal_implicit_method::check_order( rk_t() ) == doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+            using dirk_t = decltype( std::declval<rk_t>()() );
+            INFO( "test order of ", dirk_t::id );
+            auto computed_order = diagonal_implicit_method::check_order( dirk_t() );
+
+            CHECK( computed_order >= doctest::Approx( dirk_t::order ).epsilon( 0.05 ) );
+            WARN( computed_order == doctest::Approx( dirk_t::order ).epsilon( 0.05 ) );
         }
         else if constexpr ( type == class_method::exponential_method )
         {
@@ -99,6 +103,11 @@ struct test_order
 TEST_CASE( "order::explict_runge_kutta" )
 {
     test_order<class_method::explicit_method>::on<ponio::runge_kutta::erk_tuple<double>>();
+}
+
+TEST_CASE( "order::diagonal_implicit_runge_kutta" )
+{
+    test_order<class_method::diagonal_implicit_method>::on<ponio::runge_kutta::dirk_tuple<double>>();
 }
 
 TEST_CASE( "order::chebychev_runge_kutta" )
@@ -220,6 +229,9 @@ TEST_CASE( "order::splitting::_split_solve" )
 
 // TEST_CASE( "order::lawson_runge_kutta" )
 // {
-//     auto exp = [](double x){ return std::exp(x); };
-//     test_order<class_method::exponential_method>::on<ponio::runge_kutta::lrk_tuple<double, decltype(exp)>>();
+//     auto exp = []( double x )
+//     {
+//         return std::exp( x );
+//     };
+//     test_order<class_method::exponential_method>::on<ponio::runge_kutta::lrk_tuple<double, decltype( exp )>>();
 // }

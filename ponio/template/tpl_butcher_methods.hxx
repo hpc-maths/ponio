@@ -104,7 +104,6 @@ using {{ rk.id }} = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id 
  * @tparam value_t type of coefficient (``double``by default)
  *
  * @param exp_ exponential function for the Lawson method
- * @param tol  tolerance (only for adaptive time step methods)
  *
  * @details see more on [ponio](https://hpc-maths.github.io/ponio/#{{ rk.id }})
  *
@@ -114,16 +113,16 @@ using {{ rk.id }} = explicit_runge_kutta::explicit_runge_kutta<butcher_{{ rk.id 
  *
  */
 template <typename value_t, typename Exp_t>
-constexpr auto l{{ rk.id }}_t = []( Exp_t exp_ , double tol=ponio::default_config::tol )
+constexpr auto l{{ rk.id }}_t = []( Exp_t exp_ )
 {
-  return lawson_runge_kutta::make_lawson<butcher_{{ rk.id }}<value_t>,Exp_t>(exp_,tol);
+  return lawson_runge_kutta::make_lawson<butcher_{{ rk.id }}<value_t>,Exp_t>(exp_);
 };
 
 template <typename Exp_t>
 auto
-l{{ rk.id }}( Exp_t exp_ , double tol=ponio::default_config::tol )
+l{{ rk.id }}( Exp_t exp_ )
 {
-  return lawson_runge_kutta::make_lawson<butcher_{{ rk.id }}<double>,Exp_t>(exp_,tol);
+  return lawson_runge_kutta::make_lawson<butcher_{{ rk.id }}<double>,Exp_t>(exp_);
 }
 
 {% endfor %}
@@ -268,11 +267,10 @@ struct butcher_{{ rk.id }} : public butcher::{{ "adaptive_" if 'b2' in rk else "
  *
  */
 template <typename value_t, typename linear_algebra_t=void, typename ... Args>
-auto
-{{ rk.id }}_t ( Args ... args )
+constexpr auto {{ rk.id }}_t = []( Args ... args )
 {
   return diagonal_implicit_runge_kutta::make_dirk<butcher_{{ rk.id }}<value_t>, linear_algebra_t>(args...);
-}
+};
 
 template <typename linear_algebra_t=void, typename ... Args>
 auto
@@ -282,6 +280,12 @@ auto
 }
 
 {% endfor %}
+
+/**
+ * @brief Type of tuple that contains all DIRK methods of ponio
+*/
+template <typename value_t, typename linear_algebra_t=void, typename ... Args>
+using dirk_tuple = std::tuple< {{ list_dirk | sformat("decltype({}_t<value_t, linear_algebra_t, Args...>)", attribute="id") | join(", ") }} >;
 
 // NOLINTEND(cppcoreguidelines-rvalue-reference-param-not-moved, modernize-use-std-numbers)
 
