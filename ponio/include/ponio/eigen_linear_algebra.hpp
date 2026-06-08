@@ -64,9 +64,9 @@ namespace ponio::linear_algebra
     template <typename scalar_t>
     struct linear_algebra<Eigen::SparseMatrix<scalar_t>> // NOLINT(misc-include-cleaner)
     {
-        using matrix_type = Eigen::SparseMatrix<scalar_t>;          // NOLINT(misc-include-cleaner)
-        using vector_type = Eigen::Vector<scalar_t, Eigen::Dynamic>;          // NOLINT(misc-include-cleaner)
-        using solver_type = Eigen::SimplicialCholesky<matrix_type>; // NOLINT(misc-include-cleaner)
+        using matrix_type = Eigen::SparseMatrix<scalar_t>;           // NOLINT(misc-include-cleaner)
+        using vector_type = Eigen::Vector<scalar_t, Eigen::Dynamic>; // NOLINT(misc-include-cleaner)
+        using solver_type = Eigen::SimplicialCholesky<matrix_type>;  // NOLINT(misc-include-cleaner)
 
       private:
 
