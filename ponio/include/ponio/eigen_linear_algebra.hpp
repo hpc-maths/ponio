@@ -65,12 +65,12 @@ namespace ponio::linear_algebra
     struct linear_algebra<Eigen::SparseMatrix<scalar_t>> // NOLINT(misc-include-cleaner)
     {
         using matrix_type = Eigen::SparseMatrix<scalar_t>;          // NOLINT(misc-include-cleaner)
-        using vector_type = Eigen::SparseVector<scalar_t>;          // NOLINT(misc-include-cleaner)
+        using vector_type = Eigen::Vector<scalar_t, Eigen::Dynamic>;          // NOLINT(misc-include-cleaner)
         using solver_type = Eigen::SimplicialCholesky<matrix_type>; // NOLINT(misc-include-cleaner)
 
       private:
 
-        static matrix_type I; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+        inline static matrix_type I; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
       public:
 
