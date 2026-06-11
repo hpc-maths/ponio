@@ -375,8 +375,7 @@ namespace ponio::runge_kutta::rock
          */
         template <typename state_t>
             requires( !std::ranges::range<state_t> && !::ponio::detail::has_array_range<state_t> )
-        auto
-        error( state_t&& unp1, state_t&& un, state_t&& tmp )
+        auto error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
             using namespace std;
             return abs( std::forward<state_t>( tmp )
@@ -387,8 +386,7 @@ namespace ponio::runge_kutta::rock
         // same with ranges
         template <typename state_t>
             requires( std::ranges::range<state_t> )
-        auto
-        error( state_t&& unp1, state_t&& un, state_t&& tmp )
+        auto error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
             auto it_un  = std::ranges::begin( std::forward<state_t>( un ) );
             auto it_tmp = std::ranges::begin( std::forward<state_t>( tmp ) );
@@ -407,12 +405,9 @@ namespace ponio::runge_kutta::rock
         // same with something which contains a range
         template <typename state_t>
             requires( !std::ranges::range<state_t> && ::ponio::detail::has_array_range<state_t> )
-        auto
-        error( state_t&& unp1, state_t&& un, state_t&& tmp )
+        auto error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
             return error( unp1.array(), un.array(), tmp.array() );
-            // return error( std::forward<state_t>( unp1 ).array(), std::forward<state_t>( un ).array(), std::forward<state_t>( tmp
-            // ).array() );
         }
 
         /**
@@ -662,8 +657,7 @@ namespace ponio::runge_kutta::rock
          */
         template <typename state_t>
             requires( !std::ranges::range<state_t> && !::ponio::detail::has_array_range<state_t> )
-        auto
-        error( state_t const& unp1, state_t const& tmp )
+        auto error( state_t const& unp1, state_t const& tmp )
         {
             using namespace std;
             return abs( tmp / ( info().absolute_tolerance + info().relative_tolerance * abs( unp1 ) ) );
@@ -671,8 +665,7 @@ namespace ponio::runge_kutta::rock
 
         template <typename state_t>
             requires( std::ranges::range<state_t> )
-        auto
-        error( state_t const& unp1, state_t const& tmp )
+        auto error( state_t const& unp1, state_t const& tmp )
         {
             auto it_tmp = std::ranges::begin( tmp );
 
@@ -688,8 +681,7 @@ namespace ponio::runge_kutta::rock
 
         template <typename state_t>
             requires( !std::ranges::range<state_t> && ::ponio::detail::has_array_range<state_t> )
-        auto
-        error( state_t const& unp1, state_t const& tmp )
+        auto error( state_t const& unp1, state_t const& tmp )
         {
             return error( unp1.array(), tmp.array() );
         }
