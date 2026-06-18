@@ -374,8 +374,8 @@ namespace ponio::runge_kutta::rock
          * @return auto    estimation of error to compare to 1
          */
         template <typename state_t>
-        auto
-        error( state_t&& unp1, state_t&& un, state_t&& tmp )
+            requires( !std::ranges::range<state_t> && !::ponio::detail::has_array_range<state_t> )
+        auto error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
             using namespace std;
             return abs( std::forward<state_t>( tmp )
@@ -385,9 +385,8 @@ namespace ponio::runge_kutta::rock
 
         // same with ranges
         template <typename state_t>
-            requires std::ranges::range<state_t>
-        auto
-        error( state_t&& unp1, state_t&& un, state_t&& tmp )
+            requires( std::ranges::range<state_t> )
+        auto error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
             auto it_un  = std::ranges::begin( std::forward<state_t>( un ) );
             auto it_tmp = std::ranges::begin( std::forward<state_t>( tmp ) );
@@ -405,11 +404,10 @@ namespace ponio::runge_kutta::rock
 
         // same with something which contains a range
         template <typename state_t>
-            requires ::ponio::detail::has_array_range<state_t>
-        auto
-        error( state_t&& unp1, state_t&& un, state_t&& tmp )
+            requires( !std::ranges::range<state_t> && ::ponio::detail::has_array_range<state_t> )
+        auto error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
-            return error( std::forward<state_t>( unp1 ).array(), std::forward<state_t>( un ).array(), std::forward<state_t>( tmp ).array() );
+            return error( unp1.array(), un.array(), tmp.array() );
         }
 
         /**
@@ -658,37 +656,32 @@ namespace ponio::runge_kutta::rock
          * @return auto    estimation of error to compare to 1
          */
         template <typename state_t>
-        auto
-        error( state_t const& unp1, state_t const& tmp )
+            requires( !std::ranges::range<state_t> && !::ponio::detail::has_array_range<state_t> )
+        auto error( state_t const& unp1, state_t const& tmp )
         {
             using namespace std;
             return abs( tmp / ( info().absolute_tolerance + info().relative_tolerance * abs( unp1 ) ) );
         }
 
-        // same with ranges
         template <typename state_t>
-            requires std::ranges::range<state_t>
-        auto
-        error( state_t const& unp1, state_t const& tmp )
+            requires( std::ranges::range<state_t> )
+        auto error( state_t const& unp1, state_t const& tmp )
         {
             auto it_tmp = std::ranges::begin( tmp );
 
-            using namespace std;
-            return sqrt( std::accumulate( std::ranges::begin( unp1 ),
-                             std::ranges::end( unp1 ),
-                             0.,
-                             [&]( auto sum, auto unp1_i )
-                             {
-                                 return sum + ::ponio::detail::power<2>( error( unp1_i, *it_tmp++ ) );
-                             } )
-                         / static_cast<value_t>( std::size( unp1 ) ) );
+            return std::sqrt( std::accumulate( std::ranges::begin( unp1 ),
+                                  std::ranges::end( unp1 ),
+                                  0.,
+                                  [&]( auto sum, auto unp1_i )
+                                  {
+                                      return sum + ::ponio::detail::power<2>( error( unp1_i, *it_tmp++ ) );
+                                  } )
+                              / static_cast<value_t>( std::size( unp1 ) ) );
         }
 
-        // same with something which contains a range
         template <typename state_t>
-            requires ::ponio::detail::has_array_range<state_t>
-        auto
-        error( state_t const& unp1, state_t const& tmp )
+            requires( !std::ranges::range<state_t> && ::ponio::detail::has_array_range<state_t> )
+        auto error( state_t const& unp1, state_t const& tmp )
         {
             return error( unp1.array(), tmp.array() );
         }
