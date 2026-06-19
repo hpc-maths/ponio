@@ -416,7 +416,10 @@ if __name__ == '__main__':
         vprint("{}/{} {:25}".format(i+1, len(args.FILE),
                butcher['label']), end="\r")
 
+        # TODO: need to add analysis on this king of methods expRK and aRK
         if "expRK" == (butcher['tag'] if 'tag' in butcher else "RK"):
+            continue
+        if "aRK" == (butcher['tag'] if 'tag' in butcher else "RK"):
             continue
 
         rk = rk_butcher(
