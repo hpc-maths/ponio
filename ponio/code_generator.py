@@ -440,20 +440,28 @@ def doi_bib_crossref(doi: str):
     """
     import urllib.request
 
-    with urllib.request.urlopen(f"https://api.crossref.org/works/{doi}") as response:
-        message = json.loads(response.read())['message']
+    try:
+        with urllib.request.urlopen(f"https://api.crossref.org/works/{doi}") as response:
+            message = json.loads(response.read())['message']
 
-        author = " & ".join(
-            [f"{auth['family']}, {auth['given']}" for auth in message['author']])
-        title = message['title'][0]
-        pubdate = message['published']['date-parts'][0][0]
-        publisher = message['short-container-title'][0] if len(
-            message['short-container-title']) > 0 else message['publisher']
+            author = " & ".join(
+                [f"{auth['family']}, {auth['given']}" for auth in message['author']])
+            title = message['title'][0]
+            pubdate = message['published']['date-parts'][0][0]
+            publisher = message['short-container-title'][0] if len(
+                message['short-container-title']) > 0 else message['publisher']
 
-    return {
-        'url': message['URL'],
-        'bib': f"{author}, \"{title}\", in: {publisher} ({pubdate})"
-    }
+        return {
+            'url': message['URL'],
+            'bib': f"{author}, \"{title}\", in: {publisher} ({pubdate})"
+        }
+    except urllib.error.HTTPError as e:
+        print(f"HTTPError: {e.code}")
+
+        return {
+            'url': f"https://www.doi.org/{doi}",
+            'bib': f"{doi} [preprint]"
+        }
 
 
 def doi_bib_offline(doi: str):
