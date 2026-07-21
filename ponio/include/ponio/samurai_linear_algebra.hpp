@@ -17,7 +17,7 @@
 
 namespace samurai
 {
-    template <class mesh_t, class value_t, std::size_t n_comp, bool SOA>
+    template <class mesh_t, class value_t, std::size_t n_comp>
     class VectorField;
 
     template <class mesh_t, class value_t>
@@ -30,14 +30,8 @@ namespace ponio_samurai
     concept is_scalar_field = std::same_as<field_t, ::samurai::ScalarField<typename field_t::mesh_t, typename field_t::value_type>>;
 
     template <typename field_t>
-    concept is_vector_field_soa = std::same_as<field_t,
-        ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp, true>>;
-    template <typename field_t>
-    concept is_vector_field_aos = std::same_as<field_t,
-        ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp, false>>;
-
-    template <typename field_t>
-    concept is_vector_field = is_vector_field_soa<field_t> || is_vector_field_aos<field_t>;
+    concept is_vector_field = std::same_as<field_t,
+        ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp>>;
 
     template <typename field_t>
     concept is_samurai_field = is_scalar_field<field_t> || is_vector_field<field_t>;
