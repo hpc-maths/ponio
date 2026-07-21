@@ -93,10 +93,6 @@ namespace ponio::observer
     {
         using derived_t = Derived_t;
 
-        virtual ~base_observer()
-        {
-        }
-
         template <typename state_t, typename value_t>
         void
         operator()( value_t tn, state_t const& un, value_t dt );
