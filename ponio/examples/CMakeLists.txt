@@ -17,7 +17,7 @@ endif()
 
 if(BUILD_CLI11_EXAMPLES)
     list(APPEND examples_list ${examples_cli11})
-    find_package(CLI11)
+    find_package(CLI11 REQUIRED)
 endif()
 
 if(BUILD_SAMURAI_EXAMPLES)
@@ -34,20 +34,20 @@ foreach(example IN LISTS examples_list)
 
     if(${example} IN_LIST examples_eigen)
         message(STATUS "    - eigen")
-        target_link_libraries(${example} Eigen3::Eigen)
+        target_link_libraries(${example} PUBLIC Eigen3::Eigen)
     endif()
 
     if(${example} IN_LIST examples_cli11)
         message(STATUS "    - cli11")
-        target_link_libraries(${example} CLI11::CLI11)
+        target_link_libraries(${example} PUBLIC CLI11::CLI11)
     endif()
 
     if(${example} IN_LIST examples_samurai)
         message(STATUS "    - samurai")
-        target_link_libraries(${example} samurai::samurai)
+        target_link_libraries(${example} PUBLIC samurai::samurai)
     endif()
 
-    target_link_libraries(${example} ponio)
+    target_link_libraries(${example} PUBLIC ponio)
 endforeach()
 
 set(visu_list "")

@@ -156,6 +156,8 @@ namespace ponio::observer
 
         file_observer( std::filesystem::path const& path );
 
+        ~file_observer();
+
         // file_observer( file_observer const& ) = delete;
 
       private:
@@ -173,6 +175,15 @@ namespace ponio::observer
     file_observer<char_t>::file_observer( std::filesystem::path const& path )
         : out( create_directory_if_needed( path ) )
     {
+    }
+
+    /**
+     * @brief close file properly
+     */
+    template <typename char_t>
+    file_observer<char_t>::~file_observer()
+    {
+        out.close();
     }
 
     /**

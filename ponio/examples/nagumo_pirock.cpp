@@ -84,7 +84,7 @@ main( int argc, char** argv )
     auto mesh   = samurai::mra::make_mesh( box, config );
 
     // init solution ----------------------------------------------------------
-    auto u_ini = samurai::make_scalar_field<double>( "u", mesh );
+    auto u_ini = samurai::make_vector_field<double, 1>( "u", mesh );
 
     auto exact_solution = [&]( double x, double t )
     {
@@ -97,7 +97,7 @@ main( int argc, char** argv )
     samurai::for_each_cell( mesh,
         [&]( auto& cell )
         {
-            u_ini[cell] = exact_solution( cell.center( 0 ), 0 );
+            u_ini[cell]( 0 ) = exact_solution( cell.center( 0 ), 0 );
         } );
     samurai::make_bc<samurai::Neumann<1>>( u_ini, 0. );
 
@@ -125,8 +125,8 @@ main( int argc, char** argv )
     react.set_jacobian_function(
         [&]( auto& jacobian_matrix, auto const& cell, auto const& field )
         {
-            auto u          = field[cell];
-            jacobian_matrix = k * ( 2 * u * ( 1 - u ) - u * u );
+            auto u                  = field[cell]( 0 );
+            jacobian_matrix( 0, 0 ) = k * ( 2 * u * ( 1 - u ) - u * u );
         } );
     auto fr_t = [&]( double /* t */ )
     {

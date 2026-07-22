@@ -15,7 +15,7 @@ dependencies:
   - matplotlib
   # all examples dependencies
   - eigen
-  - samurai=0.28
+  - samurai
   - petsc
   - cli11
   - h5py

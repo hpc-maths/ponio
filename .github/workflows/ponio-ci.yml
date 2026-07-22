@@ -21,9 +21,9 @@ jobs:
           path: |
             ~/.cache/ccache
           key: cppcheck
-      - uses: prefix-dev/setup-pixi@v0.8.8
+      - uses: prefix-dev/setup-pixi@v0.10.0
         with:
-          pixi-version: v0.44.0
+          pixi-version: v0.70.2
           cache: true
       - name: Install Cppcheck
         run: pixi add cppcheck=2.17.1 cxx-compiler
@@ -100,9 +100,9 @@ jobs:
         run: |
           sudo apt update
           sudo apt install ${{ matrix.package }}
-      - uses: prefix-dev/setup-pixi@v0.8.8
+      - uses: prefix-dev/setup-pixi@v0.10.0
         with:
-          pixi-version: v0.44.0
+          pixi-version: v0.70.2
           cache: true
       - name: Build
         shell: pixi run bash {0}
@@ -131,9 +131,9 @@ jobs:
           - macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: prefix-dev/setup-pixi@v0.8.8
+      - uses: prefix-dev/setup-pixi@v0.10.0
         with:
-          pixi-version: v0.44.0
+          pixi-version: v0.70.2
           cache: true
       - name: Windows - Setup C++
         if: runner.os == 'Windows'
@@ -164,9 +164,9 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
-      - uses: prefix-dev/setup-pixi@v0.8.8
+      - uses: prefix-dev/setup-pixi@v0.10.0
         with:
-          pixi-version: v0.44.0
+          pixi-version: v0.70.2
           cache: true
       - name: Install compiler and Python
         run: pixi add cxx-compiler python
