@@ -16,14 +16,17 @@ This library aims to be the easiest to use without compromising on performance.
 <details>
 <summary>Table of Contents</summary>
 
-- [Get started](#get-started)
-- [Features](#features)
-- [Installation](#installation)
-  - [From conda](#from-conda)
-  - [From source](#from-source)
-- [For more information](#for-more-information)
-- [How to contribute](#how-to-contribute)
-- [License](#license)
+- [ponio](#ponio)
+  - [Get started](#get-started)
+    - [Lorenz equations](#lorenz-equations)
+    - [More examples](#more-examples)
+  - [Features](#features)
+  - [Installation](#installation)
+    - [From conda](#from-conda)
+    - [From source](#from-source)
+  - [For more information](#for-more-information)
+  - [How to contribute](#how-to-contribute)
+  - [License](#license)
 
 </details>
 
@@ -44,7 +47,7 @@ $$
 This model is weell know to be a chaotic system, here the solution plots form every 92 methods provide by ponio.
 
 | Lorenz attractor                                          |
-|-----------------------------------------------------------|
+| --------------------------------------------------------- |
 | ![Lorenz attractor](ponio/examples/img/lorenz_all/01.gif) |
 
 
@@ -125,7 +128,7 @@ More examples can be found in [notebooks](https://github.com/hpc-maths/ponio/tre
 * [x] ROCK 2 and ROCK 4 methods
 * [x] Splitting methods : Lie splitting method and Strang splitting method
 * [x] PIROCK method
-* [ ] Additive Runge-Kutta methods (IMEX) from their Butcher tableau
+* [x] Additive Runge-Kutta methods (IMEX) from their Butcher tableau
 * [x] Coupling ponio and adaptive mesh library [samurai](https://github.com/hpc-maths/samurai)
 * [x] Coupling ponio and linear algebra library [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page)
 * [ ] Parareal method
