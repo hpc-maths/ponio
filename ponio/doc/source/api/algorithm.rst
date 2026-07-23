@@ -8,7 +8,7 @@ The ponio library provides multiple algorithms to solve ODE which must be specif
   For the explanation of different methods, you can read the :doc:`time integrators desciption <../user/time_integrators>`.
 
 .. toctree::
-   :caption: List of algorithms
+   :caption: List of all algorithms
    :maxdepth: 2
    algorithm/list_algorithm
 
