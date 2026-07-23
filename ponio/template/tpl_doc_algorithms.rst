@@ -1,10 +1,7 @@
-Algorithms
-==========
+List of Runge-Kutta methods based on a Butcher tableau
+======================================================
 
-List of all algorithms (skeleton of each numerical method to solve)
-
-Runge-Kutta methods
--------------------
+List of all algorithms (skeleton of each numerical method to solve) based on a Butcher tableau
 
 A Runge-Kutta method is defined in ponio by its Butcher tableau
 
@@ -35,8 +32,8 @@ The method, with the previous Butcher tableau, reads as
    \end{aligned}
 
 
-Explicit methods
-~~~~~~~~~~~~~~~~
+Explicit Runge-Kutta methods
+----------------------------
 
 When the matrix :math:`A` is strictly lower triangular, the Runge-Kutta method is called explicit. The only think you need to provide to solve a problem with this kind of method is the function :math:`f`. See below for the list of explicit Runge-Kutta methods in ponio.
 
@@ -46,11 +43,8 @@ When the matrix :math:`A` is strictly lower triangular, the Runge-Kutta method i
 
 {% endif %}{% endfor %}
 
-
 Embedded methods
 ~~~~~~~~~~~~~~~~
-
-The ponio library provides also adaptive time step methods.
 
 {% for rk in list_erk %}{% if rk.b2 is defined %}
 .. doxygentypedef:: ponio::runge_kutta::{{ rk.id }}_t
@@ -60,21 +54,31 @@ The ponio library provides also adaptive time step methods.
 
 
 Diagonal implicit methods
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 When the matrix :math:`A` is lower triangular with a diagonal, the Runge-Kutta method is called diagonal implicit (or DIRK). You have to provide a Jacobian function that returns the Jacobian matrix in point :math:`(t, u)` (see :cpp:class:`ponio::implicit_problem`). You can also provide an operator base definition (see :cpp:class:`ponio::implicit_operator_problem`).
 
-{% for rk in list_dirk %}
-.. doxygenfunction:: ponio::runge_kutta::{{ rk.id }}_t
+{% for rk in list_dirk %}{% if rk.b2 is undefined %}
+.. doxygenvariable:: ponio::runge_kutta::{{ rk.id }}_t
   :project: ponio
 
-{% endfor %}
+{% endif %}{% endfor %}
+
+
+Embedded methods
+~~~~~~~~~~~~~~~~
+
+{% for rk in list_dirk %}{% if rk.b2 is defined %}
+.. doxygenvariable:: ponio::runge_kutta::{{ rk.id }}_t
+  :project: ponio
+
+{% endif %}{% endfor %}
 
 
 Lawson methods
 --------------
 
-Lawson methods was initialy propose into :cite:`lawson:1967`. Lawson methods are build to solve a problem with a linear and nonlinear part, to solve exactly the problem when the nonlinear part goes to zero. This class of problem can be write as
+Lawson methods was initialy propose into :footcite:t:`lawson:1967`. Lawson methods are build to solve a problem with a linear and nonlinear part, to solve exactly the problem when the nonlinear part goes to zero. This class of problem can be write as
 
 .. math::
 
@@ -112,15 +116,11 @@ We solve this equation with a classical Runge-Kutta method RK(:math:`s`, :math:`
 In ponio, Lawson methods have the same name of the underlying Runge-Kutta method prefixed by ``l``.
 
 
-Explicit methods
-~~~~~~~~~~~~~~~~
-
 {% for rk in list_erk %}{% if rk.b2 is undefined %}
 .. doxygenvariable:: ponio::runge_kutta::l{{ rk.id }}_t
   :project: ponio
 
 {% endif %}{% endfor %}
-
 
 Embedded methods
 ~~~~~~~~~~~~~~~~
@@ -168,7 +168,6 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
 
   and we use the notations :\math:`\varphi_\ell = \varphi_\ell(\Delta t L)` and :math:`\varphi_{\ell,j} = \varphi_\ell(c_j \Delta t L)`.
 
-
 {% for rk in list_exprk %}
 .. doxygentypedef:: ponio::runge_kutta::{{ rk.id }}_t
   :project: ponio
@@ -176,13 +175,71 @@ Interpolation of the integral yields to build a custom Runge-Kutta method which 
 {% endfor %}
 
 
-Explicit stabilized Runge-Kutta methods
----------------------------------------
+Additive Runge-Kutta methods
+----------------------------
+
+An additive Runge-Kutta method is defined in ponio by its pair of Butcher tableaus
+
+.. math::
+
+   \begin{array}{c|c}
+      c & A \\
+      \hline
+        & b^\top
+   \end{array}
+   \quad
+   \begin{array}{c|c}
+      \tilde{c} & \tilde{A} \\
+      \hline
+        & \tilde{b}^\top
+   \end{array}
+
+which is stored as a JSON file in ``database`` folder, and where :math:`(A, b, c)` is an explicit Runge-Kutta method and :math:`(\tilde{A}, \tilde{b}, \tilde{c})` is a diagonal implicit Runge-Kutta method.
+
+Additive Runge-Kutta methods are useful to solve a problem like
+
+.. math::
+
+   \dot{u} = f_e(t, u) + f_i(t,u)
+
+The method, with the previous pair of Butcher tableaus, reads as
+
+.. math::
+
+   \begin{aligned}
+      u^{(i)} &= u^n + \Delta t \sum_j a_{ij} k_j + \Delta t \sum_\ell \tilde{a}_{i\ell} \tilde{k}_\ell, \quad i = 1, \dots, s \\
+      k_i         &= f_e(t^n + c_i\Delta t, u^{(i)}) \\
+      \tilde{k}_i &= f_i(t^n + \tilde{c}_i\Delta t, u^{(i)}) \\
+      u^{n+1} &= u^n + \Delta t \sum_i b_i k_i  + \Delta t \sum_j \tilde{b}_j k_j
+   \end{aligned}
+
+{% for rk in list_ark %}{% if rk.explicit.b2 is undefined %}
+.. doxygenvariable:: ponio::runge_kutta::{{ rk.id }}_t
+  :project: ponio
+
+{% endif %}{% endfor %}
+
+Embedded methods
+~~~~~~~~~~~~~~~~
+
+{% for rk in list_ark %}{% if rk.explicit.b2 is defined %}
+.. doxygenvariable:: ponio::runge_kutta::{{ rk.id }}_t
+  :project: ponio
+
+{% endif %}{% endfor %}
+
+
+
+List of Runge-Kutta methods based on a specific algorithm
+=========================================================
+
+For now in ponio, these methods are explicit stabilized Runge-Kutta method or a specific IMEX method based on a stabilized Runge-Kutta method.
 
 Some problems, like heat equation, require methods stabilized on the negative real axis. The ponio library provides a Runge-Kutta Chebyshev method of order 2, ROCK2 method (of order 2), ROCK4 method (of order 4) and a Runge-Kutta Legendre method of order 1 or 2.
 
+
 Runge-Kutta Chebyshev method
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 The algorithm of RKC2 is the following:
 
@@ -234,9 +291,13 @@ and where :math:`T_j(x)` is the Chebyshev polynomial.
    :project: ponio
    :members:
 
+.. warning::
+
+  In ponio library the number of stages of RKC2 is static, you can't get dynamic number of stages for this method, look at :cpp:func:`ponio::runge_kutta::rock::rock2` or :cpp:func:`ponio::runge_kutta::rock::rock4` methods for dynamic number of stages (and optional adaptive time step method).
+
 
 ROCK2 method
-~~~~~~~~~~~~
+------------
 
 We write the method ROCK2 presented in :cite:`abdulle:2001`. The algorithm of ROCK2 method is the following:
 
@@ -257,6 +318,9 @@ where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from
    :project: ponio
    :members:
 
+Helper functions
+~~~~~~~~~~~~~~~~
+
 .. doxygenfunction:: ponio::runge_kutta::rock::rock2(eig_computer_t&&)
   :project: ponio
 
@@ -265,7 +329,7 @@ where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from
 
 
 ROCK4 method
-~~~~~~~~~~~~
+------------
 
 We write the method ROCK2 presented in :cite:`abdulle:2002`. The algorithm of ROCK4 method is the following:
 
@@ -287,6 +351,9 @@ where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from
    :project: ponio
    :members:
 
+Helper functions
+~~~~~~~~~~~~~~~~
+
 .. doxygenfunction:: ponio::runge_kutta::rock::rock4(eig_computer_t&&)
   :project: ponio
 
@@ -295,9 +362,12 @@ where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from
 
 
 Runge-Kutta Legendre method
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 An other way to get a stabilized Runge-Kutta method is to use Legendre polynomials, we follow presentation in :cite:`meyer:2014`.
+
+Runge-Kutta Legend first order method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The algorithm of RKL1 is the following:
 
@@ -326,6 +396,13 @@ where :math:`s` is the number of stages of the method.
    :project: ponio
    :members:
 
+.. warning::
+
+  In ponio library the number of stages of RKL1 is static, you can't get dynamic number of stages for this method, look at :cpp:func:`ponio::runge_kutta::rock::rock2` or :cpp:func:`ponio::runge_kutta::rock::rock4` methods for dynamic number of stages (and optional adaptive time step method).
+
+
+Runge-Kutta Legend second order method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The algorithm of RKL2 is the following:
 
@@ -371,8 +448,13 @@ where :math:`s` is the number of stages of the method
    :project: ponio
    :members:
 
-IMEX stabilized methods
------------------------
+.. warning::
+
+  In ponio library the number of stages of RKL2 is static, you can't get dynamic number of stages for this method, look at :cpp:func:`ponio::runge_kutta::rock::rock2` or :cpp:func:`ponio::runge_kutta::rock::rock4` methods for dynamic number of stages (and optional adaptive time step method).
+
+
+List of IMEX stabilized methods
+-------------------------------
 
 The PIROCK method is introduce in :cite:`abdulle:2013`, the complete scheme is a IMEX scheme that allows for solving an equation of the following form (with 3 operators):
 
@@ -504,7 +586,7 @@ Helper functions
 
 User interface functions to build a PIROCK method.
 
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t, value_t)
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&)
   :project: ponio
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&)
@@ -516,6 +598,10 @@ User interface functions to build a PIROCK method.
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock()
   :project: ponio
 
+
+:math:`\ell=2` and :math:`\alpha = 1` case
+""""""""""""""""""""""""""""""""""""""""""
+
 Following functions are useful for to build a PIROCK method with :math:`\ell=2` and :math:`\alpha = 1` (with :cpp:class:`ponio::runge_kutta::pirock::alpha_fixed` computer).
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_a1(eig_computer_t&&)
@@ -523,6 +609,10 @@ Following functions are useful for to build a PIROCK method with :math:`\ell=2` 
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_a1()
   :project: ponio
+
+
+:math:`\ell=1` and :math:`\beta = 0` case
+"""""""""""""""""""""""""""""""""""""""""
 
 Following functions are useful for to build a PIROCK method with :math:`\ell=1` and :math:`\beta = 0` (with :cpp:class:`ponio::runge_kutta::pirock::beta_0` computer).
 
@@ -542,12 +632,13 @@ In this section we present the implementation of complet PIROCK method (i.e. for
    :project: ponio
    :members:
 
+
 Helper functions
 """"""""""""""""
 
 User interface functions to build a PIROCK method.
 
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&, value_t, value_t)
+.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&)
   :project: ponio
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&)
@@ -559,6 +650,10 @@ User interface functions to build a PIROCK method.
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA()
   :project: ponio
 
+
+:math:`\ell=2` and :math:`\alpha = 1` case
+""""""""""""""""""""""""""""""""""""""""""
+
 Following functions are useful for to build a PIROCK method with :math:`\ell=2` and :math:`\alpha = 1` (with :cpp:class:`ponio::runge_kutta::pirock::alpha_fixed` computer).
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_a1(eig_computer_t&&)
@@ -566,6 +661,10 @@ Following functions are useful for to build a PIROCK method with :math:`\ell=2` 
 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_a1()
   :project: ponio
+
+
+:math:`\ell=1` and :math:`\beta = 0` case
+"""""""""""""""""""""""""""""""""""""""""
 
 Following functions are useful for to build a PIROCK method with :math:`\ell=1` and :math:`\beta = 0` (with :cpp:class:`ponio::runge_kutta::pirock::beta_0` computer).
 
@@ -578,6 +677,6 @@ Following functions are useful for to build a PIROCK method with :math:`\ell=1` 
 
 
 Bibliography
-------------
+============
 
-.. bibliography::
+.. footbibliography::

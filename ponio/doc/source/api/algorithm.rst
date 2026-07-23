@@ -11,6 +11,11 @@ The ponio library provides multiple algorithms to solve ODE which must be specif
 .. toctree::
    :caption: List of algorithms
    :maxdepth: 2
+   algorithm/list_algorithm
+
+.. toctree::
+   :caption: List of algorithms by category
+   :maxdepth: 2
 
    algorithm/list_alg_erk
    algorithm/list_alg_dirk
