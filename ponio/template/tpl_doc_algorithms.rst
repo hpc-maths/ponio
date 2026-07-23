@@ -299,7 +299,7 @@ and where :math:`T_j(x)` is the Chebyshev polynomial.
 ROCK2 method
 ------------
 
-We write the method ROCK2 presented in :cite:`abdulle:2001`. The algorithm of ROCK2 method is the following:
+We write the method ROCK2 presented in :footcite:t:`abdulle:2001`. The algorithm of ROCK2 method is the following:
 
 .. math::
 
@@ -331,7 +331,7 @@ Helper functions
 ROCK4 method
 ------------
 
-We write the method ROCK2 presented in :cite:`abdulle:2002`. The algorithm of ROCK4 method is the following:
+We write the method ROCK2 presented in :footcite:t:`abdulle:2002`. The algorithm of ROCK4 method is the following:
 
 .. math::
 
@@ -364,7 +364,7 @@ Helper functions
 Runge-Kutta Legendre method
 ---------------------------
 
-An other way to get a stabilized Runge-Kutta method is to use Legendre polynomials, we follow presentation in :cite:`meyer:2014`.
+An other way to get a stabilized Runge-Kutta method is to use Legendre polynomials, we follow presentation in :footcite:t:`meyer:2014`.
 
 Runge-Kutta Legend first order method
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -456,7 +456,7 @@ where :math:`s` is the number of stages of the method
 List of IMEX stabilized methods
 -------------------------------
 
-The PIROCK method is introduce in :cite:`abdulle:2013`, the complete scheme is a IMEX scheme that allows for solving an equation of the following form (with 3 operators):
+The PIROCK method is introduce in :footcite:t:`abdulle:2013`, the complete scheme is a IMEX scheme that allows for solving an equation of the following form (with 3 operators):
 
 .. math::
 

@@ -5,17 +5,18 @@ The ponio library provides multiple algorithms to solve ODE which must be specif
 
 .. seealso::
 
-  For the explaination of different methods, you can read the :doc:`time integrators desciption <../user/time_integrators>`.
-
+  For the explanation of different methods, you can read the :doc:`time integrators desciption <../user/time_integrators>`.
 
 .. toctree::
    :caption: List of algorithms
    :maxdepth: 2
    algorithm/list_algorithm
 
+
+
 .. toctree::
    :caption: List of algorithms by category
-   :maxdepth: 2
+   :maxdepth: 1
 
    algorithm/list_alg_erk
    algorithm/list_alg_dirk
