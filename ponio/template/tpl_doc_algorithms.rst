@@ -1,3 +1,7 @@
+==================
+List of Algorithms
+==================
+
 List of Runge-Kutta methods based on a Butcher tableau
 ======================================================
 
@@ -674,6 +678,20 @@ Following functions are useful for to build a PIROCK method with :math:`\ell=1` 
 .. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_b0()
   :project: ponio
 
+
+List of splitting methods
+=========================
+
+Lie splitting method
+--------------------
+
+
+Strang splitting method
+-----------------------
+
+
+Adaptive Strang splitting method
+--------------------------------
 
 
 Bibliography
