@@ -5,8 +5,9 @@ Explicit methods
 ----------------
 
 {% for rk in list_erk %}{% if rk.b2 is defined %}
+
 {{ rk.label }}
-~~~~~~~~~~~~~~
+{% for _ in name %}~{% endfor %}
 
 + **name:** {{ rk.label }}
 + **label in ponio:** :cpp:type:`ponio::runge_kutta::{{ rk.id }}_t`
@@ -40,7 +41,7 @@ Diagonal implicit methods
 {% for rk in list_dirk %}{% if rk.b2 is defined %}
 
 {{ rk.label }}
-~~~~~~~~~~~~~~
+{% for _ in name %}~{% endfor %}
 
 + **name:** {{ rk.label }}
 + **label in ponio:** :cpp:var:`ponio::runge_kutta::{{ rk.id }}_t`
@@ -75,7 +76,7 @@ Lawson methods
 {% for rk in list_erk %}{% if rk.b2 is defined %}
 
 Lawson {{ rk.label }}
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~{% for _ in name %}~{% endfor %}
 
 + **name:** Lawson {{ rk.label }}
 + **label in ponio:** :cpp:var:`ponio::runge_kutta::l{{ rk.id }}_t`**underlying Runge-Kutta method:** :cpp:type:`ponio::runge_kutta::{{ rk.id }}_t`
@@ -110,7 +111,7 @@ Additive Runge-Kutta methods
 {% for rk in list_ark %}{% if rk.explicit.b2 is defined %}
 
 {{ rk.label }}
-~~~~~~~~~~~~~~
+{% for _ in name %}~{% endfor %}
 
 + **name:** {{ rk.label }}
 + **label in ponio:** :cpp:var:`ponio::runge_kutta::{{ rk.id }}_t`
