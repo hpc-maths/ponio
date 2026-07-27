@@ -10,7 +10,7 @@ jobs:
     outputs:
       nb_commits: ${{ steps.new_commits.outputs.nb_commits }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: new_commits
         run: echo "nb_commits=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_OUTPUT
   # check installation of dependencies from conda with last version
@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: micromamba env installation
         uses: mamba-org/setup-micromamba@v1
         with:
@@ -44,7 +44,7 @@ jobs:
     if: github.repository == 'hpc-maths/ponio' && needs.check_new_commit.outputs.nb_commits > 0
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       ## issue with gcc-14 https://github.com/llvm/llvm-project/issues/131466
       # - name: Remove GCC from runner image
       #   shell: bash
@@ -81,7 +81,7 @@ jobs:
     needs: [check_new_commit, dependencies-from-conda-check]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: prefix-dev/setup-pixi@v0.10.0
         with:
           pixi-version: v0.70.2

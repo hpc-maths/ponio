@@ -119,7 +119,7 @@ This function is defined in :cpp:func:`ponio::detail::error_estimate`. Now compa
     \Delta t            &= \min\left( \max\left( \Delta t_\text{new}, 0.2\Delta t \right) , 5\Delta t \right)
   \end{aligned}
 
-Most common embedded Runge-Kutta methods come from :cite:`dormand:1980` and :cite:`prince:1981`, that why tey are sometime call Dormand-Prince methods.
+Most common embedded Runge-Kutta methods come from :footcite:t:`dormand:1980` and :footcite:t:`prince:1981`, that why tey are sometime call Dormand-Prince methods.
 
 .. seealso::
 
@@ -162,7 +162,7 @@ And next call the :cpp:func:`ponio::solve` function with
 Lawson methods
 ~~~~~~~~~~~~~~
 
-Lawson methods was initially propose into :cite:`lawson:1967`. Lawson methods are build to solve a problem with a linear and nonlinear part, to solve exactly the problem when the nonlinear part goes to zero. This class of problem can be write as
+Lawson methods was initially propose into :footcite:t:`lawson:1967`. Lawson methods are build to solve a problem with a linear and nonlinear part, to solve exactly the problem when the nonlinear part goes to zero. This class of problem can be write as
 
 .. math::
 
@@ -405,7 +405,7 @@ We need to specify how many stages we want (we choose 5), and next call the :cpp
 ROCK2 method
 ~~~~~~~~~~~~
 
-We write the method ROCK2 presented in :cite:`abdulle:2001`. The algorithm of ROCK2 method is the following:
+We write the method ROCK2 presented in :footcite:t:`abdulle:2001`. The algorithm of ROCK2 method is the following:
 
 .. math::
 
@@ -439,7 +439,7 @@ Next call the :cpp:func:`ponio::solve` function with
 ROCK4 method
 ~~~~~~~~~~~~
 
-We write the method ROCK2 presented in :cite:`abdulle:2002`. The algorithm of ROCK4 method is the following:
+We write the method ROCK2 presented in :footcite:t:`abdulle:2002`. The algorithm of ROCK4 method is the following:
 
 .. math::
 
@@ -475,7 +475,7 @@ Next call the :cpp:func:`ponio::solve` function with
 Runge-Kutta Legendre method
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An other way to get a stabilized Runge-Kutta method is to use Legendre polynomials, we follow presentation in :cite:`meyer:2014`.
+An other way to get a stabilized Runge-Kutta method is to use Legendre polynomials, we follow presentation in :footcite:t:`meyer:2014`.
 
 The algorithm of RKL1 is the following:
 
@@ -668,7 +668,7 @@ with :math:`\delta\in[-1/2, 0)\cup(0,1/2]`
 
    Only the first (and last) step is shifted by :math:`\delta\Delta t`.
 
-The difficulty in adaptive time step Strang splitting method is to find a good shift coefficient :math:`\delta` for a given tolerance :math:`\eta`. The complete strategy of an iteration provides in :cite:`descombes:2015` is
+The difficulty in adaptive time step Strang splitting method is to find a good shift coefficient :math:`\delta` for a given tolerance :math:`\eta`. The complete strategy of an iteration provides in :footcite:t:`descombes:2015` is
 
 1. With a given tolerance :math:`\eta`, time step :math:`\Delta t` and shift :math:`\delta` compute estimates
 
@@ -702,7 +702,7 @@ The difficulty in adaptive time step Strang splitting method is to find a good s
 IMEX methods with extended stability method
 -------------------------------------------
 
-The PIROCK method is introduce in :cite:`abdulle:2013`, the complete scheme is a IMEX scheme that allows for solving an equation of the following form (with 3 operators):
+The PIROCK method is introduce in :footcite:t:`abdulle:2013`, the complete scheme is a IMEX scheme that allows for solving an equation of the following form (with 3 operators):
 
 .. math::
 
@@ -824,4 +824,4 @@ And next call the :cpp:func:`ponio::solve` function with
 Bibliography
 ------------
 
-.. bibliography::
+.. footbibliography::

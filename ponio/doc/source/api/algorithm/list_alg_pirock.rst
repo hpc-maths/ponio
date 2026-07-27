@@ -104,18 +104,8 @@ where :math:`y^n` and :math:`y^{n+1}` are estimation of the solution respectivel
 
 Still keep two free parameters :math:`\ell` and :math:`\alpha` given free to user, ponio provides two choices for this parameters:
 
-* :math:`\ell=2` and :math:`\alpha=1`, in this case, if :math:`F_A=0` and :math:`F_R=0` we have the standard ROCK2 method;
-* :math:`\ell=1` and :math:`\alpha = \frac{1}{2P'_{s-2+\ell}(0)}`, so :math:`\beta=0` to minimized computation cost.
-
-ponio provides two computers for :math:`\alpha` and :math:`\beta` values.
-
-.. doxygenclass:: ponio::runge_kutta::pirock::alpha_fixed
-   :project: ponio
-   :members:
-
-.. doxygenclass:: ponio::runge_kutta::pirock::beta_0
-   :project: ponio
-   :members:
+* :math:`\ell=2` and :math:`\alpha=1`, with :cpp:class:`ponio::runge_kutta::pirock::alpha_fixed` class;
+* :math:`\ell=1` and :math:`\alpha = \frac{1}{2P'_{s-2+\ell}(0)}`, so :math:`\beta=0` to minimized computation cost, with :cpp:class:`ponio::runge_kutta::pirock::beta_0` class.
 
 
 PIROCK for reaction-diffusion problem
@@ -123,50 +113,16 @@ PIROCK for reaction-diffusion problem
 
 In this section we present the implementation of PIROCK method for only reaction-diffusion problem (i.e. :math:`F_A = 0`).
 
-.. doxygenclass:: ponio::runge_kutta::pirock::pirock_impl
-   :project: ponio
-   :members:
++ **name:** PIROCK for reaction-diffusion problem
++ **label in ponio:** :cpp:class:`ponio::runge_kutta::pirock::pirock_impl`
++ **helper function in ponio:** :cpp:func:`ponio::runge_kutta::pirock::pirock`
++ **stages:** dynamic number of stages
++ **order:** 2
 
-Helper functions
-~~~~~~~~~~~~~~~~
+Following the choice of parameters, ponio provides two helper functions:
 
-User interface functions to build a PIROCK method.
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(alpha_beta_computer_t&&, eig_computer_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock(eig_computer_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock()
-  :project: ponio
-
-
-:math:`\ell=2` and :math:`\alpha = 1` case
-""""""""""""""""""""""""""""""""""""""""""
-
-Following functions are useful for to build a PIROCK method with :math:`\ell=2` and :math:`\alpha = 1` (with :cpp:class:`ponio::runge_kutta::pirock::alpha_fixed` computer).
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_a1(eig_computer_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_a1()
-  :project: ponio
-
-
-:math:`\ell=1` and :math:`\beta = 0` case
-"""""""""""""""""""""""""""""""""""""""""
-
-Following functions are useful for to build a PIROCK method with :math:`\ell=1` and :math:`\beta = 0` (with :cpp:class:`ponio::runge_kutta::pirock::beta_0` computer).
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_b0(eig_computer_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_b0()
-  :project: ponio
++ :math:`\ell=2` and :math:`\alpha=1` cases, with :cpp:func:`ponio::runge_kutta::pirock::pirock_a1`
++ :math:`\ell=1` and :math:`\beta = 0` case, with :cpp:func:`ponio::runge_kutta::pirock::pirock_b0`
 
 
 PIROCK for reaction-diffusion-advection problem
@@ -174,48 +130,13 @@ PIROCK for reaction-diffusion-advection problem
 
 In this section we present the implementation of complet PIROCK method (i.e. for reaction-diffusion-advection problem).
 
-.. doxygenclass:: ponio::runge_kutta::pirock::pirock_RDA_impl
-   :project: ponio
-   :members:
++ **name:** PIROCK for reaction-diffusion-advection problem
++ **label in ponio:** :cpp:class:`ponio::runge_kutta::pirock::pirock_RDA_impl`
++ **helper function in ponio:** :cpp:func:`ponio::runge_kutta::pirock::pirock_RDA`
++ **stages:** dynamic number of stages
++ **order:** 2
 
+Following the choice of parameters, ponio provides two helper functions:
 
-Helper functions
-~~~~~~~~~~~~~~~~
-
-User interface functions to build a PIROCK method.
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&, shampine_trick_caller_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(alpha_beta_computer_t&&, eig_computer_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA(eig_computer_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA()
-  :project: ponio
-
-
-:math:`\ell=2` and :math:`\alpha = 1` case
-""""""""""""""""""""""""""""""""""""""""""
-
-Following functions are useful for to build a PIROCK method with :math:`\ell=2` and :math:`\alpha = 1` (with :cpp:class:`ponio::runge_kutta::pirock::alpha_fixed` computer).
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_a1(eig_computer_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_a1()
-  :project: ponio
-
-
-:math:`\ell=1` and :math:`\beta = 0` case
-"""""""""""""""""""""""""""""""""""""""""
-
-Following functions are useful for to build a PIROCK method with :math:`\ell=1` and :math:`\beta = 0` (with :cpp:class:`ponio::runge_kutta::pirock::beta_0` computer).
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_b0(eig_computer_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::pirock::pirock_RDA_b0()
-  :project: ponio
++ :math:`\ell=2` and :math:`\alpha=1` cases, with :cpp:func:`ponio::runge_kutta::pirock::pirock_RDA_a1`
++ :math:`\ell=1` and :math:`\beta = 0` case, with :cpp:func:`ponio::runge_kutta::pirock::pirock_RDA_b0`

@@ -16,9 +16,9 @@ jobs:
         CMAKE_GENERATOR:
           - "Ninja Multi-Config"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.conan2
