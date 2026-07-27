@@ -42,7 +42,8 @@ Lawson {{ rk.label }}
 ~~~~~~~{{ '~' * rk.label|length }}
 
 + **name:** Lawson {{ rk.label }}
-+ **label in ponio:** :cpp:var:`ponio::runge_kutta::l{{ rk.id }}_t`**underlying Runge-Kutta method:** :cpp:type:`ponio::runge_kutta::{{ rk.id }}_t`
++ **label in ponio:** :cpp:var:`ponio::runge_kutta::l{{ rk.id }}_t`
++ **underlying Runge-Kutta method:** :cpp:type:`ponio::runge_kutta::{{ rk.id }}_t`
 + **stages:** {{ rk.A|length }}
 + **order:** {{ rk.order }}
 + **stages order:** {{ rk.stage_order }}
