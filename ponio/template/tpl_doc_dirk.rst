@@ -4,7 +4,7 @@ List of diagonal implicit Runge-Kutta methods
 {% for rk in list_dirk %}{% if rk.b2 is undefined %}
 
 {{ rk.label }}
-{% for _ in name %}~{% endfor %}
+{% for letter in name %}~{% endfor %}
 
 + **name:** {{ rk.label }}
 + **label in ponio:** :cpp:var:`ponio::runge_kutta::{{ rk.id }}_t`
@@ -38,7 +38,7 @@ Embedded methods
 {% for rk in list_dirk %}{% if rk.b2 is defined %}
 
 {{ rk.label }}
-{% for _ in name %}~{% endfor %}
+{% for letter in name %}~{% endfor %}
 
 + **name:** {{ rk.label }}
 + **label in ponio:** :cpp:var:`ponio::runge_kutta::{{ rk.id }}_t`
