@@ -4,7 +4,7 @@ List of explicit Runge-Kutta methods
 {% for rk in list_erk %}{% if rk.b2 is undefined %}
 
 {{ rk.label }}
-{{ '~' * length(rk.label) }}
+{{ '~' * rk.label|length }}
 
 + **name:** {{ rk.label }}
 + **label in ponio:** :cpp:type:`ponio::runge_kutta::{{ rk.id }}_t`
@@ -38,7 +38,7 @@ Embedded methods
 {% for rk in list_erk %}{% if rk.b2 is defined %}
 
 {{ rk.label }}
-{{ '~' * length(rk.label) }}
+{{ '~' * rk.label|length }}
 
 + **name:** {{ rk.label }}
 + **label in ponio:** :cpp:type:`ponio::runge_kutta::{{ rk.id }}_t`

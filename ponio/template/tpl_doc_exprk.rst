@@ -4,7 +4,7 @@ List of exponential Runge-Kutta methods
 {% for rk in list_exprk %}
 
 {{ rk.label }}
-{{ '~' * length(rk.label) }}
+{{ '~' * rk.label|length }}
 
 + **name:** {{ rk.label }}
 + **label in ponio:** :cpp:type:`ponio::runge_kutta::{{ rk.id }}_t`

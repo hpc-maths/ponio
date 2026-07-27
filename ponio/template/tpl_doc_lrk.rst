@@ -4,7 +4,7 @@ List of Lawson Runge-Kutta methods
 {% for rk in list_erk %}{% if rk.b2 is undefined %}
 
 Lawson {{ rk.label }}
-~~~~~~~{{ '~' * length(rk.label) }}
+~~~~~~~{{ '~' * rk.label|length }}
 
 + **name:** Lawson {{ rk.label }}
 + **label in ponio:** :cpp:var:`ponio::runge_kutta::l{{ rk.id }}_t`
@@ -39,7 +39,7 @@ Embedded methods
 {% for rk in list_erk %}{% if rk.b2 is defined %}
 
 Lawson {{ rk.label }}
-~~~~~~~{{ '~' * length(rk.label) }}
+~~~~~~~{{ '~' * rk.label|length }}
 
 + **name:** Lawson {{ rk.label }}
 + **label in ponio:** :cpp:var:`ponio::runge_kutta::l{{ rk.id }}_t`**underlying Runge-Kutta method:** :cpp:type:`ponio::runge_kutta::{{ rk.id }}_t`
