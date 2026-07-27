@@ -144,9 +144,10 @@ with coefficients given by
 
 where :math:`s` is the number of stages of the method.
 
-.. doxygenclass:: ponio::runge_kutta::legendre::explicit_rkl1
-   :project: ponio
-   :members:
++ **name:** RKL1
++ **label in ponio:** :cpp:class:`ponio::runge_kutta::legendre::explicit_rkl1`
++ **stages:** static number ``N_stages_``
++ **order:** 1
 
 .. warning::
 
@@ -195,7 +196,6 @@ and
 
 
 where :math:`s` is the number of stages of the method
-
 
 + **name:** RKL2
 + **label in ponio:** :cpp:class:`ponio::runge_kutta::legendre::explicit_rkl2`
