@@ -111,7 +111,7 @@ Like many other library, ponio library provides an interface with a function :ma
 .. literalinclude:: ../_static/cpp/lorenz_rk.cpp
     :language: text
     :lines: 20-25
-  :lineno-start: 20
+    :lineno-start: 20
 
 now the :cpp:func:`ponio::solve` function can takes this lambda without underlying it in a class:
 
