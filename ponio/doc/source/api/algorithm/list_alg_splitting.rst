@@ -18,7 +18,11 @@ In Lie splitting method, the solution is computed as:
 
    u^{n+1} = \mathcal{L}^{\Delta t}(t^n, u^n) = \phi_{\Delta t}^{[f_1]}\circ \cdots \circ \phi_{\Delta t}^{[f_k]} (t^n,u^n)
 
-The algorithm of these method is implemented in :cpp:class:`ponio::splitting::lie::lie` class, and a user build an instance of this class with the helper function/factory :cpp:class:`ponio::splitting::lie::make_lie_tuple`.
++ **name:** Lie splitting method
++ **label in ponio:** :cpp:class:`ponio::splitting::lie::lie`
++ **helper function in ponio:** :cpp:class:`ponio::splitting::lie::make_lie_tuple`
++ **order:** 1
+
 
 Strang splitting method
 -----------------------
@@ -32,7 +36,10 @@ In Strang splitting method, the solution is computed as:
               \circ \phi_{\frac{\Delta t}{2}}^{[f_{k-1}]}\circ\cdots\circ \phi_{\frac{\Delta t}{2}}^{[f_1]}
               (t^n,u^n)
 
-The algorithm of these method is implemented in :cpp:class:`ponio::splitting::strang::strang` class, and a user build an instance of this class with the helper function/factory :cpp:class:`ponio::splitting::strang::make_strang_tuple`.
++ **name:** Strang splitting method
++ **label in ponio:** :cpp:class:`ponio::splitting::strang::strang`
++ **helper function in ponio:** :cpp:class:`ponio::splitting::strang::make_strang_tuple`
++ **order:** 2
 
 
 Adaptive time step Strang splitting method
@@ -90,4 +97,7 @@ The difficulty in adaptive time step Strang splitting method is to find a good s
       \Delta t^\star \approx \frac{\delta C_\delta}{C_0}
 
 
-The algorithm of these method is implemented in :cpp:class:`ponio::splitting::strang::adaptive_strang` class, and a user build an instance of this class with the helper function/factory :cpp:class:`ponio::splitting::strang::make_adaptive_strang_tuple`.
++ **name:** adaptive Strang splitting method
++ **label in ponio:** :cpp:class:`ponio::splitting::strang::adaptive_strang`
++ **helper function in ponio:** :cpp:class:`ponio::splitting::strang::make_adaptive_strang_tuple`
++ **order:** 2
