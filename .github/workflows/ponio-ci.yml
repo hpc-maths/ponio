@@ -187,6 +187,7 @@ jobs:
       - name: micromamba env installation
         uses: mamba-org/setup-micromamba@v3
         with:
+          generate-run-shell: true
           environment-file: environment/conda-environment-all.yml
           environment-name: ponio-complete-env
           #cache-environment: true
