@@ -207,7 +207,7 @@ jobs:
         shell: micromamba-shell {0}
         run: |
           export Eigen3_DIR="${CONDA_PREFIX}/share/eigen3/cmake"
-          cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON -DPython_ROOT_DIR="${CONDA_PREFIX}/bin -DPython_FIND_VIRTUALENV=FIRST"
+          cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON -DPython_ROOT_DIR="${CONDA_PREFIX}/bin -DPython_FIND_VIRTUALENV=ONLY"
       - name: Execute all examples
         shell: micromamba-shell {0}
         run: cmake --build build --target save_visu
