@@ -178,7 +178,7 @@ jobs:
         run: pixi run test
   # check installation of dependencies from conda with last version
   dependencies-from-conda-check:
-    needs: [pre-commit, cppcheck]
+    #needs: [pre-commit, cppcheck]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -189,8 +189,8 @@ jobs:
         with:
           environment-file: environment/conda-environment-all.yml
           environment-name: ponio-complete-env
-          cache-environment: true
-          cache-environment-key: ${{ hashFiles('environment/conda-environment-all.yml') }}
+          #cache-environment: true
+          #cache-environment-key: ${{ hashFiles('environment/conda-environment-all.yml') }}
       - name: Install compiler and Python
         shell: micromamba-shell {0}
         run: micromamba install -y cxx-compiler python
@@ -198,7 +198,7 @@ jobs:
         shell: micromamba-shell {0}
         run: |
           export Eigen3_DIR="${CONDA_PREFIX}/share/eigen3/cmake"
-          cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON
+          cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON -DPython_ROOT_DIR="${CONDA_PREFIX}/bin"
       - name: Execute all examples
         shell: micromamba-shell {0}
         run: cmake --build build --target save_visu
