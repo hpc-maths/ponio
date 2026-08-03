@@ -178,27 +178,36 @@ jobs:
         run: pixi run test
   # check installation of dependencies from conda with last version
   dependencies-from-conda-check:
-    needs: [pre-commit, cppcheck]
+    #needs: [pre-commit, cppcheck]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
     steps:
       - uses: actions/checkout@v7
       - name: micromamba env installation
-        uses: mamba-org/setup-micromamba@v3
+        uses: mamba-org/setup-micromamba@v3.0.0
         with:
+          generate-run-shell: true
           environment-file: environment/conda-environment-all.yml
           environment-name: ponio-complete-env
-          cache-environment: true
-          cache-environment-key: ${{ hashFiles('environment/conda-environment-all.yml') }}
+          #cache-environment: true
+          #cache-environment-key: ${{ hashFiles('environment/conda-environment-all.yml') }}
       - name: Install compiler and Python
-        shell: bash -l {0}
-        run: conda install -y python cxx-compiler
+        shell: micromamba-shell {0}
+        run: micromamba install -y cxx-compiler python
+      - name: Check Python
+        shell: micromamba-shell {0}
+        run: |
+          echo ${CONDA_PREFIX}/bin
+          ls -l ${CONDA_PREFIX}/bin/python
+          which python
+          python --version
+          which cmake
       - name: Build
-        shell: bash -l {0}
+        shell: micromamba-shell {0}
         run: |
           export Eigen3_DIR="${CONDA_PREFIX}/share/eigen3/cmake"
-          cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON
+          cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON -DPython_FIND_VIRTUALENV=ONLY
       - name: Execute all examples
-        shell: bash -l {0}
+        shell: micromamba-shell {0}
         run: cmake --build build --target save_visu
