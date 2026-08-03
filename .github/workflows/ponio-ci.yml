@@ -202,6 +202,7 @@ jobs:
           ls -l ${CONDA_PREFIX}/bin/python
           which python
           python --version
+          which cmake
       - name: Build
         shell: micromamba-shell {0}
         run: |
