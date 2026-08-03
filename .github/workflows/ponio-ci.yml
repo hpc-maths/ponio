@@ -194,6 +194,13 @@ jobs:
       - name: Install compiler and Python
         shell: micromamba-shell {0}
         run: micromamba install -y cxx-compiler python
+      - name: Check Python
+        shell: micromamba-shell {0}
+        run: |
+          echo ${CONDA_PREFIX}/bin
+          ls -l ${CONDA_PREFIX}/bin/python
+          which python
+          python --version
       - name: Build
         shell: micromamba-shell {0}
         run: |
