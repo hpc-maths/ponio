@@ -185,7 +185,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: micromamba env installation
-        uses: mamba-org/setup-micromamba@v3.0
+        uses: mamba-org/setup-micromamba@v2
         with:
           generate-run-shell: true
           environment-file: environment/conda-environment-all.yml
