@@ -191,9 +191,9 @@ jobs:
           environment-name: ponio-complete-env
           cache-environment: true
           cache-environment-key: ${{ hashFiles('environment/conda-environment-all.yml') }}
-      - name: Install compiler
+      - name: Install compiler and Python
         shell: micromamba-shell {0}
-        run: micromamba install -y cxx-compiler
+        run: micromamba install -y cxx-compiler python
       - name: Build
         shell: micromamba-shell {0}
         run: |
