@@ -81,6 +81,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
      *
      * @return last simplified Newton iterate
      */
+    // cppcheck-suppress unusedFunction
     template <typename value_t, typename state_t, typename func_t, typename jacobian_t, typename solver_t>
     state_t
     simplified_newton( func_t&& f,
