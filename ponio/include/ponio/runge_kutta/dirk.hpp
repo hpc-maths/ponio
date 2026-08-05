@@ -65,51 +65,6 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
     }
 
     /**
-     * @brief Solve a nonlinear system with a simplified Newton method.
-     *
-     * The Jacobian is evaluated once at the initial guess and kept fixed
-     * throughout the nonlinear iterations. The supplied linear solver is
-     * nevertheless called at every iteration and may therefore refactorize
-     * the frozen matrix each time.
-     *
-     * @param f nonlinear residual
-     * @param df Jacobian of the nonlinear residual
-     * @param x0 initial guess and Jacobian freezing point
-     * @param solver linear solver
-     * @param tol nonlinear tolerance
-     * @param max_iter maximum number of nonlinear iterations
-     *
-     * @return last simplified Newton iterate
-     */
-    // cppcheck-suppress unusedFunction
-    template <typename value_t, typename state_t, typename func_t, typename jacobian_t, typename solver_t>
-    state_t
-    simplified_newton( func_t&& f,
-        jacobian_t&& df,
-        state_t const& x0,
-        solver_t&& solver,
-        value_t tol          = ponio::default_config::newton_tolerance,
-        std::size_t max_iter = ponio::default_config::newton_max_iterations )
-    {
-        state_t xk                  = x0;
-        value_t residual            = ::ponio::detail::norm( std::forward<func_t>( f )( xk ) );
-        auto const& jacobian_matrix = std::forward<jacobian_t>( df )( x0 );
-        std::size_t iter            = 0;
-
-        while ( iter < max_iter && residual > tol )
-        {
-            auto increment = std::forward<solver_t>( solver )( jacobian_matrix, -std::forward<func_t>( f )( xk ) );
-
-            xk       = xk + increment;
-            residual = ::ponio::detail::norm( std::forward<func_t>( f )( xk ) );
-
-            iter += 1;
-        }
-
-        return xk;
-    }
-
-    /**
      * @brief Solve a nonlinear system with a reused matrix factorization.
      *
      * This function implements the same simplified Newton iteration as
