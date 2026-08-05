@@ -573,26 +573,6 @@ namespace ponio::runge_kutta::pirock
                     f_D_u = static_cast<state_t>( fe_tmp - fe_tmp_bis );
                 }
 
-                // Build the Shampine system once and reuse it for both the final diffusion correction and the embedded reaction error
-                // estimate. For matrix-based implicit problems, it uses the factorization already computed by the implicit stages.
-                auto shampine_system = [&]()
-                {
-                    if constexpr ( detail::problem_operator<decltype( pb.implicit_part ), value_t> )
-                    {
-                        return shampine_trick_caller.prepare( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl );
-                    }
-                    else
-                    {
-                        {
-                            return shampine_trick_caller.template prepare_with_existing_factorization<state_t>();
-                        }
-                    }
-                }();
-
-                {
-                    shampine_system.template apply<l>( f_D_u, u_tmp, shampine_element );
-                }
-
                 if constexpr ( is_embedded )
                 {
                     auto& rhs_R = U[16];
@@ -600,17 +580,33 @@ namespace ponio::runge_kutta::pirock
 
                     _info.number_of_eval[1] += 2;
 
-                    {
-                        pb.implicit_part( tn, u_sp1, fi_tmp );
-                        pb.implicit_part( tn, u_sp2, f_tmp );
+                    pb.implicit_part( tn, u_sp1, fi_tmp );
+                    pb.implicit_part( tn, u_sp2, f_tmp );
 
-                        rhs_R = static_cast<state_t>( dt / 6. * ( fi_tmp - f_tmp ) );
+                    rhs_R = static_cast<state_t>( dt / 6. * ( fi_tmp - f_tmp ) );
+
+                    if constexpr ( detail::problem_operator<decltype( pb.implicit_part ), value_t> )
+                    {
+                        // Operator-based problems keep the historical Shampine interface.
+                        // This path is used, for example, by Samurai fields.
+                        shampine_trick_caller
+                            .template operator()<l>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, f_D_u, u_tmp, shampine_element );
+
+                        // err_R = J_R^{-1} dt/6 (F_R(u^{s+1}) - F_R(u^{s+2}))
+                        shampine_trick_caller.template operator()<1>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, rhs_R, u_tmp, err_R );
                     }
-
-                    // err_R = J_R^{-1} dt/6 (F_R(u^{s+1}) - F_R(u^{s+2}))
+                    else
                     {
+                        // Matrix-based problems reuse the factorization prepared by the
+                        // implicit stages for both Shampine applications.
+                        auto shampine_system = shampine_trick_caller.template prepare_with_existing_factorization<state_t>();
+
+                        shampine_system.template apply<l>( f_D_u, u_tmp, shampine_element );
+
+                        // err_R = J_R^{-1} dt/6 (F_R(u^{s+1}) - F_R(u^{s+2}))
                         shampine_system.template apply<1>( rhs_R, u_tmp, err_R );
                     }
+
                     u_np1 = us_s - err_D + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
 
                     auto accumulator_error_gen = []( auto const& yn, auto const& ynp1, value_t a_tol, value_t r_tol )
@@ -667,6 +663,22 @@ namespace ponio::runge_kutta::pirock
 
                     pb.implicit_part( tn, u_sp1, fi_tmp );
                     pb.implicit_part( tn, u_sp2, f_tmp );
+
+                    if constexpr ( detail::problem_operator<decltype( pb.implicit_part ), value_t> )
+                    {
+                        // Operator-based problems keep the historical Shampine interface.
+                        shampine_trick_caller
+                            .template operator()<l>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, f_D_u, u_tmp, shampine_element );
+                    }
+                    else
+                    {
+                        // Matrix-based problems reuse the factorization prepared by the
+                        // implicit stages.
+                        auto shampine_system = shampine_trick_caller.template prepare_with_existing_factorization<state_t>();
+
+                        shampine_system.template apply<l>( f_D_u, u_tmp, shampine_element );
+                    }
+
                     tn = tn + dt;
 
                     u_np1 = us_s - err_D + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
