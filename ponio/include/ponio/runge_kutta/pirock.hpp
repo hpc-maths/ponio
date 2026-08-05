@@ -427,8 +427,19 @@ namespace ponio::runge_kutta::pirock
             }
             else
             {
-                using matrix_t = std::decay_t<decltype( pb.implicit_part.df( tn, un ) )>;
-                auto g_sp1     = [&]( state_t& u ) -> state_t
+                using matrix_t                = std::decay_t<decltype( pb.implicit_part.df( tn, un ) )>;
+                using matrix_linear_algebra_t = ::ponio::linear_algebra::linear_algebra<matrix_t>;
+
+                constexpr bool can_reuse_factorization = requires( matrix_t & matrix, matrix_t const& const_matrix, state_t const& rhs ) {
+                                                             matrix.rows();
+                                                             matrix.coeffRef( 0, 0 );
+                                                             matrix.makeCompressed();
+
+                                                             matrix_linear_algebra_t::factorize( const_matrix );
+                                                             matrix_linear_algebra_t::solve_factorized( rhs );
+                                                         };
+
+                auto g_sp1 = [&]( state_t& u ) -> state_t
                 {
                     _info.number_of_eval[1] += 1;
 
@@ -437,54 +448,59 @@ namespace ponio::runge_kutta::pirock
                     return u - gamma * dt * fi_tmp - u_sm2pl;
                 };
 
-                // Both implicit stages use the same diagonal coefficient gamma.
-                // Their simplified Newton iterations can therefore share the matrix I - gamma * dt * J_R and its numerical factorization.
-                matrix_t frozen_jacobian;
-
+                if constexpr ( can_reuse_factorization )
                 {
-                    // The reaction Jacobian may be a persistent matrix returned by reference by the problem implementation.
-                    decltype( auto ) reaction_jacobian = [&]() -> decltype( auto )
-                    {
-                        return pb.implicit_part.df( tn, u_sm2pl );
-                    }();
+                    // Both implicit stages use the same diagonal coefficient gamma.
+                    // Their simplified Newton iterations can therefore share the matrix
+                    // I - gamma * dt * J_R and its numerical factorization.
+                    matrix_t frozen_jacobian;
 
+                    // The reaction Jacobian may be a persistent matrix returned by
+                    // reference by the problem implementation.
+                    decltype( auto ) reaction_jacobian = pb.implicit_part.df( tn, u_sm2pl );
+
+                    frozen_jacobian = reaction_jacobian;
+                    frozen_jacobian *= -gamma * dt;
+
+                    // coeffRef inserts a missing diagonal coefficient when the Jacobian
+                    // sparse pattern does not store it.
+                    using index_t = std::decay_t<decltype( frozen_jacobian.rows() )>;
+
+                    for ( index_t i = 0; i < frozen_jacobian.rows(); ++i )
                     {
-                        frozen_jacobian = reaction_jacobian;
+                        frozen_jacobian.coeffRef( i, i ) += value_t( 1 );
                     }
 
-                    {
-                        frozen_jacobian *= -gamma * dt;
+                    frozen_jacobian.makeCompressed();
 
-                        // coeffRef inserts a missing diagonal coefficient when the Jacobian sparse pattern does not store it.
-                        for ( Eigen::Index i = 0; i < frozen_jacobian.rows(); ++i )
-                        {
-                            frozen_jacobian.coeffRef( i, i ) += value_t( 1 );
-                        }
-                    }
+                    matrix_linear_algebra_t::factorize( frozen_jacobian );
 
-                    {
-                        frozen_jacobian.makeCompressed();
-                    }
-                }
-
-                {
-                    ::ponio::linear_algebra::linear_algebra<matrix_t>::factorize( frozen_jacobian );
-                }
-                {
                     u_sp1 = diagonal_implicit_runge_kutta::simplified_newton_with_reused_factorization<value_t, state_t, matrix_t>( g_sp1,
                         u_sm2pl );
+                }
+                else
+                {
+                    auto identity = matrix_linear_algebra_t::identity( un );
+
+                    auto dg_sp1 = [&]( state_t& u ) -> matrix_t
+                    {
+                        return identity - gamma * dt * pb.implicit_part.df( tn, u );
+                    };
+
+                    u_sp1 = diagonal_implicit_runge_kutta::newton<value_t>( g_sp1,
+                        dg_sp1,
+                        u_sm2pl,
+                        matrix_linear_algebra_t::solver,
+                        ponio::default_config::newton_tolerance,
+                        ponio::default_config::newton_max_iterations );
                 }
 
                 _info.number_of_eval[0] += 1;
                 _info.number_of_eval[1] += 1;
 
-                {
-                    pb.explicit_part( tn, u_sp1, fe_tmp );
-                }
+                pb.explicit_part( tn, u_sp1, fe_tmp );
+                pb.implicit_part( tn, u_sp1, fi_tmp );
 
-                {
-                    pb.implicit_part( tn, u_sp1, fi_tmp );
-                }
                 auto g_sp2 = [&]( state_t& u ) -> state_t
                 {
                     _info.number_of_eval[1] += 1;
@@ -493,9 +509,28 @@ namespace ponio::runge_kutta::pirock
 
                     return u - gamma * dt * f_tmp - ( u_sm2pl + beta * dt * fe_tmp + ( 1. - 2. * gamma ) * dt * fi_tmp );
                 };
+
+                if constexpr ( can_reuse_factorization )
                 {
+                    // Reuse the factorization prepared before the first implicit stage.
                     u_sp2 = diagonal_implicit_runge_kutta::simplified_newton_with_reused_factorization<value_t, state_t, matrix_t>( g_sp2,
                         u_sm2pl );
+                }
+                else
+                {
+                    auto identity = matrix_linear_algebra_t::identity( un );
+
+                    auto dg_sp2 = [&]( state_t& u ) -> matrix_t
+                    {
+                        return identity - gamma * dt * pb.implicit_part.df( tn, u );
+                    };
+
+                    u_sp2 = diagonal_implicit_runge_kutta::newton<value_t>( g_sp2,
+                        dg_sp2,
+                        u_sm2pl,
+                        matrix_linear_algebra_t::solver,
+                        ponio::default_config::newton_tolerance,
+                        ponio::default_config::newton_max_iterations );
                 }
             }
             auto& u_sp3 = U[11];

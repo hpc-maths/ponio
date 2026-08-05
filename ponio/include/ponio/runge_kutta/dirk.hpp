@@ -286,17 +286,35 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
                     k_initial = Kj[I - 1];
                 }
 
-                // Freeze the stage Jacobian at the predicted derivative.
-                matrix_t frozen_stage_matrix = dg( k_initial );
+                // // Freeze the stage Jacobian at the predicted derivative.
+                // matrix_t frozen_stage_matrix = dg( k_initial );
 
-                // The numerical factorization is computed once for the
-                // current stage and reused by every nonlinear iteration.
-                ::ponio::linear_algebra::linear_algebra<matrix_t>::factorize( frozen_stage_matrix );
+                // // The numerical factorization is computed once for the
+                // // current stage and reused by every nonlinear iteration.
+                // ::ponio::linear_algebra::linear_algebra<matrix_t>::factorize( frozen_stage_matrix );
 
-                // The configurable DIRK tolerance and iteration limit are
-                // forwarded explicitly. The free function also provides
-                // Ponio defaults when it is called independently.
-                simplified_newton_with_reused_factorization<value_t, state_t, matrix_t>( g, k_initial, tol, max_iter );
+                // // The configurable DIRK tolerance and iteration limit are
+                // // forwarded explicitly. The free function also provides
+                // // Ponio defaults when it is called independently.
+                // simplified_newton_with_reused_factorization<value_t, state_t, matrix_t>( g, k_initial, tol, max_iter );
+
+                using matrix_linear_algebra_t = ::ponio::linear_algebra::linear_algebra<matrix_t>;
+
+                if constexpr ( requires( matrix_t const& matrix, state_t const& rhs ) {
+                                   matrix_linear_algebra_t::factorize( matrix );
+                                   matrix_linear_algebra_t::solve_factorized( rhs );
+                               } )
+                {
+                    matrix_t frozen_stage_matrix = dg( k_initial );
+
+                    matrix_linear_algebra_t::factorize( frozen_stage_matrix );
+
+                    simplified_newton_with_reused_factorization<value_t, state_t, matrix_t>( g, k_initial, tol, max_iter );
+                }
+                else
+                {
+                    newton<value_t>( g, dg, k_initial, matrix_linear_algebra_t::solver, tol, max_iter );
+                }
             }
         }
 
