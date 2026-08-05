@@ -17,7 +17,7 @@ dependencies:
   - eigen
   - samurai
   - petsc
-  - cli11
+  - cli11<2.5
   - h5py
   # tests
   - notebook

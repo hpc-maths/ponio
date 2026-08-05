@@ -1,5 +1,5 @@
 How-to: make a :cpp:class:`ponio::solver_range`
-----------------------------------------------
+-----------------------------------------------
 
 The signature of :cpp:func:`ponio::make_solver_range` looks like the same signature of :cpp:func:`ponio::solve` function, without the last parameter (the observer):
 

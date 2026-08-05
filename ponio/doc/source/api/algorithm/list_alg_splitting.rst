@@ -18,15 +18,11 @@ In Lie splitting method, the solution is computed as:
 
    u^{n+1} = \mathcal{L}^{\Delta t}(t^n, u^n) = \phi_{\Delta t}^{[f_1]}\circ \cdots \circ \phi_{\Delta t}^{[f_k]} (t^n,u^n)
 
-.. doxygenclass:: ponio::splitting::lie::lie
-   :project: ponio
-   :members:
++ **name:** Lie splitting method
++ **label in ponio:** :cpp:class:`ponio::splitting::lie::lie`
++ **helper function in ponio:** :cpp:class:`ponio::splitting::lie::make_lie_tuple`
++ **order:** 1
 
-Helper function
-~~~~~~~~~~~~~~~
-
-.. doxygenfunction:: ponio::splitting::lie::make_lie_tuple
-   :project: ponio
 
 Strang splitting method
 -----------------------
@@ -40,15 +36,10 @@ In Strang splitting method, the solution is computed as:
               \circ \phi_{\frac{\Delta t}{2}}^{[f_{k-1}]}\circ\cdots\circ \phi_{\frac{\Delta t}{2}}^{[f_1]}
               (t^n,u^n)
 
-.. doxygenclass:: ponio::splitting::strang::strang
-   :project: ponio
-   :members:
-
-Helper function
-~~~~~~~~~~~~~~~
-
-.. doxygenfunction:: ponio::splitting::strang::make_strang_tuple
-   :project: ponio
++ **name:** Strang splitting method
++ **label in ponio:** :cpp:class:`ponio::splitting::strang::strang`
++ **helper function in ponio:** :cpp:class:`ponio::splitting::strang::make_strang_tuple`
++ **order:** 2
 
 
 Adaptive time step Strang splitting method
@@ -105,30 +96,8 @@ The difficulty in adaptive time step Strang splitting method is to find a good s
 
       \Delta t^\star \approx \frac{\delta C_\delta}{C_0}
 
-.. doxygenclass:: ponio::splitting::strang::adaptive_strang
-   :project: ponio
-   :members:
 
-Helper function
-~~~~~~~~~~~~~~~
-
-.. doxygenfunction:: ponio::splitting::strang::make_adaptive_strang_tuple
-   :project: ponio
-
-Generic splitting tuple
------------------------
-
-The class :cpp:class:`ponio::splitting::detail::splitting_tuple` is useful to build each splitting method from variadic number of pair of algorithm and time step. This class can has optional arguments, stored in a tuple, to call constructor of :code:`_splitting_method_t` (which is :cpp:class:`ponio::splitting::lie::lie`, :cpp:class:`ponio::splitting::strang::strang` or :cpp:class:`ponio::splitting::strang::adaptive_strang`).
-
-.. doxygenclass:: ponio::splitting::detail::splitting_tuple
-   :project: ponio
-   :members:
-
-Helper functions
-~~~~~~~~~~~~~~~~
-
-.. doxygenfunction:: ponio::splitting::detail::make_splitting_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts )
-   :project: ponio
-
-.. doxygenfunction:: ponio::splitting::detail::make_splitting_from_tuple( std::tuple<Methods_t...> const& meths, std::array<value_t, sizeof...( Methods_t )> const& dts, optional_tuple_t optional_args )
-   :project: ponio
++ **name:** adaptive Strang splitting method
++ **label in ponio:** :cpp:class:`ponio::splitting::strang::adaptive_strang`
++ **helper function in ponio:** :cpp:class:`ponio::splitting::strang::make_adaptive_strang_tuple`
++ **order:** 2

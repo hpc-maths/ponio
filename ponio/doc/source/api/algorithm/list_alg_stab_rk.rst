@@ -52,10 +52,10 @@ and
 
 and where :math:`T_j(x)` is the Chebyshev polynomial.
 
-
-.. doxygenclass:: ponio::runge_kutta::chebyshev::explicit_rkc2
-   :project: ponio
-   :members:
++ **name:** RKC2
++ **label in ponio:** :cpp:class:`ponio::runge_kutta::chebyshev::explicit_rkc2`
++ **stages:** static number ``N_stages_``
++ **order:** 2
 
 .. warning::
 
@@ -80,18 +80,11 @@ We write the method ROCK2 presented in :cite:`abdulle:2001`. The algorithm of RO
 
 where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from a minimization problem.
 
-.. doxygenclass:: ponio::runge_kutta::rock::rock2_impl
-   :project: ponio
-   :members:
-
-Helper functions
-~~~~~~~~~~~~~~~~
-
-.. doxygenfunction:: ponio::runge_kutta::rock::rock2(eig_computer_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::rock::rock2()
-  :project: ponio
++ **name:** ROCK2
++ **label in ponio:** :cpp:class:`ponio::runge_kutta::rock::rock2_impl`
++ **helper function in ponio:** :cpp:func:`ponio::runge_kutta::rock::rock2(eig_computer_t&&)`, :cpp:func:`ponio::runge_kutta::rock::rock2()`
++ **stages:** dynamic number of stages
++ **order:** 2
 
 
 ROCK4 method
@@ -113,19 +106,11 @@ We write the method ROCK2 presented in :cite:`abdulle:2002`. The algorithm of RO
 
 where :math:`\mu_j`, :math:`\nu_j` and :math:`\kappa_j` coefficients coming from a minimization problem, and :math:`a_{ij}`, :math:`b_i` coming from an order 4 method build with :math:`y_{s-4}` as initial condition.
 
-.. doxygenclass:: ponio::runge_kutta::rock::rock4_impl
-   :project: ponio
-   :members:
-
-Helper functions
-~~~~~~~~~~~~~~~~
-
-.. doxygenfunction:: ponio::runge_kutta::rock::rock4(eig_computer_t&&)
-  :project: ponio
-
-.. doxygenfunction:: ponio::runge_kutta::rock::rock4()
-  :project: ponio
-
++ **name:** ROCK4
++ **label in ponio:** :cpp:class:`ponio::runge_kutta::rock::rock4_impl`
++ **helper function in ponio:** :cpp:func:`ponio::runge_kutta::rock::rock4(eig_computer_t&&)`, :cpp:func:`ponio::runge_kutta::rock::rock4()`
++ **stages:** dynamic number of stages
++ **order:** 4
 
 Runge-Kutta Legendre method
 ---------------------------
@@ -159,9 +144,10 @@ with coefficients given by
 
 where :math:`s` is the number of stages of the method.
 
-.. doxygenclass:: ponio::runge_kutta::legendre::explicit_rkl1
-   :project: ponio
-   :members:
++ **name:** RKL1
++ **label in ponio:** :cpp:class:`ponio::runge_kutta::legendre::explicit_rkl1`
++ **stages:** static number ``N_stages_``
++ **order:** 1
 
 .. warning::
 
@@ -211,9 +197,10 @@ and
 
 where :math:`s` is the number of stages of the method
 
-.. doxygenclass:: ponio::runge_kutta::legendre::explicit_rkl2
-   :project: ponio
-   :members:
++ **name:** RKL2
++ **label in ponio:** :cpp:class:`ponio::runge_kutta::legendre::explicit_rkl2`
++ **stages:** static number ``N_stages_``
++ **order:** 2
 
 .. warning::
 
