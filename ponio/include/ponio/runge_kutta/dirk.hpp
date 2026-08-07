@@ -67,10 +67,9 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
     /**
      * @brief Solve a nonlinear system with a reused matrix factorization.
      *
-     * This function implements the same simplified Newton iteration as
-     * simplified_newton(), but assumes that the frozen Jacobian has already
-     * been factorized. Each nonlinear iteration therefore performs only a
-     * solve with the stored factorization.
+     * This function implements a simplified Newton iteration and assumes that
+     * the frozen Jacobian has already been factorized. Each nonlinear iteration
+     * therefore performs only a solve with the stored factorization.
      *
      * @param f nonlinear residual
      * @param x0 initial guess
@@ -241,18 +240,6 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
                 {
                     k_initial = Kj[I - 1];
                 }
-
-                // // Freeze the stage Jacobian at the predicted derivative.
-                // matrix_t frozen_stage_matrix = dg( k_initial );
-
-                // // The numerical factorization is computed once for the
-                // // current stage and reused by every nonlinear iteration.
-                // ::ponio::linear_algebra::linear_algebra<matrix_t>::factorize( frozen_stage_matrix );
-
-                // // The configurable DIRK tolerance and iteration limit are
-                // // forwarded explicitly. The free function also provides
-                // // Ponio defaults when it is called independently.
-                // simplified_newton_with_reused_factorization<value_t, state_t, matrix_t>( g, k_initial, tol, max_iter );
 
                 using matrix_linear_algebra_t = ::ponio::linear_algebra::linear_algebra<matrix_t>;
 

@@ -39,6 +39,12 @@ namespace ponio::linear_algebra
             return matrix_type::Identity();
         }
 
+        static matrix_type
+        identity_minus( matrix_type const& matrix, scalar_t alpha )
+        {
+            return matrix_type::Identity() - alpha * matrix;
+        }
+
         static vector_type
         solver( matrix_type const& dfx, vector_type const& fx )
         {
@@ -56,6 +62,12 @@ namespace ponio::linear_algebra
         identity( vector_type const& u )
         {
             return matrix_type::Identity( u.rows(), u.rows() );
+        }
+
+        static matrix_type
+        identity_minus( matrix_type const& matrix, scalar_t alpha )
+        {
+            return matrix_type::Identity( matrix.rows(), matrix.cols() ) - alpha * matrix;
         }
 
         static vector_type
@@ -79,7 +91,7 @@ namespace ponio::linear_algebra
      * matrix coefficients change.
      *
      * The factorization is stored in a static solver so that several solves can
-     * reuse it. In particular, this is required by quasi-Newton iterations and
+     * reuse it. In particular, this is required by simplified Newton iterations and
      * by Shampine's trick, where the same factorized matrix may be applied more
      * than once.
      */
@@ -104,9 +116,8 @@ namespace ponio::linear_algebra
         inline static solver_type sparse_solver;
 
         /**
-         * The applications targeted by this backend use a fixed mesh and hence
-         * a fixed sparse pattern. Consequently, the symbolic analysis only has
-         * to be performed once for the lifetime of this specialization.
+         * The current implementation assumes a fixed sparse pattern. The symbolic
+         * analysis can therefore be reused after the first successful factorization.
          */
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
         inline static bool pattern_analyzed = false;
@@ -120,6 +131,29 @@ namespace ponio::linear_algebra
             I.setIdentity();
 
             return I;
+        }
+
+        /**
+         * @brief Build the shifted matrix I - alpha A.
+         *
+         * Sparse storage details are kept inside the Eigen backend so that
+         * algorithms using linear_algebra do not depend on Eigen-specific
+         * operations such as coeffRef() or makeCompressed().
+         */
+        static matrix_type
+        identity_minus( matrix_type const& matrix, scalar_t alpha )
+        {
+            matrix_type shifted_matrix = matrix;
+            shifted_matrix *= -alpha;
+
+            for ( Eigen::Index i = 0; i < shifted_matrix.rows(); ++i )
+            {
+                shifted_matrix.coeffRef( i, i ) += scalar_t( 1 );
+            }
+
+            shifted_matrix.makeCompressed();
+
+            return shifted_matrix;
         }
 
         /**
@@ -141,9 +175,7 @@ namespace ponio::linear_algebra
                 // SparseLU::info() must not be queried here because the numerical factorization has not been initialized yet.
             }
 
-            {
-                sparse_solver.factorize( matrix );
-            }
+            sparse_solver.factorize( matrix );
 
             if ( sparse_solver.info() != Eigen::Success )
             {
@@ -171,9 +203,7 @@ namespace ponio::linear_algebra
         {
             vector_type solution;
 
-            {
-                solution = sparse_solver.solve( rhs );
-            }
+            solution = sparse_solver.solve( rhs );
 
             if ( sparse_solver.info() != Eigen::Success )
             {
@@ -209,105 +239,20 @@ namespace ponio::shampine_trick
     struct shampine_trick;
 
     /**
-     * @brief Factorized sparse linear system used by Eigen Shampine's trick.
-     *
-     * Shampine's trick applies the inverse of the same matrix one or two times,
-     * depending on the value of ell. The matrix must therefore be factorized
-     * only once and the resulting factorization reused for every inverse
-     * application.
-     *
-     * The system may either reference the factorization owned by the local
-     * Shampine object or reuse the static factorization already prepared by the
-     * sparse linear algebra backend.
-     */
-    template <typename solver_t, typename state_t>
-    struct eigen_sparse_shampine_system
-    {
-        solver_t* solver                = nullptr;
-        bool use_external_factorization = false;
-
-        explicit eigen_sparse_shampine_system( solver_t& solver_ )
-            : solver( &solver_ )
-        {
-        }
-
-        explicit eigen_sparse_shampine_system( bool use_external_factorization_ )
-            : use_external_factorization( use_external_factorization_ )
-        {
-        }
-
-        /**
-         * @brief Apply the inverse represented by the stored factorization.
-         *
-         * When an external factorization is requested, the factorization
-         * previously computed by ponio::linear_algebra is reused directly.
-         * This is the intended behavior when Shampine's trick follows an
-         * implicit stage involving the same linear system.
-         */
-        state_t
-        solve( state_t const& rhs )
-        {
-            if ( use_external_factorization )
-            {
-                using sparse_matrix_t = Eigen::SparseMatrix<typename state_t::Scalar>;
-
-                return ::ponio::linear_algebra::linear_algebra<sparse_matrix_t>::solve_factorized( rhs );
-            }
-
-            state_t solution = solver->solve( rhs );
-
-            if ( solver->info() != Eigen::Success )
-            {
-                throw std::runtime_error( "Eigen SparseLU solve failed in Shampine's trick." );
-            }
-
-            return solution;
-        }
-
-        /**
-         * @brief Apply (I - alpha J)^(-ell) to a right-hand side.
-         *
-         * For ell = 1, a single solve is required. For ell = 2, the result of
-         * the first solve is used as the right-hand side of the second solve.
-         * Both solves reuse the same numerical factorization.
-         */
-        template <std::size_t ell>
-        void
-        apply( state_t const& rhs, state_t& u_tmp, state_t& result )
-        {
-            if constexpr ( ell == 1 )
-            {
-                result = solve( rhs );
-            }
-            else if constexpr ( ell == 2 )
-            {
-                {
-                    u_tmp = solve( rhs );
-                }
-
-                {
-                    result = solve( u_tmp );
-                }
-            }
-            else
-            {
-                static_assert( ell == 1 || ell == 2, "Eigen Shampine's trick only supports ell = 1 or ell = 2." );
-            }
-        }
-    };
-
-    /**
      * @brief Sparse Eigen implementation of Shampine's trick.
      *
-     * The matrix
+     * Shampine's trick applies the inverse of
      *
      *     I - alpha J
      *
-     * is assembled and factorized once. The resulting factorization is then
-     * reused for the one or two inverse applications required by the method.
+     * one or two times, depending on the value of ell. The initialization,
+     * application and finalization steps are kept explicit so that PIROCK only
+     * depends on a small Shampine interface and not on Eigen-specific solver
+     * details.
      *
-     * SparseLU is used so that no symmetry or positive-definiteness assumption
-     * is imposed on the reaction Jacobian.
+     * The object can either prepare its own SparseLU factorization or reuse the
+     * factorization already computed by the sparse linear algebra backend. In
+     * both cases, every call to apply() uses the same prepared factorization.
      */
     template <typename scalar_t, int size, int options, int maxrows>
     struct shampine_trick<Eigen::Matrix<scalar_t, size, 1, options, maxrows, 1>> // NOLINT(misc-include-cleaner)
@@ -329,6 +274,13 @@ namespace ponio::shampine_trick
          */
         bool sparse_pattern_analyzed_ = false;
 
+        /**
+         * When true, apply() uses the factorization previously prepared by
+         * ponio::linear_algebra. Otherwise, the factorization owned by this
+         * Shampine object is used.
+         */
+        bool use_external_factorization_ = false;
+
         void
         analyze_pattern_if_needed()
         {
@@ -340,21 +292,36 @@ namespace ponio::shampine_trick
             }
         }
 
+        /**
+         * @brief Solve a system with the factorization selected by initialize().
+         */
+        template <typename state_t>
+        state_t
+        solve( state_t const& rhs )
+        {
+            if ( use_external_factorization_ )
+            {
+                return ::ponio::linear_algebra::linear_algebra<sparse_matrix_t>::solve_factorized( rhs );
+            }
+
+            state_t solution = sparse_solver_.solve( rhs );
+
+            if ( sparse_solver_.info() != Eigen::Success )
+            {
+                throw std::runtime_error( "Eigen SparseLU solve failed in Shampine's trick." );
+            }
+
+            return solution;
+        }
+
       public:
 
         /**
-         * @brief Assemble and factorize the Shampine linear system.
-         *
-         * The reaction Jacobian is evaluated at the supplied initial guess and
-         * the sparse matrix I - alpha J is assembled. Its symbolic pattern is
-         * analyzed once, while its numerical values are factorized at every
-         * call.
-         *
-         * @return A lightweight object referencing the prepared factorization.
+         * @brief Initialize Shampine's trick with a locally factorized system.
          */
         template <typename jacobian_reac_t, typename state_t>
-        auto
-        prepare( value_t alpha, jacobian_reac_t&& jacobian_reac, state_t const& initial_guess )
+        void
+        initialize( value_t alpha, jacobian_reac_t&& jacobian_reac, state_t const& initial_guess )
         {
             using returned_matrix_t = std::decay_t<decltype( jacobian_reac( initial_guess ) )>;
 
@@ -362,76 +329,81 @@ namespace ponio::shampine_trick
                 "The Eigen implementation of Shampine's trick expects "
                 "Eigen::SparseMatrix<value_t>." );
 
+            J_reac_ = jacobian_reac( initial_guess );
+            J_R_    = ::ponio::linear_algebra::linear_algebra<sparse_matrix_t>::identity_minus( J_reac_, alpha );
+
+            analyze_pattern_if_needed();
+            sparse_solver_.factorize( J_R_ );
+
+            if ( sparse_solver_.info() != Eigen::Success )
             {
-                J_reac_ = jacobian_reac( initial_guess );
+                throw std::runtime_error( "Eigen SparseLU factorization failed in "
+                                          "Shampine's trick." );
             }
 
-            {
-                // Assemble I - alpha J without constructing an additional
-                // sparse identity matrix.
-                J_R_ = J_reac_;
-                J_R_ *= -alpha;
-
-                for ( Eigen::Index i = 0; i < J_R_.rows(); ++i )
-                {
-                    J_R_.coeffRef( i, i ) += value_t( 1 );
-                }
-            }
-
-            {
-                // SparseLU expects a compressed sparse matrix for efficient symbolic analysis and numerical factorization.
-                J_R_.makeCompressed();
-            }
-
-            {
-                analyze_pattern_if_needed();
-
-                {
-                    sparse_solver_.factorize( J_R_ );
-                }
-
-                if ( sparse_solver_.info() != Eigen::Success )
-                {
-                    throw std::runtime_error( "Eigen SparseLU factorization failed in "
-                                              "Shampine's trick." );
-                }
-
-                // The symbolic pattern is considered reusable only after a successful numerical factorization.
-                sparse_pattern_analyzed_ = true;
-            }
-
-            return eigen_sparse_shampine_system<sparse_solver_t, state_t>( sparse_solver_ );
+            // The symbolic pattern is considered reusable only after a successful numerical factorization.
+            sparse_pattern_analyzed_    = true;
+            use_external_factorization_ = false;
         }
 
         /**
-         * @brief Reuse the factorization already prepared by the sparse backend.
+         * @brief Initialize Shampine's trick from an existing factorization.
          *
-         * Shampine's trick is designed to reuse an existing factorization when
-         * the same linear system has already been prepared by an implicit
-         * stage. No additional analysis or numerical factorization is performed
-         * in this branch.
+         * PIROCK uses this overload after its implicit stages have already
+         * factorized the same matrix I - gamma dt J_R. No symbolic analysis,
+         * matrix assembly or numerical factorization is repeated here.
          */
-        template <typename state_t>
-        auto
-        prepare_with_existing_factorization()
+        void
+        initialize()
         {
-            return eigen_sparse_shampine_system<sparse_solver_t, state_t>( true );
+            use_external_factorization_ = true;
         }
 
         /**
-         * @brief Assemble, factorize, and apply Shampine's trick.
+         * @brief Apply (I - alpha J)^(-ell) to a right-hand side.
+         */
+        template <std::size_t ell, typename state_t>
+        void
+        apply( state_t const& rhs, state_t& u_tmp, state_t& result )
+        {
+            if constexpr ( ell == 1 )
+            {
+                result = solve( rhs );
+            }
+            else if constexpr ( ell == 2 )
+            {
+                u_tmp  = solve( rhs );
+                result = solve( u_tmp );
+            }
+            else
+            {
+                static_assert( ell == 1 || ell == 2, "Eigen Shampine's trick only supports ell = 1 or ell = 2." );
+            }
+        }
+
+        /**
+         * @brief Finalize the current Shampine application sequence.
+         */
+        void
+        finalize()
+        {
+            use_external_factorization_ = false;
+        }
+
+        /**
+         * @brief Assemble, factorize and apply Shampine's trick.
          *
-         * This operator preserves the original direct-call interface. The
-         * factorization is prepared once, then reused for all inverse
-         * applications associated with ell.
+         * This operator preserves the original direct-call interface. New code
+         * can use initialize(), apply() and finalize() explicitly when several
+         * inverse applications share the same factorization.
          */
         template <std::size_t ell, typename jacobian_reac_t, typename state_t>
         void
         operator()( value_t alpha, jacobian_reac_t&& jacobian_reac, state_t& initial_guess, state_t& rhs, state_t& u_tmp, state_t& shampine_result )
         {
-            auto system = prepare( alpha, std::forward<jacobian_reac_t>( jacobian_reac ), initial_guess );
-
-            system.template apply<ell>( rhs, u_tmp, shampine_result );
+            initialize( alpha, std::forward<jacobian_reac_t>( jacobian_reac ), initial_guess );
+            apply<ell>( rhs, u_tmp, shampine_result );
+            finalize();
         }
     };
 
