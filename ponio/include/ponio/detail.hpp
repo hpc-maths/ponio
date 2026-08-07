@@ -113,6 +113,64 @@ namespace ponio::detail
         */
     }
 
+    /**
+     * @brief Compute the mean squared normalized error.
+     *
+     *
+     * @tparam state_t type of state
+     * @tparam value_t type of tolerances
+     * @param error    local error estimate
+     * @param un       state \f$u^n\f$
+     * @param unp1     state \f$u^{n+1}\f$
+     * @param a_tol    absolute tolerance
+     * @param r_tol    relative tolerance
+     */
+#ifndef IN_DOXYGEN
+    template <typename state_t, typename value_t>
+        requires( !std::ranges::range<state_t> && !requires( state_t const& state ) { state.array(); } )
+    auto error_estimate_squared( state_t const& error, state_t const& un, state_t const& unp1, value_t a_tol, value_t r_tol )
+    {
+        using namespace std;
+
+        auto normalized_error = abs( error ) / ( a_tol + r_tol * max( abs( un ), abs( unp1 ) ) );
+
+        return normalized_error * normalized_error;
+    }
+#endif
+
+    template <typename state_t, typename value_t>
+        requires std::ranges::range<state_t>
+    auto
+    error_estimate_squared( state_t const& error, state_t const& un, state_t const& unp1, value_t a_tol, value_t r_tol )
+    {
+        auto it_un   = std::ranges::cbegin( un );
+        auto it_unp1 = std::ranges::cbegin( unp1 );
+        auto last    = std::ranges::cend( error );
+
+        auto n_elm = std::distance( std::ranges::cbegin( error ), last );
+
+        value_t result = static_cast<value_t>( 0 );
+
+        using namespace std;
+        for ( auto it_error = std::ranges::cbegin( error ); it_error != last; ++it_error, ++it_un, ++it_unp1 )
+        {
+            auto normalized_error = abs( *it_error ) / ( a_tol + r_tol * max( abs( *it_un ), abs( *it_unp1 ) ) );
+
+            result += normalized_error * normalized_error;
+        }
+
+        return result / static_cast<value_t>( n_elm );
+    }
+
+#ifndef IN_DOXYGEN
+    template <typename state_t, typename value_t>
+        requires( !std::ranges::range<state_t> && requires( state_t const& state ) { state.array(); } )
+    auto error_estimate_squared( state_t const& error, state_t const& un, state_t const& unp1, value_t a_tol, value_t r_tol )
+    {
+        return error_estimate_squared( error.array(), un.array(), unp1.array(), a_tol, r_tol );
+    }
+#endif
+
     template <typename state_t, typename value_t, typename ArrayA_t, typename ArrayB_t>
     concept tpl_inner_product_requirement = requires( ArrayA_t a, ArrayB_t b, state_t init, value_t mul_coeff, state_t output ) {
                                                 output = init + mul_coeff * a[0] * b[0];

@@ -292,9 +292,7 @@ namespace ponio::runge_kutta::pirock
             //
             // > if method is called as a constant time step method, only index from 0 to 12 are used
 
-            {
-                _info.reset_eval();
-            }
+            _info.reset_eval();
             auto [mdeg, deg_index, start_index, n_eval] = degree_computer::compute_n_stages_optimal_degree( rock::rock_order::rock_2(),
                 eig_computer,
                 pb.explicit_part,
@@ -377,17 +375,13 @@ namespace ponio::runge_kutta::pirock
 
             // u_{*s-1} = u_{s-2} + \sigma_\alpha \Delta t  F_D( u_{s-2} )
             auto& us_sm1 = U[7];
-            {
-                pb.explicit_part( t_jm1, u_sm2, fe_tmp );
-                us_sm1 = u_sm2 + sigma_a * dt * fe_tmp;
-            }
+            pb.explicit_part( t_jm1, u_sm2, fe_tmp );
+            us_sm1 = u_sm2 + sigma_a * dt * fe_tmp;
 
             // u_{*s} = u_{*s-1} + \sigma_\alpha \Delta t  F_D( u_{*s-1} )
             auto& us_s = U[8];
-            {
-                pb.explicit_part( t_jm1, us_sm1, fe_tmp );
-                us_s = us_sm1 + sigma_a * dt * fe_tmp;
-            }
+            pb.explicit_part( t_jm1, us_sm1, fe_tmp );
+            us_s = us_sm1 + sigma_a * dt * fe_tmp;
 
             // u_{s-2+l} = u_j
             auto& u_sm2pl = u_j;
@@ -403,25 +397,17 @@ namespace ponio::runge_kutta::pirock
                 auto op_sp1 = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.implicit_part.f_t( tn );
 
                 auto rhs_sp1 = u_sm2pl;
-                {
-                    ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp1, u_sp1, rhs_sp1, n_eval_sp1 );
-                }
+                ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp1, u_sp1, rhs_sp1, n_eval_sp1 );
 
                 std::size_t n_eval_sp2 = 0;
 
-                {
-                    pb.explicit_part( tn, u_sp1, fe_tmp );
-                }
-                {
-                    pb.implicit_part( tn, u_sp1, fi_tmp );
-                }
+                pb.explicit_part( tn, u_sp1, fe_tmp );
+                pb.implicit_part( tn, u_sp1, fi_tmp );
                 auto& rhs_sp2 = U[11];
                 auto op_sp2 = ::ponio::linear_algebra::operator_algebra<state_t>::identity( un ) - gamma * dt * pb.implicit_part.f_t( tn );
 
                 rhs_sp2 = u_sm2pl + beta * dt * fe_tmp + ( 1. - 2. * gamma ) * dt * fi_tmp;
-                {
-                    ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2, n_eval_sp2 );
-                }
+                ::ponio::linear_algebra::operator_algebra<state_t>::solve( op_sp2, u_sp2, rhs_sp2, n_eval_sp2 );
 
                 _info.number_of_eval[1] += n_eval_sp1 + n_eval_sp2 + 1;
             }
@@ -430,12 +416,9 @@ namespace ponio::runge_kutta::pirock
                 using matrix_t                = std::decay_t<decltype( pb.implicit_part.df( tn, un ) )>;
                 using matrix_linear_algebra_t = ::ponio::linear_algebra::linear_algebra<matrix_t>;
 
-                constexpr bool can_reuse_factorization = requires( matrix_t & matrix, matrix_t const& const_matrix, state_t const& rhs ) {
-                                                             matrix.rows();
-                                                             matrix.coeffRef( 0, 0 );
-                                                             matrix.makeCompressed();
-
-                                                             matrix_linear_algebra_t::factorize( const_matrix );
+                constexpr bool can_reuse_factorization = requires( matrix_t const& matrix, state_t const& rhs ) {
+                                                             matrix_linear_algebra_t::identity_minus( matrix, value_t{} );
+                                                             matrix_linear_algebra_t::factorize( matrix );
                                                              matrix_linear_algebra_t::solve_factorized( rhs );
                                                          };
 
@@ -453,27 +436,10 @@ namespace ponio::runge_kutta::pirock
                     // Both implicit stages use the same diagonal coefficient gamma.
                     // Their simplified Newton iterations can therefore share the matrix
                     // I - gamma * dt * J_R and its numerical factorization.
-                    matrix_t frozen_jacobian;
-
-                    // The reaction Jacobian may be a persistent matrix returned by
-                    // reference by the problem implementation.
                     decltype( auto ) reaction_jacobian = pb.implicit_part.df( tn, u_sm2pl );
+                    matrix_t frozen_stage_matrix       = matrix_linear_algebra_t::identity_minus( reaction_jacobian, gamma * dt );
 
-                    frozen_jacobian = reaction_jacobian;
-                    frozen_jacobian *= -gamma * dt;
-
-                    // coeffRef inserts a missing diagonal coefficient when the Jacobian
-                    // sparse pattern does not store it.
-                    using index_t = std::decay_t<decltype( frozen_jacobian.rows() )>;
-
-                    for ( index_t i = 0; i < frozen_jacobian.rows(); ++i )
-                    {
-                        frozen_jacobian.coeffRef( i, i ) += value_t( 1 );
-                    }
-
-                    frozen_jacobian.makeCompressed();
-
-                    matrix_linear_algebra_t::factorize( frozen_jacobian );
+                    matrix_linear_algebra_t::factorize( frozen_stage_matrix );
 
                     u_sp1 = diagonal_implicit_runge_kutta::simplified_newton_with_reused_factorization<value_t, state_t, matrix_t>( g_sp1,
                         u_sm2pl );
@@ -535,12 +501,9 @@ namespace ponio::runge_kutta::pirock
             }
             auto& u_sp3 = U[11];
 
-            {
-                _info.number_of_eval[1] += 1;
-
-                pb.implicit_part( tn, u_sp1, fi_tmp );
-                u_sp3 = u_sm2pl + ( 1. - gamma ) * dt * fi_tmp;
-            }
+            _info.number_of_eval[1] += 1;
+            pb.implicit_part( tn, u_sp1, fi_tmp );
+            u_sp3 = u_sm2pl + ( 1. - gamma ) * dt * fi_tmp;
 
             value_t tau   = sigma * rock_coeff::fp2[deg_index - 1] + sigma * sigma;
             value_t tau_a = 0.5 * detail::power<2>( alpha - 1. ) + 2. * alpha * ( 1. - alpha ) * sigma + alpha * alpha * tau;
@@ -559,19 +522,13 @@ namespace ponio::runge_kutta::pirock
 
                 // err_D = sigma_a(1 - tau_a/sigma_a^2) dt
                 //         (F_D(u^{*(s-1)}) - F_D(u^{(s-2)}))
-                {
-                    pb.explicit_part( tn, us_sm1, fe_tmp );
-                    pb.explicit_part( tn, u_sm2, fe_tmp_bis );
+                pb.explicit_part( tn, us_sm1, fe_tmp );
+                pb.explicit_part( tn, u_sm2, fe_tmp_bis );
+                err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fe_tmp - fe_tmp_bis );
 
-                    err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fe_tmp - fe_tmp_bis );
-                }
-
-                {
-                    pb.explicit_part( tn, u_sp3, fe_tmp );
-                    pb.explicit_part( tn, u_sp1, fe_tmp_bis );
-
-                    f_D_u = static_cast<state_t>( fe_tmp - fe_tmp_bis );
-                }
+                pb.explicit_part( tn, u_sp3, fe_tmp );
+                pb.explicit_part( tn, u_sp1, fe_tmp_bis );
+                f_D_u = static_cast<state_t>( fe_tmp - fe_tmp_bis );
 
                 if constexpr ( is_embedded )
                 {
@@ -587,8 +544,7 @@ namespace ponio::runge_kutta::pirock
 
                     if constexpr ( detail::problem_operator<decltype( pb.implicit_part ), value_t> )
                     {
-                        // Operator-based problems keep the historical Shampine interface.
-                        // This path is used, for example, by Samurai fields.
+                        // Operator-based Shampine's trick.
                         shampine_trick_caller
                             .template operator()<l>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, f_D_u, u_tmp, shampine_element );
 
@@ -599,50 +555,24 @@ namespace ponio::runge_kutta::pirock
                     {
                         // Matrix-based problems reuse the factorization prepared by the
                         // implicit stages for both Shampine applications.
-                        auto shampine_system = shampine_trick_caller.template prepare_with_existing_factorization<state_t>();
-
-                        shampine_system.template apply<l>( f_D_u, u_tmp, shampine_element );
+                        shampine_trick_caller.initialize();
+                        shampine_trick_caller.template apply<l>( f_D_u, u_tmp, shampine_element );
 
                         // err_R = J_R^{-1} dt/6 (F_R(u^{s+1}) - F_R(u^{s+2}))
-                        shampine_system.template apply<1>( rhs_R, u_tmp, err_R );
+                        shampine_trick_caller.template apply<1>( rhs_R, u_tmp, err_R );
+                        shampine_trick_caller.finalize();
                     }
 
                     u_np1 = us_s - err_D + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
 
-                    auto accumulator_error_gen = []( auto const& yn, auto const& ynp1, value_t a_tol, value_t r_tol )
-                    {
-                        return [=, it_yn = yn.begin(), it_ynp1 = ynp1.begin()]( value_t const& acc, value_t const err_i ) mutable
-                        {
-                            using namespace std;
+                    value_t err_R_scalar = detail::error_estimate_squared( err_R, un, u_np1, _info.absolute_tolerance, _info.relative_tolerance );
 
-                            return acc + detail::power<2>( err_i / ( a_tol + r_tol * max( abs( *it_yn++ ), abs( *it_ynp1++ ) ) ) );
-                        };
-                    };
+                    value_t err_D_scalar = detail::error_estimate_squared( err_D, un, u_np1, _info.absolute_tolerance, _info.relative_tolerance );
 
-                    value_t err_R_scalar = std::accumulate( err_R.array().begin(),
-                        err_R.array().end(),
-                        static_cast<value_t>( 0. ),
-                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
-
-                    value_t err_D_scalar = std::accumulate( err_D.array().begin(),
-                        err_D.array().end(),
-                        static_cast<value_t>( 0. ),
-                        accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
-
-                    value_t const state_size = static_cast<value_t>( err_R.size() );
-
-                    err_R_scalar /= state_size;
-                    err_D_scalar /= state_size;
-
-                    _info.error   = std::max( err_D_scalar, err_R_scalar );
-                    _info.success = _info.error < 1.0;
-                    value_t new_dt;
-
-                    {
-                        value_t fac = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / _info.error ) ) );
-
-                        new_dt = 0.8 * fac * dt;
-                    }
+                    _info.error    = std::max( err_D_scalar, err_R_scalar );
+                    _info.success  = _info.error < 1.0;
+                    value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / _info.error ) ) );
+                    value_t new_dt = 0.8 * fac * dt;
 
                     // accepted step
                     if ( _info.success )
@@ -666,7 +596,7 @@ namespace ponio::runge_kutta::pirock
 
                     if constexpr ( detail::problem_operator<decltype( pb.implicit_part ), value_t> )
                     {
-                        // Operator-based problems keep the historical Shampine interface.
+                        // Reuse the factorization prepared by the implicit stages.
                         shampine_trick_caller
                             .template operator()<l>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, f_D_u, u_tmp, shampine_element );
                     }
@@ -674,9 +604,9 @@ namespace ponio::runge_kutta::pirock
                     {
                         // Matrix-based problems reuse the factorization prepared by the
                         // implicit stages.
-                        auto shampine_system = shampine_trick_caller.template prepare_with_existing_factorization<state_t>();
-
-                        shampine_system.template apply<l>( f_D_u, u_tmp, shampine_element );
+                        shampine_trick_caller.initialize();
+                        shampine_trick_caller.template apply<l>( f_D_u, u_tmp, shampine_element );
+                        shampine_trick_caller.finalize();
                     }
 
                     tn = tn + dt;
@@ -686,9 +616,9 @@ namespace ponio::runge_kutta::pirock
             }
             else
             {
-                auto& fe_tmp_bis = U[0];
-                auto& fe_tmp_ter = U[1];
-                auto& fe_tmp_qua = U[2];
+                auto& fe_tmp_bis = U[0]; // temporary use of U[0] after u_j
+                auto& fe_tmp_ter = U[1]; // temporary use of U[1] after u_jm1
+                auto& fe_tmp_qua = U[2]; // temporary use of U[2] after u_jm2
 
                 pb.explicit_part( tn, us_sm1, fe_tmp );
                 pb.explicit_part( tn, u_sm2, fe_tmp_bis );

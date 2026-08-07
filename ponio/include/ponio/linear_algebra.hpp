@@ -33,6 +33,12 @@ namespace ponio::linear_algebra
             return static_cast<matrix_type>( 1.0 );
         }
 
+        static constexpr matrix_type
+        identity_minus( matrix_type const& matrix, scalar_t alpha )
+        {
+            return static_cast<matrix_type>( 1.0 ) - alpha * matrix;
+        }
+
         static vector_type
         solver( matrix_type const& dfx, vector_type const& fx )
         {
