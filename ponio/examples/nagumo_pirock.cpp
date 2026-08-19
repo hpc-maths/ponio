@@ -151,7 +151,7 @@ main( int argc, char** argv )
     };
 
     // time loop  -------------------------------------------------------------
-    auto pirock = ponio::runge_kutta::pirock::pirock<1>( ponio::runge_kutta::pirock::beta_0<double>(),
+    auto pirock = ponio::runge_kutta::pirock::pirock<1, true>( ponio::runge_kutta::pirock::beta_0<double>(),
         eigmax_computer,
         ponio::shampine_trick::shampine_trick<decltype( u_ini )>() );
 
