@@ -96,6 +96,45 @@ namespace ponio::linear_algebra
         }
     };
 
+    /**
+     * @brief in-place update of a state, as needed by compensated summation
+     *
+     * The default implementation uses compound assignment, which is provided by
+     * arithmetic types and by Eigen vectors. A state type that offers addition
+     * and assignment but no compound assignment specializes this structure.
+     *
+     * @tparam state_t type of state
+     */
+    template <typename state_t>
+    struct state_algebra
+    {
+        /**
+         * @brief computes \f$y \leftarrow \alpha y\f$
+         *
+         * @param y     state to scale
+         * @param alpha scaling factor
+         */
+        template <typename value_t>
+        static void
+        scale( state_t& y, value_t alpha )
+        {
+            y *= alpha;
+        }
+
+        /**
+         * @brief computes \f$y \leftarrow y + x\f$
+         *
+         * @param y state to update
+         * @param x increment, possibly an unevaluated expression
+         */
+        template <typename increment_t>
+        static void
+        add( state_t& y, increment_t const& x )
+        {
+            y += x;
+        }
+    };
+
 } // namespace ponio::linear_algebra
 
 namespace ponio::shampine_trick

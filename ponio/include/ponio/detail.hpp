@@ -30,7 +30,7 @@ namespace ponio::detail
 #endif
 
     /**
-     * @brief compute \f$L_1\f$ norm of a container: \f$\sum_i |x_i|\f$
+     * @brief compute \f$L_2\f$ (Euclidean) norm of a container: \f$\sqrt{\sum_i x_i^2}\f$
      *
      * @tparam state_t type of computed value
      * @param x        container
@@ -52,6 +52,40 @@ namespace ponio::detail
 
         using namespace std;
         return sqrt( accu );
+    }
+
+#ifndef IN_DOXYGEN
+    template <typename state_t>
+    auto
+    norm_l1( state_t const& x )
+    {
+        using namespace std;
+        return abs( x );
+    }
+#endif
+
+    /**
+     * @brief compute \f$L_1\f$ norm of a container: \f$\sum_i |x_i|\f$
+     *
+     * @tparam state_t type of computed value
+     * @param x        container
+     */
+    template <typename state_t>
+        requires std::ranges::range<state_t>
+    auto
+    norm_l1( state_t const& x )
+    {
+        auto zero = static_cast<decltype( *std::begin( x ) )>( 0. );
+        auto accu = std::accumulate( std::begin( x ),
+            std::end( x ),
+            zero,
+            []( auto const& acc, auto const& xi )
+            {
+                using namespace std;
+                return acc + abs( xi );
+            } );
+
+        return accu;
     }
 
 #ifndef IN_DOXYGEN
@@ -170,6 +204,37 @@ namespace ponio::detail
         return error_estimate_squared( error.array(), un.array(), unp1.array(), a_tol, r_tol );
     }
 #endif
+
+    /**
+     * @brief error estimate of a state, as the adaptive controllers consume it
+     *
+     * The default implementation walks the whole state, which is what the
+     * degrees of freedom of the problem amount to for a contiguous container.
+     * A state type whose storage also holds values that are not degrees of
+     * freedom — the ghost cells of a mesh, for instance — specializes this
+     * structure so that only the degrees of freedom weigh in the estimate.
+     *
+     * @tparam state_t type of state
+     */
+    template <typename state_t>
+    struct error_algebra
+    {
+        /**
+         * @brief squared normalized error, averaged over the degrees of freedom
+         *
+         * @param error  error estimate of the step
+         * @param un     solution at \f$t^n\f$
+         * @param unp1   solution at \f$t^{n+1}\f$
+         * @param a_tol  absolute tolerance
+         * @param r_tol  relative tolerance
+         */
+        template <typename value_t>
+        static value_t
+        estimate_squared( state_t const& error, state_t const& un, state_t const& unp1, value_t a_tol, value_t r_tol )
+        {
+            return static_cast<value_t>( error_estimate_squared( error, un, unp1, a_tol, r_tol ) );
+        }
+    };
 
     template <typename state_t, typename value_t, typename ArrayA_t, typename ArrayB_t>
     concept tpl_inner_product_requirement = requires( ArrayA_t a, ArrayB_t b, state_t init, value_t mul_coeff, state_t output ) {

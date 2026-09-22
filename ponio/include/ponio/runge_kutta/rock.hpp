@@ -146,7 +146,7 @@ namespace ponio::runge_kutta::rock
                 static constexpr std::size_t max_iter  = 50;
                 static constexpr value_t safety_factor = 1.2;
 
-                // start power method
+                // Power iteration
                 while ( necessary )
                 {
                     eigmaxo = eigmax;
@@ -197,12 +197,6 @@ namespace ponio::runge_kutta::rock
                 std::size_t mz = 1;
                 std::size_t mr = 1;
 
-                // TODO : verifier si ce test est utile
-                // if ( mdeg < 2 )
-                // {
-                //     return { mz, mr };
-                // }
-
                 std::size_t i = 1;
                 for ( auto ms_i : rock_coeff::ms )
                 {
@@ -233,8 +227,9 @@ namespace ponio::runge_kutta::rock
              * @param tn           current time
              * @param un           current state
              * @param dt           current time step
-             * @param du_work      temporary array with work values
-             * @param s_min        minimal number of stages (3 for ROCK2, 5 for ROCK4)
+             * @param du_work                  temporary array with work values
+             * @param s_min                    minimal number of stages (3 for ROCK2, 5 for ROCK4)
+             * @param rock2_stability_constant stability constant used by ROCK2 (0.811 by default; PIROCK ell=1 uses 0.432)
              */
             template <typename rock_method, typename eig_computer_t, typename problem_t, typename state_t, typename array_work_t>
             static std::tuple<std::size_t, std::size_t>
@@ -245,7 +240,8 @@ namespace ponio::runge_kutta::rock
                 state_t& un,
                 value_t& dt,
                 array_work_t& du_work,
-                std::size_t s_min )
+                std::size_t s_min,
+                value_t rock2_stability_constant = static_cast<value_t>( 0.811 ) )
             {
                 std::size_t n_eval = 0;
                 auto f_counter     = [&n_eval, &f]( value_t t, state_t& u, state_t& du )
@@ -258,11 +254,15 @@ namespace ponio::runge_kutta::rock
                 auto mdeg            = s_min;
                 if constexpr ( std::same_as<rock_method, rock_order::rock_2> )
                 {
-                    mdeg = static_cast<std::size_t>( std::ceil( std::sqrt( ( 1.5 + dt * eigmax ) / 0.811 ) ) );
+                    // Match the Fortran ROCK2 degree formula. PIROCK uses c = 0.811 for ell = 2
+                    // and c = 0.432 for ell = 1; the cast reproduces the integer truncation.
+                    mdeg = static_cast<std::size_t>( std::sqrt( ( static_cast<value_t>( 1.5 ) + dt * eigmax ) / rock2_stability_constant )
+                                                     + static_cast<value_t>( 1.0 ) );
                     if ( mdeg > 200 )
                     {
                         mdeg = 200;
-                        dt   = 0.8 * ( static_cast<double>( mdeg * mdeg ) * 0.811 - 1.5 ) / eigmax;
+                        dt   = static_cast<value_t>( 0.8 )
+                           * ( static_cast<value_t>( mdeg * mdeg ) * rock2_stability_constant - static_cast<value_t>( 1.5 ) ) / eigmax;
                     }
 
                     mdeg = std::max( mdeg, s_min ) - 2;
@@ -298,8 +298,9 @@ namespace ponio::runge_kutta::rock
              * @param tn           current time
              * @param un           current state
              * @param dt           current time step
-             * @param du_work      temporary array with work values
-             * @param s_min        minimal number of stages (3 for ROCK2, 5 for ROCK4)
+             * @param du_work                  temporary array with work values
+             * @param s_min                    minimal number of stages (3 for ROCK2, 5 for ROCK4)
+             * @param rock2_stability_constant stability constant used by ROCK2 (0.811 by default; PIROCK ell=1 uses 0.432)
              * @return std::tuple<std::size_t, std::size_t, std::size_t> tuple with number of stages of ROCK method, shift index for last
              * stages, shift index of ROCK stages
              */
@@ -312,11 +313,19 @@ namespace ponio::runge_kutta::rock
                 state_t& un,
                 value_t& dt,
                 array_work_t& du_work,
-                std::size_t s_min = 3 )
+                std::size_t s_min                = 3,
+                value_t rock2_stability_constant = static_cast<value_t>( 0.811 ) )
             {
-                auto [mdeg,
-                    n_eval] = compute_n_stages( rock_method(), std::forward<eig_computer_t>( eig_computer ), f, tn, un, dt, du_work, s_min );
-                auto [mz, mr] = optimal_degree( mdeg );
+                auto [mdeg, n_eval] = compute_n_stages( rock_method(),
+                    std::forward<eig_computer_t>( eig_computer ),
+                    f,
+                    tn,
+                    un,
+                    dt,
+                    du_work,
+                    s_min,
+                    rock2_stability_constant );
+                auto [mz, mr]       = optimal_degree( mdeg );
 
                 return { mdeg, mz, mr, n_eval };
             }
@@ -374,8 +383,8 @@ namespace ponio::runge_kutta::rock
          * @return auto    estimation of error to compare to 1
          */
         template <typename state_t>
-            requires( !std::ranges::range<state_t> && !::ponio::detail::has_array_range<state_t> )
-        auto error( state_t&& unp1, state_t&& un, state_t&& tmp )
+        auto
+        error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
             using namespace std;
             return abs( std::forward<state_t>( tmp )
@@ -385,8 +394,9 @@ namespace ponio::runge_kutta::rock
 
         // same with ranges
         template <typename state_t>
-            requires( std::ranges::range<state_t> )
-        auto error( state_t&& unp1, state_t&& un, state_t&& tmp )
+            requires std::ranges::range<state_t>
+        auto
+        error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
             auto it_un  = std::ranges::begin( std::forward<state_t>( un ) );
             auto it_tmp = std::ranges::begin( std::forward<state_t>( tmp ) );
@@ -404,10 +414,11 @@ namespace ponio::runge_kutta::rock
 
         // same with something which contains a range
         template <typename state_t>
-            requires( !std::ranges::range<state_t> && ::ponio::detail::has_array_range<state_t> )
-        auto error( state_t&& unp1, state_t&& un, state_t&& tmp )
+            requires ::ponio::detail::has_array_range<state_t>
+        auto
+        error( state_t&& unp1, state_t&& un, state_t&& tmp )
         {
-            return error( unp1.array(), un.array(), tmp.array() );
+            return error( std::forward<state_t>( unp1 ).array(), std::forward<state_t>( un ).array(), std::forward<state_t>( tmp ).array() );
         }
 
         /**
@@ -424,7 +435,6 @@ namespace ponio::runge_kutta::rock
          * @param unp1 returns solution at time \f$t^{n+1} = t^n + \Delta t\f$
          */
         template <typename problem_t, typename state_t, typename array_ki_t>
-        // std::tuple<value_t, state_t, value_t>
         void
         operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& G, value_t& dt, state_t& unp1 )
         {
@@ -459,7 +469,6 @@ namespace ponio::runge_kutta::rock
             {
                 uj = ujm1;
             }
-            // std::cout << "\nmdeg = " << mdeg << "\n";
             for ( std::size_t j = 2; j < mdeg + 1; ++j )
             {
                 value_t const mu    = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 1 - 1];
@@ -481,7 +490,7 @@ namespace ponio::runge_kutta::rock
                 t_jm2 = t_jm1;
             }
 
-            // the two-stages finish procedure
+            // Two-stage finishing procedure
 
             value_t const delta_t_1 = dt * rock_coeff::fp1[deg_index - 1]; // equals to $\Delta t \sigma$
             value_t const delta_t_2 = dt * rock_coeff::fp2[deg_index - 1]; // equals to $-\Delta t \sigma(1 - \frac{\tau}{\sigma^2})$
@@ -508,17 +517,12 @@ namespace ponio::runge_kutta::rock
                 // accepted step
                 if ( _info.success )
                 {
-                    // return { tn + dt, uj, new_dt };
-
                     tn = tn + dt;
                     std::swap( uj, unp1 );
                     dt = new_dt;
                 }
                 else
                 {
-                    // return { tn, un, new_dt };
-
-                    // tn = tn;
                     std::swap( un, unp1 );
                     dt = new_dt;
                 }
@@ -526,12 +530,8 @@ namespace ponio::runge_kutta::rock
             else
             {
                 f( t_jm1, ujm1, f_tmp );
-                // uj = ujm1 + ( delta_t_1 + delta_t_2 ) * f_tmp - delta_t_2 * ujm2;
-
                 tn   = tn + dt;
                 unp1 = ujm1 + ( delta_t_1 + delta_t_2 ) * f_tmp - delta_t_2 * ujm2;
-
-                // return { tn + dt, uj, dt };
             }
         }
 
@@ -655,35 +655,20 @@ namespace ponio::runge_kutta::rock
          * @param tmp      other estimation of solution at time \f$t^{n+1} = t^n+\Delta t\f$
          * @return auto    estimation of error to compare to 1
          */
-        template <typename state_t>
-            requires( !std::ranges::range<state_t> && !::ponio::detail::has_array_range<state_t> )
-        auto error( state_t const& unp1, state_t const& tmp )
-        {
-            using namespace std;
-            return abs( tmp / ( info().absolute_tolerance + info().relative_tolerance * abs( unp1 ) ) );
-        }
 
         template <typename state_t>
-            requires( std::ranges::range<state_t> )
-        auto error( state_t const& unp1, state_t const& tmp )
+        auto
+        error( state_t const& unp1, state_t const& tmp )
         {
-            auto it_tmp = std::ranges::begin( tmp );
+            // Passing unp1 twice preserves ROCK4's historical scaling
+            // atol + rtol * |u^{n+1}| while delegating state traversal to the backend.
+            auto const error_squared = ::ponio::detail::error_algebra<state_t>::estimate_squared( tmp,
+                unp1,
+                unp1,
+                info().absolute_tolerance,
+                info().relative_tolerance );
 
-            return std::sqrt( std::accumulate( std::ranges::begin( unp1 ),
-                                  std::ranges::end( unp1 ),
-                                  0.,
-                                  [&]( auto sum, auto unp1_i )
-                                  {
-                                      return sum + ::ponio::detail::power<2>( error( unp1_i, *it_tmp++ ) );
-                                  } )
-                              / static_cast<value_t>( std::size( unp1 ) ) );
-        }
-
-        template <typename state_t>
-            requires( !std::ranges::range<state_t> && ::ponio::detail::has_array_range<state_t> )
-        auto error( state_t const& unp1, state_t const& tmp )
-        {
-            return error( unp1.array(), tmp.array() );
+            return std::sqrt( error_squared );
         }
 
         /**
@@ -757,7 +742,7 @@ namespace ponio::runge_kutta::rock
                 t_jm2 = t_jm1;
             }
 
-            // the fourth-stages finish procedure
+            // Four-stage finishing procedure
 
             value_t const a_21 = dt * rock_coeff::fpa[deg_index - 1][0];
             value_t const a_31 = dt * rock_coeff::fpa[deg_index - 1][1];
@@ -791,7 +776,7 @@ namespace ponio::runge_kutta::rock
             {
                 auto& tmp = G[6];
 
-                // for embedded method for error estimation
+                // Embedded error estimator
                 value_t const bh_1 = dt * ( rock_coeff::fpbe[deg_index - 1][0] - rock_coeff::fpb[deg_index - 1][0] );
                 value_t const bh_2 = dt * ( rock_coeff::fpbe[deg_index - 1][1] - rock_coeff::fpb[deg_index - 1][1] );
                 value_t const bh_3 = dt * ( rock_coeff::fpbe[deg_index - 1][2] - rock_coeff::fpb[deg_index - 1][2] );
@@ -806,7 +791,7 @@ namespace ponio::runge_kutta::rock
 
                 _info.error   = error( uj, tmp );
                 _info.success = _info.error < 1.0;
-                _info.number_of_eval += 1; // one of two evaluations already count
+                _info.number_of_eval += 1; // one of the two evaluations is already counted
 
                 value_t fac = std::pow( ( 1. / _info.error ), 0.25 );
                 fac         = std::min( 5., std::max( 0.1, 0.8 * fac ) );
@@ -822,7 +807,6 @@ namespace ponio::runge_kutta::rock
                 }
                 else
                 {
-                    // tn = tn;
                     std::swap( un, unp1 );
                     dt = new_dt;
                 }

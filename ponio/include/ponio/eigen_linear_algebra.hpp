@@ -18,6 +18,7 @@
 
 // NOLINTEND(misc-include-cleaner)
 
+#include <cstddef>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -26,7 +27,6 @@
 
 namespace ponio::linear_algebra
 {
-
     template <typename scalar_t, int size, int options, int maxrows, int maxcols>
     struct linear_algebra<Eigen::Matrix<scalar_t, size, size, options, maxrows, maxcols>> // NOLINT(misc-include-cleaner)
     {
@@ -107,18 +107,11 @@ namespace ponio::linear_algebra
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
         inline static matrix_type I;
 
-        /**
-         * The sparse solver is shared by all calls using this specialization.
-         * Its numerical factorization therefore remains available after
-         * factorize() returns and can be reused by solve_factorized().
-         */
+        // Keep the factorization available for subsequent right-hand sides.
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
         inline static solver_type sparse_solver;
 
-        /**
-         * The current implementation assumes a fixed sparse pattern. The symbolic
-         * analysis can therefore be reused after the first successful factorization.
-         */
+        // The sparse pattern is assumed fixed for this Eigen backend.
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
         inline static bool pattern_analyzed = false;
 
@@ -143,7 +136,8 @@ namespace ponio::linear_algebra
         static matrix_type
         identity_minus( matrix_type const& matrix, scalar_t alpha )
         {
-            matrix_type shifted_matrix = matrix;
+            matrix_type shifted_matrix;
+            shifted_matrix = matrix;
             shifted_matrix *= -alpha;
 
             for ( Eigen::Index i = 0; i < shifted_matrix.rows(); ++i )
@@ -171,8 +165,6 @@ namespace ponio::linear_algebra
             if ( !pattern_analyzed )
             {
                 sparse_solver.analyzePattern( matrix );
-
-                // SparseLU::info() must not be queried here because the numerical factorization has not been initialized yet.
             }
 
             sparse_solver.factorize( matrix );
@@ -183,7 +175,7 @@ namespace ponio::linear_algebra
                                           "ponio::linear_algebra." );
             }
 
-            // The symbolic pattern is considered valid only after a successful numerical factorization.
+            // The symbolic pattern is reusable only after a successful factorization.
             pattern_analyzed = true;
         }
 
@@ -201,9 +193,7 @@ namespace ponio::linear_algebra
         static vector_type
         solve_factorized( vector_type const& rhs )
         {
-            vector_type solution;
-
-            solution = sparse_solver.solve( rhs );
+            vector_type solution = sparse_solver.solve( rhs );
 
             if ( sparse_solver.info() != Eigen::Success )
             {
@@ -267,18 +257,10 @@ namespace ponio::shampine_trick
         sparse_matrix_t J_R_;
         sparse_solver_t sparse_solver_;
 
-        /**
-         * The sparse pattern is fixed because no mesh adaptation occurs in the
-         * Eigen path. The symbolic analysis can therefore be reused throughout
-         * the lifetime of the Shampine object.
-         */
+        // Reuse the symbolic analysis while the sparse pattern remains fixed.
         bool sparse_pattern_analyzed_ = false;
 
-        /**
-         * When true, apply() uses the factorization previously prepared by
-         * ponio::linear_algebra. Otherwise, the factorization owned by this
-         * Shampine object is used.
-         */
+        // Select the PIROCK factorization instead of the local Shampine one.
         bool use_external_factorization_ = false;
 
         void
@@ -287,13 +269,15 @@ namespace ponio::shampine_trick
             if ( !sparse_pattern_analyzed_ )
             {
                 sparse_solver_.analyzePattern( J_R_ );
-
-                // SparseLU::info() must not be queried here because the numerical factorization has not been initialized yet.
             }
         }
 
         /**
          * @brief Solve a system with the factorization selected by initialize().
+         *
+         * The external factorization is the one prepared by
+         * ponio::linear_algebra during the implicit PIROCK stages. Otherwise,
+         * the factorization stored locally by this object is used.
          */
         template <typename state_t>
         state_t
@@ -318,6 +302,13 @@ namespace ponio::shampine_trick
 
         /**
          * @brief Initialize Shampine's trick with a locally factorized system.
+         *
+         * The reaction Jacobian is evaluated at the supplied initial guess and
+         * the matrix I - alpha J is assembled. Its symbolic pattern is analyzed
+         * once, while its numerical factorization is updated at every call.
+         *
+         * This overload preserves the standalone behavior of the original
+         * Shampine implementation.
          */
         template <typename jacobian_reac_t, typename state_t>
         void
@@ -349,9 +340,9 @@ namespace ponio::shampine_trick
         /**
          * @brief Initialize Shampine's trick from an existing factorization.
          *
-         * PIROCK uses this overload after its implicit stages have already
-         * factorized the same matrix I - gamma dt J_R. No symbolic analysis,
-         * matrix assembly or numerical factorization is repeated here.
+         * PIROCK reuses the factorization left by the implicit stages. This
+         * matches the Fortran implementation, where Shampine's correction
+         * applies SOL with the current LU factors.
          */
         void
         initialize()
@@ -361,6 +352,10 @@ namespace ponio::shampine_trick
 
         /**
          * @brief Apply (I - alpha J)^(-ell) to a right-hand side.
+         *
+         * For ell = 1, one linear solve is performed. For ell = 2, the first
+         * solution is reused as the right-hand side of a second solve. Both
+         * solves use the factorization selected during initialize().
          */
         template <std::size_t ell, typename state_t>
         void
@@ -383,6 +378,7 @@ namespace ponio::shampine_trick
 
         /**
          * @brief Finalize the current Shampine application sequence.
+         *
          */
         void
         finalize()
