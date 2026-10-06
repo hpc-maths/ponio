@@ -1,3 +1,4 @@
+
 // Copyright 2022 PONIO TEAM. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -6,8 +7,12 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cmath>
 #include <cstddef>
+#include <stdexcept>
 #include <string_view> // NOLINT(misc-include-cleaner)
+#include <utility>
 
 #include "../detail.hpp" // NOLINT(misc-include-cleaner)
 #include "../iteration_info.hpp"
@@ -291,5 +296,308 @@ namespace ponio::runge_kutta::chebyshev
             return _info;
         }
     };
+
+    namespace rkc_detail
+    {
+        /**
+         * @brief RKC1 damping/stability constant.
+         *
+         * For the damped first-order RKC polynomial, beta = 2 - 4 eps / 3
+         * gives the sufficient real-axis stability interval beta * m^2.
+         */
+        template <typename value_t>
+        constexpr value_t
+        beta( value_t eps )
+        {
+            return static_cast<value_t>( 2. ) - static_cast<value_t>( 4. ) * eps / static_cast<value_t>( 3. );
+        }
+
+        /**
+         * @brief Compute T_m(x) and T'_m(x) by forward recurrence.
+         */
+        template <typename value_t>
+        void
+        chebyshev_T_dT( std::size_t m, value_t x, value_t& Tm, value_t& dTm )
+        {
+            if ( m == 0 )
+            {
+                Tm  = static_cast<value_t>( 1. );
+                dTm = static_cast<value_t>( 0. );
+                return;
+            }
+
+            if ( m == 1 )
+            {
+                Tm  = x;
+                dTm = static_cast<value_t>( 1. );
+                return;
+            }
+
+            value_t Tjm2  = static_cast<value_t>( 1. );
+            value_t Tjm1  = x;
+            value_t dTjm2 = static_cast<value_t>( 0. );
+            value_t dTjm1 = static_cast<value_t>( 1. );
+
+            for ( std::size_t j = 2; j <= m; ++j )
+            {
+                value_t const Tj  = static_cast<value_t>( 2. ) * x * Tjm1 - Tjm2;
+                value_t const dTj = static_cast<value_t>( 2. ) * Tjm1 + static_cast<value_t>( 2. ) * x * dTjm1 - dTjm2;
+
+                Tjm2  = Tjm1;
+                Tjm1  = Tj;
+                dTjm2 = dTjm1;
+                dTjm1 = dTj;
+            }
+
+            Tm  = Tjm1;
+            dTm = dTjm1;
+        }
+
+        template <typename value_t>
+        value_t
+        omega_0( std::size_t m, value_t eps )
+        {
+            value_t const mm = static_cast<value_t>( m ) * static_cast<value_t>( m );
+            return static_cast<value_t>( 1. ) + eps / mm;
+        }
+
+        template <typename value_t>
+        value_t
+        omega_1( std::size_t m, value_t eps )
+        {
+            value_t const w0 = omega_0( m, eps );
+
+            value_t Tm  = static_cast<value_t>( 0. );
+            value_t dTm = static_cast<value_t>( 0. );
+            chebyshev_T_dT( m, w0, Tm, dTm );
+
+            return Tm / dTm;
+        }
+
+        template <typename value_t>
+        value_t
+        stability_interval( std::size_t m, value_t eps )
+        {
+            value_t const w0 = omega_0( m, eps );
+            value_t const w1 = omega_1( m, eps );
+            return static_cast<value_t>( 2. ) * w0 / w1;
+        }
+
+        /**
+         * @brief Smallest stage number for standalone dynamic RKC1.
+         *
+         * The beta*m^2 bound gives an initial estimate; the exact real-axis
+         * interval 2*omega_0/omega_1 is then used to return the smallest
+         * admissible stage number.
+         */
+        template <typename value_t>
+        std::size_t
+        dynamic_rkc1_stages( value_t dt, value_t rho, value_t eps )
+        {
+            value_t const z = std::abs( dt ) * rho;
+
+            if ( z == static_cast<value_t>( 0. ) )
+            {
+                return 1;
+            }
+
+            value_t const beta_value = beta( eps );
+            if ( beta_value <= static_cast<value_t>( 0. ) )
+            {
+                throw std::runtime_error( "RKC1: damping parameter gives a non-positive beta." );
+            }
+
+            std::size_t m = std::max<std::size_t>( 1, static_cast<std::size_t>( std::ceil( std::sqrt( z / beta_value ) ) ) );
+
+            while ( m > 1 && z <= stability_interval( m - 1, eps ) )
+            {
+                --m;
+            }
+
+            while ( z > stability_interval( m, eps ) )
+            {
+                ++m;
+            }
+
+            return m;
+        }
+
+        /**
+         * @brief One RKC1 step with a prescribed number of stages.
+         *
+         * This is the common RKC1 kernel used by standalone dynamic RKC1,
+         * by the mRKC micro-solver, and by the mRKC macro-solver.
+         *
+         * Stage abscissae are propagated with the same RKC recurrence, so the
+         * kernel also supports non-autonomous right-hand sides.
+         */
+        template <typename problem_t, typename value_t, typename state_t>
+        void
+        rkc1_step( problem_t&& f,
+            value_t t,
+            state_t& y,
+            value_t dt,
+            std::size_t n_stages,
+            value_t eps,
+            state_t& kjm2,
+            state_t& kjm1,
+            state_t& kj,
+            state_t& f_tmp,
+            state_t& y_out )
+        {
+            if ( n_stages == 0 )
+            {
+                throw std::invalid_argument( "RKC1: number of stages must be at least one." );
+            }
+
+            value_t const w0 = omega_0( n_stages, eps );
+            value_t const w1 = omega_1( n_stages, eps );
+
+            value_t Tjm2 = static_cast<value_t>( 1. );
+            value_t Tjm1 = w0;
+
+            kjm2 = y;
+
+            value_t const mu1 = w1 / w0;
+
+            value_t cjm2 = static_cast<value_t>( 0. );
+            value_t cjm1 = mu1;
+
+            std::forward<problem_t>( f )( t, kjm2, f_tmp );
+            kjm1 = kjm2 + mu1 * dt * f_tmp;
+
+            if ( n_stages == 1 )
+            {
+                y_out = kjm1;
+                return;
+            }
+
+            for ( std::size_t j = 2; j <= n_stages; ++j )
+            {
+                value_t const Tj = static_cast<value_t>( 2. ) * w0 * Tjm1 - Tjm2;
+
+                value_t const bjm2 = static_cast<value_t>( 1. ) / Tjm2;
+                value_t const bjm1 = static_cast<value_t>( 1. ) / Tjm1;
+                value_t const bj   = static_cast<value_t>( 1. ) / Tj;
+
+                value_t const mu_j    = static_cast<value_t>( 2. ) * w1 * bj / bjm1;
+                value_t const nu_j    = static_cast<value_t>( 2. ) * w0 * bj / bjm1;
+                value_t const kappa_j = -bj / bjm2;
+
+                std::forward<problem_t>( f )( t + cjm1 * dt, kjm1, f_tmp );
+                kj = nu_j * kjm1 + kappa_j * kjm2 + mu_j * dt * f_tmp;
+
+                value_t const cj = nu_j * cjm1 + kappa_j * cjm2 + mu_j;
+
+                if ( j < n_stages )
+                {
+                    std::swap( kjm2, kjm1 );
+                    std::swap( kjm1, kj );
+
+                    cjm2 = cjm1;
+                    cjm1 = cj;
+                }
+
+                Tjm2 = Tjm1;
+                Tjm1 = Tj;
+            }
+
+            y_out = kj;
+        }
+    } // namespace rkc_detail
+
+    template <typename value_t>
+    inline constexpr value_t rkc1_default_eps = static_cast<value_t>( 0.05 );
+
+    /**
+     * @brief First-order explicit Runge--Kutta--Chebyshev method (RKC1)
+     *        with a number of stages selected dynamically at run time.
+     *
+     * The spectral radius is supplied by the caller through a callable, using
+     * the same interface as ROCK2. No power iteration is performed internally
+     * unless the caller explicitly provides such a spectral-radius estimator.
+     */
+    template <typename eig_computer_t, typename _value_t = double>
+    struct explicit_rkc1
+    {
+        static constexpr bool is_embedded      = false;
+        static constexpr std::size_t N_stages  = stages::dynamic;
+        static constexpr std::size_t N_storage = 4;
+        static constexpr std::size_t order     = 1;
+        static constexpr std::string_view id   = "RKC1";
+
+        using value_t = _value_t;
+
+        static constexpr value_t default_eps = rkc1_default_eps<value_t>;
+
+        iteration_info<explicit_rkc1> _info;
+
+        eig_computer_t eig_computer;
+        value_t eps;
+
+        explicit explicit_rkc1( eig_computer_t&& _eig_computer, value_t damping = default_eps )
+            : _info()
+            , eig_computer( std::forward<eig_computer_t>( _eig_computer ) )
+            , eps( damping )
+        {
+            if ( eps < static_cast<value_t>( 0. ) || rkc_detail::beta( eps ) <= static_cast<value_t>( 0. ) )
+            {
+                throw std::invalid_argument( "RKC1: damping parameter eps must be non-negative and satisfy 2 - 4 eps / 3 > 0." );
+            }
+        }
+
+        std::size_t
+        required_stages( value_t dt, value_t spectral_radius ) const
+        {
+            if ( spectral_radius < static_cast<value_t>( 0. ) )
+            {
+                throw std::invalid_argument( "RKC1: spectral radius must be non-negative." );
+            }
+            return rkc_detail::dynamic_rkc1_stages( dt, spectral_radius, eps );
+        }
+
+        template <typename problem_t, typename state_t, typename array_ki_t>
+        void
+        operator()( problem_t& f, value_t& tn, state_t& un, array_ki_t& K, value_t& dt, state_t& unp1 )
+        {
+            _info.reset_eval();
+
+            std::size_t n_eval = 0;
+            auto f_counter     = [&n_eval, &f]( value_t t, state_t& u, state_t& du )
+            {
+                ++n_eval;
+                f( t, u, du );
+            };
+
+            value_t const spectral_radius = eig_computer( f_counter, tn, un, dt, K );
+            std::size_t const m           = required_stages( dt, spectral_radius );
+
+            _info.number_of_stages = m;
+            _info.number_of_eval   = n_eval + m;
+
+            rkc_detail::rkc1_step( f, tn, un, dt, m, eps, K[0], K[1], K[2], K[3], unp1 );
+
+            tn += dt;
+        }
+
+        auto&
+        info()
+        {
+            return _info;
+        }
+
+        auto const&
+        info() const
+        {
+            return _info;
+        }
+    };
+
+    template <typename value_t = double, typename eig_computer_t>
+    auto
+    rkc1( eig_computer_t&& eig_computer, value_t eps = rkc1_default_eps<value_t> )
+    {
+        return explicit_rkc1<eig_computer_t, value_t>( std::forward<eig_computer_t>( eig_computer ), eps );
+    }
 
 } // namespace ponio::runge_kutta::chebyshev

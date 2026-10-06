@@ -9,6 +9,7 @@
 #include <iterator>
 #include <limits>
 #include <optional>
+#include <type_traits>
 
 #include "method.hpp"
 #include "stage.hpp"
@@ -386,6 +387,80 @@ namespace ponio
             {
                 std::forward<lambda_t>( f )( ki );
             }
+            std::forward<lambda_t>( f )( u_tmp );
+        }
+
+        /**
+         * @brief returns one persistent method storage entry
+         *
+         * Persistent entries are declared by the algorithm through
+         * `persistent_storage_indices`. They are part of the method storage but
+         * must survive generic resets of transient stages.
+         *
+         * @tparam I index in the algorithm persistent-storage list
+         * @return auto& persistent state
+         */
+        template <std::size_t I = 0>
+        auto&
+        persistent_stage() // cppcheck-suppress unusedFunction
+            requires requires { meth.alg.persistent_storage_indices; }
+        {
+            using algorithm_t = std::remove_cvref_t<decltype( meth.alg )>;
+            static_assert( I < algorithm_t::persistent_storage_indices.size() );
+            return stages()[algorithm_t::persistent_storage_indices[I]];
+        }
+
+        template <std::size_t I = 0>
+        auto const&
+        persistent_stage() const // cppcheck-suppress unusedFunction
+            requires requires { meth.alg.persistent_storage_indices; }
+        {
+            using algorithm_t = std::remove_cvref_t<decltype( meth.alg )>;
+            static_assert( I < algorithm_t::persistent_storage_indices.size() );
+            return stages()[algorithm_t::persistent_storage_indices[I]];
+        }
+
+        /**
+         * @brief call a callback on transient stages only, plus temporary u^{n+1}
+         *
+         * Algorithms may mark storage entries as persistent. Those entries are
+         * skipped here, while the historical callback_on_stages() keeps its
+         * original behavior.
+         *
+         * @param f callback function
+         */
+        template <typename lambda_t>
+        void
+        callback_on_transient_stages( lambda_t&& f ) // cppcheck-suppress unusedFunction
+        {
+            if constexpr ( requires { meth.alg.persistent_storage_indices; } )
+            {
+                using algorithm_t = std::remove_cvref_t<decltype( meth.alg )>;
+                std::size_t i     = 0;
+
+                for ( auto& ki : stages() )
+                {
+                    bool persistent = false;
+                    for ( auto const index : algorithm_t::persistent_storage_indices )
+                    {
+                        persistent = persistent || ( i == index );
+                    }
+
+                    if ( !persistent )
+                    {
+                        std::forward<lambda_t>( f )( ki );
+                    }
+                    ++i;
+                }
+            }
+            else
+            {
+                for ( auto& ki : stages() )
+                {
+                    std::forward<lambda_t>( f )( ki );
+                }
+            }
+
             std::forward<lambda_t>( f )( u_tmp );
         }
 
