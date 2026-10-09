@@ -125,35 +125,6 @@ namespace ponio::linear_algebra
         }
     };
 
-    /**
-     * @brief in-place update of a samurai field
-     *
-     * samurai fields provide addition and assignment but no compound
-     * assignment, so both operations are written as an assignment from an
-     * expression. Assignment is elementwise, so the field appearing on both
-     * sides reads and writes the same cell and needs no temporary.
-     *
-     * @tparam field_t type of samurai field
-     */
-    template <typename field_t>
-        requires ::ponio_samurai::is_samurai_field<field_t>
-    struct state_algebra<field_t>
-    {
-        template <typename value_t>
-        static void
-        scale( field_t& y, value_t alpha )
-        {
-            y = alpha * y;
-        }
-
-        template <typename increment_t>
-        static void
-        add( field_t& y, increment_t const& x )
-        {
-            y = y + x;
-        }
-    };
-
 } // namespace ponio::linear_algebra
 
 namespace ponio::shampine_trick

@@ -24,7 +24,7 @@
 #include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp"
-#include "dirk.hpp"
+#include "newton.hpp"
 #include "rock.hpp"
 #include "rock_coeff.hpp"
 
@@ -200,13 +200,12 @@ namespace ponio::runge_kutta::pirock
         static constexpr std::size_t N_stages    = stages::dynamic;
         // clang-format off
         static constexpr std::size_t N_storage   = std::conditional_t<shampine_trick_enable,
-                                                    std::integral_constant<std::size_t, 21>, // if shampine's trick
-                                                    std::integral_constant<std::size_t, 15>  // else (no error estimation)
+                                                    std::integral_constant<std::size_t, 19>, // if shampine's trick
+                                                    std::integral_constant<std::size_t, 13>  // else (no error estimation)
                                                 >::value;
         // clang-format on
-        static constexpr std::array<std::size_t, 1> persistent_storage_indices = { N_storage - 2 };
-        static constexpr std::size_t order                                     = 2;
-        static constexpr std::string_view id                                   = "PIROCK";
+        static constexpr std::size_t order   = 2;
+        static constexpr std::string_view id = "PIROCK";
 
         using value_t                 = _value_t;
         using rock_coeff              = rock::rock2_coeff<value_t>;
@@ -218,9 +217,6 @@ namespace ponio::runge_kutta::pirock
         shampine_trick_caller_t shampine_trick_caller;
 
         iteration_info<pirock_impl> _info;
-
-        bool compensated_summation_initialized = false;
-        value_t time_compensation              = static_cast<value_t>( 0. );
 
         // Adaptive controller state. These values persist across step attempts,
         // as in the reference Fortran `rockcore` controller.
@@ -327,12 +323,10 @@ namespace ponio::runge_kutta::pirock
             // | 15    | fd_tn_cache      | cached $F_D(t_n,u_n)$ across rejected retries     |
             // | 16    | rhs_R            | right-hand side to compute $err_R$ error term     |
             // | 17    | err_R            | $err_R$ error on reaction term                    |
-            // | last-2| rock_increment    | transported ROCK increment; then $err_D$           |
-            // | last-1| compensation      | compensated summation remainder                    |
-            // | last  | compensation_tmp  | temporary state for compensated summation          |
+            // | last  | rock_increment    | transported ROCK increment; then $err_D$           |
             //
             // > if method is called as a constant time step method, only index from 0 to 11 are used
-            // > in addition to the three compensated summation work arrays
+            // > in addition to the ROCK increment workspace
 
             _info.reset_eval();
 
@@ -382,48 +376,7 @@ namespace ponio::runge_kutta::pirock
             auto& fi_tmp = U[5];
             auto& f_tmp  = U[6];
 
-            auto& rock_increment   = U[N_storage - 3];
-            auto& compensation     = U[N_storage - 2];
-            auto& compensation_tmp = U[N_storage - 1];
-
-            // The compensated sums below update a state in place. state_algebra
-            // carries that operation for the state type at hand: compound
-            // assignment where the type provides it, as Eigen vectors do, and
-            // assignment from an expression where it does not, as for samurai
-            // fields. The accumulation itself reads the same in both cases.
-            using state_algebra_t = ::ponio::linear_algebra::state_algebra<state_t>;
-
-            if ( !compensated_summation_initialized )
-            {
-                compensation = un;
-                state_algebra_t::scale( compensation, value_t( 0 ) );
-                compensated_summation_initialized = true;
-            }
-
-            // Compensated summation keeps small stage increments that would
-            // otherwise be lost to round-off.
-            auto compensated_update = [&]( state_t& state, auto const& increment )
-            {
-                state_algebra_t::add( compensation, increment );
-                compensation_tmp = state;
-                state            = state + compensation;
-                state_algebra_t::add( compensation, compensation_tmp - state );
-            };
-
-            auto compensated_commit = [&]( state_t const& state, state_t& result )
-            {
-                compensation_tmp = state;
-                result           = state + compensation;
-                state_algebra_t::add( compensation, compensation_tmp - result );
-            };
-
-            auto compensated_time_update = [&]( value_t increment )
-            {
-                value_t const previous_time = tn;
-                time_compensation += increment;
-                tn = tn + time_compensation;
-                time_compensation += previous_time - tn;
-            };
+            auto& rock_increment = U[N_storage - 1];
 
             // Adaptive controller shared by the early-rejection and full-step paths.
             auto raw_fac_from_current_error = [&]() -> value_t
@@ -510,8 +463,7 @@ namespace ponio::runge_kutta::pirock
                 pb.explicit_part( tn, un, fe_tmp );
                 rock_increment = alpha * dt * mu_1 * fe_tmp;
             }
-            u_jm1 = un;
-            compensated_update( u_jm1, rock_increment );
+            u_jm1 = un + rock_increment;
 
             if ( mdeg < 2 )
             {
@@ -545,15 +497,13 @@ namespace ponio::runge_kutta::pirock
 
                 if ( j <= mdeg )
                 {
-                    state_algebra_t::scale( rock_increment, kappa_j );
-                    state_algebra_t::add( rock_increment, alpha * mu_j * dt * fe_tmp );
-                    u_j = u_jm1;
-                    compensated_update( u_j, rock_increment );
+                    rock_increment = kappa_j * rock_increment + alpha * mu_j * dt * fe_tmp;
+                    u_j            = u_jm1 + rock_increment;
                 }
                 else
                 {
                     // Fortran `rtstep` applies the recf2 stages directly to the
-                    // stage values, without compensated summation.
+                    // stage values directly.
                     u_j = alpha * mu_j * dt * fe_tmp - nu_j * u_jm1 - kappa_j * u_jm2;
                 }
 
@@ -597,8 +547,7 @@ namespace ponio::runge_kutta::pirock
             auto& us_sm1 = U[7];
             pb.explicit_part( t_sm2, u_sm2, fe_tmp );
             rock_increment = fe_tmp;
-            us_sm1         = u_sm2;
-            compensated_update( us_sm1, sigma_a * dt * fe_tmp );
+            us_sm1         = u_sm2 + sigma_a * dt * fe_tmp;
 
             // u_{*s} = u_{*s-1} + \sigma_\alpha \Delta t F_D( u_{*s-1} ) - err_D
             // with
@@ -612,8 +561,7 @@ namespace ponio::runge_kutta::pirock
 
             err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fe_tmp - err_D );
 
-            us_s = us_sm1;
-            compensated_update( us_s, sigma_a * dt * fe_tmp - err_D );
+            us_s = us_sm1 + sigma_a * dt * fe_tmp - err_D;
 
             if constexpr ( is_embedded )
             {
@@ -881,10 +829,7 @@ namespace ponio::runge_kutta::pirock
                         shampine_trick_caller.finalize();
                     }
 
-                    state_algebra_t::add( compensation, 0.5 * dt * fi_tmp );
-                    state_algebra_t::add( compensation, 0.5 * dt * f_tmp );
-                    state_algebra_t::add( compensation, dt / ( 2. - 4. * gamma ) * shampine_element );
-                    compensated_commit( us_s, u_np1 );
+                    u_np1 = us_s + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
 
                     value_t err_R_scalar = detail::error_algebra<state_t>::estimate_squared( err_R,
                         un,
@@ -916,7 +861,7 @@ namespace ponio::runge_kutta::pirock
                     // accepted step
                     if ( _info.success )
                     {
-                        compensated_time_update( dt );
+                        tn += dt;
 
                         // Store the accepted error and step before updating dt.
                         errp = _info.error;
@@ -963,12 +908,9 @@ namespace ponio::runge_kutta::pirock
                         shampine_trick_caller.finalize();
                     }
 
-                    compensated_time_update( dt );
+                    tn += dt;
 
-                    state_algebra_t::add( compensation, 0.5 * dt * fi_tmp );
-                    state_algebra_t::add( compensation, 0.5 * dt * f_tmp );
-                    state_algebra_t::add( compensation, dt / ( 2. - 4. * gamma ) * shampine_element );
-                    compensated_commit( us_s, u_np1 );
+                    u_np1 = us_s + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
                 }
             }
             else
@@ -983,12 +925,9 @@ namespace ponio::runge_kutta::pirock
 
                 // Reuse the reaction values left by the two implicit stages,
                 // matching the Fortran `fnc` semantics.
-                compensated_time_update( dt );
+                tn += dt;
 
-                state_algebra_t::add( compensation, 0.5 * dt * fi_tmp );
-                state_algebra_t::add( compensation, 0.5 * dt * f_tmp );
-                state_algebra_t::add( compensation, dt / ( 2. - 4. * gamma ) * f_D_u );
-                compensated_commit( us_s, u_np1 );
+                u_np1 = us_s + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * f_D_u;
             }
         }
 
@@ -1040,8 +979,6 @@ namespace ponio::runge_kutta::pirock
             return *this;
         }
     };
-
-    // cppcheck-suppress-begin unusedFunction
 
     /**
      * @brief helper function to build PIROCK algorithm
@@ -1186,8 +1123,6 @@ namespace ponio::runge_kutta::pirock
         return pirock_b0<value_t>( rock::detail::power_method() );
     }
 
-    // cppcheck-suppress-end unusedFunction
-
     // --- PIROCK DIFFUSION-ADVECTION ------------------------------------------
 
     /**
@@ -1208,12 +1143,11 @@ namespace ponio::runge_kutta::pirock
         static constexpr std::size_t l       = _l;
         static constexpr bool is_imex_method = true;
         // number_of_eval counts one evaluation per operator: 0 diffusion, 1 advection.
-        static constexpr std::size_t N_operators                               = 2;
-        static constexpr std::size_t N_stages                                  = stages::dynamic;
-        static constexpr std::size_t N_storage                                 = is_embedded ? 18 : 17;
-        static constexpr std::array<std::size_t, 1> persistent_storage_indices = { N_storage - 2 };
-        static constexpr std::size_t order                                     = 2;
-        static constexpr std::string_view id                                   = "PIROCK";
+        static constexpr std::size_t N_operators = 2;
+        static constexpr std::size_t N_stages    = stages::dynamic;
+        static constexpr std::size_t N_storage   = is_embedded ? 16 : 15;
+        static constexpr std::size_t order       = 2;
+        static constexpr std::string_view id     = "PIROCK";
 
         using value_t         = _value_t;
         using rock_coeff      = rock::rock2_coeff<value_t>;
@@ -1223,9 +1157,6 @@ namespace ponio::runge_kutta::pirock
         eig_computer_t eig_computer;
 
         iteration_info<pirock_DA_impl> _info;
-
-        bool compensated_summation_initialized = false;
-        value_t time_compensation              = static_cast<value_t>( 0. );
 
         // Adaptive controller state, shared with the RD and RDA implementations.
         value_t facmax                 = static_cast<value_t>( 5. );
@@ -1300,16 +1231,7 @@ namespace ponio::runge_kutta::pirock
             auto& u_sp4      = U[12 + adaptive_shift];
             auto& u_sp5      = U[13 + adaptive_shift];
 
-            auto& rock_increment   = U[N_storage - 3];
-            auto& compensation     = U[N_storage - 2];
-            auto& compensation_tmp = U[N_storage - 1];
-
-            // The compensated sums below update a state in place. state_algebra
-            // carries that operation for the state type at hand: compound
-            // assignment where the type provides it, as Eigen vectors do, and
-            // assignment from an expression where it does not, as for samurai
-            // fields. The accumulation itself reads the same in both cases.
-            using state_algebra_t = ::ponio::linear_algebra::state_algebra<state_t>;
+            auto& rock_increment = U[N_storage - 1];
 
             _info.reset_eval();
 
@@ -1352,36 +1274,6 @@ namespace ponio::runge_kutta::pirock
             value_t const t_advection_K        = tn;
             value_t const t_advection_sp4      = tn + dt / 3.;
             value_t const t_advection_sp5      = tn + 2. * dt / 3.;
-
-            if ( !compensated_summation_initialized )
-            {
-                compensation = un;
-                state_algebra_t::scale( compensation, value_t( 0 ) );
-                compensated_summation_initialized = true;
-            }
-
-            auto compensated_update = [&]( state_t& state, auto const& increment )
-            {
-                state_algebra_t::add( compensation, increment );
-                compensation_tmp = state;
-                state            = state + compensation;
-                state_algebra_t::add( compensation, compensation_tmp - state );
-            };
-
-            auto compensated_commit = [&]( state_t const& state, state_t& result )
-            {
-                compensation_tmp = state;
-                result           = state + compensation;
-                state_algebra_t::add( compensation, compensation_tmp - result );
-            };
-
-            auto compensated_time_update = [&]( value_t increment )
-            {
-                value_t const previous_time = tn;
-                time_compensation += increment;
-                tn = tn + time_compensation;
-                time_compensation += previous_time - tn;
-            };
 
             auto raw_fac_from_current_error = [&]() -> value_t
             {
@@ -1462,8 +1354,7 @@ namespace ponio::runge_kutta::pirock
                 rock_increment = alpha * dt * mu_1 * fd_tmp;
             }
 
-            u_jm1 = un;
-            compensated_update( u_jm1, rock_increment );
+            u_jm1 = un + rock_increment;
 
             if ( mdeg < 2 )
             {
@@ -1496,10 +1387,8 @@ namespace ponio::runge_kutta::pirock
 
                 if ( j <= mdeg )
                 {
-                    state_algebra_t::scale( rock_increment, kappa_j );
-                    state_algebra_t::add( rock_increment, alpha * mu_j * dt * fd_tmp );
-                    u_j = u_jm1;
-                    compensated_update( u_j, rock_increment );
+                    rock_increment = kappa_j * rock_increment + alpha * mu_j * dt * fd_tmp;
+                    u_j            = u_jm1 + rock_increment;
                 }
                 else
                 {
@@ -1533,16 +1422,14 @@ namespace ponio::runge_kutta::pirock
             // ROCK2 finishing procedure and diffusion estimator.
             eval_diffusion( t_sm2, u_sm2, fd_tmp );
             rock_increment = fd_tmp;
-            us_sm1         = u_sm2;
-            compensated_update( us_sm1, sigma_a * dt * fd_tmp );
+            us_sm1         = u_sm2 + sigma_a * dt * fd_tmp;
 
             auto& err_D = rock_increment;
             eval_diffusion( t_sm2 + sigma_a * dt, us_sm1, fd_tmp );
 
             err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fd_tmp - err_D );
 
-            us_s = us_sm1;
-            compensated_update( us_s, sigma_a * dt * fd_tmp - err_D );
+            us_s = us_sm1 + sigma_a * dt * fd_tmp - err_D;
 
             if constexpr ( is_embedded )
             {
@@ -1589,10 +1476,7 @@ namespace ponio::runge_kutta::pirock
             eval_diffusion( t_diffusion_coupling, u_sp3, fd_tmp_bis );
             fd_tmp_bis = static_cast<state_t>( fd_tmp_bis - fd_tmp );
 
-            state_algebra_t::add( compensation, 0.25 * dt * fa_K );
-            state_algebra_t::add( compensation, dt / ( 2. - 4. * gamma ) * fd_tmp_bis );
-            state_algebra_t::add( compensation, 0.75 * dt * fa_tmp_bis );
-            compensated_commit( us_s, u_np1 );
+            u_np1 = us_s + 0.25 * dt * fa_K + dt / ( 2. - 4. * gamma ) * fd_tmp_bis + 0.75 * dt * fa_tmp_bis;
 
             if constexpr ( is_embedded )
             {
@@ -1628,7 +1512,7 @@ namespace ponio::runge_kutta::pirock
 
                 if ( _info.success )
                 {
-                    compensated_time_update( dt );
+                    tn += dt;
 
                     errp = _info.error;
                     hp   = dt;
@@ -1652,7 +1536,7 @@ namespace ponio::runge_kutta::pirock
             }
             else
             {
-                compensated_time_update( dt );
+                tn += dt;
             }
         }
 
@@ -1704,8 +1588,6 @@ namespace ponio::runge_kutta::pirock
             return *this;
         }
     };
-
-    // cppcheck-suppress-begin unusedFunction
 
     /**
      * @brief helper function to build PIROCK diffusion-advection algorithm
@@ -1819,8 +1701,6 @@ namespace ponio::runge_kutta::pirock
         return pirock_DA_b0<value_t>( rock::detail::power_method() );
     }
 
-    // cppcheck-suppress-end unusedFunction
-
     // --- PIROCK REACTION-DIFFUSION-ADVECTION --------------------------------
 
     /**
@@ -1853,13 +1733,12 @@ namespace ponio::runge_kutta::pirock
         static constexpr std::size_t N_stages    = stages::dynamic;
         // clang-format off
         static constexpr std::size_t N_storage   = std::conditional_t<shampine_trick_enable,
-                                                    std::integral_constant<std::size_t, 29>,
-                                                    std::integral_constant<std::size_t, 23>
+                                                    std::integral_constant<std::size_t, 27>,
+                                                    std::integral_constant<std::size_t, 21>
                                                 >::value;
         // clang-format on
-        static constexpr std::array<std::size_t, 1> persistent_storage_indices = { N_storage - 2 };
-        static constexpr std::size_t order                                     = 2;
-        static constexpr std::string_view id                                   = "PIROCK";
+        static constexpr std::size_t order   = 2;
+        static constexpr std::string_view id = "PIROCK";
 
         using value_t                 = _value_t;
         using rock_coeff              = rock::rock2_coeff<value_t>;
@@ -1871,9 +1750,6 @@ namespace ponio::runge_kutta::pirock
         shampine_trick_caller_t shampine_trick_caller;
 
         iteration_info<pirock_RDA_impl> _info;
-
-        bool compensated_summation_initialized = false;
-        value_t time_compensation              = static_cast<value_t>( 0. );
 
         // Adaptive controller state. These values persist across step attempts,
         // as in the reference Fortran `rockcore` controller.
@@ -1988,9 +1864,7 @@ namespace ponio::runge_kutta::pirock
             // | 18    | u_sp4              | \f$u^{(s+4)}\f$                                      |
             // | 19    | u_sp5              | \f$u^{(s+5)}\f$                                      |
             // | 20-25 | Shampine/error work arrays when enabled                          |
-            // | last-2| rock_increment     | transported ROCK increment; then \f$err_D\f$         |
-            // | last-1| compensation       | compensated summation remainder                       |
-            // | last  | compensation_tmp   | temporary state for compensated summation             |
+            // | last  | rock_increment     | transported ROCK increment; then \f$err_D\f$         |
 
             _info.reset_eval();
 
@@ -2059,46 +1933,7 @@ namespace ponio::runge_kutta::pirock
             auto& fa_tmp      = U[10];
             auto& fa_tmp_bis  = U[11];
 
-            auto& rock_increment   = U[N_storage - 3];
-            auto& compensation     = U[N_storage - 2];
-            auto& compensation_tmp = U[N_storage - 1];
-
-            // The compensated sums below update a state in place. state_algebra
-            // carries that operation for the state type at hand: compound
-            // assignment where the type provides it, as Eigen vectors do, and
-            // assignment from an expression where it does not, as for samurai
-            // fields. The accumulation itself reads the same in both cases.
-            using state_algebra_t = ::ponio::linear_algebra::state_algebra<state_t>;
-
-            if ( !compensated_summation_initialized )
-            {
-                compensation = un;
-                state_algebra_t::scale( compensation, value_t( 0 ) );
-                compensated_summation_initialized = true;
-            }
-
-            auto compensated_update = [&]( state_t& state, auto const& increment )
-            {
-                state_algebra_t::add( compensation, increment );
-                compensation_tmp = state;
-                state            = state + compensation;
-                state_algebra_t::add( compensation, compensation_tmp - state );
-            };
-
-            auto compensated_commit = [&]( state_t const& state, state_t& result )
-            {
-                compensation_tmp = state;
-                result           = state + compensation;
-                state_algebra_t::add( compensation, compensation_tmp - result );
-            };
-
-            auto compensated_time_update = [&]( value_t increment )
-            {
-                value_t const previous_time = tn;
-                time_compensation += increment;
-                tn = tn + time_compensation;
-                time_compensation += previous_time - tn;
-            };
+            auto& rock_increment = U[N_storage - 1];
 
             auto raw_fac_from_current_error = [&]() -> value_t
             {
@@ -2179,8 +2014,7 @@ namespace ponio::runge_kutta::pirock
                 eval_diffusion( tn, un, fd_tmp );
                 rock_increment = alpha * dt * mu_1 * fd_tmp;
             }
-            u_jm1 = un;
-            compensated_update( u_jm1, rock_increment );
+            u_jm1 = un + rock_increment;
 
             if ( mdeg < 2 )
             {
@@ -2213,10 +2047,8 @@ namespace ponio::runge_kutta::pirock
 
                 if ( j <= mdeg )
                 {
-                    state_algebra_t::scale( rock_increment, kappa_j );
-                    state_algebra_t::add( rock_increment, alpha * mu_j * dt * fd_tmp );
-                    u_j = u_jm1;
-                    compensated_update( u_j, rock_increment );
+                    rock_increment = kappa_j * rock_increment + alpha * mu_j * dt * fd_tmp;
+                    u_j            = u_jm1 + rock_increment;
                 }
                 else
                 {
@@ -2253,8 +2085,7 @@ namespace ponio::runge_kutta::pirock
             auto& us_sm1 = U[12];
             eval_diffusion( t_sm2, u_sm2, fd_tmp );
             rock_increment = fd_tmp;
-            us_sm1         = u_sm2;
-            compensated_update( us_sm1, sigma_a * dt * fd_tmp );
+            us_sm1         = u_sm2 + sigma_a * dt * fd_tmp;
 
             auto& us_s  = U[13];
             auto& err_D = rock_increment;
@@ -2262,8 +2093,7 @@ namespace ponio::runge_kutta::pirock
 
             err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fd_tmp - err_D );
 
-            us_s = us_sm1;
-            compensated_update( us_s, sigma_a * dt * fd_tmp - err_D );
+            us_s = us_sm1 + sigma_a * dt * fd_tmp - err_D;
 
             if constexpr ( is_embedded )
             {
@@ -2515,12 +2345,8 @@ namespace ponio::runge_kutta::pirock
 
                     err_A = -0.15 * dt * Fa_u_sp1 + 0.3 * dt * fa_tmp - 0.15 * dt * fa_tmp_bis;
 
-                    state_algebra_t::add( compensation, 0.5 * dt * fr_tmp );
-                    state_algebra_t::add( compensation, 0.25 * dt * Fa_u_sp1 );
-                    state_algebra_t::add( compensation, 0.5 * dt * fr_tmp_bis );
-                    state_algebra_t::add( compensation, dt / ( 2. - 4. * gamma ) * filtered_D );
-                    state_algebra_t::add( compensation, 0.75 * dt * fa_tmp_bis );
-                    compensated_commit( us_s, u_np1 );
+                    u_np1 = us_s + 0.5 * dt * fr_tmp + 0.25 * dt * Fa_u_sp1 + 0.5 * dt * fr_tmp_bis + dt / ( 2. - 4. * gamma ) * filtered_D
+                          + 0.75 * dt * fa_tmp_bis;
 
                     value_t const err_R_scalar = detail::error_algebra<state_t>::estimate_squared( err_R,
                         un,
@@ -2557,7 +2383,7 @@ namespace ponio::runge_kutta::pirock
 
                     if ( _info.success )
                     {
-                        compensated_time_update( dt );
+                        tn += dt;
 
                         errp = _info.error;
                         hp   = dt;
@@ -2592,27 +2418,19 @@ namespace ponio::runge_kutta::pirock
                         shampine_trick_caller.finalize();
                     }
 
-                    compensated_time_update( dt );
+                    tn += dt;
 
-                    state_algebra_t::add( compensation, 0.5 * dt * fr_tmp );
-                    state_algebra_t::add( compensation, 0.25 * dt * Fa_u_sp1 );
-                    state_algebra_t::add( compensation, 0.5 * dt * fr_tmp_bis );
-                    state_algebra_t::add( compensation, dt / ( 2. - 4. * gamma ) * filtered_D );
-                    state_algebra_t::add( compensation, 0.75 * dt * fa_tmp_bis );
-                    compensated_commit( us_s, u_np1 );
+                    u_np1 = us_s + 0.5 * dt * fr_tmp + 0.25 * dt * Fa_u_sp1 + 0.5 * dt * fr_tmp_bis + dt / ( 2. - 4. * gamma ) * filtered_D
+                          + 0.75 * dt * fa_tmp_bis;
                 }
             }
             else
             {
                 // Fixed-step variant without Shampine filtering.
-                compensated_time_update( dt );
+                tn += dt;
 
-                state_algebra_t::add( compensation, 0.5 * dt * fr_tmp );
-                state_algebra_t::add( compensation, 0.25 * dt * Fa_u_sp1 );
-                state_algebra_t::add( compensation, 0.5 * dt * fr_tmp_bis );
-                state_algebra_t::add( compensation, dt / ( 2. - 4. * gamma ) * fd_tmp_bis );
-                state_algebra_t::add( compensation, 0.75 * dt * fa_tmp_bis );
-                compensated_commit( us_s, u_np1 );
+                u_np1 = us_s + 0.5 * dt * fr_tmp + 0.25 * dt * Fa_u_sp1 + 0.5 * dt * fr_tmp_bis + dt / ( 2. - 4. * gamma ) * fd_tmp_bis
+                      + 0.75 * dt * fa_tmp_bis;
             }
         }
 
@@ -2664,8 +2482,6 @@ namespace ponio::runge_kutta::pirock
             return *this;
         }
     };
-
-    // cppcheck-suppress-begin unusedFunction
 
     /**
      * @brief helper function to build PIROCK algorithm
@@ -2809,7 +2625,5 @@ namespace ponio::runge_kutta::pirock
     {
         return pirock_RDA_b0<value_t>( rock::detail::power_method() );
     }
-
-    // cppcheck-suppress-end unusedFunction
 
 } // namespace ponio::runge_kutta::pirock
