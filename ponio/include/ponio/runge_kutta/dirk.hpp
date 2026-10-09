@@ -19,30 +19,10 @@
 #include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp" // NOLINT(misc-include-cleaner)
+#include "newton.hpp"
 
 namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
 {
-    template <typename value_t, typename state_t, typename func_t, typename jacobian_t, typename solver_t>
-    state_t
-    newton( func_t&& f, jacobian_t&& df, state_t const& x0, solver_t&& solver, value_t tol = 1e-10, std::size_t max_iter = 50 )
-    {
-        state_t xk       = x0;
-        value_t residual = ::ponio::detail::norm( std::forward<func_t>( f )( xk ) );
-        std::size_t iter = 0;
-
-        while ( iter < max_iter && residual > tol )
-        {
-            auto increment = std::forward<solver_t>( solver )( std::forward<jacobian_t>( df )( xk ), -std::forward<func_t>( f )( xk ) );
-
-            xk       = xk + increment;
-            residual = ::ponio::detail::norm( std::forward<func_t>( f )( xk ) );
-
-            iter += 1;
-        }
-
-        return xk;
-    }
-
     template <typename tableau_t, typename lin_alg_t = void>
     struct diagonal_implicit_rk_butcher
     {

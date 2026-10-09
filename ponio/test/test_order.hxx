@@ -4,11 +4,17 @@
 
 #pragma once
 
+#include <array>
+#include <cmath>
 #include <tuple>
+#include <valarray>
 
 #include <doctest/doctest.h>
 
+#include <ponio/problem.hpp>
 #include <ponio/runge_kutta.hpp>
+#include <ponio/runge_kutta/pirkl.hpp>
+#include <ponio/runge_kutta/rkl_d.hpp>
 #include <ponio/solver.hpp>
 
 #include "compute_order.hpp"
@@ -273,6 +279,118 @@ TEST_CASE( "order::legendre_runge_kutta" )
     // clang-format on
 
     test_order<class_method::explicit_method>::on<rkl_methods>();
+}
+
+TEST_CASE( "order::dynamic_legendre_runge_kutta" )
+{
+    auto compute_error = []( double dt )
+    {
+        constexpr std::size_t stages = 5;
+        constexpr double t_end       = 1.;
+
+        auto rhs = []( double, double const& u, double& du )
+        {
+            du = -u;
+        };
+
+        double t = 0.;
+        double u = 1.;
+        auto const n_steps = static_cast<std::size_t>( std::lround( t_end / dt ) );
+
+        for ( std::size_t n = 0; n < n_steps; ++n )
+        {
+            double f_start = 0.;
+            double y_jm2   = 0.;
+            double y_jm1   = 0.;
+            double y_j     = 0.;
+            double f_tmp   = 0.;
+            double u_next  = 0.;
+
+            rhs( t, u, f_start );
+            ponio::runge_kutta::legendre::dynamic::apply_rkl2(
+                rhs, t, u, dt, stages, f_start, y_jm2, y_jm1, y_j, f_tmp, u_next );
+
+            u = u_next;
+            t += dt;
+        }
+
+        return std::abs( u - std::exp( -t_end ) );
+    };
+
+    double const err_dt   = compute_error( 1. / 20. );
+    double const err_dt_2 = compute_error( 1. / 40. );
+    double const order    = std::log2( err_dt / err_dt_2 );
+
+    INFO( "test order of dynamic RKL2" );
+    INFO( "computed order: ", order );
+
+    CHECK( order >= doctest::Approx( 2. ).epsilon( 0.05 ) );
+}
+
+TEST_CASE( "order::pirkl_DA" )
+{
+    using state_t = std::valarray<double>;
+
+    constexpr double lambda_D = -4.;
+    constexpr double lambda_A = 1.;
+    constexpr double rho_D    = -lambda_D;
+    constexpr double safety   = 1.15;
+    constexpr double damping  = 11.;
+    constexpr double t_end    = 1.;
+
+    auto compute_error = [=]( double dt )
+    {
+        auto diffusion = [=]( double, state_t const& u, state_t& du )
+        {
+            du = lambda_D * u;
+        };
+        auto advection = [=]( double, state_t const& u, state_t& du )
+        {
+            du = lambda_A * u;
+        };
+        auto spectral_radius = [=]( auto&&, double, auto const&, double, auto& )
+        {
+            return rho_D;
+        };
+
+        auto problem = ponio::make_problem( diffusion, advection );
+        auto method  = ponio::runge_kutta::pirkl::pirkl_DA( spectral_radius );
+        method.safety( safety ).damping_constant( damping );
+
+        std::array<state_t, decltype( method )::N_storage> work;
+        for ( auto& stage : work )
+        {
+            stage.resize( 1 );
+        }
+
+        state_t u( 1., 1 );
+        state_t u_next( 0., 1 );
+        double t = 0.;
+        auto const n_steps = static_cast<std::size_t>( std::lround( t_end / dt ) );
+
+        for ( std::size_t n = 0; n < n_steps; ++n )
+        {
+            method( problem, t, u, work, dt, u_next );
+            u = u_next;
+        }
+
+        auto const& dim = method.dimensioning();
+        CHECK( method.spectral_radius() == doctest::Approx( rho_D ) );
+        CHECK( dim.zmax == doctest::Approx( safety * dt * rho_D ) );
+        CHECK( dim.delta
+               == doctest::Approx( ponio::runge_kutta::legendre::dynamic::damping_from_zmax( dim.zmax, damping ) ) );
+
+        return std::abs( u[0] - std::exp( ( lambda_D + lambda_A ) * t_end ) );
+    };
+
+    double const err_dt   = error( 1. / 20. );
+    double const err_dt_2 = error( 1. / 40. );
+    double const order    = std::log2( err_dt / err_dt_2 );
+
+    INFO( "test order of PIRKL-D" );
+    INFO( "computed order: ", order );
+
+    CHECK( order >= doctest::Approx( 2. ).epsilon( 0.1 ) );
 }
 
 TEST_CASE( "order::pirock" )
