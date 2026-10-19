@@ -5,6 +5,8 @@
 #pragma once
 
 #include <cassert>
+#include <stdexcept>
+#include <string>
 
 #include "detail.hpp"
 #include "linear_algebra.hpp"
@@ -183,8 +185,9 @@ namespace ponio::shampine_trick
             PetscInt const err = KSPSetUp( ksp );
             if ( err != 0 )
             {
-                std::cerr << "The setup of the solver failed!" << std::endl;
-                exit( EXIT_FAILURE ); // NOLINT
+                KSPDestroy( &ksp );
+                MatDestroy( &J_R );
+                throw std::runtime_error( "The setup of the solver failed." );
             }
 
             auto& result_l1 = ( ell == 1 ) ? shampine_result : u_tmp;
@@ -200,11 +203,16 @@ namespace ponio::shampine_trick
             KSPGetConvergedReason( ksp, &reason_code );
             if ( reason_code < 0 )
             {
-                using namespace std::string_literals;
                 char const* reason_text;
                 KSPGetConvergedReasonString( ksp, &reason_text );
-                std::cerr << "Divergence of the solver ("s + reason_text + ")" << std::endl;
-                exit( EXIT_FAILURE ); // NOLINT
+                std::string const message = "Divergence of the solver (" + std::string( reason_text ) + ")";
+
+                VecDestroy( &u_tmp_petsc );
+                VecDestroy( &rhs_petsc );
+                KSPDestroy( &ksp );
+                MatDestroy( &J_R );
+
+                throw std::runtime_error( message );
             }
 
             if constexpr ( ell == 2 )
@@ -217,11 +225,17 @@ namespace ponio::shampine_trick
                 KSPGetConvergedReason( ksp, &reason_code );
                 if ( reason_code < 0 )
                 {
-                    using namespace std::string_literals;
                     char const* reason_text;
                     KSPGetConvergedReasonString( ksp, &reason_text );
-                    std::cerr << "Divergence of the solver ("s + reason_text + ")" << std::endl;
-                    exit( EXIT_FAILURE ); // NOLINT
+                    std::string const message = "Divergence of the solver (" + std::string( reason_text ) + ")";
+
+                    VecDestroy( &result_petsc );
+                    VecDestroy( &u_tmp_petsc );
+                    VecDestroy( &rhs_petsc );
+                    KSPDestroy( &ksp );
+                    MatDestroy( &J_R );
+
+                    throw std::runtime_error( message );
                 }
 
                 VecDestroy( &result_petsc );

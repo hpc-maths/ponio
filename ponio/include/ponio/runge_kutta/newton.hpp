@@ -9,9 +9,7 @@
 #include <cmath>
 #include <concepts>
 #include <cstddef>
-#include <functional> // NOLINT(misc-include-cleaner)
 #include <iterator>
-#include <limits>
 #include <stdexcept>
 #include <utility>
 
@@ -19,7 +17,7 @@
 #include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
 
-namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
+namespace ponio::runge_kutta::nonlinear_solver
 {
     /**
      * @brief Solve a nonlinear system with Newton's method.
@@ -66,13 +64,19 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
     /**
      * @brief Solve a PIROCK implicit stage with a simplified Newton iteration.
      *
-     * The factorization is supplied by the caller. Following the reference
-     * Fortran `ieuler` routine (`irec = 5`), corrections 1--5 reuse the current
-     * factorization and corrections 6 and beyond refresh it before each solve.
+     * The factorization is supplied by the caller. The first corrections reuse
+     * the current factorization; after @p refresh_after corrections, the
+     * factorization is refreshed at the current iterate before every solve.
+     * Convergence is tested on the mean absolute norm of the correction.
      *
-     * Convergence is tested after applying the correction, as in Fortran. Ponio
-     * uses a global mean L1 norm of the correction instead of the local block
-     * L1 test of `ieuler`.
+     * @param f nonlinear residual
+     * @param x0 initial guess
+     * @param refresh_factorization callback that rebuilds and factorizes the stage matrix
+     * @param tol nonlinear tolerance
+     * @param max_iter maximum number of nonlinear iterations
+     * @param refresh_after number of corrections performed before refreshing the factorization
+     *
+     * @return last simplified-Newton iterate
      */
     template <typename value_t, typename state_t, typename matrix_t, typename func_t, typename refresh_t>
         requires std::invocable<refresh_t&, state_t const&>
@@ -89,56 +93,67 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         state_t residual_rhs;
         state_t increment;
 
-        value_t const n_dof      = static_cast<value_t>( std::distance( std::begin( x0 ), std::end( x0 ) ) );
-        auto const mean_abs_norm = [&n_dof]( state_t const& x ) -> value_t
+        value_t const n_dof = [&]() -> value_t
         {
-            return static_cast<value_t>( ::ponio::detail::norm_l1( x ) ) / n_dof;
-        };
+            if constexpr ( requires {
+                               std::begin( x0 );
+                               std::end( x0 );
+                           } )
+            {
+                return static_cast<value_t>( std::distance( std::begin( x0 ), std::end( x0 ) ) );
+            }
+            else if constexpr ( requires { x0.size(); } )
+            {
+                return static_cast<value_t>( x0.size() );
+            }
+            else
+            {
+                return value_t{ 1 };
+            }
+        }();
 
-        value_t residual       = mean_abs_norm( residual_vector );
-        value_t increment_norm = std::numeric_limits<value_t>::quiet_NaN();
-        std::size_t iter       = 0;
-
-        if ( !std::isfinite( static_cast<double>( residual ) ) )
+        value_t residual_norm = static_cast<value_t>( ::ponio::detail::mean_abs_norm( residual_vector, n_dof ) );
+        if ( !std::isfinite( static_cast<double>( residual_norm ) ) )
         {
             throw std::runtime_error( "PIROCK Newton initial residual is non-finite." );
         }
 
-        // `ieuler` always applies one correction before testing convergence.
-        do
+        std::size_t iter = 0;
+        bool necessary   = true;
+
+        while ( necessary )
         {
-            // iter == 5 corresponds to the sixth Fortran correction.
             if ( iter >= refresh_after )
             {
-                std::invoke( refresh_factorization, xk );
+                refresh_factorization( xk );
             }
 
             residual_rhs = -residual_vector;
             increment    = ::ponio::linear_algebra::linear_algebra<matrix_t>::solve_factorized( residual_rhs );
 
-            increment_norm = mean_abs_norm( increment );
+            value_t const increment_norm = static_cast<value_t>( ::ponio::detail::mean_abs_norm( increment, n_dof ) );
             if ( !std::isfinite( static_cast<double>( increment_norm ) ) )
             {
                 throw std::runtime_error( "PIROCK Newton correction is non-finite." );
             }
 
             xk += increment;
-            iter += 1;
+            ++iter;
 
-            // Fortran exits here without reevaluating F_R at the corrected state.
-            if ( increment_norm <= tol || iter >= max_iter )
+            necessary = increment_norm > tol && iter < max_iter;
+
+            // Reevaluate the residual only when another correction is needed.
+            if ( necessary )
             {
-                break;
-            }
+                residual_vector = std::forward<func_t>( f )( xk );
+                residual_norm   = static_cast<value_t>( ::ponio::detail::mean_abs_norm( residual_vector, n_dof ) );
 
-            residual_vector = std::forward<func_t>( f )( xk );
-            residual        = mean_abs_norm( residual_vector );
-
-            if ( !std::isfinite( static_cast<double>( residual ) ) )
-            {
-                throw std::runtime_error( "PIROCK Newton residual became non-finite." );
+                if ( !std::isfinite( static_cast<double>( residual_norm ) ) )
+                {
+                    throw std::runtime_error( "PIROCK Newton residual became non-finite." );
+                }
             }
-        } while ( true );
+        }
 
         return xk;
     }
@@ -193,4 +208,4 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
         return xk;
     }
 
-} // namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
+} // namespace ponio::runge_kutta::nonlinear_solver

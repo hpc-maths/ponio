@@ -767,7 +767,6 @@ namespace ponio::runge_kutta::rock
             1.211682179036361e-04, 9.628860485040655e-01, 1.211987755701019e-04, 9.633747238043349e-01, 1.212297589117476e-04, 9.638702662671197e-01
         };
 
-
         // PIROCK: coefficients of the additional orthogonal polynomials.
         // Four values are stored for each tabulated ROCK2 degree:
         // (mu, kappa) for the first additional stage, then for the second.

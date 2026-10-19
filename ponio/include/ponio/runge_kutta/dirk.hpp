@@ -139,19 +139,17 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             }
             else
             {
-                // Predict the derivative of the current stage. The first stage
-                // uses an explicit evaluation, whereas the following stages
-                // reuse the derivative computed at the previous stage.
-                state_t k_initial = un;
-
+                // Predict the derivative of the current stage in the existing
+                // stage workspace. The first stage uses an explicit evaluation,
+                // whereas the following stages reuse the previous derivative.
                 if constexpr ( I == 0 )
                 {
-                    pb.f( tn + butcher.c[I] * dt, un, k_initial );
+                    pb.f( tn + butcher.c[I] * dt, un, ki );
                     _info.number_of_eval += 1;
                 }
                 else
                 {
-                    k_initial = Kj[I - 1];
+                    ki = Kj[I - 1];
                 }
 
                 using matrix_linear_algebra_t = ::ponio::linear_algebra::linear_algebra<matrix_t>;
@@ -161,14 +159,14 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
                                    matrix_linear_algebra_t::solve_factorized( rhs );
                                } )
                 {
-                    matrix_t frozen_stage_matrix = dg( k_initial );
+                    matrix_t frozen_stage_matrix = dg( ki );
                     matrix_linear_algebra_t::factorize( frozen_stage_matrix );
 
-                    chord_method<value_t, state_t, matrix_t>( g, k_initial, tol, max_iter );
+                    nonlinear_solver::chord_method<value_t, state_t, matrix_t>( g, ki, tol, max_iter );
                 }
                 else
                 {
-                    newton<value_t>( g, dg, k_initial, matrix_linear_algebra_t::solver, tol, max_iter );
+                    nonlinear_solver::newton<value_t>( g, dg, ki, matrix_linear_algebra_t::solver, tol, max_iter );
                 }
             }
         }

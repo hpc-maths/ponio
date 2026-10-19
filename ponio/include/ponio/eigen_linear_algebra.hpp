@@ -340,9 +340,8 @@ namespace ponio::shampine_trick
         /**
          * @brief Initialize Shampine's trick from an existing factorization.
          *
-         * PIROCK reuses the factorization left by the implicit stages. This
-         * matches the Fortran implementation, where Shampine's correction
-         * applies SOL with the current LU factors.
+         * PIROCK reuses the factorization left by the implicit stages so that
+         * Shampine's correction can apply the current LU factors directly.
          */
         void
         initialize()

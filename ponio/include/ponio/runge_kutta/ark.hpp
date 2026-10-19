@@ -9,6 +9,7 @@
 #include <array>
 #include <concepts>
 #include <cstddef>
+#include <functional>
 #include <string_view> // NOLINT(misc-include-cleaner)
 
 #include "../butcher_tableau.hpp"
@@ -171,7 +172,7 @@ namespace ponio::runge_kutta::additive_runge_kutta
                         return &::ponio::linear_algebra::linear_algebra<matrix_t>::solver;
                     }
                 }();
-                ui = diagonal_implicit_runge_kutta::newton<value_t>( F, dF, un, solver, tol, max_iter );
+                ui = nonlinear_solver::newton<value_t>( F, dF, un, solver, tol, max_iter );
             }
 
             // call explicit and implicit function on stage ui

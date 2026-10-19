@@ -254,8 +254,8 @@ namespace ponio::runge_kutta::rock
                 auto mdeg            = s_min;
                 if constexpr ( std::same_as<rock_method, rock_order::rock_2> )
                 {
-                    // Match the Fortran ROCK2 degree formula. PIROCK uses c = 0.811 for ell = 2
-                    // and c = 0.432 for ell = 1; the cast reproduces the integer truncation.
+                    // ROCK2 degree formula. PIROCK uses c = 0.811 for ell = 2
+                    // and c = 0.432 for ell = 1; the cast preserves integer truncation.
                     mdeg = static_cast<std::size_t>( std::sqrt( ( static_cast<value_t>( 1.5 ) + dt * eigmax ) / rock2_stability_constant )
                                                      + static_cast<value_t>( 1.0 ) );
                     if ( mdeg > 200 )
@@ -514,7 +514,7 @@ namespace ponio::runge_kutta::rock
                 value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / _info.error ) ) );
                 value_t new_dt = 0.8 * fac * dt;
 
-                // accepted step
+                // Accepted step: advance time, keep the candidate state and update the time step.
                 if ( _info.success )
                 {
                     tn = tn + dt;
@@ -523,6 +523,7 @@ namespace ponio::runge_kutta::rock
                 }
                 else
                 {
+                    // Rejected step: keep the current time/state and retry with the new time step.
                     std::swap( un, unp1 );
                     dt = new_dt;
                 }
@@ -798,7 +799,7 @@ namespace ponio::runge_kutta::rock
 
                 value_t new_dt = fac * dt;
 
-                // accepted step
+                // Accepted step: advance time, keep the candidate state and update the time step.
                 if ( _info.success )
                 {
                     tn = tn + dt;
@@ -807,6 +808,7 @@ namespace ponio::runge_kutta::rock
                 }
                 else
                 {
+                    // Rejected step: keep the current time/state and retry with the new time step.
                     std::swap( un, unp1 );
                     dt = new_dt;
                 }

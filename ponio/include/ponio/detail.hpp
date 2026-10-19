@@ -88,6 +88,69 @@ namespace ponio::detail
         return accu;
     }
 
+    /**
+     * @brief Compute the mean absolute norm of a state.
+     *
+     * For a container this is the L1 norm divided by the number of degrees of
+     * freedom. For a scalar it reduces to the absolute value. Eigen-like
+     * states are handled through their array interface.
+     *
+     * The overload taking @p n_dof is useful when the same state size is used
+     * repeatedly, so callers can compute it once and avoid traversing the state
+     * only to recover its size.
+     *
+     * @tparam state_t type of state
+     * @param x state
+     */
+    template <typename state_t>
+    auto
+    mean_abs_norm( state_t const& x )
+    {
+        if constexpr ( std::ranges::range<state_t> )
+        {
+            auto const n_dof = std::ranges::distance( x );
+            using value_t    = std::remove_cvref_t<decltype( *std::ranges::cbegin( x ) )>;
+
+            return static_cast<value_t>( norm_l1( x ) ) / static_cast<value_t>( n_dof );
+        }
+        else if constexpr ( requires {
+                                x.array().abs().sum();
+                                x.size();
+                            } )
+        {
+            auto const l1_norm = x.array().abs().sum();
+            return l1_norm / static_cast<decltype( l1_norm )>( x.size() );
+        }
+        else
+        {
+            return norm_l1( x );
+        }
+    }
+
+    /**
+     * @brief Compute the mean absolute norm using a precomputed number of degrees of freedom.
+     */
+    template <typename state_t, typename size_t>
+    auto
+    mean_abs_norm( state_t const& x, size_t n_dof )
+    {
+        if constexpr ( std::ranges::range<state_t> )
+        {
+            using value_t = std::remove_cvref_t<decltype( *std::ranges::cbegin( x ) )>;
+            return static_cast<value_t>( norm_l1( x ) ) / static_cast<value_t>( n_dof );
+        }
+        else if constexpr ( requires { x.array().abs().sum(); } )
+        {
+            auto const l1_norm = x.array().abs().sum();
+            return l1_norm / static_cast<decltype( l1_norm )>( n_dof );
+        }
+        else
+        {
+            using value_t = std::remove_cvref_t<decltype( norm_l1( x ) )>;
+            return static_cast<value_t>( norm_l1( x ) ) / static_cast<value_t>( n_dof );
+        }
+    }
+
 #ifndef IN_DOXYGEN
     template <typename state_t, typename value_t>
     auto

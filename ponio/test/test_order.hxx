@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <array>
-#include <cmath>
 #include <tuple>
 
 #include <doctest/doctest.h>
@@ -22,6 +20,7 @@ enum struct class_method
     exponential_method,
     additive_method,
     RD_method,
+    DA_method,
     RDA_method,
     splitting_method
 };
@@ -169,6 +168,34 @@ struct test_order
                 }
             }
         }
+        else if constexpr ( type == class_method::DA_method )
+        {
+            // Mirror the RD test with lambda_D = lambda and lambda_A = 1 - lambda.
+            for ( auto lambda : { 0.5, 1. / 3., 2. / 3., 0., 1. } )
+            {
+                double computed_order;
+                double computed_cst;
+
+                // use std::tie because of a bug in clang++-15
+                std::tie( computed_order, computed_cst ) = DA_method::check_order( rk_t(), lambda );
+
+                INFO( "test order of ", rk_t::id );
+                INFO( "lambda_D: ", lambda );
+                INFO( "lambda_A: ", 1. - lambda );
+                INFO( "theoretical order: ", rk_t::order );
+                INFO( "computed order   : ", computed_order );
+                INFO( "computed error constant: ", computed_cst );
+
+                if ( computed_cst > -8. ) // error is to close than computer error
+                {
+                    WARN( computed_order >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+                }
+                else
+                {
+                    WARN( computed_order >= doctest::Approx( rk_t::order ).epsilon( 2. ) );
+                }
+            }
+        }
         else if constexpr ( type == class_method::RDA_method )
         {
             // In additive Runge-Kutta method, one of method could be higher order than other (so we don't test equality)
@@ -292,64 +319,15 @@ TEST_CASE( "order::pirock_RD" )
 
 TEST_CASE( "order::pirock_DA" )
 {
-    constexpr double lambda_D = -4.;
-    constexpr double lambda_A = 1.;
-    constexpr double rho_D    = -lambda_D;
-    constexpr double t_end    = 1.;
+    // clang-format off
+    using pirock_methods = std::tuple<
+        decltype( ponio::runge_kutta::pirock::pirock_DA() ),
+        decltype( ponio::runge_kutta::pirock::pirock_DA_a1() ),
+        decltype( ponio::runge_kutta::pirock::pirock_DA_b0() )
+    >;
+    // clang-format on
 
-    auto diffusion = []( double, double const& u, double& du )
-    {
-        du = lambda_D * u;
-    };
-
-    auto advection = []( double, double const& u, double& du )
-    {
-        du = lambda_A * u;
-    };
-
-    auto spectral_radius = [=]( auto&&, double, auto const&, double, auto& )
-    {
-        return rho_D;
-    };
-
-    auto problem = ponio::make_problem( diffusion, advection );
-
-    auto check_method = [&]( auto method )
-    {
-        auto error = [&]( double dt )
-        {
-            using method_t = std::decay_t<decltype( method )>;
-
-            std::array<double, method_t::N_storage> work{};
-
-            double t      = 0.;
-            double u      = 1.;
-            double u_next = 0.;
-
-            auto const n_steps = static_cast<std::size_t>( std::lround( t_end / dt ) );
-
-            for ( std::size_t n = 0; n < n_steps; ++n )
-            {
-                method( problem, t, u, work, dt, u_next );
-                u = u_next;
-            }
-
-            return std::abs( u - std::exp( ( lambda_D + lambda_A ) * t_end ) );
-        };
-
-        double const err_dt   = error( 1. / 20. );
-        double const err_dt_2 = error( 1. / 40. );
-        double const order    = std::log2( err_dt / err_dt_2 );
-
-        INFO( "test order of PIROCK-DA" );
-        INFO( "computed order: ", order );
-
-        CHECK( order >= doctest::Approx( 2. ).epsilon( 0.1 ) );
-    };
-
-    check_method( ponio::runge_kutta::pirock::pirock_DA( spectral_radius ) );
-    check_method( ponio::runge_kutta::pirock::pirock_DA_a1( spectral_radius ) );
-    check_method( ponio::runge_kutta::pirock::pirock_DA_b0( spectral_radius ) );
+    test_order<class_method::DA_method>::on<pirock_methods>();
 }
 
 TEST_CASE( "order::pirock_RDA" )
