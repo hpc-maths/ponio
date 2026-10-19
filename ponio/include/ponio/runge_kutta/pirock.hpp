@@ -175,9 +175,7 @@ namespace ponio::runge_kutta::pirock
          * The controller stores the persistent state needed across attempts:
          * the safety/growth factors, rejection statistics, and the error/time
          * step of the last accepted step used by the memory correction.
-         * The input error is the squared PIROCK controller indicator: diffusion
-         * and reaction use a normalized RMS error squared, while advection is
-         * order-adjusted before entering the controller.
+         * Errors are expected in the PIROCK RMS-squared convention.
          */
         template <typename value_t>
         struct controller
@@ -187,36 +185,33 @@ namespace ponio::runge_kutta::pirock
             {
                 ++attempt_count;
 
-                // Every 100 attempts, adapt the safety factor from the recent
-                // rejection count.
                 if ( attempt_count % 100 == 0 )
                 {
                     if ( rejected_since_update >= 10 )
                     {
-                        safety_factor *= static_cast<value_t>( 0.8 );
+                        damping_factor *= static_cast<value_t>( 0.8 );
                     }
                     if ( rejected_since_update == 0 )
                     {
-                        safety_factor *= static_cast<value_t>( 1.02 );
+                        damping_factor *= static_cast<value_t>( 1.02 );
                     }
 
-                    safety_factor         = std::min( static_cast<value_t>( 0.8 ), std::max( static_cast<value_t>( 0.4 ), safety_factor ) );
+                    damping_factor = std::min( static_cast<value_t>( 0.8 ), std::max( static_cast<value_t>( 0.4 ), damping_factor ) );
                     rejected_since_update = 0;
                 }
 
-                // The controller uses a squared error indicator, hence the -1/4 exponent.
+                // The stored error is RMS^2, hence the -1/4 exponent.
                 return std::pow( error, static_cast<value_t>( -0.25 ) );
             }
 
             value_t
             apply_memory( value_t factor, value_t diffusion_error, value_t competing_error, value_t dt ) const
             {
-                // A factor 10 on the underlying error indicator corresponds to
-                // 100 in the squared convention used here.
-                if ( previous_accepted_error != static_cast<value_t>( 0. ) && !previous_rejected && diffusion_error >= 100. * competing_error )
+                // A factor 10 on RMS corresponds to 100 in RMS^2.
+                if ( previous_error != static_cast<value_t>( 0. ) && !previous_rejected && diffusion_error >= 100. * competing_error )
                 {
-                    value_t const memory_factor = std::pow( previous_accepted_error, static_cast<value_t>( 0.25 ) ) * factor * factor
-                                                * ( dt / previous_accepted_dt );
+                    value_t const memory_factor = std::pow( previous_error, static_cast<value_t>( 0.25 ) ) * factor * factor
+                                                * ( dt / previous_dt );
                     return std::min( factor, memory_factor );
                 }
 
@@ -226,13 +221,12 @@ namespace ponio::runge_kutta::pirock
             value_t
             limit_factor( value_t factor )
             {
-                // After a rejection, the next proposed step is not allowed to grow.
                 if ( previous_rejected )
                 {
-                    max_step_factor = static_cast<value_t>( 1. );
+                    maximum_factor = static_cast<value_t>( 1. );
                 }
 
-                return std::min( max_step_factor, std::max( static_cast<value_t>( 0.1 ), safety_factor * factor ) );
+                return std::min( maximum_factor, std::max( static_cast<value_t>( 0.1 ), damping_factor * factor ) );
             }
 
             value_t
@@ -240,17 +234,15 @@ namespace ponio::runge_kutta::pirock
             {
                 value_t retry_dt = static_cast<value_t>( 0.8 ) * new_dt;
 
-                // Track repeated rejections at the same time value and apply
-                // the fallback step when the counter reaches ten.
-                if ( last_rejection_time == current_time )
+                if ( previous_rejection_time == current_time )
                 {
-                    ++same_time_rejection_count;
-                    if ( same_time_rejection_count == 10 )
+                    ++consecutive_rejections;
+                    if ( consecutive_rejections == 10 )
                     {
                         retry_dt = static_cast<value_t>( 1.0e-5 );
                     }
                 }
-                last_rejection_time = current_time;
+                previous_rejection_time = current_time;
 
                 ++rejected_since_update;
                 previous_rejected = true;
@@ -261,23 +253,21 @@ namespace ponio::runge_kutta::pirock
             value_t
             accepted_step( value_t error, value_t current_dt, value_t new_dt )
             {
-                previous_accepted_error = error;
-                previous_accepted_dt    = current_dt;
+                previous_error = error;
+                previous_dt    = current_dt;
 
                 if ( previous_rejected )
                 {
-                    // Do not immediately increase the time step after a rejected attempt.
-                    new_dt                    = std::min( new_dt, current_dt );
-                    same_time_rejection_count = 0;
+                    new_dt                 = std::min( new_dt, current_dt );
+                    consecutive_rejections = 0;
                 }
 
-                max_step_factor   = static_cast<value_t>( 2. );
+                maximum_factor    = static_cast<value_t>( 2. );
                 previous_rejected = false;
 
                 return new_dt;
             }
 
-            // Return whether the immediately previous adaptive attempt was rejected.
             bool
             previous_attempt_rejected() const
             {
@@ -286,18 +276,18 @@ namespace ponio::runge_kutta::pirock
 
           private:
 
-            value_t max_step_factor = static_cast<value_t>( 5. );
-            value_t safety_factor   = static_cast<value_t>( 0.8 );
+            value_t maximum_factor = static_cast<value_t>( 5. );
+            value_t damping_factor = static_cast<value_t>( 0.8 );
 
             std::size_t attempt_count         = 0;
             std::size_t rejected_since_update = 0;
             bool previous_rejected            = false;
 
-            value_t previous_accepted_error = static_cast<value_t>( 0. );
-            value_t previous_accepted_dt    = static_cast<value_t>( 0. );
+            value_t previous_error = static_cast<value_t>( 0. );
+            value_t previous_dt    = static_cast<value_t>( 0. );
 
-            value_t last_rejection_time           = static_cast<value_t>( 0. );
-            std::size_t same_time_rejection_count = 0;
+            value_t previous_rejection_time    = static_cast<value_t>( 0. );
+            std::size_t consecutive_rejections = 0;
         };
     } // namespace adaptive
 
@@ -527,25 +517,6 @@ namespace ponio::runge_kutta::pirock
 
             value_t t_sm2 = tn;
 
-            auto finalize_rock_stage = [&]( std::size_t j, value_t mu_j, value_t nu_j, value_t kappa_j )
-            {
-                t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
-
-                if ( j == mdeg )
-                {
-                    u_sm2 = u_j;
-                    t_sm2 = t_jm1;
-                }
-                if ( j < mdeg + l )
-                {
-                    std::swap( u_jm2, u_jm1 );
-                    std::swap( u_jm1, u_j );
-                }
-
-                t_jm3 = t_jm2;
-                t_jm2 = t_jm1;
-            };
-
             for ( std::size_t j = 2; j < mdeg + 1; ++j )
             {
                 value_t const mu_j    = rock_coeff::recf[start_index + 2 * ( j - 2 )];
@@ -558,7 +529,19 @@ namespace ponio::runge_kutta::pirock
                 rock_increment = kappa_j * rock_increment + alpha * mu_j * dt * fe_tmp;
                 u_j            = u_jm1 + rock_increment;
 
-                finalize_rock_stage( j, mu_j, nu_j, kappa_j );
+                t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
+
+                if ( j == mdeg )
+                {
+                    u_sm2 = u_j;
+                    t_sm2 = t_jm1;
+                }
+
+                std::swap( u_jm2, u_jm1 );
+                std::swap( u_jm1, u_j );
+
+                t_jm3 = t_jm2;
+                t_jm2 = t_jm1;
             }
 
             for ( std::size_t j = mdeg + 1; j < mdeg + l + 1; ++j )
@@ -572,7 +555,16 @@ namespace ponio::runge_kutta::pirock
                 // Supplementary stages use the recf2 recurrence directly on the stage values.
                 u_j = alpha * mu_j * dt * fe_tmp - nu_j * u_jm1 - kappa_j * u_jm2;
 
-                finalize_rock_stage( j, mu_j, nu_j, kappa_j );
+                t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
+
+                if ( j < mdeg + l )
+                {
+                    std::swap( u_jm2, u_jm1 );
+                    std::swap( u_jm1, u_j );
+                }
+
+                t_jm3 = t_jm2;
+                t_jm2 = t_jm1;
             }
 
             // if l == 1
@@ -634,8 +626,7 @@ namespace ponio::runge_kutta::pirock
 
                     value_t fac = adaptive_controller.raw_factor( _info.error );
 
-                    // Skip the memory correction: the competing reaction error
-                    // indicator is not available before the implicit stages.
+                    // facp is unavailable here because err_R is not evaluated.
                     fac = adaptive_controller.limit_factor( fac );
 
                     new_dt = dt * fac;
@@ -1318,25 +1309,6 @@ namespace ponio::runge_kutta::pirock
 
             value_t t_sm2 = tn;
 
-            auto finalize_rock_stage = [&]( std::size_t j, value_t mu_j, value_t nu_j, value_t kappa_j )
-            {
-                t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
-
-                if ( j == mdeg )
-                {
-                    u_sm2 = u_j;
-                    t_sm2 = t_jm1;
-                }
-                if ( j < mdeg + l )
-                {
-                    std::swap( u_jm2, u_jm1 );
-                    std::swap( u_jm1, u_j );
-                }
-
-                t_jm3 = t_jm2;
-                t_jm2 = t_jm1;
-            };
-
             for ( std::size_t j = 2; j < mdeg + 1; ++j )
             {
                 value_t const mu_j    = rock_coeff::recf[start_index + 2 * ( j - 2 )];
@@ -1348,7 +1320,19 @@ namespace ponio::runge_kutta::pirock
                 rock_increment = kappa_j * rock_increment + alpha * mu_j * dt * fd_tmp;
                 u_j            = u_jm1 + rock_increment;
 
-                finalize_rock_stage( j, mu_j, nu_j, kappa_j );
+                t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
+
+                if ( j == mdeg )
+                {
+                    u_sm2 = u_j;
+                    t_sm2 = t_jm1;
+                }
+
+                std::swap( u_jm2, u_jm1 );
+                std::swap( u_jm1, u_j );
+
+                t_jm3 = t_jm2;
+                t_jm2 = t_jm1;
             }
 
             for ( std::size_t j = mdeg + 1; j < mdeg + l + 1; ++j )
@@ -1361,7 +1345,16 @@ namespace ponio::runge_kutta::pirock
 
                 u_j = alpha * mu_j * dt * fd_tmp - nu_j * u_jm1 - kappa_j * u_jm2;
 
-                finalize_rock_stage( j, mu_j, nu_j, kappa_j );
+                t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
+
+                if ( j < mdeg + l )
+                {
+                    std::swap( u_jm2, u_jm1 );
+                    std::swap( u_jm1, u_j );
+                }
+
+                t_jm3 = t_jm2;
+                t_jm2 = t_jm1;
             }
 
             value_t const sigma   = rock_coeff::fp1[deg_index - 1];
@@ -1399,10 +1392,7 @@ namespace ponio::runge_kutta::pirock
                     _info.success = false;
 
                     value_t fac = adaptive_controller.raw_factor( _info.error );
-
-                    // Skip the memory correction: the competing advection error
-                    // indicator is not available before the finishing procedure.
-                    fac = adaptive_controller.limit_factor( fac );
+                    fac         = adaptive_controller.limit_factor( fac );
 
                     value_t const new_dt = dt * fac;
                     u_np1                = un;
@@ -1892,25 +1882,6 @@ namespace ponio::runge_kutta::pirock
 
             value_t t_sm2 = tn;
 
-            auto finalize_rock_stage = [&]( std::size_t j, value_t mu_j, value_t nu_j, value_t kappa_j )
-            {
-                t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
-
-                if ( j == mdeg )
-                {
-                    u_sm2 = u_j;
-                    t_sm2 = t_jm1;
-                }
-                if ( j < mdeg + l )
-                {
-                    std::swap( u_jm2, u_jm1 );
-                    std::swap( u_jm1, u_j );
-                }
-
-                t_jm3 = t_jm2;
-                t_jm2 = t_jm1;
-            };
-
             for ( std::size_t j = 2; j < mdeg + 1; ++j )
             {
                 value_t const mu_j    = rock_coeff::recf[start_index + 2 * ( j - 2 )];
@@ -1922,7 +1893,19 @@ namespace ponio::runge_kutta::pirock
                 rock_increment = kappa_j * rock_increment + alpha * mu_j * dt * fd_tmp;
                 u_j            = u_jm1 + rock_increment;
 
-                finalize_rock_stage( j, mu_j, nu_j, kappa_j );
+                t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
+
+                if ( j == mdeg )
+                {
+                    u_sm2 = u_j;
+                    t_sm2 = t_jm1;
+                }
+
+                std::swap( u_jm2, u_jm1 );
+                std::swap( u_jm1, u_j );
+
+                t_jm3 = t_jm2;
+                t_jm2 = t_jm1;
             }
 
             for ( std::size_t j = mdeg + 1; j < mdeg + l + 1; ++j )
@@ -1936,7 +1919,16 @@ namespace ponio::runge_kutta::pirock
                 // Supplementary stages use the recf2 recurrence directly on the stage values.
                 u_j = alpha * mu_j * dt * fd_tmp - nu_j * u_jm1 - kappa_j * u_jm2;
 
-                finalize_rock_stage( j, mu_j, nu_j, kappa_j );
+                t_jm1 = alpha * dt * mu_j - nu_j * t_jm2 - kappa_j * t_jm3;
+
+                if ( j < mdeg + l )
+                {
+                    std::swap( u_jm2, u_jm1 );
+                    std::swap( u_jm1, u_j );
+                }
+
+                t_jm3 = t_jm2;
+                t_jm2 = t_jm1;
             }
 
             value_t const sigma   = rock_coeff::fp1[deg_index - 1];
@@ -1974,10 +1966,7 @@ namespace ponio::runge_kutta::pirock
                     _info.success = false;
 
                     value_t fac = adaptive_controller.raw_factor( _info.error );
-
-                    // Skip the memory correction: the competing advection and
-                    // reaction error indicators are not available yet.
-                    fac = adaptive_controller.limit_factor( fac );
+                    fac         = adaptive_controller.limit_factor( fac );
 
                     value_t const new_dt = dt * fac;
 
