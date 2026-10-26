@@ -410,16 +410,14 @@ TEST_CASE( "expressions::vector::expr1.2" )
     using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
-    container_t r1, r2;
+    container_t r1( a.size() ), r2( a.size() );
     double result = 81;
-
-    r1.reserve( a.size() );
-    r2.reserve( a.size() );
 
     make_state( r1 ) = ( make_state( a ) + make_state( b ) ) * ( make_state( a ) + make_state( b ) );
     make_state( r2 ) = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b )
                      + make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
+    CHECK( r1.size() == a.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -506,16 +504,14 @@ TEST_CASE( "expressions::vector::expr2.2" )
     using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
-    container_t r1, r2;
+    container_t r1( a.size() ), r2( a.size() );
     container_t result = { 81, 49, 25, 9, 1 };
-
-    r1.reserve( a.size() );
-    r2.reserve( a.size() );
 
     make_state( r1 ) = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) - make_state( b ) );
     make_state( r2 ) = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b )
                      - make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
+    CHECK( r1.size() == a.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -600,15 +596,13 @@ TEST_CASE( "expressions::vector::expr3.2" )
     using namespace ponio::expression;
 
     container_t a{ 0., 1., 2., 3., 4. }, b{ 9., 8., 7., 6., 5. };
-    container_t r1, r2;
+    container_t r1( a.size() ), r2( a.size() );
     container_t result = { -81, -63, -45, -27, -9 };
-
-    r1.reserve( a.size() );
-    r2.reserve( a.size() );
 
     make_state( r1 ) = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) + make_state( b ) );
     make_state( r2 ) = make_state( a ) * make_state( a ) - make_state( b ) * make_state( b );
 
+    CHECK( r1.size() == a.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -706,9 +700,7 @@ TEST_CASE( "expressions::span::expr1.2" )
     using namespace ponio::expression;
 
     raw_container_t raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
-    raw_container_t raw_r1, raw_r2;
-    raw_r1.reserve( raw_a.size() );
-    raw_r2.reserve( raw_a.size() );
+    raw_container_t raw_r1( raw_a.size() ), raw_r2( raw_a.size() );
 
     container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
     container_t r1( raw_r1.data(), raw_r1.size() ), r2( raw_r2.data(), raw_r2.size() );
@@ -718,6 +710,7 @@ TEST_CASE( "expressions::span::expr1.2" )
     make_state( r2 ) = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b )
                      + make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
+    CHECK( r1.size() == a.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -812,9 +805,7 @@ TEST_CASE( "expressions::span::expr2.2" )
     using namespace ponio::expression;
 
     raw_container_t raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
-    raw_container_t raw_r1, raw_r2;
-    raw_r1.reserve( raw_a.size() );
-    raw_r2.reserve( raw_a.size() );
+    raw_container_t raw_r1( raw_a.size() ), raw_r2( raw_a.size() );
 
     container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
     container_t r1( raw_r1.data(), raw_r1.size() ), r2( raw_r2.data(), raw_r2.size() );
@@ -824,6 +815,7 @@ TEST_CASE( "expressions::span::expr2.2" )
     make_state( r2 ) = make_state( a ) * make_state( a ) + make_state( b ) * make_state( b )
                      - make_scalar( 2.0 ) * make_state( a ) * make_state( b );
 
+    CHECK( r1.size() == a.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
@@ -916,9 +908,7 @@ TEST_CASE( "expressions::span::expr3.2" )
     using namespace ponio::expression;
 
     raw_container_t raw_a{ 0., 1., 2., 3., 4. }, raw_b{ 9., 8., 7., 6., 5. };
-    raw_container_t raw_r1, raw_r2;
-    raw_r1.reserve( raw_a.size() );
-    raw_r2.reserve( raw_a.size() );
+    raw_container_t raw_r1( raw_a.size() ), raw_r2( raw_a.size() );
 
     container_t a( raw_a.data(), raw_a.size() ), b( raw_b.data(), raw_b.size() );
     container_t r1( raw_r1.data(), raw_r1.size() ), r2( raw_r2.data(), raw_r2.size() );
@@ -927,6 +917,7 @@ TEST_CASE( "expressions::span::expr3.2" )
     make_state( r1 ) = ( make_state( a ) - make_state( b ) ) * ( make_state( a ) + make_state( b ) );
     make_state( r2 ) = make_state( a ) * make_state( a ) - make_state( b ) * make_state( b );
 
+    CHECK( r1.size() == a.size() );
     CHECK( r1.size() == r2.size() );
     for ( auto i = 0u; i < r1.size(); ++i )
     {
