@@ -382,6 +382,26 @@ namespace ponio::detail
     template <bool expression, typename T, T value_true, T value_false>
     constexpr T conditional_v = conditional_value<expression, T, value_true, value_false>::value;
 
+    /**
+     * @brief tells if a time step should stop exactly on a target time
+     *
+     * @tparam value_t type of time
+     * @param tn       current time
+     * @param dt       time step
+     * @param target   target time
+     * @return true if the step goes past the target, or stops short of it by less than a millionth of the time step
+     *
+     * @details The tolerance absorbs the rounding errors of accumulated time: ten steps of 0.1 end at 0.9999999999999999,
+     * and without it an eleventh step of 1e-16 is taken to reach 1.
+     */
+    template <typename value_t>
+    constexpr bool
+    step_reaches( value_t tn, value_t dt, value_t target )
+    {
+        constexpr value_t relative_tolerance = 1e-6;
+        return tn + dt * ( 1 + relative_tolerance ) >= target;
+    }
+
     // some concepts
     template <typename T>
     concept has_identity_method = std::is_member_function_pointer_v<decltype( &T::identity )>;
