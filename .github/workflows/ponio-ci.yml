@@ -185,20 +185,31 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: micromamba env installation
-        uses: mamba-org/setup-micromamba@v3
+        uses: mamba-org/setup-micromamba@v3.0.0
         with:
+          generate-run-shell: true
           environment-file: environment/conda-environment-all.yml
           environment-name: ponio-complete-env
-          cache-environment: true
-          cache-environment-key: ${{ hashFiles('environment/conda-environment-all.yml') }}
+          #cache-environment: true
+          #cache-environment-key: ${{ hashFiles('environment/conda-environment-all.yml') }}
       - name: Install compiler and Python
-        shell: bash -l {0}
-        run: conda install -y python cxx-compiler
+        shell: micromamba-shell {0}
+        run: micromamba install -y cxx-compiler python
+      - name: Check Python
+        shell: micromamba-shell {0}
+        run: |
+          echo ${CONDA_PREFIX}/bin
+          ls -l ${CONDA_PREFIX}/bin/python
+          which python
+          python --version
+          which cmake
+          echo PYTHON_INCLUDE_DIR=$(python -c "import sysconfig; print(sysconfig.get_path('include'))")
+          echo DPYTHON_LIBRARY=$(python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
       - name: Build
-        shell: bash -l {0}
+        shell: micromamba-shell {0}
         run: |
           export Eigen3_DIR="${CONDA_PREFIX}/share/eigen3/cmake"
-          cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON
+          cmake . -Bbuild -DBUILD_ALL_EXAMPLES=ON -DPython_FIND_VIRTUALENV=ONLY -DPYTHON_INCLUDE_DIR=$(python -c "import sysconfig; print(sysconfig.get_path('include'))") -DPYTHON_LIBRARY=$(python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
       - name: Execute all examples
-        shell: bash -l {0}
+        shell: micromamba-shell {0}
         run: cmake --build build --target save_visu

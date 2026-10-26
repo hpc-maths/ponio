@@ -16,6 +16,7 @@ dependencies:
   # all examples dependencies
   - eigen
   - samurai
+  - pkg-config
   - petsc
   - cli11<2.5
   - h5py
