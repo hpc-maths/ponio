@@ -240,17 +240,7 @@ namespace ponio
         void
         operator()( value_t t, state_expr_t&& y, state_t& dy )
         {
-            state_t dy_exp = dy;
-            state_t dy_imp = dy;
-            explicit_part( t, std::forward<state_expr_t>( y ), dy_exp );
-            implicit_part( t, std::forward<state_expr_t>( y ), dy_imp );
-            dy = dy_exp + dy_imp;
-        }
-
-        template <typename state_t, typename value_t, typename state_expr_t>
-        void
-        operator()( value_t t, state_expr_t& y, state_t& dy )
-        {
+            // y is not forwarded: both parts read it, a part that takes it by value would empty it for the other one
             state_t dy_exp = dy;
             state_t dy_imp = dy;
             explicit_part( t, y, dy_exp );
@@ -352,8 +342,9 @@ namespace ponio
     void
     lawson_problem<Linear_t, Nonlinear_t>::operator()( value_t t, state_expr_t&& y, state_t& dy )
     {
-        n( t, std::forward<state_expr_t>( y ), dy );
-        dy = l * std::forward<state_expr_t>( y ) + dy;
+        // y is not forwarded: it is read again after the call to n
+        n( t, y, dy );
+        dy = l * y + dy;
     }
 
     /**
@@ -384,10 +375,6 @@ namespace ponio
         std::tuple<Callables_t...> system;
 
         problem( Callables_t... args );
-
-        template <typename value_t, typename state_t, typename state_expr_t, std::size_t... Is>
-        state_t
-        _sum_components_impl( value_t t, state_expr_t&& y, state_t& dy, std::index_sequence<Is...> );
 
         template <typename value_t, typename state_t, typename state_expr_t, std::size_t... Is>
         state_t
@@ -447,14 +434,6 @@ namespace ponio
     template <typename... Callables_t>
     template <typename value_t, typename state_t, typename state_expr_t, std::size_t... Is>
     inline state_t
-    problem<Callables_t...>::_sum_components_impl( value_t t, state_expr_t&& y, state_t& dy, std::index_sequence<Is...> )
-    {
-        return ( call<Is>( t, std::forward<state_t>( y ), dy ) + ... );
-    }
-
-    template <typename... Callables_t>
-    template <typename value_t, typename state_t, typename state_expr_t, std::size_t... Is>
-    inline state_t
     problem<Callables_t...>::_sum_components_impl( value_t t, state_expr_t& y, state_t& dy, std::index_sequence<Is...> )
     {
         return ( call<Is>( t, y, dy ) + ... );
@@ -472,7 +451,8 @@ namespace ponio
     inline void
     problem<Callables_t...>::operator()( value_t t, state_expr_t&& y, state_t& dy )
     {
-        dy = _sum_components_impl( t, std::forward<state_t>( y ), dy, std::make_index_sequence<size>{} );
+        // y is not forwarded: every sub-problem reads it, a sub-problem that takes it by value would empty it for the next ones
+        dy = _sum_components_impl( t, y, dy, std::make_index_sequence<size>{} );
     }
 
     template <typename... Callables_t>
