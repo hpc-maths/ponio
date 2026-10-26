@@ -144,6 +144,7 @@ option(BUILD_EIGEN_EXAMPLES "build examples working with eigen" OFF)
 option(BUILD_CLI11_EXAMPLES "build examples working with cli11" OFF)
 option(BUILD_SAMURAI_EXAMPLES "build examples working with samurai" OFF)
 option(BUILD_ALL_EXAMPLES "build all examples" OFF)
+option(BUILD_BENCHMARKS "build the profiling workloads" OFF)
 
 if (BUILD_TESTS)
     add_subdirectory(ponio/test)
@@ -158,6 +159,10 @@ endif()
 
 if ((BUILD_EXAMPLES) OR (BUILD_EIGEN_EXAMPLES) OR (BUILD_CLI11_EXAMPLES) OR (BUILD_SAMURAI_EXAMPLES) OR (BUILD_ALL_EXAMPLES))
   add_subdirectory(ponio/examples)
+endif()
+
+if (BUILD_BENCHMARKS)
+  add_subdirectory(ponio/benchmarks)
 endif()
 
 # package the project

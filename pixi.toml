@@ -21,6 +21,7 @@ configure_test = { cmd = "cmake -S . -G 'Ninja' -B ./build -DBUILD_TESTS=ON" }
 configure_long_test = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_TESTS=ON -DBUILD_SAMURAI_EXAMPLES=ON" }
 configure_examples = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_EXAMPLES=ON" }
 configure_all_examples = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_ALL_EXAMPLES=ON -DBUILD_TESTS=ON" }
+configure_bench = { cmd = "cmake . -G 'Ninja' -B ./build -DBUILD_BENCHMARKS=ON" }
 configure_debug = { cmd = "cmake . -G 'Ninja' -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXAMPLES=ON" }
 
 build_ninja = { cmd = "cmake --build ./build --config Release" } # don't call this rule alone
@@ -34,6 +35,7 @@ build_all_examples_j1 = { depends-on = [
   "configure_all_examples",
   "build_ninja_j1",
 ] }
+build_bench = { depends-on = ["configure_bench", "build_ninja"] }
 build_debug = { cmd = "ninja -C build ponio", depends-on = ["configure_debug"] }
 
 test = { cmd = "./build/ponio/test/ponio_tests", depends-on = ["build_test"] }
