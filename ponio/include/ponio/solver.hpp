@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <iterator>
 #include <limits>
+#include <optional>
 
 #include "detail.hpp"
 #include "method.hpp"
