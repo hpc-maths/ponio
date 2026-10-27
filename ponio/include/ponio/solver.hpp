@@ -8,8 +8,8 @@
 #include <cstddef>
 #include <iterator>
 #include <limits>
-#include <optional>
 
+#include "detail.hpp"
 #include "method.hpp"
 #include "stage.hpp"
 #include "time_span.hpp"
@@ -92,7 +92,6 @@ namespace ponio
         problem_t& pb; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
         ponio::time_span<value_t> t_span;
         typename ponio::time_span<value_t>::iterator it_next_time;
-        std::optional<value_t> dt_reference;
         static constexpr value_t sentinel = std::numeric_limits<value_t>::max();
 
         /**
@@ -113,7 +112,6 @@ namespace ponio
             , pb( pb_ )
             , t_span( t_span_ )
             , it_next_time( std::next( std::begin( t_span ) ) )
-            , dt_reference( std::nullopt )
         {
         }
 
@@ -131,7 +129,6 @@ namespace ponio
             , pb( rhs.pb )
             , t_span( rhs.t_span )
             , it_next_time( std::begin( t_span ) + std::ranges::distance( std::begin( rhs.t_span ), rhs.it_next_time ) )
-            , dt_reference( rhs.dt_reference )
         {
         }
 
@@ -147,7 +144,6 @@ namespace ponio
             , pb( std::move( rhs.pb ) )
             , t_span( std::move( rhs.t_span ) )
             , it_next_time( std::move( rhs.it_next_time ) )
-            , dt_reference( std::move( rhs.dt_reference ) )
         {
         }
 
@@ -168,7 +164,6 @@ namespace ponio
                 pb           = rhs.pb;
                 t_span       = rhs.t_span;
                 it_next_time = std::begin( t_span ) + std::ranges::distance( std::begin( rhs.t_span ), rhs.it_next_time );
-                dt_reference = rhs.dt_reference;
             }
 
             return *this;
@@ -191,7 +186,6 @@ namespace ponio
                 pb           = std::move( rhs.pb );
                 t_span       = std::move( rhs.t_span );
                 it_next_time = std::move( rhs.it_next_time );
-                dt_reference = std::move( rhs.dt_reference );
             }
 
             return *this;
@@ -218,7 +212,7 @@ namespace ponio
          * @return difference_type
          */
         difference_type
-        next_time() const
+        next_time() const // cppcheck-suppress unusedFunction
         {
             return sol.time + sol.time_step;
         }
@@ -240,20 +234,28 @@ namespace ponio
                 return *this;
             }
 
-            if ( dt_reference.has_value() )
+            // a step that reaches the next time of t_span is shortened (or stretched by a rounding error) to stop exactly on it
+            if ( detail::step_reaches( sol.time, sol.time_step, *it_next_time ) )
             {
-                sol.time_step = dt_reference.value();
-                dt_reference  = std::nullopt;
+                value_t const tn = sol.time;
+                value_t const dt = sol.time_step;
+
+                sol.time_step = *it_next_time - tn;
+                increment();
+
+                // a rejected step of an adaptive method does not move the time and keeps the time step it chose
+                if ( sol.time != tn )
+                {
+                    sol.time      = *it_next_time;
+                    sol.time_step = dt;
+                    ++it_next_time;
+                }
+            }
+            else
+            {
+                increment();
             }
 
-            if ( next_time() > *it_next_time )
-            {
-                dt_reference  = sol.time_step;
-                sol.time_step = *it_next_time - sol.time;
-                ++it_next_time;
-            }
-
-            increment();
             return *this;
         }
 
@@ -678,13 +680,11 @@ namespace ponio
         auto it_next_time    = t_span.begin() + 1;
 
         value_t current_dt = dt;
-        bool reset_dt      = false;
 
         state_t un  = u0;
         state_t un1 = u0;
 
         value_t last_time = t_span.back();
-        auto last_it      = t_span.end() - 1;
 
         auto meth = make_method<value_t>( std::forward<Algorithm_t>( algo ), un );
 
@@ -692,26 +692,29 @@ namespace ponio
 
         while ( current_time < last_time )
         {
+            // a step that reaches the next time of t_span is shortened (or stretched by a rounding error) to stop exactly on it
+            bool const stops_on_next_time = detail::step_reaches( current_time, current_dt, *it_next_time );
+            value_t const tn              = current_time;
+            value_t const dt_before       = current_dt;
+
+            if ( stops_on_next_time )
+            {
+                current_dt = *it_next_time - current_time;
+            }
+
             meth( pb, current_time, un, current_dt, un1 );
             std::swap( un, un1 );
 
-            obs( current_time, un, current_dt );
+            // a rejected step of an adaptive method does not move the time and keeps the time step it chose,
+            // an accepted step that stopped on a time of t_span gives back the time step used before shortening
+            if ( stops_on_next_time && current_time != tn )
+            {
+                current_time = *it_next_time;
+                current_dt   = dt_before;
+                ++it_next_time;
+            }
 
-            // prepare next step
-            if ( current_time + current_dt > *it_next_time )
-            {
-                current_dt = *it_next_time - current_time;
-                reset_dt   = true;
-                if ( it_next_time != last_it )
-                {
-                    ++it_next_time;
-                }
-            }
-            else if ( reset_dt )
-            {
-                reset_dt   = false;
-                current_dt = dt;
-            }
+            obs( current_time, un, current_dt );
         }
 
         return un;
