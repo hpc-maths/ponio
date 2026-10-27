@@ -745,7 +745,7 @@ namespace ponio::runge_kutta::rock
                 f( t_jm1, ujm1, f_tmp );
                 uj = dt * mu * f_tmp - nu * ujm1 - kappa * ujm2;
 
-                t_jm1 = dt * mu + nu * t_jm2 - kappa * t_jm3;
+                t_jm1 = dt * mu - nu * t_jm2 - kappa * t_jm3;
 
                 if ( j < mdeg )
                 {
