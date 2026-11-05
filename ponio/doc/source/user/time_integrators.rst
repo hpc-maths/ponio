@@ -702,121 +702,184 @@ The difficulty in adaptive time step Strang splitting method is to find a good s
 IMEX methods with extended stability method
 -------------------------------------------
 
-The PIROCK method is introduce in :footcite:t:`abdulle:2013`, the complete scheme is a IMEX scheme that allows for solving an equation of the following form (with 3 operators):
+The PIROCK method is introduced in :footcite:t:`abdulle:2013`. It is a second-order partitioned IMEX scheme for
 
 .. math::
 
-  \dot{u} = F_R(u) + F_D(u) + F_A(u)
+   \dot{u} = F_R(u) + F_D(u) + F_A(u),
 
-with :math:`F_R` a reaction operator (solved implicitly), :math:`F_D` a diffusion operator (solved explicitly by a modified ROCK2 method) and :math:`F_A` an advection operator (solved with an explicit RK3 method). The first implementation of PIROCK scheme in ponio makes to solve only reaction-diffusion problem (e.g. :math:`F_A = 0`), the second one to solve a complet reaction-diffusion-advection problem.
+where :math:`F_R` is treated implicitly, :math:`F_D` is stabilized by a modified ROCK2 method and :math:`F_A` is treated explicitly. Ponio provides three variants: reaction-diffusion (RD, :math:`F_A=0`), diffusion-advection (DA, :math:`F_R=0`) and reaction-diffusion-advection (RDA).
 
-The method is divided into 5 steps:
+The complete method can be written in five steps:
 
 1. Diffusion stabilization procedure (modified ROCK2 method)
 
    .. math::
 
       \begin{aligned}
-        u^{(0)} &= u^n \\
-        u^{(1)} &= u^n + \alpha \mu_1 \Delta t F_D(u^n) \\
-        u^{(j)} &= \alpha \mu_j \Delta t F_D(u^{(j-1)}) - \nu_j u^{(j-1)} - \kappa_j u^{(j-2)},\quad j=2,\dots, s-2+\ell
+         u^{(0)} &= u^n, \\
+         u^{(1)} &= u^n + \alpha\mu_1\Delta t F_D(u^n), \\
+         u^{(j)} &= \alpha\mu_j\Delta t F_D(u^{(j-1)})
+                    - \nu_j u^{(j-1)} - \kappa_j u^{(j-2)},
+                    \quad j=2,\dots,s-2+\ell.
       \end{aligned}
+
 2. Finishing procedure for diffusion
 
    .. math::
 
       \begin{aligned}
-         u^{*(s-1)} &= u^{(s-2)} + \sigma_\alpha \Delta t F_D(u^{(s-2)}) \\
-         u^{*(s)} &= u^{*(s-1)} + \sigma_\alpha \Delta t F_D(u^{*(s-1)})
+         u^{*(s-1)} &= u^{(s-2)} + \sigma_\alpha\Delta t F_D(u^{(s-2)}), \\
+         u^{*(s)} &= u^{*(s-1)} + \sigma_\alpha\Delta t F_D(u^{*(s-1)}).
       \end{aligned}
+
 3. Starting value for advection-reaction
 
    .. math::
 
-      U = u^{(s-2+\ell)}
+      U = u^{(s-2+\ell)}.
+
 4. Finishing procedure for advection-reaction coupling
 
    .. math::
 
       \begin{aligned}
-         u^{(s+1)} &= u^{(s-2+\ell)} + \gamma \Delta t F_R(u^{(s+1)}) \\
-         u^{(s+2)} &= u^{(s-2+\ell)} + \beta \Delta t F_D(u^{(s+1)}) + \Delta t F_A(u^{(s+1)}) + (1-2\gamma)\Delta t F_R(u^{(s+1)}) + \gamma \Delta t F_R(u^{(s+2)}) \\
-         u^{(s+3)} &= u^{(s-2+\ell)} + (1-2\gamma)\Delta t F_A(u^{(s+1)}) + (1-\gamma)\Delta t F_R(u^{(s+1)}) \\
-         u^{(s+4)} &= u^{(s-2+\ell)} + \frac{1}{3}\Delta t F_A(u^{(s+1)}) \\
-         u^{(s+5)} &= u^{(s-2+\ell)} + \frac{2\beta}{3} \Delta t F_D(u^{(s+1)}) + \frac{2}{3}\Delta t J_R^{-1} F_A(u^{(s+4)}) + \left(\frac{2}{3} - \gamma\right) \Delta t F_R(u^{(s+1)}) + \frac{2\gamma}{3}\Delta t F_R(u^{(s+2)})
+         u^{(s+1)} &= U + \gamma\Delta t F_R(u^{(s+1)}), \\
+         u^{(s+2)} &= U + \beta\Delta t F_D(u^{(s+1)}) + \Delta t F_A(u^{(s+1)})
+                       + (1-2\gamma)\Delta t F_R(u^{(s+1)})
+                       + \gamma\Delta t F_R(u^{(s+2)}), \\
+         u^{(s+3)} &= U + (1-2\gamma)\Delta t F_A(u^{(s+1)})
+                       + (1-\gamma)\Delta t F_R(u^{(s+1)}), \\
+         u^{(s+4)} &= U + \frac{1}{3}\Delta t F_A(u^{(s+1)}), \\
+         u^{(s+5)} &= U + \frac{2\beta}{3}\Delta t F_D(u^{(s+1)})
+                       + \frac{2}{3}\Delta t J_R^{-1}F_A(u^{(s+4)})
+                       + \left(\frac{2}{3}-\gamma\right)\Delta t F_R(u^{(s+1)})
+                       + \frac{2\gamma}{3}\Delta t F_R(u^{(s+2)}).
       \end{aligned}
+
 5. Computation of the integration step
 
    .. math::
 
       \begin{aligned}
          u^{n+1} =& u^{*(s)} \\
-                     & - \sigma_\alpha\left( 1 - \frac{\tau_\alpha}{\sigma_\alpha^2}\right)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)})) \\
-                     & + \frac{1}{4}\Delta t F_A(u^{(s+1)}) + \frac{3}{4}\Delta t F_A(u^{(s+5)}) \\
-                     & + \frac{1}{2}\Delta t F_R(u^{(s+1)}) + \frac{1}{2}\Delta t F_R(u^{(s+2)}) \\
-                     & + \frac{J_R^{-\ell}}{2-4\gamma}\Delta t (F_D(u^{(s+3)}) - F_D(u^{(s+1)}))
+                    &- \sigma_\alpha\left(1-\frac{\tau_\alpha}{\sigma_\alpha^2}\right)\Delta t
+                       \left(F_D(u^{*(s-1)})-F_D(u^{(s-2)})\right) \\
+                    &+ \frac{1}{4}\Delta t F_A(u^{(s+1)})
+                     + \frac{3}{4}\Delta t F_A(u^{(s+5)}) \\
+                    &+ \frac{1}{2}\Delta t F_R(u^{(s+1)})
+                     + \frac{1}{2}\Delta t F_R(u^{(s+2)}) \\
+                    &+ \frac{\Delta t}{2-4\gamma}J_R^{-\ell}
+                       \left(F_D(u^{(s+3)})-F_D(u^{(s+1)})\right).
       \end{aligned}
 
-   where :math:`\mu_j`, :math:`\nu_j`, :math:`\kappa_j` are the same coefficients as for the standard ROCK2 method and:
+where
 
-   * :math:`\gamma = 1-\frac{\sqrt{2}}{2}`
-   * :math:`\beta = 1-2\alpha P'_{s-2+\ell}(0)` where :math:`P'_{s-2+\ell}` is the stability polynomial of the underlying ROCK2 method
-   * :math:`J_R = I - \gamma \Delta t \frac{\partial F_R}{\partial u}(u^{(s-2+\ell)})`
-   * :math:`\sigma_\alpha = \frac{1-\alpha}{2} + \alpha \sigma`, where :math:`\sigma` coming from the underlying ROCK2 method
-   * :math:`\tau_\alpha = \frac{(\alpha-1)^2}{2} + 2\alpha(1-\alpha)\sigma + \alpha^2\tau`, where :math:`\sigma` and :math:`\tau` coming from the underlying ROCK2 method
+* :math:`\gamma = 1-\frac{\sqrt{2}}{2}`;
+* :math:`\beta = 1-2\alpha P'_{s-2+\ell}(0)`;
+* :math:`J_R = I-\gamma\Delta t\frac{\partial F_R}{\partial u}(U)`;
+* :math:`\sigma_\alpha = \frac{1-\alpha}{2}+\alpha\sigma`;
+* :math:`\tau_\alpha = \frac{(\alpha-1)^2}{2}+2\alpha(1-\alpha)\sigma+\alpha^2\tau`.
 
-For adaptive time step method, need to compute one error by operator and take the maximum value
+The RD and DA variants are obtained directly by setting :math:`F_A=0` and :math:`F_R=0`, respectively. In particular, DA does not require an implicit reaction solve or Shampine damping.
 
-.. math::
-
-    \begin{aligned}
-      err_D &= \sigma_\alpha \Delta t \left( 1 - \frac{\tau_\alpha}{\sigma_\alpha^2} \right) ( F_D( u^{*(s-1)} - u^{(s-2)} )) \\
-      err_R &= \Delta t J_R^{-1}\left( \frac{1}{6}F_R(u^{(s+1)}) - \frac{1}{6}F_R(u^{(s+2)}) \right) \\
-      err_A &= -\frac{3}{20}\Delta t F_A(u^{(s+1)}) + \frac{3}{10}\Delta t F_A(u^{(s+4)}) - \frac{3}{20}\Delta t F_A(u^{(s+5)})
-    \end{aligned}
-
-The error is computed with the maximum:
+For adaptive time stepping, one estimator is computed for each active operator:
 
 .. math::
 
-  err = \max\left( \|err_D\|, \|err_R\|, \|err_A\|^{2/3} \right)
+   \begin{aligned}
+      err_D &= \sigma_\alpha\left(1-\frac{\tau_\alpha}{\sigma_\alpha^2}\right)\Delta t
+               \left(F_D(u^{*(s-1)})-F_D(u^{(s-2)})\right), \\
+      err_R &= \frac{\Delta t}{6}J_R^{-1}
+               \left(F_R(u^{(s+2)})-F_R(u^{(s+1)})\right), \\
+      err_A &= -\frac{3}{20}\Delta t F_A(u^{(s+1)})
+                + \frac{3}{10}\Delta t F_A(u^{(s+4)})
+                - \frac{3}{20}\Delta t F_A(u^{(s+5)}).
+   \end{aligned}
 
-with the following error norm:
+Ponio uses the normalized squared RMS error
 
 .. math::
 
-  \|\cdot\| : err \mapsto \sum_i \left( \frac{err_i}{a_{tol} + \max(y^{n+1}_i, y^n_i) } \right)^2
+   E(e) = \frac{1}{N}\sum_{i=1}^{N}
+      \left(
+         \frac{|e_i|}
+              {a_{tol}+r_{tol}\max(|u_i^n|,|u_i^{n+1}|)}
+      \right)^2.
 
-where :math:`y^n` and :math:`y^{n+1}` are estimation of the solution respectively at time :math:`t^n` and after an iteration :math:`t^{n+1}=t^n+\Delta t`, and :math:`a_{tol}` and :math:`r_{tol}` respectively absolute and relative tolerances. This norm give a normalized error, so its compare to :math:`1` and new time step is computed as:
+The controller uses :math:`\max(E(err_D),E(err_R),E(err_A)^{2/3})` for RDA, with the inactive terms removed for RD and DA. A step is accepted when this value is smaller than one. The step-size controller also applies a safety factor, growth limits and a memory correction when the diffusion error dominates.
 
-.. math::
+Two standard parameter choices are provided:
 
-  \Delta t_{new} = \sqrt{\frac{1}{err}} \Delta t
-
-.. note::
-
-  As in a lot of adaptive time step method, the new time step stays in :math:`\Delta t_{new} \in [0.5\Delta t, 2 \Delta t]` set and there is a safety factor, so the new time step is multiply by :math:`0.8`.
-
-Still keep two free parameters :math:`\ell` and :math:`\alpha` given free to user, ponio provides two choices for this parameters:
-
-* :math:`\ell=2` and :math:`\alpha=1`, in this case, if :math:`F_A=0` and :math:`F_R=0` we have the standard ROCK2 method;
-* :math:`\ell=1` and :math:`\alpha = \frac{1}{2P'_{s-2+\ell}(0)}`, so :math:`\beta=0` to minimized computation cost.
+* :math:`\ell=2` and :math:`\alpha=1`;
+* :math:`\ell=1` and :math:`\alpha=\frac{1}{2P'_{s-2+\ell}(0)}`, hence :math:`\beta=0`.
 
 .. seealso::
 
-   See the :doc:`list of IMEX methods with extended stability method <../api/algorithm/list_alg_pirock>` in ponio.
+   See the :doc:`list of IMEX methods with extended stability method <../api/algorithm/list_alg_pirock>` in ponio for the detailed RD, DA and RDA algorithms.
 
-For a PIROCK method to solve only reaction-diffusion problem, we need two functions :math:`F_D` and :math:`F_R` and the Jacobian function :math:`\partial_u F_R`, and store them into a :cpp:class:`ponio::imex_problem`.
+Using PIROCK in ponio
+~~~~~~~~~~~~~~~~~~~~~
 
-.. literalinclude:: ../_static/cpp/curtiss_hirschfelder_all/pirock.cxx
-  :language: cpp
-  :lines: 1-14
-
-And next call the :cpp:func:`ponio::solve` function with
+For a reaction-diffusion problem, define :math:`F_D`, :math:`F_R` and the reaction Jacobian :math:`\partial_u F_R` with :cpp:func:`ponio::make_imex_jacobian_problem`:
 
 .. literalinclude:: ../_static/cpp/curtiss_hirschfelder_all/pirock.cxx
-  :language: cpp
-  :lines: 16
+   :language: cpp
+   :lines: 1-14
+
+The fixed-step helpers are :cpp:func:`ponio::runge_kutta::pirock::pirock_a1` for :math:`\ell=2`, :math:`\alpha=1`, and :cpp:func:`ponio::runge_kutta::pirock::pirock_b0` for :math:`\ell=1`, :math:`\beta=0`. For example,
+
+.. literalinclude:: ../_static/cpp/curtiss_hirschfelder_all/pirock.cxx
+   :language: cpp
+   :lines: 16
+
+For a diffusion-advection problem, the problem contains the diffusion operator first and the advection operator second:
+
+.. code-block:: cpp
+
+   auto pb = ponio::make_problem( fd, fa );
+   auto method = ponio::runge_kutta::pirock::pirock_DA_b0();
+
+   ponio::solve( pb, method, y_0, t_span, dt, observer );
+
+The alternative fixed-step helper is :cpp:func:`ponio::runge_kutta::pirock::pirock_DA_a1`.
+
+For a reaction-diffusion-advection problem, the reaction problem is stored first, followed by diffusion and advection:
+
+.. code-block:: cpp
+
+   auto reaction = ponio::make_implicit_problem( fr, dfr );
+   auto pb = ponio::make_problem( reaction, fd, fa );
+   auto method = ponio::runge_kutta::pirock::pirock_RDA_b0();
+
+   ponio::solve( pb, method, y_0, t_span, dt, observer );
+
+The alternative fixed-step helper is :cpp:func:`ponio::runge_kutta::pirock::pirock_RDA_a1`. Operator-based reaction problems can be built in the same way with the corresponding ponio operator-problem factories.
+
+Adaptive time step and Shampine's trick
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The adaptive variants are selected with the ``is_embedded`` template parameter and tolerances are set with ``abs_tol`` and ``rel_tol``. For RD and RDA, the adaptive reaction estimator uses Shampine's trick; the Shampine caller is therefore passed to the method:
+
+.. code-block:: cpp
+
+   auto method = ponio::runge_kutta::pirock::pirock<1, true>(
+       ponio::runge_kutta::pirock::beta_0<double>(),
+       eig_computer,
+       ponio::shampine_trick::shampine_trick<decltype( y_0 )>() );
+
+   method.abs_tol( 1e-8 ).rel_tol( 1e-6 );
+
+For RDA, use :cpp:func:`ponio::runge_kutta::pirock::pirock_RDA` in the same way. Shampine's trick can also be enabled in fixed-step RD/RDA by passing the same caller with ``is_embedded=false``.
+
+DA has no reaction operator and therefore no Shampine step. Its adaptive variant is built directly with :cpp:func:`ponio::runge_kutta::pirock::pirock_DA`:
+
+.. code-block:: cpp
+
+   auto method = ponio::runge_kutta::pirock::pirock_DA<1, true>(
+       ponio::runge_kutta::pirock::beta_0<double>(), eig_computer );
+
+   method.abs_tol( 1e-8 ).rel_tol( 1e-6 );
 
 
 ----

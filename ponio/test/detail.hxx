@@ -17,6 +17,18 @@ TEST_CASE( "detail::power" )
     CHECK( ponio::detail::power<10>( 2 ) == 1024 );
 }
 
+TEST_CASE( "detail::mean_abs_norm" )
+{
+    CHECK( ponio::detail::mean_abs_norm( -2.0 ) == doctest::Approx( 2.0 ) );
+
+    std::vector<double> const vector_state = { -1.0, 2.0, -3.0 };
+    CHECK( ponio::detail::mean_abs_norm( vector_state ) == doctest::Approx( 2.0 ) );
+    CHECK( ponio::detail::mean_abs_norm( vector_state, vector_state.size() ) == doctest::Approx( 2.0 ) );
+
+    std::valarray<double> const valarray_state = { -1.0, 2.0, -3.0 };
+    CHECK( ponio::detail::mean_abs_norm( valarray_state ) == doctest::Approx( 2.0 ) );
+}
+
 TEST_CASE( "detail::init_fill_array" )
 {
     SUBCASE( "with a value" )

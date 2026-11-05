@@ -6,10 +6,8 @@
 
 #pragma once
 
-#include <cmath>
 #include <concepts>
 #include <cstddef>
-#include <functional> // NOLINT(misc-include-cleaner)
 #include <string_view>
 #include <type_traits>
 
@@ -19,29 +17,10 @@
 #include "../linear_algebra.hpp"
 #include "../ponio_config.hpp"
 #include "../stage.hpp" // NOLINT(misc-include-cleaner)
+#include "newton.hpp"
 
 namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
 {
-    template <typename value_t, typename state_t, typename func_t, typename jacobian_t, typename solver_t>
-    state_t
-    newton( func_t&& f, jacobian_t&& df, state_t const& x0, solver_t&& solver, value_t tol = 1e-10, std::size_t max_iter = 50 )
-    {
-        state_t xk       = x0;
-        value_t residual = ::ponio::detail::norm( std::forward<func_t>( f )( xk ) );
-        std::size_t iter = 0;
-
-        while ( iter < max_iter && residual > tol )
-        {
-            auto increment = std::forward<solver_t>( solver )( std::forward<jacobian_t>( df )( xk ), -std::forward<func_t>( f )( xk ) );
-
-            xk       = xk + increment;
-            residual = ::ponio::detail::norm( std::forward<func_t>( f )( xk ) );
-
-            iter += 1;
-        }
-
-        return xk;
-    }
 
     template <typename tableau_t, typename lin_alg_t = void>
     struct diagonal_implicit_rk_butcher
@@ -114,7 +93,7 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
                 _info.reset_eval();
             }
 
-            using matrix_t = decltype( pb.df( tn, un ) );
+            using matrix_t = std::decay_t<decltype( pb.df( tn, un ) )>;
 
             auto identity = [&]( state_t const& u )
             {
@@ -151,7 +130,8 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
                 return identity - butcher.A[I][I] * dt * pb.df( tn + butcher.c[I] * dt, ui );
             };
 
-            // call newton method
+            // Use a custom nonlinear solver when one is provided by the
+            // selected linear algebra backend.
             if constexpr ( detail::has_newton_method<lin_alg_t, decltype( g ), decltype( dg )>
                            || detail::has_newton_method<lin_alg_t, decltype( g ), decltype( dg ), state_t> )
             {
@@ -159,19 +139,35 @@ namespace ponio::runge_kutta::diagonal_implicit_runge_kutta
             }
             else
             {
-                auto solver = [&]()
+                // Predict the derivative of the current stage in the existing
+                // stage workspace. The first stage uses an explicit evaluation,
+                // whereas the following stages reuse the previous derivative.
+                if constexpr ( I == 0 )
                 {
-                    if constexpr ( detail::has_solver_method<lin_alg_t, matrix_t, state_t> )
-                    {
-                        using namespace std::placeholders;
-                        return std::bind( &lin_alg_t::solver, linalg, _1, _2 );
-                    }
-                    else
-                    {
-                        return &::ponio::linear_algebra::linear_algebra<matrix_t>::solver;
-                    }
-                }();
-                newton<value_t>( g, dg, un, solver, tol, max_iter );
+                    pb.f( tn + butcher.c[I] * dt, un, ki );
+                    _info.number_of_eval += 1;
+                }
+                else
+                {
+                    ki = Kj[I - 1];
+                }
+
+                using matrix_linear_algebra_t = ::ponio::linear_algebra::linear_algebra<matrix_t>;
+
+                if constexpr ( requires( matrix_t const& matrix, state_t const& rhs ) {
+                                   matrix_linear_algebra_t::factorize( matrix );
+                                   matrix_linear_algebra_t::solve_factorized( rhs );
+                               } )
+                {
+                    matrix_t frozen_stage_matrix = dg( ki );
+                    matrix_linear_algebra_t::factorize( frozen_stage_matrix );
+
+                    nonlinear_solver::chord_method<value_t, state_t, matrix_t>( g, ki, tol, max_iter );
+                }
+                else
+                {
+                    nonlinear_solver::newton<value_t>( g, dg, ki, matrix_linear_algebra_t::solver, tol, max_iter );
+                }
             }
         }
 

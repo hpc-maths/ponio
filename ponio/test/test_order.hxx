@@ -20,6 +20,7 @@ enum struct class_method
     exponential_method,
     additive_method,
     RD_method,
+    DA_method,
     RDA_method,
     splitting_method
 };
@@ -167,6 +168,34 @@ struct test_order
                 }
             }
         }
+        else if constexpr ( type == class_method::DA_method )
+        {
+            // Mirror the RD test with lambda_D = lambda and lambda_A = 1 - lambda.
+            for ( auto lambda : { 0.5, 1. / 3., 2. / 3., 0., 1. } )
+            {
+                double computed_order;
+                double computed_cst;
+
+                // use std::tie because of a bug in clang++-15
+                std::tie( computed_order, computed_cst ) = DA_method::check_order( rk_t(), lambda );
+
+                INFO( "test order of ", rk_t::id );
+                INFO( "lambda_D: ", lambda );
+                INFO( "lambda_A: ", 1. - lambda );
+                INFO( "theoretical order: ", rk_t::order );
+                INFO( "computed order   : ", computed_order );
+                INFO( "computed error constant: ", computed_cst );
+
+                if ( computed_cst > -8. ) // error is to close than computer error
+                {
+                    WARN( computed_order >= doctest::Approx( rk_t::order ).epsilon( 0.05 ) );
+                }
+                else
+                {
+                    WARN( computed_order >= doctest::Approx( rk_t::order ).epsilon( 2. ) );
+                }
+            }
+        }
         else if constexpr ( type == class_method::RDA_method )
         {
             // In additive Runge-Kutta method, one of method could be higher order than other (so we don't test equality)
@@ -275,7 +304,7 @@ TEST_CASE( "order::legendre_runge_kutta" )
     test_order<class_method::explicit_method>::on<rkl_methods>();
 }
 
-TEST_CASE( "order::pirock" )
+TEST_CASE( "order::pirock_RD" )
 {
     // clang-format off
     using pirock_methods = std::tuple<
@@ -286,6 +315,19 @@ TEST_CASE( "order::pirock" )
     // clang-format on
 
     test_order<class_method::RD_method>::on<pirock_methods>();
+}
+
+TEST_CASE( "order::pirock_DA" )
+{
+    // clang-format off
+    using pirock_methods = std::tuple<
+        decltype( ponio::runge_kutta::pirock::pirock_DA() ),
+        decltype( ponio::runge_kutta::pirock::pirock_DA_a1() ),
+        decltype( ponio::runge_kutta::pirock::pirock_DA_b0() )
+    >;
+    // clang-format on
+
+    test_order<class_method::DA_method>::on<pirock_methods>();
 }
 
 TEST_CASE( "order::pirock_RDA" )

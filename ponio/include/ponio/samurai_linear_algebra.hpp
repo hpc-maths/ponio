@@ -5,37 +5,86 @@
 #pragma once
 
 #include <cassert>
+#include <stdexcept>
+#include <string>
 
+#include "detail.hpp"
 #include "linear_algebra.hpp"
 
 #if __has_include( <samurai/schemes/fv.hpp> )
+#include <samurai/field.hpp>
 #include <samurai/schemes/fv.hpp>
 #include <samurai/utils.hpp>
 #else
 #error "Samurai should be included"
 #endif
 
-namespace samurai
-{
-    template <class mesh_t, class value_t, std::size_t n_comp>
-    class VectorField;
-
-    template <class mesh_t, class value_t>
-    class ScalarField;
-}
-
 namespace ponio_samurai
 {
+    // Avoid depending on Samurai's internal ScalarField/VectorField template arity.
     template <typename field_t>
-    concept is_scalar_field = std::same_as<field_t, ::samurai::ScalarField<typename field_t::mesh_t, typename field_t::value_type>>;
-
-    template <typename field_t>
-    concept is_vector_field = std::same_as<field_t,
-        ::samurai::VectorField<typename field_t::mesh_t, typename field_t::value_type, field_t::n_comp>>;
-
-    template <typename field_t>
-    concept is_samurai_field = is_scalar_field<field_t> || is_vector_field<field_t>;
+    concept is_samurai_field = requires( field_t const& field ) {
+                                   typename field_t::mesh_t;
+                                   typename field_t::value_type;
+                                   field_t::n_comp;
+                                   field.mesh();
+                               };
 }
+
+namespace ponio::detail
+{
+    /**
+     * @brief error estimate of a samurai field
+     *
+     * The storage of a field spans the ghost cells as well as the cells of the
+     * mesh, and the finite volume schemes write the latter only. Walking the
+     * storage would therefore weigh stale values in the estimate and average it
+     * over more entries than the problem has degrees of freedom, so the cells
+     * of the mesh are visited instead.
+     *
+     * @tparam field_t type of samurai field
+     */
+    template <typename field_t>
+        requires ::ponio_samurai::is_samurai_field<field_t>
+    struct error_algebra<field_t>
+    {
+        template <typename value_t>
+        static value_t
+        estimate_squared( field_t const& error, field_t const& un, field_t const& unp1, value_t a_tol, value_t r_tol )
+        {
+            value_t accumulated = static_cast<value_t>( 0 );
+            std::size_t n_dof   = 0;
+
+            auto contribution = [&]( value_t e, value_t u_n, value_t u_np1 )
+            {
+                using namespace std;
+                value_t const normalized = abs( e ) / ( a_tol + r_tol * max( abs( u_n ), abs( u_np1 ) ) );
+
+                accumulated += normalized * normalized;
+                ++n_dof;
+            };
+
+            ::samurai::for_each_cell( error.mesh(),
+                [&]( auto& cell )
+                {
+                    if constexpr ( field_t::n_comp == 1 )
+                    {
+                        contribution( error[cell], un[cell], unp1[cell] );
+                    }
+                    else
+                    {
+                        for ( std::size_t c = 0; c < field_t::n_comp; ++c )
+                        {
+                            contribution( error[cell]( c ), un[cell]( c ), unp1[cell]( c ) );
+                        }
+                    }
+                } );
+
+            return accumulated / static_cast<value_t>( n_dof );
+        }
+    };
+
+} // namespace ponio::detail
 
 namespace ponio::linear_algebra
 {
@@ -136,8 +185,9 @@ namespace ponio::shampine_trick
             PetscInt const err = KSPSetUp( ksp );
             if ( err != 0 )
             {
-                std::cerr << "The setup of the solver failed!" << std::endl;
-                exit( EXIT_FAILURE ); // NOLINT
+                KSPDestroy( &ksp );
+                MatDestroy( &J_R );
+                throw std::runtime_error( "The setup of the solver failed." );
             }
 
             auto& result_l1 = ( ell == 1 ) ? shampine_result : u_tmp;
@@ -153,11 +203,16 @@ namespace ponio::shampine_trick
             KSPGetConvergedReason( ksp, &reason_code );
             if ( reason_code < 0 )
             {
-                using namespace std::string_literals;
                 char const* reason_text;
                 KSPGetConvergedReasonString( ksp, &reason_text );
-                std::cerr << "Divergence of the solver ("s + reason_text + ")" << std::endl;
-                exit( EXIT_FAILURE ); // NOLINT
+                std::string const message = "Divergence of the solver (" + std::string( reason_text ) + ")";
+
+                VecDestroy( &u_tmp_petsc );
+                VecDestroy( &rhs_petsc );
+                KSPDestroy( &ksp );
+                MatDestroy( &J_R );
+
+                throw std::runtime_error( message );
             }
 
             if constexpr ( ell == 2 )
@@ -167,6 +222,21 @@ namespace ponio::shampine_trick
                 assembly.set_0_for_all_ghosts( u_tmp_petsc );
 
                 KSPSolve( ksp, u_tmp_petsc, result_petsc );
+                KSPGetConvergedReason( ksp, &reason_code );
+                if ( reason_code < 0 )
+                {
+                    char const* reason_text;
+                    KSPGetConvergedReasonString( ksp, &reason_text );
+                    std::string const message = "Divergence of the solver (" + std::string( reason_text ) + ")";
+
+                    VecDestroy( &result_petsc );
+                    VecDestroy( &u_tmp_petsc );
+                    VecDestroy( &rhs_petsc );
+                    KSPDestroy( &ksp );
+                    MatDestroy( &J_R );
+
+                    throw std::runtime_error( message );
+                }
 
                 VecDestroy( &result_petsc );
             }
