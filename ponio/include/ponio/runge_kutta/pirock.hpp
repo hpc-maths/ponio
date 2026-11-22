@@ -70,8 +70,11 @@ namespace ponio::runge_kutta::pirock
 
             for ( std::size_t j = 2; j < sm2pl + 1; ++j )
             {
-                double const mu    = rock_coeff::recf[mr + 2 * ( j - 2 ) + 1 - 1];
-                double const kappa = rock_coeff::recf[mr + 2 * ( j - 2 ) + 2 - 1];
+                // beyond mdeg, the recurrence is continued with the coefficients recf2 of pirock.f
+                double const mu    = j <= mdeg ? rock_coeff::recf[mr + 2 * ( j - 2 ) + 1 - 1]
+                                               : rock_coeff::recf2[4 * ( mz - 1 ) + 2 * ( j - mdeg - 1 )];
+                double const kappa = j <= mdeg ? rock_coeff::recf[mr + 2 * ( j - 2 ) + 2 - 1]
+                                               : rock_coeff::recf2[4 * ( mz - 1 ) + 2 * ( j - mdeg - 1 ) + 1];
                 double const nu    = -1.0 - kappa;
 
                 // u_j = mu * f(u_jm1) - nu * u_jm1 - kappa * u_jm2
@@ -336,13 +339,18 @@ namespace ponio::runge_kutta::pirock
 
             if ( mdeg < 2 )
             {
-                u_j = u_jm1;
+                u_j   = u_jm1;
+                u_sm2 = u_jm1; // u^{(s-2)} = u^{(1)}: the loop below never reaches j == s - 2
             }
 
             for ( std::size_t j = 2; j < s - 2 + l + 1; ++j )
             {
-                value_t const mu_j    = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 1 - 1];
-                value_t const kappa_j = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 2 - 1];
+                // beyond mdeg (stages s-1 and s), the recurrence is continued with the
+                // coefficients recf2 of pirock.f, not with the next row of recf
+                value_t const mu_j    = j <= mdeg ? rock_coeff::recf[start_index + 2 * ( j - 2 ) + 1 - 1]
+                                                  : rock_coeff::recf2[4 * ( deg_index - 1 ) + 2 * ( j - mdeg - 1 )];
+                value_t const kappa_j = j <= mdeg ? rock_coeff::recf[start_index + 2 * ( j - 2 ) + 2 - 1]
+                                                  : rock_coeff::recf2[4 * ( deg_index - 1 ) + 2 * ( j - mdeg - 1 ) + 1];
                 value_t const nu_j    = -1.0 - kappa_j;
 
                 // u_{j} = \alpha \mu_j \Delta t F_D( u_{j-2} ) - \nu_j u_{j-1} - \kappa_j u_{j-2}
@@ -942,13 +950,18 @@ namespace ponio::runge_kutta::pirock
 
             if ( mdeg < 2 )
             {
-                u_j = u_jm1;
+                u_j   = u_jm1;
+                u_sm2 = u_jm1; // u^{(s-2)} = u^{(1)}: the loop below never reaches j == s - 2
             }
 
             for ( std::size_t j = 2; j < s - 2 + l + 1; ++j )
             {
-                value_t const mu_j    = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 1 - 1];
-                value_t const kappa_j = rock_coeff::recf[start_index + 2 * ( j - 2 ) + 2 - 1];
+                // beyond mdeg (stages s-1 and s), the recurrence is continued with the
+                // coefficients recf2 of pirock.f, not with the next row of recf
+                value_t const mu_j    = j <= mdeg ? rock_coeff::recf[start_index + 2 * ( j - 2 ) + 1 - 1]
+                                                  : rock_coeff::recf2[4 * ( deg_index - 1 ) + 2 * ( j - mdeg - 1 )];
+                value_t const kappa_j = j <= mdeg ? rock_coeff::recf[start_index + 2 * ( j - 2 ) + 2 - 1]
+                                                  : rock_coeff::recf2[4 * ( deg_index - 1 ) + 2 * ( j - mdeg - 1 ) + 1];
                 value_t const nu_j    = -1.0 - kappa_j;
 
                 // u_{j} = \alpha \mu_j \Delta t F_D( u_{j-2} ) - \nu_j u_{j-1} - \kappa_j u_{j-2}
