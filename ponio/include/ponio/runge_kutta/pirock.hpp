@@ -469,26 +469,45 @@ namespace ponio::runge_kutta::pirock
 
             // auto& u_np1 = U[12];
 
-            if constexpr ( shampine_trick_enable && detail::problem_operator<decltype( pb.implicit_part ), value_t> )
+            if constexpr ( shampine_trick_enable )
             {
                 auto& shampine_element = U[12];
                 auto& f_D_u            = U[13];
                 auto& u_tmp            = U[14];
-                auto& fe_tmp_bis       = U[14]; // temporary use of U[15] before u_tmp
+                auto& fe_tmp_bis       = U[14]; // temporary use of U[14] before u_tmp
 
                 // for embedded method
                 auto& err_D = U[15];
 
-                // $err_D = \sigma_\alpha(1-\tau_a/\sigma_a^2)\Delta t (F_D(u^{*(s-1)}) - F_D(u^{(s-2)}))$
+                // err_D = sigma_a(1 - tau_a/sigma_a^2) dt
+                //         (F_D(u^{*(s-1)}) - F_D(u^{(s-2)}))
                 pb.explicit_part( tn, us_sm1, fe_tmp );
                 pb.explicit_part( tn, u_sm2, fe_tmp_bis );
+
                 err_D = sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fe_tmp - fe_tmp_bis );
 
                 pb.explicit_part( tn, u_sp3, fe_tmp );
                 pb.explicit_part( tn, u_sp1, fe_tmp_bis );
+
                 f_D_u = static_cast<state_t>( fe_tmp - fe_tmp_bis );
 
-                shampine_trick_caller.template operator()<l>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, f_D_u, u_tmp, shampine_element );
+                if constexpr ( detail::problem_operator<decltype( pb.implicit_part ), value_t> )
+                {
+                    // Cas Samurai / opérateur abstrait : on garde l'ancien comportement
+                    shampine_trick_caller
+                        .template operator()<l>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, f_D_u, u_tmp, shampine_element );
+                }
+                else
+                {
+                    // Cas Eigen / problème à jacobienne :
+                    // on fournit explicitement la jacobienne de la réaction
+                    auto jacobian_reac = [&]( state_t const& u )
+                    {
+                        return pb.implicit_part.df( tn, u );
+                    };
+
+                    shampine_trick_caller.template operator()<l>( gamma * dt, jacobian_reac, u_sm2pl, f_D_u, u_tmp, shampine_element );
+                }
 
                 if constexpr ( is_embedded )
                 {
@@ -499,12 +518,25 @@ namespace ponio::runge_kutta::pirock
 
                     pb.implicit_part( tn, u_sp1, fi_tmp );
                     pb.implicit_part( tn, u_sp2, f_tmp );
+
                     rhs_R = static_cast<state_t>( dt / 6. * ( fi_tmp - f_tmp ) );
 
-                    // $err_R = J_R^{-1} \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
-                    // to compute it, get $rhs_R = \Delta t/6 (F_R(u^{s+1}) - F_R(u^{s+2}))$
-                    // then solve $J_R err_R = rhs_R$ (that what Shampine's trick does, it build $J_R$ and solve it)
-                    shampine_trick_caller.template operator()<1>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, rhs_R, u_tmp, err_R );
+                    // err_R = J_R^{-1} dt/6 (F_R(u^{s+1}) - F_R(u^{s+2}))
+                    if constexpr ( detail::problem_operator<decltype( pb.implicit_part ), value_t> )
+                    {
+                        // Cas Samurai / opérateur abstrait
+                        shampine_trick_caller.template operator()<1>( gamma * dt, pb.implicit_part.f_t( tn ), u_sm2pl, rhs_R, u_tmp, err_R );
+                    }
+                    else
+                    {
+                        // Cas Eigen / problème à jacobienne
+                        auto jacobian_reac = [&]( state_t const& u )
+                        {
+                            return pb.implicit_part.df( tn, u );
+                        };
+
+                        shampine_trick_caller.template operator()<1>( gamma * dt, jacobian_reac, u_sm2pl, rhs_R, u_tmp, err_R );
+                    }
 
                     u_np1 = us_s - err_D + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
 
@@ -513,15 +545,16 @@ namespace ponio::runge_kutta::pirock
                         return [=, it_yn = yn.begin(), it_ynp1 = ynp1.begin()]( value_t const& acc, value_t const err_i ) mutable
                         {
                             using namespace std;
+
                             return acc + detail::power<2>( err_i / ( a_tol + r_tol * max( abs( *it_yn++ ), abs( *it_ynp1++ ) ) ) );
                         };
                     };
 
-                    // TODO: this couple of lines works only with samurai (because of err_D.array())
                     value_t err_R_scalar = std::accumulate( err_R.array().begin(),
                         err_R.array().end(),
                         static_cast<value_t>( 0. ),
                         accumulator_error_gen( un.array(), u_np1.array(), _info.absolute_tolerance, _info.relative_tolerance ) );
+
                     value_t err_D_scalar = std::accumulate( err_D.array().begin(),
                         err_D.array().end(),
                         static_cast<value_t>( 0. ),
@@ -530,11 +563,8 @@ namespace ponio::runge_kutta::pirock
                     _info.error   = std::max( err_D_scalar, err_R_scalar );
                     _info.success = _info.error < 1.0;
 
-                    // std::cout << "tn " << tn << " dt " << dt << " mdeg " << mdeg << "\n";
-                    // std::cout << "err_D " << err_D_scalar << " err_R " << err_R_scalar << "\n";
-                    // std::cout << "a_tol " << _info.absolute_tolerance << " r_tol " << _info.relative_tolerance << "\n";
+                    value_t fac = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / _info.error ) ) );
 
-                    value_t fac    = std::min( 2.0, std::max( 0.5, std::sqrt( 1.0 / _info.error ) ) );
                     value_t new_dt = 0.8 * fac * dt;
 
                     // accepted step
@@ -542,16 +572,12 @@ namespace ponio::runge_kutta::pirock
                     {
                         tn = tn + dt;
                         dt = new_dt;
-
-                        // return { tn + dt, u_np1, new_dt };
                     }
                     else
                     {
-                        // tn = tn
+                        // rejected step: tn is unchanged
                         std::swap( un, u_np1 );
                         dt = new_dt;
-
-                        // return { tn, un, new_dt };
                     }
                 }
                 else
@@ -559,15 +585,16 @@ namespace ponio::runge_kutta::pirock
                     pb.implicit_part( tn, u_sp1, fi_tmp );
                     pb.implicit_part( tn, u_sp2, f_tmp );
 
-                    tn    = tn + dt;
+                    tn = tn + dt;
+
                     u_np1 = us_s - err_D + 0.5 * dt * fi_tmp + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * shampine_element;
                 }
             }
             else
             {
-                auto& fe_tmp_bis = U[0]; // temporary use of U[0] after u_j
-                auto& fe_tmp_ter = U[1]; // temporary use of U[1] after u_jm1
-                auto& fe_tmp_qua = U[2]; // temporary use of U[2] after u_jm2
+                auto& fe_tmp_bis = U[0];
+                auto& fe_tmp_ter = U[1];
+                auto& fe_tmp_qua = U[2];
 
                 pb.explicit_part( tn, us_sm1, fe_tmp );
                 pb.explicit_part( tn, u_sm2, fe_tmp_bis );
@@ -577,11 +604,11 @@ namespace ponio::runge_kutta::pirock
                 pb.implicit_part( tn, u_sp1, fi_tmp );
                 pb.implicit_part( tn, u_sp2, f_tmp );
 
-                tn    = tn + dt;
+                tn = tn + dt;
+
                 u_np1 = us_s - sigma_a * ( 1. - tau_a / ( sigma_a * sigma_a ) ) * dt * ( fe_tmp - fe_tmp_bis ) + 0.5 * dt * fi_tmp
                       + 0.5 * dt * f_tmp + dt / ( 2. - 4. * gamma ) * ( fe_tmp_ter - fe_tmp_qua );
             }
-
             // return { tn + dt, u_np1, dt };
         }
 

@@ -92,3 +92,68 @@ namespace ponio::linear_algebra
     };
 
 } // namespace ponio::linear_algebra
+
+namespace ponio::shampine_trick
+{
+    template <typename scalar_t, int size, int options, int maxrows>
+    struct shampine_trick<Eigen::Matrix<scalar_t, size, 1, options, maxrows, 1>>
+    {
+        using value_t = scalar_t;
+
+        template <std::size_t ell, typename jacobian_reac_t, typename state_t>
+        void
+        operator()( value_t alpha, jacobian_reac_t&& jacobian_reac, state_t& initial_guess, state_t& rhs, state_t& u_tmp, state_t& shampine_result )
+        {
+            auto J_reac = jacobian_reac( initial_guess );
+
+            using matrix_t = std::decay_t<decltype( J_reac )>;
+
+            matrix_t J_R = ::ponio::linear_algebra::linear_algebra<matrix_t>::identity( initial_guess ) - alpha * J_reac;
+            J_R.makeCompressed();
+
+            auto solve_linear_system = []( auto const& A, auto const& b )
+            {
+                using matrix_t = std::decay_t<decltype( A )>;
+                using vector_t = std::decay_t<decltype( b )>;
+
+                if constexpr ( std::same_as<matrix_t, Eigen::SparseMatrix<value_t>> )
+                {
+                    Eigen::SparseLU<matrix_t> solver;
+
+                    solver.analyzePattern( A );
+                    solver.factorize( A );
+
+                    if ( solver.info() != Eigen::Success )
+                    {
+                        throw std::runtime_error( "SparseLU factorization failed in Eigen Shampine trick." );
+                    }
+
+                    vector_t x = solver.solve( b );
+
+                    if ( solver.info() != Eigen::Success )
+                    {
+                        throw std::runtime_error( "SparseLU solve failed in Eigen Shampine trick." );
+                    }
+
+                    return x;
+                }
+                else
+                {
+                    vector_t x = A.colPivHouseholderQr().solve( b );
+                    return x;
+                }
+            };
+
+            if constexpr ( ell == 1 )
+            {
+                shampine_result = solve_linear_system( J_R, rhs );
+            }
+            else if constexpr ( ell == 2 )
+            {
+                u_tmp = solve_linear_system( J_R, rhs );
+
+                shampine_result = solve_linear_system( J_R, u_tmp );
+            }
+        }
+    };
+} // namespace ponio::shampine_trick
